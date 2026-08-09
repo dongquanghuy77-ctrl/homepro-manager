@@ -44,8 +44,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     if (!employee) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     return NextResponse.json(employee);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -158,7 +159,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     });
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -24,7 +24,9 @@ interface Employee {
 // ── Data fetching ─────────────────────────────────────────────────────────────
 async function getEmployees(searchParams: Record<string, string | string[] | undefined>): Promise<Employee[]> {
   const cookieStore = cookies();
-  const cookieHeader = cookieStore.toString();
+  // Fix: must extract the specific cookie value, NOT use toString() which returns '[object Object]'
+  const sessionCookie = cookieStore.get('homepro_session')?.value;
+  const cookieHeader  = sessionCookie ? `homepro_session=${sessionCookie}` : '';
 
   const query = new URLSearchParams();
   if (searchParams.search)     query.set('search',     String(searchParams.search));
