@@ -3,57 +3,92 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { attendance } from '@/db/schema';
-import { requireAuth, ADMIN_ONLY } from '@/lib/auth';
+import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { getWorkHours, calculateAttendanceStats, writeHrAuditLog } from '@/lib/hr';
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const { session, error } = await requireAuth(req, ADMIN_ONLY);
-  if (error || !session) return NextResponse.json({ error: error || 'Unauthorized' }, { status: 401 });
+// ── Shared update logic for PUT and PATCH ─────────────────────────────────────
+async function updateAttendanceRecord(
+  req: NextRequest,
+  params: { id: string }
+): Promise<NextResponse> {
+  const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
+  if (error) return error;
 
   const id = Number(params.id);
   if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
   try {
     const body = await req.json();
-    let { checkIn, checkOut, note, status } = body;
-    
-    checkIn = checkIn ? new Date(checkIn) : null;
-    checkOut = checkOut ? new Date(checkOut) : null;
-    const now = new Date();
+    const { checkIn, checkOut, note, status } = body;
+
+    const checkInDate  = checkIn  ? new Date(checkIn)  : null;
+    const checkOutDate = checkOut ? new Date(checkOut) : null;
+    const now          = new Date();
 
     const [oldRecord] = await db.select().from(attendance).where(eq(attendance.id, id));
-    if (!oldRecord) return NextResponse.json({ error: 'Record not found' }, { status: 404 });
+    if (!oldRecord) {
+      return NextResponse.json({ error: 'Không tìm thấy bản ghi chấm công' }, { status: 404 });
+    }
 
-    const { start, end } = await getWorkHours();
-    const stats = calculateAttendanceStats(checkIn, checkOut, start, end);
+    // Validate status nếu được cung cấp
+    const validStatuses = ['PRESENT', 'ABSENT', 'LATE', 'HALF_DAY', 'ON_LEAVE', 'NOT_CHECKED'];
+    if (status && !validStatuses.includes(status)) {
+      return NextResponse.json({ error: `status không hợp lệ. Cho phép: ${validStatuses.join(', ')}` }, { status: 400 });
+    }
+
+    // Recalculate stats từ giờ check nếu được cung cấp
+    let computedLateMinutes       = oldRecord.lateMinutes       ?? 0;
+    let computedEarlyLeaveMinutes = oldRecord.earlyLeaveMinutes ?? 0;
+    let computedTotalHours        = oldRecord.totalHours        ?? 0;
+    let computedStatus            = status ?? oldRecord.status;
+
+    if (checkInDate) {
+      const { start, end } = await getWorkHours();
+      const stats = calculateAttendanceStats(checkInDate, checkOutDate, start, end);
+      computedLateMinutes       = stats.lateMinutes;
+      computedEarlyLeaveMinutes = stats.earlyLeaveMinutes;
+      computedTotalHours        = stats.totalHours;
+      if (!status) computedStatus = stats.status;
+    }
 
     const [updatedRecord] = await db.update(attendance).set({
-      checkIn,
-      checkOut,
-      note,
-      status: status || stats.status,
-      lateMinutes: stats.lateMinutes,
-      earlyLeaveMinutes: stats.earlyLeaveMinutes,
-      totalHours: stats.totalHours,
-      correctedBy: session.id,
-      correctedAt: now,
-      updatedAt: now
+      // Chỉ update các field được gửi lên, giữ nguyên nếu không gửi
+      checkIn:           checkIn  !== undefined ? checkInDate  : oldRecord.checkIn,
+      checkOut:          checkOut !== undefined ? checkOutDate : oldRecord.checkOut,
+      note:              note     !== undefined ? (note?.trim() || null) : oldRecord.note,
+      status:            computedStatus,
+      lateMinutes:       computedLateMinutes,
+      earlyLeaveMinutes: computedEarlyLeaveMinutes,
+      totalHours:        computedTotalHours,
+      correctedBy:       session.id,
+      correctedAt:       now,
+      updatedAt:         now,
     }).where(eq(attendance.id, id)).returning();
 
     await writeHrAuditLog({
-      action: 'ATTENDANCE_CORRECTED',
+      action:     'ATTENDANCE_CORRECTED',
       entityType: 'attendance',
-      entityId: id,
-      actorId: session.id,
-      actorName: session.name,
-      oldValue: oldRecord,
-      newValue: updatedRecord,
-      ipAddress: req.headers.get('x-forwarded-for') || 'unknown'
+      entityId:   id,
+      actorId:    session.id,
+      actorName:  session.name,
+      oldValue:   { status: oldRecord.status, checkIn: oldRecord.checkIn, checkOut: oldRecord.checkOut },
+      newValue:   { status: computedStatus, checkIn: checkInDate, checkOut: checkOutDate },
+      ipAddress:  req.headers.get('x-forwarded-for') || 'unknown',
     });
 
     return NextResponse.json(updatedRecord);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+// PUT và PATCH đều dùng cùng logic update
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  return updateAttendanceRecord(req, params);
+}
+
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  return updateAttendanceRecord(req, params);
 }
