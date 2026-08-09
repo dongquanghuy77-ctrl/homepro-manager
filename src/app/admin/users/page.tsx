@@ -101,19 +101,18 @@ export default function UserManagementPage() {
   }
 
   async function handleResetPassword(user: UserItem) {
-    if (!confirm(`Bạn có chắc chắn muốn ĐẶT LẠI MẬT KHẨU về "123456" cho tài khoản ${user.name} (${user.username})?`)) {
-      return;
-    }
+    const newPass = prompt(`Nhập mật khẩu mới cho tài khoản ${user.name} (${user.username}):`, '123456');
+    if (!newPass || !newPass.trim()) return;
 
     try {
       const res = await fetch(`/api/users/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: '123456' }),
+        body: JSON.stringify({ password: newPass.trim() }),
       });
 
       if (res.ok) {
-        setSuccess(`🔑 Đã reset mật khẩu của tài khoản ${user.name} (${user.username}) về "123456" thành công!`);
+        setSuccess(`🔑 Đã cấp mật khẩu mới "${newPass.trim()}" cho tài khoản ${user.name} (${user.username}). Vui lòng bàn giao mật khẩu này cho nhân viên.`);
         loadUsers();
       } else {
         throw new Error('Lỗi đặt lại mật khẩu');

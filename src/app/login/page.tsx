@@ -208,7 +208,7 @@ export default function LoginPage() {
           textAlign: 'center',
           lineHeight: '1.5',
         }}>
-          💡 <strong>Quên mật khẩu?</strong> Vui lòng liên hệ Admin (Chủ xưởng / Quản lý) để reset mật khẩu về mặc định <code>123456</code>.
+          💡 <strong>Quên mật khẩu?</strong> Vui lòng liên hệ Admin hoặc Quản lý xưởng để được hỗ trợ cấp lại mật khẩu.
         </div>
 
         {/* Collapsible Demo Account Selector */}
