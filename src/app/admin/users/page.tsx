@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Shield, CheckCircle, XCircle, Trash2, Edit, Key, Lock } from 'lucide-react';
+import { Users, UserPlus, Shield, CheckCircle, XCircle, Trash2, Key, Lock, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface UserItem {
   id: number;
@@ -87,18 +87,47 @@ export default function UserManagementPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !user.active }),
       });
-      if (res.ok) loadUsers();
+      if (res.ok) {
+        setSuccess(`Đã ${user.active ? 'khóa' : 'kích hoạt lại'} tài khoản ${user.name}`);
+        loadUsers();
+      }
     } catch (err) {
       console.error('Toggle active error:', err);
     }
   }
 
+  async function handleResetPassword(user: UserItem) {
+    if (!confirm(`Bạn có chắc chắn muốn ĐẶT LẠI MẬT KHẨU về "123456" cho tài khoản ${user.name} (${user.username})?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: '123456' }),
+      });
+
+      if (res.ok) {
+        setSuccess(`🔑 Đã reset mật khẩu của tài khoản ${user.name} (${user.username}) về "123456" thành công!`);
+        loadUsers();
+      } else {
+        throw new Error('Lỗi đặt lại mật khẩu');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }
+
   async function handleDeleteUser(id: number, name: string) {
-    if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản ${name}?`)) return;
+    if (!confirm(`Bạn có chắc chắn muốn XÓA tài khoản ${name}?`)) return;
 
     try {
       const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
-      if (res.ok) loadUsers();
+      if (res.ok) {
+        setSuccess(`Đã xóa tài khoản ${name}`);
+        loadUsers();
+      }
     } catch (err) {
       console.error('Delete user error:', err);
     }
@@ -147,7 +176,7 @@ export default function UserManagementPage() {
                   <th>Vai trò (Role)</th>
                   <th>Số điện thoại</th>
                   <th>Trạng thái</th>
-                  <th style={{ textAlign: 'right' }}>Thao tác</th>
+                  <th style={{ textAlign: 'right' }}>Thao tác Admin</th>
                 </tr>
               </thead>
               <tbody>
@@ -178,6 +207,14 @@ export default function UserManagementPage() {
                       <td style={{ textAlign: 'right' }}>
                         <div className="flex justify-end gap-2">
                           <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleResetPassword(u)}
+                            title="Reset mật khẩu về 123456"
+                          >
+                            <Key size={14} /> Reset MK
+                          </button>
+
+                          <button
                             className={`btn btn-sm ${u.active ? 'btn-secondary' : 'btn-primary'}`}
                             onClick={() => handleToggleActive(u)}
                             title={u.active ? 'Tạm khóa tài khoản' : 'Kích hoạt lại'}
@@ -185,6 +222,7 @@ export default function UserManagementPage() {
                             {u.active ? <XCircle size={14} /> : <CheckCircle size={14} />}
                             {u.active ? 'Khóa' : 'Mở'}
                           </button>
+
                           {u.username !== 'admin' && (
                             <button
                               className="btn btn-danger btn-sm"
@@ -227,13 +265,13 @@ export default function UserManagementPage() {
               </div>
 
               <div className="form-group mb-4">
-                <label className="form-label">Mật khẩu *</label>
+                <label className="form-label">Mật khẩu ban đầu *</label>
                 <input
                   type="password"
                   className="form-input"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  placeholder="Nhập mật khẩu"
+                  placeholder="Nhập mật khẩu (vd: 123456)"
                   required
                 />
               </div>

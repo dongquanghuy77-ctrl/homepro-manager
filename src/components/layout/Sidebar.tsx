@@ -5,10 +5,11 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings,
-  Command, Menu, X, MoreHorizontal, LogOut, UserCheck,
+  Command, Menu, X, MoreHorizontal, LogOut, UserCheck, Key,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
+import ChangePasswordModal from '@/components/auth/ChangePasswordModal';
 
 const iconMap = {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
@@ -51,6 +52,7 @@ export default function Sidebar() {
   const router = useRouter();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserState | null>(null);
 
   useEffect(() => {
@@ -225,22 +227,40 @@ export default function Sidebar() {
                 </div>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              title="Đăng xuất"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--color-text-muted)',
-                cursor: 'pointer',
-                padding: 6,
-                borderRadius: 6,
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <LogOut size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <button
+                onClick={() => setPasswordModalOpen(true)}
+                title="Đổi mật khẩu cá nhân"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--color-text-muted)',
+                  cursor: 'pointer',
+                  padding: 6,
+                  borderRadius: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Key size={15} />
+              </button>
+              <button
+                onClick={handleLogout}
+                title="Đăng xuất"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--color-text-muted)',
+                  cursor: 'pointer',
+                  padding: 6,
+                  borderRadius: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <LogOut size={15} />
+              </button>
+            </div>
           </div>
         </div>
       </aside>
@@ -285,6 +305,7 @@ export default function Sidebar() {
       </nav>
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
+      <ChangePasswordModal isOpen={passwordModalOpen} onClose={() => setPasswordModalOpen(false)} />
     </>
   );
 }
