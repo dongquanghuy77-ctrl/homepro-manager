@@ -220,10 +220,10 @@ export default function Sidebar() {
               </div>
               <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 130 }}>
                 <div className="sidebar-user-name" style={{ fontSize: 13, fontWeight: 700 }}>
-                  {currentUser?.name || 'Huy'}
+                  {currentUser?.name || 'Đồng Quang Huy'}
                 </div>
                 <div className="sidebar-user-role" style={{ fontSize: 11, color: 'var(--color-primary)' }}>
-                  {currentUser ? (ROLE_LABELS[currentUser.role] || currentUser.role) : 'Project Manager'}
+                  {currentUser ? (ROLE_LABELS[currentUser.role] || currentUser.role) : 'Admin / Kỹ thuật xưởng'}
                 </div>
               </div>
             </div>
