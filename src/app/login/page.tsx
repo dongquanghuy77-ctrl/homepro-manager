@@ -14,11 +14,11 @@ export default function LoginPage() {
   const [showDemo, setShowDemo] = useState(false);
 
   const demoAccounts = [
-    { role: 'Quản trị viên', user: 'admin', pass: 'admin123', badge: '👑 Admin', desc: 'Toàn quyền hệ thống & phân quyền' },
-    { role: 'Quản lý xưởng', user: 'manager', pass: 'manager123', badge: '👔 Manager', desc: 'Dự án, công việc, duyệt vật tư' },
-    { role: 'Giám sát công trình', user: 'supervisor', pass: 'sup123', badge: '👷 Supervisor', desc: 'Nhật ký, chấm công thợ, tiến độ, đề xuất vật tư' },
-    { role: 'Công nhân thi công', user: 'worker', pass: 'worker123', badge: '🛠️ Worker', desc: 'Báo cáo hàng ngày trên mobile' },
-    { role: 'Ban Giám Đốc / Xem', user: 'viewer', pass: 'viewer123', badge: '👁️ Viewer', desc: 'Xem tiến độ & báo cáo read-only' },
+    { role: 'Quản trị viên', user: 'huy.dong', pass: '123456', badge: '👑 Admin (ĐỒNG QUANG HUY)', desc: 'Toàn quyền hệ thống & phân quyền' },
+    { role: 'Quản lý xưởng', user: 'quan.mai', pass: '123456', badge: '👔 Manager (MAI QUỐC QUÂN)', desc: 'Dự án, công việc, duyệt vật tư' },
+    { role: 'Giám sát công trình', user: 'duy.le', pass: '123456', badge: '👷 Supervisor (LÊ TRUNG DUY)', desc: 'Nhật ký, chấm công thợ, tiến độ, đề xuất vật tư' },
+    { role: 'Công nhân thi công', user: 'phuc.tran', pass: '123456', badge: '🛠️ Worker (TRẦN THANH PHÚC)', desc: 'Báo cáo hàng ngày trên mobile' },
+    { role: 'Ban Giám Đốc / Xem', user: 'viewer', pass: '123456', badge: '👁️ Viewer (Ban Giám Đốc)', desc: 'Xem tiến độ & báo cáo read-only' },
   ];
 
   async function handleLogin(e: React.FormEvent) {
