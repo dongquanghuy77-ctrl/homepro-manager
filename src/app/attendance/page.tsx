@@ -62,7 +62,8 @@ function AddAttendanceModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const today = new Date().toISOString().split('T')[0];
+  // Use Vietnam timezone for default date (avoid UTC date mismatch after 17:00 UTC = 00:00 VN+1)
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -82,8 +83,10 @@ function AddAttendanceModal({
     const checkOutVal = (fd.get('checkOut') as string)?.trim();
 
     // Build ISO datetime strings from workDate + HH:MM
-    if (checkInVal)  payload.checkIn  = `${payload.workDate}T${checkInVal}:00`;
-    if (checkOutVal) payload.checkOut = `${payload.workDate}T${checkOutVal}:00`;
+    // IMPORTANT: append +07:00 so server correctly stores UTC equivalent of VN local time
+    // Without timezone suffix → server (UTC) treats it as UTC → 7h offset in display
+    if (checkInVal)  payload.checkIn  = `${payload.workDate}T${checkInVal}:00+07:00`;
+    if (checkOutVal) payload.checkOut = `${payload.workDate}T${checkOutVal}:00+07:00`;
 
     if (!payload.employeeId) { setError('Vui lòng chọn nhân viên'); setLoading(false); return; }
     if (!payload.workDate)   { setError('Vui lòng chọn ngày');       setLoading(false); return; }
@@ -199,8 +202,9 @@ function EditAttendanceModal({
     const payload: Record<string, string | null> = {
       status: fd.get('status') as string,
       note:   (fd.get('note') as string)?.trim() || null,
-      checkIn:  checkInVal  ? `${record.workDate}T${checkInVal}:00`  : null,
-      checkOut: checkOutVal ? `${record.workDate}T${checkOutVal}:00` : null,
+      // +07:00 suffix ensures server stores correct UTC equivalent of VN local time
+      checkIn:  checkInVal  ? `${record.workDate}T${checkInVal}:00+07:00`  : null,
+      checkOut: checkOutVal ? `${record.workDate}T${checkOutVal}:00+07:00` : null,
     };
 
     try {
@@ -275,7 +279,8 @@ function EditAttendanceModal({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AttendancePage() {
-  const today   = new Date().toISOString().split('T')[0];
+  // Use Vietnam timezone to avoid date mismatch after 17:00 UTC (= midnight VN+1)
+  const today   = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
   const thisMonth = today.substring(0, 7); // YYYY-MM
 
   const [records,   setRecords]   = useState<AttendanceRecord[]>([]);
@@ -449,9 +454,10 @@ export default function AttendancePage() {
                     <td>{fmt(r.checkOut)}</td>
                     <td>
                       {r.totalHours != null ? `${r.totalHours.toFixed(1)}h` : '—'}
-                      {r.lateMinutes ? (
-                        <span style={{ marginLeft: '4px', fontSize: '0.75rem', color: 'var(--color-warning)' }}>
-                          (+{r.lateMinutes}ph)
+                      {r.lateMinutes && r.lateMinutes > 0 ? (
+                        <span style={{ marginLeft: '4px', fontSize: '0.75rem', color: 'var(--color-warning)', whiteSpace: 'nowrap' }}
+                              title={`Đi trễ ${r.lateMinutes} phút`}>
+                          ⚡ Trễ {r.lateMinutes}ph
                         </span>
                       ) : null}
                     </td>
