@@ -31,13 +31,21 @@ export default function UserManagementPage() {
   const [success, setSuccess] = useState('');
 
   // New user form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    username: string;
+    password: string;
+    name: string;
+    position: string;
+    birthDate: string;
+    role: UserItem['role'];
+    phone: string;
+  }>({
     username: '',
     password: '',
     name: '',
-    position: '',
+    position: 'Công nhân',
     birthDate: '',
-    role: 'SUPERVISOR' as const,
+    role: 'WORKER',
     phone: '',
   });
 
@@ -77,7 +85,7 @@ export default function UserManagementPage() {
 
       setSuccess(`Đã tạo tài khoản thành công cho ${data.name} (${data.role})`);
       setShowAddModal(false);
-      setFormData({ username: '', password: '', name: '', position: '', birthDate: '', role: 'SUPERVISOR', phone: '' });
+      setFormData({ username: '', password: '', name: '', position: 'Công nhân', birthDate: '', role: 'WORKER', phone: '' });
       loadUsers();
     } catch (err: any) {
       setError(err.message);
@@ -368,12 +376,29 @@ export default function UserManagementPage() {
               <div className="grid-2 mb-4">
                 <div className="form-group">
                   <label className="form-label">Chức vụ thực tế</label>
-                  <input
-                    className="form-input"
+                  <select
+                    className="form-select"
                     value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    placeholder="vd: Kỹ thuật, Công nhân..."
-                  />
+                    onChange={(e) => {
+                      const pos = e.target.value;
+                      let autoRole: UserItem['role'] = formData.role;
+                      if (pos === 'Kỹ thuật') autoRole = 'SUPERVISOR';
+                      else if (pos === 'Kỹ thuật xưởng') autoRole = 'MANAGER';
+                      else if (pos === 'Công nhân') autoRole = 'WORKER';
+                      else if (pos === 'Ban Giám Đốc') autoRole = 'VIEWER';
+                      else if (pos === 'Giám sát công trình') autoRole = 'SUPERVISOR';
+                      else if (pos === 'Quản lý xưởng') autoRole = 'MANAGER';
+                      
+                      setFormData({ ...formData, position: pos, role: autoRole });
+                    }}
+                  >
+                    <option value="Công nhân">👷 Công nhân</option>
+                    <option value="Kỹ thuật">🛠️ Kỹ thuật</option>
+                    <option value="Kỹ thuật xưởng">🏭 Kỹ thuật xưởng</option>
+                    <option value="Giám sát công trình">📋 Giám sát công trình</option>
+                    <option value="Quản lý xưởng">💼 Quản lý xưởng</option>
+                    <option value="Ban Giám Đốc">👁️ Ban Giám Đốc</option>
+                  </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Ngày sinh (DD/MM/YYYY)</label>
