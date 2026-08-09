@@ -1,3 +1,6 @@
+// @ts-check
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -9,28 +12,22 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          // Prevent clickjacking
           { key: 'X-Frame-Options', value: 'DENY' },
-          // Prevent MIME type sniffing
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          // Restrict referrer information
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          // Disable browser features not needed
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-          // Content Security Policy
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob:",
-              "connect-src 'self' https://*.neon.tech wss://*.neon.tech",
+              "connect-src 'self' https://*.neon.tech wss://*.neon.tech https://*.sentry.io https://*.ingest.de.sentry.io",
               "frame-ancestors 'none'",
             ].join('; '),
           },
-          // XSS Protection for older browsers
           { key: 'X-XSS-Protection', value: '1; mode=block' },
         ],
       },
@@ -38,4 +35,22 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Sentry organization and project from DSN
+  org: 'donghuy',
+  project: 'homepro-manager',
+
+  // Only upload source maps in CI/production builds to save time locally
+  silent: !process.env.CI,
+
+  // Automatically instrument Next.js data fetching methods, route handlers
+  autoInstrumentServerFunctions: true,
+
+  // Disable source map upload if SENTRY_AUTH_TOKEN not set (optional)
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+
+  // Prevents Sentry from adding extra bloat in dev mode
+  disableLogger: true,
+});
