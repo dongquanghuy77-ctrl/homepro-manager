@@ -75,9 +75,13 @@ function AddAttendanceModal({
 }) {
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
 
-  // Phân quyền: ADMIN/MANAGER xếm mọi NV; WORKER/SUPERVISOR chỉ xếm chính mình
-  const isManager = currentUser?.role === 'ADMIN' || currentUser?.role === 'MANAGER';
-  const visibleEmployees: EmployeeOption[] = isManager
+  // Phân quyền hiển thị:
+  // ADMIN, MANAGER, VIEWER → thấy toàn bộ danh sách nhân viên
+  // WORKER, SUPERVISOR    → chỉ thấy chính mình
+  const canSeeAll = ['ADMIN', 'MANAGER', 'VIEWER'].includes(currentUser?.role ?? '');
+  // VIEWER: chỉ xem, không thực hiện được tác vụ ghi
+  const isViewer  = currentUser?.role === 'VIEWER';
+  const visibleEmployees: EmployeeOption[] = canSeeAll
     ? employees
     : currentUser
       ? [{ id: currentUser.id, name: currentUser.name,
@@ -85,9 +89,9 @@ function AddAttendanceModal({
       : [];
 
   // Controlled state (needed for live validation + dependency logic)
-  // WORKER/SUPERVISOR: auto-select chính mình; ADMIN/MANAGER: để trống để tự chọn
+  // WORKER/SUPERVISOR: auto-select chính mình; còn lại: để trống tự chọn
   const [selEmployee, setSelEmployee] = useState(
-    !isManager && currentUser ? String(currentUser.id) : ''
+    !canSeeAll && currentUser ? String(currentUser.id) : ''
   );
   const [selDate,     setSelDate]     = useState(today);
   const [selStatus,   setSelStatus]   = useState('PRESENT');
@@ -217,7 +221,7 @@ function AddAttendanceModal({
             <div className="form-group" style={{ margin: 0 }}>
               <label className="form-label">Nhân viên *</label>
               {/* Nếu WORKER/SUPERVISOR: chỉ hiện chính mình (cờ disabled) */}
-              {!isManager && currentUser ? (
+              {!canSeeAll && currentUser ? (
                 <div className="form-input" style={{ cursor: 'not-allowed', opacity: 0.8 }}>
                   {currentUser.employeeCode ? `[${currentUser.employeeCode}] ` : ''}
                   {currentUser.name}{currentUser.department ? ` — ${currentUser.department}` : ''}
@@ -386,11 +390,21 @@ function AddAttendanceModal({
             </div>
           )}
 
-          <div className="modal-footer">
-            <button type="button" className="btn btn-ghost" onClick={onClose} disabled={loading}>Hủy</button>
-            <button type="submit" className="btn btn-primary" disabled={loading || !!timeError}>
-              {loading ? 'Đang lưu...' : '+ Lưu chấm công'}
-            </button>
+          <div className="modal-footer" style={{ flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
+            {isViewer && (
+              <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--color-text-muted)',
+                padding: '6px 12px', background: 'var(--color-surface-2)', borderRadius: 6 }}>
+                🔒 Tài khoản Demo chỉ có quyền xem, không thể lưu dữ liệu
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button type="button" className="btn btn-ghost" onClick={onClose} disabled={loading}>Hủy</button>
+              <button type="submit" className="btn btn-primary"
+                disabled={loading || !!timeError || isViewer}
+                title={isViewer ? 'Tài khoản xem không thể thực hiện tác vụ này' : ''}>
+                {isViewer ? '🔒 Chỉ xem' : (loading ? 'Đang lưu...' : '+ Lưu chấm công')}
+              </button>
+            </div>
           </div>
         </form>
       </div>
