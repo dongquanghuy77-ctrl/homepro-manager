@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface AttendanceRecord {
@@ -62,40 +62,90 @@ function AddAttendanceModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  // Use Vietnam timezone for default date (avoid UTC date mismatch after 17:00 UTC = 00:00 VN+1)
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
-  const [error,   setError]   = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Controlled state (needed for live validation + dependency logic)
+  const [selEmployee, setSelEmployee] = useState('');
+  const [selDate,     setSelDate]     = useState(today);
+  const [selStatus,   setSelStatus]   = useState('PRESENT');
+  const [checkIn,     setCheckIn]     = useState('');
+  const [checkOut,    setCheckOut]    = useState('');
+  const [note,        setNote]        = useState('');
+  const [error,       setError]       = useState('');
+  const [loading,     setLoading]     = useState(false);
+  const [dupWarning,  setDupWarning]  = useState('');
+
+  // ── FIX-1: ABSENT / ON_LEAVE → time fields disabled & cleared ─────────────
+  const timeDisabled = selStatus === 'ABSENT' || selStatus === 'ON_LEAVE';
+  useEffect(() => {
+    if (timeDisabled) { setCheckIn(''); setCheckOut(''); }
+  }, [timeDisabled]);
+
+  // ── FIX-2 + FIX-3: Validate checkOut > checkIn + real-time total preview ──
+  const { totalPreview, timeError } = useMemo(() => {
+    if (!checkIn || !checkOut) return { totalPreview: null, timeError: null };
+    const [ih, im] = checkIn.split(':').map(Number);
+    const [oh, om] = checkOut.split(':').map(Number);
+    const diffMin = (oh * 60 + om) - (ih * 60 + im);
+    if (diffMin <= 0) return { totalPreview: null, timeError: 'Giờ ra phải sau giờ vào' };
+    return { totalPreview: (diffMin / 60).toFixed(1), timeError: null };
+  }, [checkIn, checkOut]);
+
+  // ── FIX-4: Real-time duplicate check (debounced 600ms) ────────────────────
+  useEffect(() => {
+    if (!selEmployee || !selDate) { setDupWarning(''); return; }
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/hr/attendance?date=${selDate}&employeeId=${selEmployee}`);
+        if (res.ok) {
+          const data = await res.json() as AttendanceRecord[];
+          setDupWarning(data.length > 0
+            ? `⚠️ Nhân viên này đã có bản ghi chấm công ngày ${selDate}`
+            : '');
+        }
+      } catch { /* silent */ }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [selEmployee, selDate]);
+
+  // ── FIX-7: Fill current VN time ───────────────────────────────────────────
+  const fillNow = (field: 'in' | 'out') => {
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Ho_Chi_Minh',
+    });
+    const [h, m] = fmt.format(new Date()).split(':');
+    const t = `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+    if (field === 'in') setCheckIn(t);
+    else setCheckOut(t);
+  };
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!selEmployee) { setError('Vui lòng chọn nhân viên'); return; }
+    if (!selDate)      { setError('Vui lòng chọn ngày');      return; }
+    if (timeError)     { setError(timeError);                  return; }
+    // FIX-1: PRESENT / LATE / HALF_DAY → giờ vào là bắt buộc
+    if (!timeDisabled && !checkIn) {
+      const label = selStatus === 'HALF_DAY' ? 'Nửa ngày' : selStatus === 'LATE' ? 'Đi trễ' : 'Có mặt';
+      setError(`Trạng thái "${label}" yêu cầu nhập Giờ vào`);
+      return;
+    }
     setLoading(true);
-    const fd = new FormData(e.currentTarget);
-
-    const payload: Record<string, string | null> = {
-      employeeId: fd.get('employeeId') as string,
-      workDate:   fd.get('workDate')   as string,
-      status:     fd.get('status')     as string,
-      note:       (fd.get('note') as string)?.trim() || null,
-    };
-    const checkInVal  = (fd.get('checkIn')  as string)?.trim();
-    const checkOutVal = (fd.get('checkOut') as string)?.trim();
-
-    // Build ISO datetime strings from workDate + HH:MM
-    // IMPORTANT: append +07:00 so server correctly stores UTC equivalent of VN local time
-    // Without timezone suffix → server (UTC) treats it as UTC → 7h offset in display
-    if (checkInVal)  payload.checkIn  = `${payload.workDate}T${checkInVal}:00+07:00`;
-    if (checkOutVal) payload.checkOut = `${payload.workDate}T${checkOutVal}:00+07:00`;
-
-    if (!payload.employeeId) { setError('Vui lòng chọn nhân viên'); setLoading(false); return; }
-    if (!payload.workDate)   { setError('Vui lòng chọn ngày');       setLoading(false); return; }
-
     try {
       const res = await fetch('/api/hr/attendance', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
+        body: JSON.stringify({
+          employeeId: selEmployee,
+          workDate:   selDate,
+          status:     selStatus,
+          note:       note.trim() || null,
+          // +07:00 ensures server stores correct UTC equivalent of VN local time
+          checkIn:  checkIn  ? `${selDate}T${checkIn}:00+07:00`  : null,
+          checkOut: checkOut ? `${selDate}T${checkOut}:00+07:00` : null,
+        }),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -119,50 +169,124 @@ function AddAttendanceModal({
           <button className="btn btn-ghost btn-icon" onClick={onClose} disabled={loading}>✕</button>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="modal-body grid-2">
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+            {/* ── Nhân viên — full width ───────────────────────────────────── */}
+            <div className="form-group" style={{ margin: 0 }}>
               <label className="form-label">Nhân viên *</label>
-              <select name="employeeId" className="form-select" required>
+              <select className="form-select" value={selEmployee}
+                onChange={e => setSelEmployee(e.target.value)} required>
                 <option value="">-- Chọn nhân viên --</option>
-                {employees.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.employeeCode ? `[${e.employeeCode}] ` : ''}{e.name}
-                    {e.department ? ` — ${e.department}` : ''}
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.employeeCode ? `[${emp.employeeCode}] ` : ''}{emp.name}
+                    {emp.department ? ` — ${emp.department}` : ''}
                   </option>
                 ))}
               </select>
             </div>
-            <div className="form-group">
-              <label className="form-label">Ngày *</label>
-              <input type="date" name="workDate" className="form-input" defaultValue={today} required />
+
+            {/* ── FIX-4: Cảnh báo trùng ngày (real-time) ───────────────────── */}
+            {dupWarning && (
+              <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.35)',
+                color: '#F59E0B', padding: '8px 12px', borderRadius: 8, fontSize: 13 }}>
+                {dupWarning}
+              </div>
+            )}
+
+            {/* ── Ngày + Trạng thái ─────────────────────────────────────────── */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label">Ngày *</label>
+                {/* FIX-5: max=today chặn ngày tương lai */}
+                <input type="date" className="form-input" value={selDate}
+                  max={today} onChange={e => setSelDate(e.target.value)} required />
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label">Trạng thái</label>
+                <select className="form-select" value={selStatus}
+                  onChange={e => setSelStatus(e.target.value)}>
+                  <option value="PRESENT">Có mặt</option>
+                  <option value="LATE">Đi trễ</option>
+                  <option value="ABSENT">Vắng</option>
+                  <option value="HALF_DAY">Nửa ngày</option>
+                  <option value="ON_LEAVE">Nghỉ phép</option>
+                </select>
+              </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Trạng thái</label>
-              <select name="status" className="form-select">
-                <option value="PRESENT">Có mặt</option>
-                <option value="LATE">Đi trễ</option>
-                <option value="ABSENT">Vắng</option>
-                <option value="HALF_DAY">Nửa ngày</option>
-                <option value="ON_LEAVE">Nghỉ phép</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Giờ vào (HH:MM)</label>
-              <input type="time" name="checkIn" className="form-input" />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Giờ ra (HH:MM)</label>
-              <input type="time" name="checkOut" className="form-input" />
-            </div>
-            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+
+            {/* ── FIX-1: Giờ vào / Giờ ra — ẩn khi ABSENT / ON_LEAVE ───────── */}
+            {!timeDisabled && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <label className="form-label" style={{ margin: 0 }}>
+                      Giờ vào&nbsp;<span style={{ color: 'var(--color-danger)' }}>*</span>
+                    </label>
+                    {/* FIX-7: Fill current VN time */}
+                    <button type="button" onClick={() => fillNow('in')}
+                      style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none',
+                        border: 'none', cursor: 'pointer', padding: 0 }}>
+                      ⏱ Hiện tại
+                    </button>
+                  </div>
+                  <input type="time" className="form-input" value={checkIn}
+                    onChange={e => setCheckIn(e.target.value)} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <label className="form-label" style={{ margin: 0 }}>Giờ ra</label>
+                    <button type="button" onClick={() => fillNow('out')}
+                      style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none',
+                        border: 'none', cursor: 'pointer', padding: 0 }}>
+                      ⏱ Hiện tại
+                    </button>
+                  </div>
+                  <input type="time" className="form-input" value={checkOut}
+                    onChange={e => setCheckOut(e.target.value)} />
+                </div>
+              </div>
+            )}
+
+            {/* ── FIX-2: Cảnh báo lỗi giờ ──────────────────────────────────── */}
+            {timeError && (
+              <div style={{ color: 'var(--color-danger)', fontSize: 13, display: 'flex', gap: 6 }}>
+                ⚠️ {timeError}
+              </div>
+            )}
+
+            {/* ── FIX-3: Preview tổng giờ real-time ────────────────────────── */}
+            {totalPreview && !timeError && (
+              <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
+                borderRadius: 8, padding: '8px 14px', fontSize: 13, color: 'var(--color-success)',
+                display: 'flex', alignItems: 'center', gap: 8 }}>
+                ✅ Tổng giờ: <strong>{totalPreview}h</strong>
+                {Number(totalPreview) > 8 && (
+                  <span style={{ color: 'var(--color-warning)', fontSize: 12 }}>
+                    · OT +{Math.round((Number(totalPreview) - 8) * 60)}ph
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* ── Ghi chú ───────────────────────────────────────────────────── */}
+            <div className="form-group" style={{ margin: 0 }}>
               <label className="form-label">Ghi chú</label>
-              <input type="text" name="note" className="form-input" placeholder="Ghi chú thêm..." />
+              <input type="text" className="form-input" placeholder="Ghi chú thêm..."
+                value={note} onChange={e => setNote(e.target.value)} />
             </div>
+
           </div>
-          {error && <div className="modal-body" style={{ paddingTop: 0 }}><div className="alert alert-danger">{error}</div></div>}
+
+          {error && (
+            <div className="modal-body" style={{ paddingTop: 0 }}>
+              <div className="alert alert-danger">{error}</div>
+            </div>
+          )}
+
           <div className="modal-footer">
             <button type="button" className="btn btn-ghost" onClick={onClose} disabled={loading}>Hủy</button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="btn btn-primary" disabled={loading || !!timeError}>
               {loading ? 'Đang lưu...' : '+ Lưu chấm công'}
             </button>
           </div>
@@ -171,6 +295,7 @@ function AddAttendanceModal({
     </div>
   );
 }
+
 
 // ── EditAttendanceModal ───────────────────────────────────────────────────────
 function EditAttendanceModal({
