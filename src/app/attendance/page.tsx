@@ -61,8 +61,7 @@ function fmt(dateStr: string | null): string {
   return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 }
 
-// ── TimePicker24 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-// 2 select giờ (00–23) + phút (00–59) — luôn hiển thị 24h, không phụ thuộc locale trình duyệt
+// TimePicker24: number inputs, 24h, no native popup
 function TimePicker24({
   value, onChange, disabled,
 }: {
@@ -70,41 +69,46 @@ function TimePicker24({
   onChange: (v: string) => void;
   disabled?: boolean;
 }) {
-  const [hh, mm] = value ? value.split(':') : ['', ''];
+  const sp = (v: string) => { const p = (v || '').split(':'); return [p[0] ?? '', p[1] ?? '']; };
+  const [lh, setLh] = useState(() => sp(value)[0]);
+  const [lm, setLm] = useState(() => sp(value)[1]);
+  useEffect(() => { const [h, m] = sp(value); setLh(h); setLm(m); }, [value]);
 
-  const update = (newH: string, newM: string) => {
-    if (!newH && !newM) { onChange(''); return; }
-    onChange(`${(newH || '00').padStart(2, '0')}:${(newM || '00').padStart(2, '0')}`);
+  const commit = (rawH: string, rawM: string) => {
+    if (!rawH && !rawM) { onChange(''); return; }
+    const h = String(Math.min(23, Math.max(0, parseInt(rawH) || 0))).padStart(2, '0');
+    const m = String(Math.min(59, Math.max(0, parseInt(rawM) || 0))).padStart(2, '0');
+    setLh(h); setLm(m); onChange(`${h}:${m}`);
   };
 
-  const selStyle: React.CSSProperties = {
-    background: 'none', border: 'none', color: 'inherit',
-    fontSize: 15, fontWeight: 500, padding: '0 4px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    outline: 'none', flex: 1, textAlign: 'center',
+  const inp: React.CSSProperties = {
+    width: 42, background: 'none', border: 'none', color: 'inherit',
+    fontSize: 20, fontWeight: 700, textAlign: 'center', outline: 'none',
+    padding: 0, fontFamily: 'inherit', cursor: disabled ? 'not-allowed' : 'text',
   };
 
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 2,
-      background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
-      borderRadius: 8, padding: '0 10px', height: 40,
-      opacity: disabled ? 0.5 : 1,
-    }}>
-      <select value={hh} disabled={disabled} onChange={e => update(e.target.value, mm)} style={selStyle}>
-        <option value="">––</option>
-        {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
-          <option key={h} value={h}>{h}</option>
-        ))}
-      </select>
-      <span style={{ fontWeight: 700, color: 'var(--color-text-muted)', userSelect: 'none' }}>:</span>
-      <select value={mm} disabled={disabled} onChange={e => update(hh, e.target.value)} style={selStyle}>
-        <option value="">––</option>
-        {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => (
-          <option key={m} value={m}>{m}</option>
-        ))}
-      </select>
-    </div>
+    <>
+      <style>{`.tp24::-webkit-inner-spin-button,.tp24::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.tp24{-moz-appearance:textfield}.tp24-box:focus-within{border-color:var(--color-primary)!important;box-shadow:0 0 0 3px rgba(99,102,241,.18)!important}`}</style>
+      <div className="tp24-box" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: '100%', height: 44,
+        background: 'var(--color-surface-2)', border: '1.5px solid var(--color-border)',
+        borderRadius: 10, padding: '0 14px',
+        opacity: disabled ? 0.5 : 1, transition: 'border-color .15s, box-shadow .15s',
+      }}>
+        <input type="number" className="tp24" min={0} max={23} inputMode="numeric"
+          placeholder="00" value={lh} disabled={disabled} style={inp}
+          onChange={e => setLh(e.target.value)} onBlur={e => commit(e.target.value, lm)}
+          onFocus={e => e.target.select()} />
+        <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--color-primary)',
+          padding: '0 4px', userSelect: 'none', lineHeight: 1 }}>:</span>
+        <input type="number" className="tp24" min={0} max={59} inputMode="numeric"
+          placeholder="00" value={lm} disabled={disabled} style={inp}
+          onChange={e => setLm(e.target.value)} onBlur={e => commit(lh, e.target.value)}
+          onFocus={e => e.target.select()} />
+      </div>
+    </>
   );
 }
 
