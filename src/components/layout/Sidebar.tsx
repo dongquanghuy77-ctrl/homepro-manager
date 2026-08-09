@@ -212,56 +212,65 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="sidebar-footer">
-          <div className="sidebar-footer-info" style={{ width: '100%', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div className="sidebar-avatar">
+        <div className="sidebar-footer" style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+              <div className="sidebar-avatar" style={{ flexShrink: 0 }}>
                 {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'H'}
               </div>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 130 }}>
-                <div className="sidebar-user-name" style={{ fontSize: 13, fontWeight: 700 }}>
+              <div style={{ overflow: 'hidden', minWidth: 0, flex: 1 }}>
+                <div className="sidebar-user-name" style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {currentUser?.name || 'Đồng Quang Huy'}
                 </div>
-                <div className="sidebar-user-role" style={{ fontSize: 11, color: 'var(--color-primary)' }}>
+                <div className="sidebar-user-role" style={{ fontSize: 11, color: 'var(--color-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {currentUser ? (ROLE_LABELS[currentUser.role] || currentUser.role) : 'Admin / Kỹ thuật xưởng'}
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <button
-                onClick={() => setPasswordModalOpen(true)}
-                title="Đổi mật khẩu cá nhân"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--color-text-muted)',
-                  cursor: 'pointer',
-                  padding: 6,
-                  borderRadius: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <Key size={15} />
-              </button>
-              <button
-                onClick={handleLogout}
-                title="Đăng xuất"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--color-text-muted)',
-                  cursor: 'pointer',
-                  padding: 6,
-                  borderRadius: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <LogOut size={15} />
-              </button>
-            </div>
+
+            <button
+              onClick={() => setPasswordModalOpen(true)}
+              title="Đổi mật khẩu cá nhân"
+              style={{
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-muted)',
+                cursor: 'pointer',
+                padding: '6px 8px',
+                borderRadius: 6,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: 11,
+                flexShrink: 0,
+              }}
+            >
+              <Key size={13} />
+            </button>
           </div>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              borderRadius: 8,
+              background: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#FCA5A5',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <LogOut size={14} />
+            <span>Đăng xuất tài khoản</span>
+          </button>
         </div>
       </aside>
 
