@@ -21,23 +21,24 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   try {
     const [employee] = await db.select({
-      id: users.id,
-      username: users.username,
-      name: users.name,
-      position: users.position,
-      role: users.role,
-      phone: users.phone,
-      active: users.active,
-      employeeCode: users.employeeCode,
-      department: users.department,
+      id:             users.id,
+      username:       users.username,
+      name:           users.name,
+      position:       users.position,
+      role:           users.role,
+      phone:          users.phone,
+      email:          users.email,
+      active:         users.active,
+      employeeCode:   users.employeeCode,
+      department:     users.department,
       employmentType: users.employmentType,
-      joinDate: users.joinDate,
-      managerId: users.managerId,
+      joinDate:       users.joinDate,
+      managerId:      users.managerId,
       employeeStatus: users.employeeStatus,
-      note: users.note,
-      birthDate: users.birthDate,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt
+      note:           users.note,
+      birthDate:      users.birthDate,
+      createdAt:      users.createdAt,
+      updatedAt:      users.updatedAt,
     }).from(users).where(eq(users.id, id));
 
     if (!employee) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -64,6 +65,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       name?: string;
       position?: string;
       phone?: string;
+      email?: string | null;
       birthDate?: string;
       department?: string;
       employmentType?: string;
@@ -81,16 +83,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       updatedAt: new Date(),
     };
 
-    // Whitelist approach: chỉ copy các field được phép cập nhật
-    if (typeof body.name === 'string')           updateData.name = body.name;
-    if (typeof body.position === 'string')       updateData.position = body.position;
-    if (typeof body.phone === 'string')          updateData.phone = body.phone;
-    if (typeof body.birthDate === 'string')      updateData.birthDate = body.birthDate;
-    if (typeof body.department === 'string')     updateData.department = body.department;
+    if (typeof body.name === 'string')           updateData.name = body.name.trim();
+    if (typeof body.position === 'string')       updateData.position = body.position.trim() || null;
+    if (typeof body.phone === 'string')          updateData.phone = body.phone.trim() || null;
+    if (typeof body.email === 'string')          updateData.email = body.email.trim().toLowerCase() || null;
+    if (body.email === null)                     updateData.email = null;
+    if (typeof body.birthDate === 'string')      updateData.birthDate = body.birthDate || null;
+    if (typeof body.department === 'string')     updateData.department = body.department || null;
     if (typeof body.employmentType === 'string') updateData.employmentType = body.employmentType;
-    if (typeof body.joinDate === 'string')       updateData.joinDate = body.joinDate;
+    if (typeof body.joinDate === 'string')       updateData.joinDate = body.joinDate || null;
     if (body.managerId !== undefined)            updateData.managerId = body.managerId === null ? null : Number(body.managerId);
-    if (typeof body.note === 'string')           updateData.note = body.note;
+    if (typeof body.note === 'string')           updateData.note = body.note.trim() || null;
     if (typeof body.role === 'string')           updateData.role = body.role;
     if (typeof body.active === 'boolean')        updateData.active = body.active;
     if (typeof body.employeeStatus === 'string') updateData.employeeStatus = body.employeeStatus;

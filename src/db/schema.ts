@@ -14,6 +14,7 @@ export const users = pgTable('users', {
   birthDate: text('birth_date'),
   role: text('role').notNull().default('WORKER'),
   phone: text('phone'),
+  email: text('email'),
   active: boolean('active').notNull().default(true),
   // ── HR Module 01 fields ──────────────────────────────────────
   employeeCode: text('employee_code').unique(),          // NV001, NV002...

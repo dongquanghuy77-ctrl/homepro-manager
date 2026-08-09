@@ -8,19 +8,20 @@ import { eq, or, ilike, and, desc } from 'drizzle-orm';
 import { generateEmployeeCode, writeHrAuditLog } from '@/lib/hr';
 import bcrypt from 'bcryptjs';
 
+// ─── GET: Danh sách nhân viên (ADMIN, MANAGER) ───────────────────────────────
 export async function GET(req: NextRequest) {
   const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
   if (error) return error;
 
   try {
     const { searchParams } = new URL(req.url);
-    const department = searchParams.get('department');
-    const status = searchParams.get('status');
-    const search = searchParams.get('search');
+    const department = searchParams.get('department')?.trim() || null;
+    const status = searchParams.get('status')?.trim() || null;
+    const search = searchParams.get('search')?.trim() || null;
 
     const conditions = [];
     if (department) conditions.push(eq(users.department, department));
-    if (status) conditions.push(eq(users.employeeStatus, status));
+    if (status)     conditions.push(eq(users.employeeStatus, status));
     if (search) {
       conditions.push(
         or(
@@ -32,73 +33,123 @@ export async function GET(req: NextRequest) {
     }
 
     const employeeList = await db.select({
-      id: users.id,
-      username: users.username,
-      name: users.name,
-      position: users.position,
-      role: users.role,
-      phone: users.phone,
-      active: users.active,
-      employeeCode: users.employeeCode,
-      department: users.department,
+      id:             users.id,
+      username:       users.username,
+      name:           users.name,
+      position:       users.position,
+      role:           users.role,
+      phone:          users.phone,
+      email:          users.email,
+      active:         users.active,
+      employeeCode:   users.employeeCode,
+      department:     users.department,
       employmentType: users.employmentType,
-      joinDate: users.joinDate,
-      managerId: users.managerId,
+      joinDate:       users.joinDate,
+      managerId:      users.managerId,
       employeeStatus: users.employeeStatus,
-      note: users.note,
-      birthDate: users.birthDate,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt
-    }).from(users).where(conditions.length ? and(...conditions) : undefined).orderBy(desc(users.createdAt));
+      birthDate:      users.birthDate,
+      note:           users.note,
+      createdAt:      users.createdAt,
+      updatedAt:      users.updatedAt,
+      // password is intentionally NOT selected
+    })
+      .from(users)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(users.createdAt));
 
     return NextResponse.json(employeeList);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
+// ─── POST: Tạo nhân viên mới (ADMIN only) ────────────────────────────────────
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth(req, ADMIN_ONLY);
   if (error) return error;
 
   try {
     const body = await req.json();
-    const { name, username, password, position, role, phone, birthDate, department, employmentType, joinDate, managerId, note } = body;
 
+    // ── Input validation ──────────────────────────────────────────────────────
+    const { name, username, password, position, role, phone, email,
+            birthDate, department, employmentType, joinDate, managerId, note } = body;
+
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ error: 'Họ tên không được để trống' }, { status: 400 });
+    }
+    if (!username || typeof username !== 'string' || !username.trim()) {
+      return NextResponse.json({ error: 'Tên đăng nhập không được để trống' }, { status: 400 });
+    }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return NextResponse.json({ error: 'Mật khẩu phải có ít nhất 6 ký tự' }, { status: 400 });
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: 'Email không hợp lệ' }, { status: 400 });
+    }
+    if (phone && !/^[0-9+\-\s()]{8,15}$/.test(phone.trim())) {
+      return NextResponse.json({ error: 'Số điện thoại không hợp lệ' }, { status: 400 });
+    }
+
+    // ── Check duplicate username ──────────────────────────────────────────────
+    const [existing] = await db.select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, username.trim().toLowerCase()));
+    if (existing) {
+      return NextResponse.json({ error: 'Tên đăng nhập đã tồn tại' }, { status: 409 });
+    }
+
+    // ── Hash password + generate employee code ────────────────────────────────
     const hashedPassword = await bcrypt.hash(password, 10);
-    const employeeCode = await generateEmployeeCode();
+    const employeeCode   = await generateEmployeeCode();
+
+    const validRoles = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER'];
+    const safeRole = validRoles.includes(role) ? role : 'WORKER';
+
+    const validEmploymentTypes = ['FULL_TIME', 'PART_TIME', 'CONTRACT'];
+    const safeEmploymentType = validEmploymentTypes.includes(employmentType)
+      ? employmentType : 'FULL_TIME';
 
     const [newUser] = await db.insert(users).values({
-      name,
-      username,
-      password: hashedPassword,
-      position,
-      role,
-      phone,
-      birthDate,
-      department,
-      employmentType,
-      joinDate,
-      managerId,
-      note,
+      name:           name.trim(),
+      username:       username.trim().toLowerCase(),
+      password:       hashedPassword,
+      position:       position?.trim() || null,
+      role:           safeRole,
+      phone:          phone?.trim() || null,
+      email:          email?.trim().toLowerCase() || null,
+      birthDate:      birthDate || null,
+      department:     department || null,
+      employmentType: safeEmploymentType,
+      joinDate:       joinDate || null,
+      managerId:      managerId ? Number(managerId) : null,
+      note:           note?.trim() || null,
       employeeCode,
-      active: true,
-      employeeStatus: 'ACTIVE'
-    }).returning({ id: users.id });
+      active:         true,
+      employeeStatus: 'ACTIVE',
+    }).returning({ id: users.id, employeeCode: users.employeeCode });
 
     await writeHrAuditLog({
-      action: 'EMPLOYEE_CREATED',
-      entityType: 'user',
-      entityId: newUser.id,
-      actorId: session.id,
-      actorName: session.name,
-      oldValue: undefined,
-      newValue: body,
-      ipAddress: req.headers.get('x-forwarded-for') || 'unknown'
+      action:     'EMPLOYEE_CREATED',
+      entityType: 'employee',
+      entityId:   newUser.id,
+      actorId:    session.id,
+      actorName:  session.name,
+      newValue:   { name, username, department, position, role },
+      ipAddress:  req.headers.get('x-forwarded-for') || 'unknown',
     });
 
-    return NextResponse.json({ success: true, id: newUser.id }, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: true, id: newUser.id, employeeCode: newUser.employeeCode },
+      { status: 201 }
+    );
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    // Catch unique constraint violation (username or employee_code)
+    if (message.includes('unique') || message.includes('duplicate')) {
+      return NextResponse.json({ error: 'Tên đăng nhập đã tồn tại' }, { status: 409 });
+    }
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
