@@ -12,6 +12,8 @@ export async function GET() {
         id: users.id,
         username: users.username,
         name: users.name,
+        position: users.position,
+        birthDate: users.birthDate,
         role: users.role,
         phone: users.phone,
         active: users.active,
@@ -30,7 +32,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { username, password, name, role, phone } = body;
+    const { username, password, name, position, birthDate, role, phone } = body;
 
     if (!username || !password || !name) {
       return NextResponse.json({ error: 'Thiếu thông tin bắt buộc (Tên đăng nhập, Mật khẩu, Họ tên)' }, { status: 400 });
@@ -48,6 +50,8 @@ export async function POST(req: NextRequest) {
         username: username.trim(),
         password: password.trim(),
         name: name.trim(),
+        position: position ? position.trim() : null,
+        birthDate: birthDate ? birthDate.trim() : null,
         role: role || 'WORKER',
         phone: phone ? phone.trim() : null,
       })

@@ -16,6 +16,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     };
 
     if (body.name !== undefined) updateData.name = body.name.trim();
+    if (body.position !== undefined) updateData.position = body.position ? body.position.trim() : null;
+    if (body.birthDate !== undefined) updateData.birthDate = body.birthDate ? body.birthDate.trim() : null;
     if (body.role !== undefined) updateData.role = body.role;
     if (body.phone !== undefined) updateData.phone = body.phone ? body.phone.trim() : null;
     if (body.active !== undefined) updateData.active = Boolean(body.active);

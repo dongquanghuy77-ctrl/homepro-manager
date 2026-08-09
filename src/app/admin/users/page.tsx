@@ -7,6 +7,8 @@ interface UserItem {
   id: number;
   username: string;
   name: string;
+  position?: string;
+  birthDate?: string;
   role: 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
   phone?: string;
   active: boolean;
@@ -33,6 +35,8 @@ export default function UserManagementPage() {
     username: '',
     password: '',
     name: '',
+    position: '',
+    birthDate: '',
     role: 'SUPERVISOR' as const,
     phone: '',
   });
@@ -73,7 +77,7 @@ export default function UserManagementPage() {
 
       setSuccess(`Đã tạo tài khoản thành công cho ${data.name} (${data.role})`);
       setShowAddModal(false);
-      setFormData({ username: '', password: '', name: '', role: 'SUPERVISOR', phone: '' });
+      setFormData({ username: '', password: '', name: '', position: '', birthDate: '', role: 'SUPERVISOR', phone: '' });
       loadUsers();
     } catch (err: any) {
       setError(err.message);
@@ -173,8 +177,9 @@ export default function UserManagementPage() {
                 <tr>
                   <th>Mã / Tên đăng nhập</th>
                   <th>Họ và tên</th>
-                  <th>Vai trò (Role)</th>
-                  <th>Số điện thoại</th>
+                  <th>Chức vụ thực tế</th>
+                  <th>Ngày sinh</th>
+                  <th>Vai trò hệ thống</th>
                   <th>Trạng thái</th>
                   <th style={{ textAlign: 'right' }}>Thao tác Admin</th>
                 </tr>
@@ -188,6 +193,10 @@ export default function UserManagementPage() {
                         {u.username}
                       </td>
                       <td style={{ fontWeight: 600 }}>{u.name}</td>
+                      <td>{u.position || '—'}</td>
+                      <td style={{ fontSize: 13, fontWeight: 600, color: '#F59E0B' }}>
+                        {u.birthDate ? `🎂 ${u.birthDate}` : '—'}
+                      </td>
                       <td>
                         <span
                           className="badge"
@@ -282,9 +291,30 @@ export default function UserManagementPage() {
                   className="form-input"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="vd: Nguyễn Văn Minh"
+                  placeholder="vd: NGUYỄN VĂN CƯỜNG"
                   required
                 />
+              </div>
+
+              <div className="grid-2 mb-4">
+                <div className="form-group">
+                  <label className="form-label">Chức vụ thực tế</label>
+                  <input
+                    className="form-input"
+                    value={formData.position}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    placeholder="vd: Kỹ thuật, Công nhân..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Ngày sinh (DD/MM/YYYY)</label>
+                  <input
+                    className="form-input"
+                    value={formData.birthDate}
+                    onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                    placeholder="vd: 20/04/1990"
+                  />
+                </div>
               </div>
 
               <div className="form-group mb-4">

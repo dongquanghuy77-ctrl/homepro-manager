@@ -10,6 +10,8 @@ export const users = pgTable('users', {
   username: text('username').notNull().unique(),
   password: text('password').notNull(),
   name: text('name').notNull(),
+  position: text('position'), // Kỹ thuật, Kỹ thuật xưởng, Công nhân...
+  birthDate: text('birth_date'), // DD/MM/YYYY
   role: text('role').notNull().default('WORKER'), // 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER'
   phone: text('phone'),
   active: boolean('active').notNull().default(true),

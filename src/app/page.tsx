@@ -7,6 +7,7 @@ import { TaskStatusBadge, TaskPriorityBadge } from '@/components/tasks/TaskBadge
 import { ProgressBar } from '@/components/ui/Progress';
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, Clock, Play, Calendar, TrendingUp } from 'lucide-react';
+import BirthdayAlert from '@/components/ui/BirthdayAlert';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -97,6 +98,9 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Birthday Notifications */}
+      <BirthdayAlert />
 
       {/* Overdue Alert */}
       {overdueTasks.length > 0 && (
