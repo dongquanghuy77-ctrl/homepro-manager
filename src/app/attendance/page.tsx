@@ -27,6 +27,14 @@ interface EmployeeOption {
   department: string | null;
 }
 
+interface CurrentUser {
+  id: number;
+  name: string;
+  role: string;
+  employeeCode: string | null;
+  department: string | null;
+}
+
 const DEPARTMENTS = ['Xưởng gỗ', 'Thi công', 'Thiết kế', 'Kế toán', 'Quản lý', 'Khác'] as const;
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
@@ -53,20 +61,34 @@ function fmt(dateStr: string | null): string {
   return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 }
 
-// ── AddAttendanceModal ────────────────────────────────────────────────────────
+// ── AddAttendanceModal ───────────────────────────────────────────────────────────────
 function AddAttendanceModal({
   employees,
+  currentUser,
   onClose,
   onSuccess,
 }: {
   employees: EmployeeOption[];
+  currentUser: CurrentUser | null;
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
 
+  // Phân quyền: ADMIN/MANAGER xếm mọi NV; WORKER/SUPERVISOR chỉ xếm chính mình
+  const isManager = currentUser?.role === 'ADMIN' || currentUser?.role === 'MANAGER';
+  const visibleEmployees: EmployeeOption[] = isManager
+    ? employees
+    : currentUser
+      ? [{ id: currentUser.id, name: currentUser.name,
+           employeeCode: currentUser.employeeCode, department: currentUser.department }]
+      : [];
+
   // Controlled state (needed for live validation + dependency logic)
-  const [selEmployee, setSelEmployee] = useState('');
+  // WORKER/SUPERVISOR: auto-select chính mình; ADMIN/MANAGER: để trống để tự chọn
+  const [selEmployee, setSelEmployee] = useState(
+    !isManager && currentUser ? String(currentUser.id) : ''
+  );
   const [selDate,     setSelDate]     = useState(today);
   const [selStatus,   setSelStatus]   = useState('PRESENT');
   const [checkIn,     setCheckIn]     = useState('');
@@ -194,16 +216,24 @@ function AddAttendanceModal({
             {/* ── Nhân viên — full width ───────────────────────────────────── */}
             <div className="form-group" style={{ margin: 0 }}>
               <label className="form-label">Nhân viên *</label>
-              <select className="form-select" value={selEmployee}
-                onChange={e => setSelEmployee(e.target.value)} required>
-                <option value="">-- Chọn nhân viên --</option>
-                {employees.map(emp => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.employeeCode ? `[${emp.employeeCode}] ` : ''}{emp.name}
-                    {emp.department ? ` — ${emp.department}` : ''}
-                  </option>
-                ))}
-              </select>
+              {/* Nếu WORKER/SUPERVISOR: chỉ hiện chính mình (cờ disabled) */}
+              {!isManager && currentUser ? (
+                <div className="form-input" style={{ cursor: 'not-allowed', opacity: 0.8 }}>
+                  {currentUser.employeeCode ? `[${currentUser.employeeCode}] ` : ''}
+                  {currentUser.name}{currentUser.department ? ` — ${currentUser.department}` : ''}
+                </div>
+              ) : (
+                <select className="form-select" value={selEmployee}
+                  onChange={e => setSelEmployee(e.target.value)} required>
+                  <option value="">-- Chọn nhân viên --</option>
+                  {visibleEmployees.map(emp => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.employeeCode ? `[${emp.employeeCode}] ` : ''}{emp.name}
+                      {emp.department ? ` — ${emp.department}` : ''}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* ── FIX-4: Cảnh báo trùng ngày (real-time) ───────────────────── */}
@@ -556,6 +586,7 @@ export default function AttendancePage() {
 
   const [records,   setRecords]   = useState<AttendanceRecord[]>([]);
   const [employees, setEmployees] = useState<EmployeeOption[]>([]);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [loading,   setLoading]   = useState(true);
   const [filterDate,       setFilterDate]       = useState(today);
   const [filterMonth,      setFilterMonth]      = useState('');
@@ -563,6 +594,14 @@ export default function AttendancePage() {
   const [filterDepartment, setFilterDepartment] = useState('');
   const [showAdd,       setShowAdd]       = useState(false);
   const [editRecord,    setEditRecord]    = useState<AttendanceRecord | null>(null);
+
+  // Lấy thông tin người dùng hiện tại (cho dropdown filter theo role)
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.ok ? r.json() : { user: null })
+      .then(data => setCurrentUser(data.user ?? null))
+      .catch(() => setCurrentUser(null));
+  }, []);
 
   // Load employee list for filter/modal
   useEffect(() => {
@@ -762,6 +801,7 @@ export default function AttendancePage() {
       {showAdd && (
         <AddAttendanceModal
           employees={employees}
+          currentUser={currentUser}
           onClose={() => setShowAdd(false)}
           onSuccess={loadRecords}
         />
