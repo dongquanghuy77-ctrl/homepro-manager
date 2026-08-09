@@ -345,8 +345,26 @@ function EditAttendanceModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [error,   setError]   = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error,     setError]     = useState('');
+  const [loading,   setLoading]   = useState(false);
+  const [location,  setLocation]  = useState<string | null>(record.location ?? null);
+  const [locStatus, setLocStatus] = useState<'idle'|'loading'|'ok'|'denied'>(
+    record.location ? 'ok' : 'idle'
+  );
+
+  const getLocation = () => {
+    if (!navigator.geolocation) { setLocStatus('denied'); return; }
+    setLocStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
+        setLocation(coords);
+        setLocStatus('ok');
+      },
+      () => setLocStatus('denied'),
+      { timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const toTimeInput = (iso: string | null) => {
     if (!iso) return '';
@@ -363,8 +381,9 @@ function EditAttendanceModal({
     const checkOutVal = (fd.get('checkOut') as string)?.trim();
 
     const payload: Record<string, string | null> = {
-      status: fd.get('status') as string,
-      note:   (fd.get('note') as string)?.trim() || null,
+      status:   fd.get('status') as string,
+      note:     (fd.get('note') as string)?.trim() || null,
+      location: location ?? null,
       // +07:00 suffix ensures server stores correct UTC equivalent of VN local time
       checkIn:  checkInVal  ? `${record.workDate}T${checkInVal}:00+07:00`  : null,
       checkOut: checkOutVal ? `${record.workDate}T${checkOutVal}:00+07:00` : null,
@@ -425,6 +444,30 @@ function EditAttendanceModal({
             <div className="form-group">
               <label className="form-label">Giờ ra (HH:MM)</label>
               <input type="time" name="checkOut" className="form-input" defaultValue={toTimeInput(record.checkOut)} />
+            </div>
+            {/* GPS location — full width */}
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Vị trí</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <button type="button" onClick={getLocation} disabled={locStatus === 'loading'}
+                  style={{ fontSize: 12, padding: '5px 10px', borderRadius: 6,
+                    border: '1px solid var(--color-border)', background: 'var(--color-surface-2)',
+                    color: 'var(--color-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  {locStatus === 'loading' ? '⏳ Đang lấy...' : '📍 Cập nhật vị trí'}
+                </button>
+                {locStatus === 'ok' && location && (
+                  <a href={`https://maps.google.com/?q=${location}`} target="_blank" rel="noreferrer"
+                    style={{ fontSize: 12, color: 'var(--color-success)' }}>
+                    ✅ {location}
+                  </a>
+                )}
+                {locStatus === 'denied' && (
+                  <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>⚠️ Không có quyền định vị</span>
+                )}
+                {locStatus === 'idle' && !location && (
+                  <span style={{ fontSize: 12, opacity: 0.5 }}>Chưa có vị trí</span>
+                )}
+              </div>
             </div>
           </div>
           {error && <div className="modal-body" style={{ paddingTop: 0 }}><div className="alert alert-danger">{error}</div></div>}
