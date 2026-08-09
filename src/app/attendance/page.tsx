@@ -76,11 +76,11 @@ function AddAttendanceModal({
   const [loading,     setLoading]     = useState(false);
   const [dupWarning,  setDupWarning]  = useState('');
   const [location,    setLocation]    = useState<string | null>(null);
-  const [locStatus,   setLocStatus]   = useState<'idle'|'loading'|'ok'|'denied'>('idle');
+  const [locStatus,   setLocStatus]   = useState<'idle'|'loading'|'ok'|'denied'|'error'>('idle');
 
-  // ── FIX-GPS: Lấy toạ độ GPS từ browser ───────────────────────────────────
+  // ── GPS: Lấy tọa độ (phân biệt lỗi theo GeolocationPositionError.code) ────
   const getLocation = () => {
-    if (!navigator.geolocation) { setLocStatus('denied'); return; }
+    if (!navigator.geolocation) { setLocStatus('error'); return; }
     setLocStatus('loading');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -88,7 +88,8 @@ function AddAttendanceModal({
         setLocation(coords);
         setLocStatus('ok');
       },
-      () => setLocStatus('denied'),
+      // code 1 = PERMISSION_DENIED, code 2 = UNAVAILABLE, code 3 = TIMEOUT
+      (err) => setLocStatus(err.code === 1 ? 'denied' : 'error'),
       { timeout: 10000, maximumAge: 0 }
     );
   };
@@ -296,21 +297,54 @@ function AddAttendanceModal({
             </div>
 
             {/* ── Vị trí GPS ────────────────────────────────────────────────── */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button type="button" onClick={getLocation} disabled={locStatus === 'loading'}
-                style={{ fontSize: 12, padding: '5px 10px', borderRadius: 6, border: '1px solid var(--color-border)',
-                  background: 'var(--color-surface-2)', color: 'var(--color-text)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 5 }}>
-                {locStatus === 'loading' ? '⏳ Đang lấy...' : '📍 Lấy vị trí'}
-              </button>
-              {locStatus === 'ok' && location && (
-                <a href={`https://maps.google.com/?q=${location}`} target="_blank" rel="noreferrer"
-                  style={{ fontSize: 12, color: 'var(--color-success)' }}>
-                  ✅ {location}
-                </a>
-              )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button type="button" onClick={getLocation} disabled={locStatus === 'loading'}
+                  style={{ fontSize: 12, padding: '5px 10px', borderRadius: 6,
+                    border: '1px solid var(--color-border)', background: 'var(--color-surface-2)',
+                    color: 'var(--color-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                  {locStatus === 'loading' ? '⏳ Đang lấy...' : '📍 Lấy vị trí'}
+                </button>
+                {locStatus === 'ok' && location && (
+                  <a href={`https://maps.google.com/?q=${location}`} target="_blank" rel="noreferrer"
+                    style={{ fontSize: 12, color: 'var(--color-success)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    ✅ {location}
+                  </a>
+                )}
+              </div>
+              {/* Trình duyệt đã chặn — hướng dẫn + nhập thủ công */}
               {locStatus === 'denied' && (
-                <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>⚠️ Không có quyền định vị</span>
+                <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                  borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ fontSize: 12, color: 'var(--color-danger)', fontWeight: 500 }}>
+                    ⚠️ Trình duyệt đã chặn quyền vị trí
+                  </div>
+                  <div style={{ fontSize: 11, opacity: 0.75, lineHeight: 1.5 }}>
+                    Bật lại: nhấn icon <strong>🔒</strong> trên thanh địa chỉ trình duyệt
+                    → <strong>Quyền trang web</strong> → <strong>Vị trí</strong> → <strong>Cho phép</strong> → tải lại trang.
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, opacity: 0.65, whiteSpace: 'nowrap' }}>Hoặc nhập tay:</span>
+                    <input type="text" className="form-input" placeholder="10.776111,106.700981"
+                      value={location ?? ''} onChange={e => setLocation(e.target.value || null)}
+                      style={{ flex: 1, fontSize: 12, padding: '4px 8px', height: 32 }} />
+                  </div>
+                </div>
+              )}
+              {/* GPS không khả dụng — nhập thủ công */}
+              {locStatus === 'error' && (
+                <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                  borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ fontSize: 12, color: 'var(--color-danger)', fontWeight: 500 }}>
+                    ⚠️ Không lấy được vị trí (GPS không khả dụng hoặc hết giờ chờ)
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, opacity: 0.65, whiteSpace: 'nowrap' }}>Nhập tay:</span>
+                    <input type="text" className="form-input" placeholder="10.776111,106.700981"
+                      value={location ?? ''} onChange={e => setLocation(e.target.value || null)}
+                      style={{ flex: 1, fontSize: 12, padding: '4px 8px', height: 32 }} />
+                  </div>
+                </div>
               )}
             </div>
 
@@ -348,12 +382,12 @@ function EditAttendanceModal({
   const [error,     setError]     = useState('');
   const [loading,   setLoading]   = useState(false);
   const [location,  setLocation]  = useState<string | null>(record.location ?? null);
-  const [locStatus, setLocStatus] = useState<'idle'|'loading'|'ok'|'denied'>(
+  const [locStatus, setLocStatus] = useState<'idle'|'loading'|'ok'|'denied'|'error'>(
     record.location ? 'ok' : 'idle'
   );
 
   const getLocation = () => {
-    if (!navigator.geolocation) { setLocStatus('denied'); return; }
+    if (!navigator.geolocation) { setLocStatus('error'); return; }
     setLocStatus('loading');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -361,7 +395,7 @@ function EditAttendanceModal({
         setLocation(coords);
         setLocStatus('ok');
       },
-      () => setLocStatus('denied'),
+      (err) => setLocStatus(err.code === 1 ? 'denied' : 'error'),
       { timeout: 10000, maximumAge: 0 }
     );
   };
@@ -448,24 +482,55 @@ function EditAttendanceModal({
             {/* GPS location — full width */}
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Vị trí</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <button type="button" onClick={getLocation} disabled={locStatus === 'loading'}
-                  style={{ fontSize: 12, padding: '5px 10px', borderRadius: 6,
-                    border: '1px solid var(--color-border)', background: 'var(--color-surface-2)',
-                    color: 'var(--color-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                  {locStatus === 'loading' ? '⏳ Đang lấy...' : '📍 Cập nhật vị trí'}
-                </button>
-                {locStatus === 'ok' && location && (
-                  <a href={`https://maps.google.com/?q=${location}`} target="_blank" rel="noreferrer"
-                    style={{ fontSize: 12, color: 'var(--color-success)' }}>
-                    ✅ {location}
-                  </a>
-                )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button type="button" onClick={getLocation} disabled={locStatus === 'loading'}
+                    style={{ fontSize: 12, padding: '5px 10px', borderRadius: 6,
+                      border: '1px solid var(--color-border)', background: 'var(--color-surface-2)',
+                      color: 'var(--color-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                    {locStatus === 'loading' ? '⏳ Đang lấy...' : '📍 Cập nhật vị trí'}
+                  </button>
+                  {locStatus === 'ok' && location && (
+                    <a href={`https://maps.google.com/?q=${location}`} target="_blank" rel="noreferrer"
+                      style={{ fontSize: 12, color: 'var(--color-success)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      ✅ {location}
+                    </a>
+                  )}
+                  {locStatus === 'idle' && !location && (
+                    <span style={{ fontSize: 12, opacity: 0.5 }}>Chưa có vị trí</span>
+                  )}
+                </div>
                 {locStatus === 'denied' && (
-                  <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>⚠️ Không có quyền định vị</span>
+                  <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                    borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ fontSize: 12, color: 'var(--color-danger)', fontWeight: 500 }}>
+                      ⚠️ Trình duyệt đã chặn quyền vị trí
+                    </div>
+                    <div style={{ fontSize: 11, opacity: 0.75, lineHeight: 1.5 }}>
+                      Bật lại: nhấn icon <strong>🔒</strong> trên thanh địa chỉ
+                      → <strong>Quyền trang web</strong> → <strong>Vị trí</strong> → <strong>Cho phép</strong> → tải lại trang.
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 11, opacity: 0.65, whiteSpace: 'nowrap' }}>Hoặc nhập tay:</span>
+                      <input type="text" className="form-input" placeholder="10.776111,106.700981"
+                        value={location ?? ''} onChange={e => setLocation(e.target.value || null)}
+                        style={{ flex: 1, fontSize: 12, padding: '4px 8px', height: 32 }} />
+                    </div>
+                  </div>
                 )}
-                {locStatus === 'idle' && !location && (
-                  <span style={{ fontSize: 12, opacity: 0.5 }}>Chưa có vị trí</span>
+                {locStatus === 'error' && (
+                  <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                    borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ fontSize: 12, color: 'var(--color-danger)', fontWeight: 500 }}>
+                      ⚠️ Không lấy được vị trí
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 11, opacity: 0.65, whiteSpace: 'nowrap' }}>Nhập tay:</span>
+                      <input type="text" className="form-input" placeholder="10.776111,106.700981"
+                        value={location ?? ''} onChange={e => setLocation(e.target.value || null)}
+                        style={{ flex: 1, fontSize: 12, padding: '4px 8px', height: 32 }} />
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
