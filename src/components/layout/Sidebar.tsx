@@ -1,19 +1,26 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings,
-  Command, Menu, X, MoreHorizontal,
+  Command, Menu, X, MoreHorizontal, LogOut, UserCheck,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
 
 const iconMap = {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
-  ShieldAlert, BookOpen, Package, DollarSign, Users, Settings,
+  ShieldAlert, BookOpen, Package, DollarSign, Users, Settings, UserCheck,
 };
+
+interface UserState {
+  id: number;
+  username: string;
+  name: string;
+  role: 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
+}
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', href: '/', sprint: 1 },
@@ -23,6 +30,7 @@ const NAV_ITEMS = [
   { id: 'qc', label: 'QC / Lỗi', icon: 'ShieldAlert', href: '/qc', sprint: 3 },
   { id: 'logs', label: 'Nhật ký', icon: 'BookOpen', href: '/logs', sprint: 3 },
   { id: 'materials', label: 'Vật tư', icon: 'Package', href: '/vat-tu', sprint: 4 },
+  { id: 'users', label: 'Phân quyền', icon: 'UserCheck', href: '/admin/users', sprint: 1, adminOnly: true },
   { id: 'costs', label: 'Chi phí', icon: 'DollarSign', href: '/chi-phi', sprint: 5 },
   { id: 'customers', label: 'Khách hàng', icon: 'Users', href: '/khach-hang', sprint: 5 },
   { id: 'settings', label: 'Cài đặt', icon: 'Settings', href: '/settings', sprint: 5 },
@@ -30,10 +38,20 @@ const NAV_ITEMS = [
 
 const ACTIVE_SPRINT = 4;
 
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: 'Quản trị viên',
+  MANAGER: 'Quản lý xưởng',
+  SUPERVISOR: 'Giám sát công trình',
+  WORKER: 'Công nhân thi công',
+  VIEWER: 'Ban Giám Đốc',
+};
+
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserState | null>(null);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -46,17 +64,40 @@ export default function Sidebar() {
     return () => document.removeEventListener('keydown', handleKey);
   }, []);
 
+  // Fetch current logged in user profile
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setCurrentUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, [pathname]);
+
   // Close mobile drawer on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+    router.refresh();
+  };
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   };
 
-  const activeItems = NAV_ITEMS.filter((item) => item.sprint <= ACTIVE_SPRINT);
+  const activeItems = NAV_ITEMS.filter((item) => {
+    if (item.sprint > ACTIVE_SPRINT) return false;
+    if (item.adminOnly && currentUser?.role !== 'ADMIN') return false;
+    return true;
+  });
+
   const lockedItems = NAV_ITEMS.filter((item) => item.sprint > ACTIVE_SPRINT);
 
   return (
@@ -170,12 +211,36 @@ export default function Sidebar() {
 
         {/* Footer */}
         <div className="sidebar-footer">
-          <div className="sidebar-footer-info">
-            <div className="sidebar-avatar">H</div>
-            <div>
-              <div className="sidebar-user-name">Huy</div>
-              <div className="sidebar-user-role">Project Manager</div>
+          <div className="sidebar-footer-info" style={{ width: '100%', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="sidebar-avatar">
+                {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'H'}
+              </div>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 130 }}>
+                <div className="sidebar-user-name" style={{ fontSize: 13, fontWeight: 700 }}>
+                  {currentUser?.name || 'Huy'}
+                </div>
+                <div className="sidebar-user-role" style={{ fontSize: 11, color: 'var(--color-primary)' }}>
+                  {currentUser ? (ROLE_LABELS[currentUser.role] || currentUser.role) : 'Project Manager'}
+                </div>
+              </div>
             </div>
+            <button
+              onClick={handleLogout}
+              title="Đăng xuất"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--color-text-muted)',
+                cursor: 'pointer',
+                padding: 6,
+                borderRadius: 6,
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
       </aside>

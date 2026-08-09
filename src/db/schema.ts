@@ -1,4 +1,22 @@
-import { pgTable, serial, text, integer, real, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, real, timestamp, boolean } from 'drizzle-orm/pg-core';
+
+
+
+// ============================================================
+// USERS
+// ============================================================
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  username: text('username').notNull().unique(),
+  password: text('password').notNull(),
+  name: text('name').notNull(),
+  role: text('role').notNull().default('WORKER'), // 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER'
+  phone: text('phone'),
+  active: boolean('active').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 
 // ============================================================
 // PROJECTS
@@ -137,6 +155,10 @@ export type Material = typeof materials.$inferSelect;
 export type NewMaterial = typeof materials.$inferInsert;
 export type BoqItem = typeof boqItems.$inferSelect;
 export type NewBoqItem = typeof boqItems.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
 
 export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
 export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'OVERDUE';

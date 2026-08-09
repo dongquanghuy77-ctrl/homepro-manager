@@ -1,0 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/db';
+import { users } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  try {
+    const list = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        role: users.role,
+        phone: users.phone,
+        active: users.active,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.id));
+
+    return NextResponse.json(list);
+  } catch (err) {
+    console.error('GET /api/users error:', err);
+    return NextResponse.json({ error: 'Không thể tải danh sách tài khoản' }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { username, password, name, role, phone } = body;
+
+    if (!username || !password || !name) {
+      return NextResponse.json({ error: 'Thiếu thông tin bắt buộc (Tên đăng nhập, Mật khẩu, Họ tên)' }, { status: 400 });
+    }
+
+    // Check duplicate username
+    const existing = await db.select().from(users).where(eq(users.username, username.trim()));
+    if (existing.length > 0) {
+      return NextResponse.json({ error: 'Tên đăng nhập đã tồn tại trong hệ thống' }, { status: 400 });
+    }
+
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        username: username.trim(),
+        password: password.trim(),
+        name: name.trim(),
+        role: role || 'WORKER',
+        phone: phone ? phone.trim() : null,
+      })
+      .returning();
+
+    return NextResponse.json(newUser, { status: 201 });
+  } catch (err) {
+    console.error('POST /api/users error:', err);
+    return NextResponse.json({ error: 'Không thể tạo tài khoản' }, { status: 500 });
+  }
+}
