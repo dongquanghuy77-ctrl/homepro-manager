@@ -7,24 +7,28 @@ export const revalidate = 0;
 async function getHRDashboardData(searchParams: { [key: string]: string | string[] | undefined }) {
   const cookieStore = cookies();
   const sessionCookie = cookieStore.get('homepro_session')?.value;
-  
+
+  const defaultData = {
+    stats: { total: 0, present: 0, late: 0, absent: 0, noRecord: 0, onLeave: 0 },
+    pendingLeave: 0,
+    pendingOvertime: 0,
+  };
+
   const query = new URLSearchParams();
-  if (searchParams.date) query.append('date', searchParams.date as string);
+  if (searchParams.date)       query.append('date',       searchParams.date as string);
   if (searchParams.department) query.append('department', searchParams.department as string);
-  
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/hr/dashboard?${query.toString()}`, { 
-    headers: { Cookie: `homepro_session=${sessionCookie}` }, 
-    cache: 'no-store' 
-  });
-  
-  if (!res.ok) {
-    return {
-      stats: { total: 0, present: 0, late: 0, absent: 0, noRecord: 0, onLeave: 0 },
-      pendingLeave: 0,
-      pendingOvertime: 0
-    };
+
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/hr/dashboard?${query.toString()}`,
+      { headers: { Cookie: `homepro_session=${sessionCookie}` }, cache: 'no-store' }
+    );
+    if (!res.ok) return defaultData;
+    return res.json();
+  } catch {
+    // Graceful fallback — e.g. when NEXT_PUBLIC_APP_URL is not set (Vercel)
+    return defaultData;
   }
-  return res.json();
 }
 
 export default async function HRDashboardPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
