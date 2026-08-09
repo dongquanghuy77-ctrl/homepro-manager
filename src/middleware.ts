@@ -4,12 +4,14 @@ import { getSessionFromRequest } from '@/lib/session';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow static files, api auth routes, and login page
+  // Allow static files, api auth routes, login page, and public demo page
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/api/demo') ||
     pathname.startsWith('/favicon.ico') ||
-    pathname === '/login'
+    pathname === '/login' ||
+    pathname === '/demo'
   ) {
     return NextResponse.next();
   }
