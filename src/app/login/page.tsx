@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogIn, Shield, User, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { LogIn, Shield, User, Lock, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
@@ -153,13 +154,13 @@ export default function LoginPage() {
             <div style={{ position: 'relative' }}>
               <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#64748B' }} />
               <input
-                type="password"
+                type={showPass ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Nhập mật khẩu"
                 style={{
                   width: '100%',
-                  padding: '10px 12px 10px 38px',
+                  padding: '10px 40px 10px 38px',
                   background: '#0F172A',
                   border: '1px solid #334155',
                   borderRadius: 10,
@@ -168,6 +169,25 @@ export default function LoginPage() {
                   outline: 'none',
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: 11,
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#64748B',
+                  cursor: 'pointer',
+                  padding: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title={showPass ? 'Ẩn mật khẩu' : 'Xem mật khẩu'}
+              >
+                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
