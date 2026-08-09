@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Pencil, Save, X, Trash2 } from 'lucide-react';
+import { Pencil, Save, X, Trash2, FileSpreadsheet } from 'lucide-react';
 import type { Project } from '@/db/schema';
 import { formatDate, formatCurrency, daysUntilDeadline, toDateInputValue } from '@/lib/utils';
 import { PROJECT_STATUS } from '@/lib/constants';
+import ProjectReportModal from '@/components/projects/ProjectReportModal';
 
 interface ProjectProfileClientProps {
   project: Project;
@@ -24,6 +25,7 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   const [form, setForm] = useState({
     code: project.code,
@@ -118,18 +120,25 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
           ) : (
             <>
               <button
+                className="btn btn-primary"
+                onClick={() => setReportModalOpen(true)}
+                style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', borderColor: '#10B981' }}
+              >
+                <FileSpreadsheet size={15} /> Báo cáo 360° (Xuất/In)
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setEditing(true)}
+                id="edit-project-btn"
+              >
+                <Pencil size={14} /> Chỉnh sửa
+              </button>
+              <button
                 className="btn btn-danger btn-sm"
                 onClick={handleDelete}
                 id="delete-project-btn"
               >
                 <Trash2 size={14} /> Xóa
-              </button>
-              <button
-                id="edit-project-btn"
-                className="btn btn-secondary"
-                onClick={() => setEditing(true)}
-              >
-                <Pencil size={14} /> Chỉnh sửa
               </button>
             </>
           )}
@@ -312,6 +321,12 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
           </div>
         </div>
       </div>
+
+      <ProjectReportModal
+        projectId={project.id}
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+      />
     </>
   );
 }
