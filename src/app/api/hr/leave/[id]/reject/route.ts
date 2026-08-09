@@ -7,38 +7,54 @@ import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
 import { writeHrAuditLog } from '@/lib/hr';
 import { eq } from 'drizzle-orm';
 
+// ── PATCH: Từ chối đơn (ADMIN hoặc MANAGER, chỉ khi PENDING) ─────────────────
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
+  if (error) return error;
+
+  const id = Number(params.id);
+  if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
+
   try {
-    const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
-    if (error || !session) return error;
+    const body = await req.json().catch(() => ({})) as { reviewNote?: string };
 
-    const id = Number(params.id);
-    if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
-    const body = await req.json().catch(() => ({}));
+    // Kiểm tra đơn tồn tại và đang PENDING
+    const [request] = await db.select().from(leaveRequests).where(eq(leaveRequests.id, id));
+    if (!request) return NextResponse.json({ error: 'Không tìm thấy đơn nghỉ phép' }, { status: 404 });
+    if (request.status !== 'PENDING') {
+      return NextResponse.json(
+        { error: `Chỉ có thể từ chối đơn ở trạng thái PENDING. Đơn này đang: ${request.status}` },
+        { status: 400 }
+      );
+    }
 
+    const now = new Date();
     const [updated] = await db
       .update(leaveRequests)
-      .set({ 
-        status: 'REJECTED', 
-        reviewedBy: session.id, 
-        reviewedAt: new Date(),
-        reviewNote: body.reviewNote || null,
-        updatedAt: new Date()
+      .set({
+        status:      'REJECTED',
+        reviewedBy:  session.id,
+        reviewedAt:  now,
+        reviewNote:  body.reviewNote?.trim() || null,
+        updatedAt:   now,
       })
       .where(eq(leaveRequests.id, id))
       .returning();
 
-    if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-
     await writeHrAuditLog({
-      action: 'LEAVE_REJECTED',
-      entityType: 'LEAVE',
-      entityId: id,
-      actorId: session.id
+      action:     'LEAVE_REJECTED',
+      entityType: 'leave',
+      entityId:   id,
+      actorId:    session.id,
+      actorName:  session.name,
+      oldValue:   { status: 'PENDING' },
+      newValue:   { status: 'REJECTED', reviewNote: body.reviewNote ?? null },
+      ipAddress:  req.headers.get('x-forwarded-for') || 'unknown',
     });
 
     return NextResponse.json(updated);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

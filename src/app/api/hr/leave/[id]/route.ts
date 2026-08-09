@@ -7,60 +7,72 @@ import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { writeHrAuditLog } from '@/lib/hr';
 
+// ── GET: Chi tiết một đơn nghỉ ────────────────────────────────────────────────
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const { session, error } = await requireAuth(req, ALL_ROLES);
+  if (error) return error;
+
+  const id = Number(params.id);
+  if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
+
   try {
-    const { session, error } = await requireAuth(req, ALL_ROLES);
-    if (error || !session) return error;
-
-    const id = Number(params.id);
-    if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
-
-    const [request] = await db
+    const [row] = await db
       .select({
-        leave: leaveRequests,
-        user: { name: users.name }
+        id:          leaveRequests.id,
+        employeeId:  leaveRequests.employeeId,
+        leaveType:   leaveRequests.leaveType,
+        startDate:   leaveRequests.startDate,
+        endDate:     leaveRequests.endDate,
+        totalDays:   leaveRequests.totalDays,
+        reason:      leaveRequests.reason,
+        status:      leaveRequests.status,
+        reviewedBy:  leaveRequests.reviewedBy,
+        reviewedAt:  leaveRequests.reviewedAt,
+        reviewNote:  leaveRequests.reviewNote,
+        createdAt:   leaveRequests.createdAt,
+        employeeName: users.name,
+        department:   users.department,
       })
       .from(leaveRequests)
       .leftJoin(users, eq(leaveRequests.employeeId, users.id))
       .where(eq(leaveRequests.id, id));
 
-    if (!request) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!row) return NextResponse.json({ error: 'Không tìm thấy đơn nghỉ phép' }, { status: 404 });
 
-    if (session.role !== 'ADMIN' && session.role !== 'MANAGER' && request.leave.employeeId !== session.id) {
+    // Chỉ ADMIN/MANAGER hoặc chính chủ đơn mới được xem
+    if (session.role !== 'ADMIN' && session.role !== 'MANAGER' && row.employeeId !== session.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    return NextResponse.json(request);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(row);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
+// ── PATCH: Hủy đơn (chỉ chủ đơn, chỉ khi PENDING) ───────────────────────────
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  return handleCancel(req, params.id);
-}
+  const { session, error } = await requireAuth(req, ALL_ROLES);
+  if (error) return error;
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  return handleCancel(req, params.id);
-}
+  const id = Number(params.id);
+  if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
-async function handleCancel(req: NextRequest, paramsId: string) {
   try {
-    const { session, error } = await requireAuth(req, ALL_ROLES);
-    if (error || !session) return error;
-
-    const id = Number(paramsId);
-    if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
-
     const [request] = await db.select().from(leaveRequests).where(eq(leaveRequests.id, id));
-    if (!request) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!request) return NextResponse.json({ error: 'Không tìm thấy đơn nghỉ phép' }, { status: 404 });
 
+    // Chỉ chủ đơn mới được hủy (ADMIN không thể hủy thay)
     if (request.employeeId !== session.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json({ error: 'Bạn không có quyền hủy đơn này' }, { status: 403 });
     }
-
+    // Chỉ hủy được khi còn PENDING
     if (request.status !== 'PENDING') {
-      return NextResponse.json({ error: 'Cannot cancel processed request' }, { status: 400 });
+      return NextResponse.json(
+        { error: `Không thể hủy đơn đang ở trạng thái "${request.status}"` },
+        { status: 400 }
+      );
     }
 
     const [updated] = await db
@@ -68,15 +80,21 @@ async function handleCancel(req: NextRequest, paramsId: string) {
       .set({ status: 'CANCELLED', updatedAt: new Date() })
       .where(eq(leaveRequests.id, id))
       .returning();
-    
+
     await writeHrAuditLog({
-      action: 'LEAVE_CANCELLED',
-      entityType: 'LEAVE',
-      entityId: id,
-      actorId: session.id
+      action:     'LEAVE_CANCELLED',
+      entityType: 'leave',
+      entityId:   id,
+      actorId:    session.id,
+      actorName:  session.name,
+      oldValue:   { status: 'PENDING' },
+      newValue:   { status: 'CANCELLED' },
+      ipAddress:  req.headers.get('x-forwarded-for') || 'unknown',
     });
+
     return NextResponse.json(updated);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
