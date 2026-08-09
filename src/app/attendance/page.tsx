@@ -61,6 +61,53 @@ function fmt(dateStr: string | null): string {
   return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 }
 
+// ── TimePicker24 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// 2 select giờ (00–23) + phút (00–59) — luôn hiển thị 24h, không phụ thuộc locale trình duyệt
+function TimePicker24({
+  value, onChange, disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  const [hh, mm] = value ? value.split(':') : ['', ''];
+
+  const update = (newH: string, newM: string) => {
+    if (!newH && !newM) { onChange(''); return; }
+    onChange(`${(newH || '00').padStart(2, '0')}:${(newM || '00').padStart(2, '0')}`);
+  };
+
+  const selStyle: React.CSSProperties = {
+    background: 'none', border: 'none', color: 'inherit',
+    fontSize: 15, fontWeight: 500, padding: '0 4px',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    outline: 'none', flex: 1, textAlign: 'center',
+  };
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 2,
+      background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
+      borderRadius: 8, padding: '0 10px', height: 40,
+      opacity: disabled ? 0.5 : 1,
+    }}>
+      <select value={hh} disabled={disabled} onChange={e => update(e.target.value, mm)} style={selStyle}>
+        <option value="">––</option>
+        {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
+          <option key={h} value={h}>{h}</option>
+        ))}
+      </select>
+      <span style={{ fontWeight: 700, color: 'var(--color-text-muted)', userSelect: 'none' }}>:</span>
+      <select value={mm} disabled={disabled} onChange={e => update(hh, e.target.value)} style={selStyle}>
+        <option value="">––</option>
+        {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => (
+          <option key={m} value={m}>{m}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 // ── AddAttendanceModal ───────────────────────────────────────────────────────────────
 function AddAttendanceModal({
   employees,
@@ -301,8 +348,7 @@ function AddAttendanceModal({
                       ⏱ Hiện tại
                     </button>
                   </div>
-                  <input type="time" className="form-input" value={checkIn}
-                    onChange={e => setCheckIn(e.target.value)} />
+                  <TimePicker24 value={checkIn} onChange={setCheckIn} />
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
@@ -313,8 +359,7 @@ function AddAttendanceModal({
                       ⏱ Hiện tại
                     </button>
                   </div>
-                  <input type="time" className="form-input" value={checkOut}
-                    onChange={e => setCheckOut(e.target.value)} />
+                  <TimePicker24 value={checkOut} onChange={setCheckOut} />
                 </div>
               </div>
             )}
@@ -440,12 +485,20 @@ function EditAttendanceModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [error,     setError]     = useState('');
-  const [loading,   setLoading]   = useState(false);
-  const [location,  setLocation]  = useState<string | null>(record.location ?? null);
-  const [locStatus, setLocStatus] = useState<'idle'|'loading'|'ok'|'denied'|'error'>(
+  const [error,       setError]       = useState('');
+  const [loading,     setLoading]     = useState(false);
+  const [location,    setLocation]    = useState<string | null>(record.location ?? null);
+  const [locStatus,   setLocStatus]   = useState<'idle'|'loading'|'ok'|'denied'|'error'>(
     record.location ? 'ok' : 'idle'
   );
+  // Controlled time state (thông qua TimePicker24 — 24h format)
+  const toHHmm = (iso: string | null) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  };
+  const [editCheckIn,  setEditCheckIn]  = useState(toHHmm(record.checkIn));
+  const [editCheckOut, setEditCheckOut] = useState(toHHmm(record.checkOut));
 
   const getLocation = () => {
     if (!navigator.geolocation) { setLocStatus('error'); return; }
@@ -472,8 +525,8 @@ function EditAttendanceModal({
     setError('');
     setLoading(true);
     const fd = new FormData(e.currentTarget);
-    const checkInVal  = (fd.get('checkIn')  as string)?.trim();
-    const checkOutVal = (fd.get('checkOut') as string)?.trim();
+    const checkInVal  = editCheckIn.trim();
+    const checkOutVal = editCheckOut.trim();
 
     const payload: Record<string, string | null> = {
       status:   fd.get('status') as string,
@@ -533,12 +586,12 @@ function EditAttendanceModal({
               <input type="text" name="note" className="form-input" defaultValue={record.note ?? ''} />
             </div>
             <div className="form-group">
-              <label className="form-label">Giờ vào (HH:MM)</label>
-              <input type="time" name="checkIn" className="form-input" defaultValue={toTimeInput(record.checkIn)} />
+              <label className="form-label">Giờ vào</label>
+              <TimePicker24 value={editCheckIn} onChange={setEditCheckIn} />
             </div>
             <div className="form-group">
-              <label className="form-label">Giờ ra (HH:MM)</label>
-              <input type="time" name="checkOut" className="form-input" defaultValue={toTimeInput(record.checkOut)} />
+              <label className="form-label">Giờ ra</label>
+              <TimePicker24 value={editCheckOut} onChange={setEditCheckOut} />
             </div>
             {/* GPS location — full width */}
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
