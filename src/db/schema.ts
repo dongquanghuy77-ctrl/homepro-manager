@@ -10,11 +10,20 @@ export const users = pgTable('users', {
   username: text('username').notNull().unique(),
   password: text('password').notNull(),
   name: text('name').notNull(),
-  position: text('position'), // Kỹ thuật, Kỹ thuật xưởng, Công nhân...
-  birthDate: text('birth_date'), // DD/MM/YYYY
-  role: text('role').notNull().default('WORKER'), // 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER'
+  position: text('position'),
+  birthDate: text('birth_date'),
+  role: text('role').notNull().default('WORKER'),
   phone: text('phone'),
   active: boolean('active').notNull().default(true),
+  // ── HR Module 01 fields ──────────────────────────────────────
+  employeeCode: text('employee_code').unique(),          // NV001, NV002...
+  department: text('department'),                        // Xưởng gỗ | Thi công | Thiết kế | Kế toán | Quản lý
+  employmentType: text('employment_type').default('FULL_TIME'), // FULL_TIME | PART_TIME | CONTRACT
+  joinDate: text('join_date'),                           // DD/MM/YYYY
+  managerId: integer('manager_id'),                      // FK to users.id (self-referential)
+  employeeStatus: text('employee_status').default('ACTIVE'), // ACTIVE | INACTIVE | ON_LEAVE
+  note: text('note'),
+  // ─────────────────────────────────────────────────────────────
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -182,6 +191,81 @@ export const settings = pgTable('settings', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+
+// ============================================================
+// HR MODULE 01 – ATTENDANCE (CHẤM CÔNG)
+// ============================================================
+export const attendance = pgTable('attendance', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  workDate: text('work_date').notNull(),          // YYYY-MM-DD
+  checkIn: timestamp('check_in'),                 // Server-generated timestamp
+  checkOut: timestamp('check_out'),               // Server-generated timestamp
+  status: text('status').notNull().default('NOT_CHECKED'), // PRESENT | ABSENT | LATE | HALF_DAY | ON_LEAVE | NOT_CHECKED
+  lateMinutes: integer('late_minutes').default(0),
+  earlyLeaveMinutes: integer('early_leave_minutes').default(0),
+  totalHours: real('total_hours').default(0),
+  note: text('note'),
+  correctedBy: integer('corrected_by').references(() => users.id),
+  correctedAt: timestamp('corrected_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
+// HR MODULE 01 – LEAVE REQUESTS (ĐƠN XIN NGHỈ)
+// ============================================================
+export const leaveRequests = pgTable('leave_requests', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  leaveType: text('leave_type').notNull().default('ANNUAL'), // ANNUAL | SICK | PERSONAL | UNPAID | OTHER
+  startDate: text('start_date').notNull(),        // YYYY-MM-DD
+  endDate: text('end_date').notNull(),            // YYYY-MM-DD
+  totalDays: real('total_days').notNull().default(1),
+  reason: text('reason'),
+  status: text('status').notNull().default('PENDING'), // PENDING | APPROVED | REJECTED | CANCELLED
+  reviewedBy: integer('reviewed_by').references(() => users.id),
+  reviewedAt: timestamp('reviewed_at'),
+  reviewNote: text('review_note'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
+// HR MODULE 01 – OVERTIME REQUESTS (TĂNG CA)
+// ============================================================
+export const overtimeRequests = pgTable('overtime_requests', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  workDate: text('work_date').notNull(),          // YYYY-MM-DD
+  startTime: text('start_time').notNull(),        // HH:MM
+  endTime: text('end_time').notNull(),            // HH:MM
+  totalHours: real('total_hours').notNull().default(0),
+  reason: text('reason'),
+  projectId: integer('project_id').references(() => projects.id, { onDelete: 'set null' }),
+  status: text('status').notNull().default('PENDING'), // PENDING | APPROVED | REJECTED | CANCELLED
+  approvedBy: integer('approved_by').references(() => users.id),
+  approvedAt: timestamp('approved_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
+// HR MODULE 01 – AUDIT LOGS (NHẬT KÝ THAO TÁC)
+// ============================================================
+export const hrAuditLogs = pgTable('hr_audit_logs', {
+  id: serial('id').primaryKey(),
+  action: text('action').notNull(),               // EMPLOYEE_CREATED | ATTENDANCE_CORRECTED | LEAVE_APPROVED ...
+  entityType: text('entity_type').notNull(),      // employee | attendance | leave | overtime
+  entityId: integer('entity_id'),
+  actorId: integer('actor_id').references(() => users.id),
+  actorName: text('actor_name'),
+  oldValue: text('old_value'),                    // JSON string
+  newValue: text('new_value'),                    // JSON string
+  ipAddress: text('ip_address'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // ============================================================
 // TYPE EXPORTS
 // ============================================================
@@ -205,12 +289,23 @@ export type Customer = typeof customers.$inferSelect;
 export type NewCustomer = typeof customers.$inferInsert;
 export type Setting = typeof settings.$inferSelect;
 export type NewSetting = typeof settings.$inferInsert;
+export type Attendance = typeof attendance.$inferSelect;
+export type NewAttendance = typeof attendance.$inferInsert;
+export type LeaveRequest = typeof leaveRequests.$inferSelect;
+export type NewLeaveRequest = typeof leaveRequests.$inferInsert;
+export type OvertimeRequest = typeof overtimeRequests.$inferSelect;
+export type NewOvertimeRequest = typeof overtimeRequests.$inferInsert;
+export type HrAuditLog = typeof hrAuditLogs.$inferSelect;
 
 export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
-
 export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
 export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'OVERDUE';
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type QcSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type QcStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
-
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'HALF_DAY' | 'ON_LEAVE' | 'NOT_CHECKED';
+export type LeaveType = 'ANNUAL' | 'SICK' | 'PERSONAL' | 'UNPAID' | 'OTHER';
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+export type EmploymentType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACT';
+export type EmployeeStatus = 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE';
+export type Department = 'Xưởng gỗ' | 'Thi công' | 'Thiết kế' | 'Kế toán' | 'Quản lý' | 'Khác';

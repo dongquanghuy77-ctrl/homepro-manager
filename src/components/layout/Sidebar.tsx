@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings,
   Command, Menu, X, MoreHorizontal, LogOut, UserCheck, Key,
+  Clock, CalendarDays, UserCog, FileBarChart2, Timer,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
@@ -14,6 +15,7 @@ import ChangePasswordModal from '@/components/auth/ChangePasswordModal';
 const iconMap = {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings, UserCheck,
+  Clock, CalendarDays, UserCog, FileBarChart2, Timer,
 };
 
 interface UserState {
@@ -35,9 +37,16 @@ const NAV_ITEMS = [
   { id: 'costs', label: 'Chi phí', icon: 'DollarSign', href: '/chi-phi', sprint: 5 },
   { id: 'customers', label: 'Khách hàng', icon: 'Users', href: '/khach-hang', sprint: 5 },
   { id: 'settings', label: 'Cài đặt', icon: 'Settings', href: '/settings', sprint: 5 },
+  // ── HR Module 01 ───────────────────────────────────────────
+  { id: 'hr', label: 'Nhân sự', icon: 'Clock', href: '/hr', sprint: 6, managerOnly: true },
+  { id: 'employees', label: 'Danh sách NV', icon: 'UserCog', href: '/employees', sprint: 6, managerOnly: true },
+  { id: 'attendance', label: 'Chấm công', icon: 'CalendarDays', href: '/attendance', sprint: 6, managerOnly: true },
+  { id: 'leave', label: 'Nghỉ phép', icon: 'CalendarDays', href: '/leave', sprint: 6 },
+  { id: 'overtime', label: 'Tăng ca', icon: 'Timer', href: '/overtime', sprint: 6 },
+  { id: 'hr-reports', label: 'Báo cáo NS', icon: 'FileBarChart2', href: '/hr/reports', sprint: 6, managerOnly: true },
 ];
 
-const ACTIVE_SPRINT = 5;
+const ACTIVE_SPRINT = 6;
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Quản trị viên',
@@ -97,6 +106,7 @@ export default function Sidebar() {
   const activeItems = NAV_ITEMS.filter((item) => {
     if (item.sprint > ACTIVE_SPRINT) return false;
     if (item.adminOnly && currentUser?.role !== 'ADMIN') return false;
+    if (item.managerOnly && currentUser?.role !== 'ADMIN' && currentUser?.role !== 'MANAGER') return false;
     return true;
   });
 
