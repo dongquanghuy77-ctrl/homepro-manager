@@ -44,8 +44,12 @@ async function updateAttendanceRecord(
     let computedStatus            = status ?? oldRecord.status;
 
     if (checkInDate) {
-      const { start, end } = await getWorkHours();
-      const stats = calculateAttendanceStats(checkInDate, checkOutDate, start, end);
+      const { start, end, breakStart, breakEnd } = await getWorkHours();
+      const stats = calculateAttendanceStats(
+        checkInDate, checkOutDate,
+        start, end,
+        breakStart, breakEnd   // truyền giờ nghỉ trưa
+      );
       computedLateMinutes       = stats.lateMinutes;
       computedEarlyLeaveMinutes = stats.earlyLeaveMinutes;
       computedTotalHours        = stats.totalHours;

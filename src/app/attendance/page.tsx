@@ -127,14 +127,22 @@ function AddAttendanceModal({
   }, [timeDisabled]);
 
   // ── FIX-2 + FIX-3: Validate checkOut > checkIn + real-time total preview ──
+  // Break: 12:00-13:00 (ISO 8601 interval intersection — trừ nghỉ trưa nếu ca làm trùng)
+  const BREAK_START_MIN = 12 * 60; // 720
+  const BREAK_END_MIN   = 13 * 60; // 780
+
   const { totalPreview, timeError } = useMemo(() => {
     if (!checkIn || !checkOut) return { totalPreview: null, timeError: null };
     const [ih, im] = checkIn.split(':').map(Number);
     const [oh, om] = checkOut.split(':').map(Number);
-    const diffMin = (oh * 60 + om) - (ih * 60 + im);
-    if (diffMin <= 0) return { totalPreview: null, timeError: 'Giờ ra phải sau giờ vào' };
-    return { totalPreview: (diffMin / 60).toFixed(1), timeError: null };
-  }, [checkIn, checkOut]);
+    const startMin = ih * 60 + im;
+    const endMin   = oh * 60 + om;
+    if (endMin <= startMin) return { totalPreview: null, timeError: 'Giờ ra phải sau giờ vào' };
+    // Trừ phần nghỉ trưa trùng với ca làm (giống logic backend)
+    const overlapMin = Math.max(0, Math.min(endMin, BREAK_END_MIN) - Math.max(startMin, BREAK_START_MIN));
+    const actualMin  = endMin - startMin - overlapMin;
+    return { totalPreview: (actualMin / 60).toFixed(1), timeError: null };
+  }, [checkIn, checkOut, BREAK_START_MIN, BREAK_END_MIN]);
 
   // ── FIX-4: Real-time duplicate check (debounced 600ms) ────────────────────
   useEffect(() => {

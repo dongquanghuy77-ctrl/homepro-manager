@@ -111,7 +111,11 @@ export async function POST(req: NextRequest) {
 
     if (checkInDate) {
       const workHours = await getWorkHours();
-      const stats     = calculateAttendanceStats(checkInDate, checkOutDate, workHours.start, workHours.end);
+      const stats     = calculateAttendanceStats(
+        checkInDate, checkOutDate,
+        workHours.start, workHours.end,
+        workHours.breakStart, workHours.breakEnd   // truyền giờ nghỉ trưa
+      );
       lateMinutes       = stats.lateMinutes;
       earlyLeaveMinutes = stats.earlyLeaveMinutes;
       totalHours        = stats.totalHours;

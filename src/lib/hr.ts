@@ -6,17 +6,19 @@ import { hrAuditLogs, attendance, settings, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 // ── Work hours config ─────────────────────────────────────────────────────────
-export async function getWorkHours(): Promise<{ start: string; end: string; lateThreshold: number }> {
+export async function getWorkHours(): Promise<{ start: string; end: string; lateThreshold: number; breakStart: string; breakEnd: string }> {
   try {
     const rows = await db.select().from(settings);
     const get = (key: string, def: string) => rows.find((r) => r.key === key)?.value ?? def;
     return {
-      start: get('hr_work_start', '07:30'),
-      end: get('hr_work_end', '17:00'),
+      start:         get('hr_work_start',              '08:00'),
+      end:           get('hr_work_end',                '17:00'),
       lateThreshold: parseInt(get('hr_late_threshold_minutes', '15')),
+      breakStart:    get('hr_break_start',             '12:00'), // Giờ bắt đầu nghỉ trưa
+      breakEnd:      get('hr_break_end',               '13:00'), // Giờ kết thúc nghỉ trưa
     };
   } catch {
-    return { start: '07:30', end: '17:00', lateThreshold: 15 };
+    return { start: '08:00', end: '17:00', lateThreshold: 15, breakStart: '12:00', breakEnd: '13:00' };
   }
 }
 
@@ -26,31 +28,46 @@ export function timeToMinutes(hhmm: string): number {
   return h * 60 + m;
 }
 
+// ── Break overlap: số phút nghỉ trùng với ca làm (ISO 8601 interval intersection) ──────
+function breakOverlapMinutes(
+  workStartMin: number, workEndMin: number,
+  breakStartMin: number, breakEndMin: number
+): number {
+  const overlapStart = Math.max(workStartMin, breakStartMin);
+  const overlapEnd   = Math.min(workEndMin,   breakEndMin);
+  return Math.max(0, overlapEnd - overlapStart);
+}
+
 export function calculateAttendanceStats(
   checkIn: Date,
   checkOut: Date | null,
   workStart: string,
-  workEnd: string
+  workEnd: string,
+  breakStart = '12:00',   // Giờ bắt đầu nghỉ (cấu hình được, mặc định 12:00)
+  breakEnd   = '13:00'    // Giờ kết thúc nghỉ (cấu hình được, mặc định 13:00)
 ): { lateMinutes: number; earlyLeaveMinutes: number; totalHours: number; status: string } {
   const workStartMin = timeToMinutes(workStart);
-  const workEndMin = timeToMinutes(workEnd);
+  const workEndMin   = timeToMinutes(workEnd);
+  const breakStartMin = timeToMinutes(breakStart);
+  const breakEndMin   = timeToMinutes(breakEnd);
 
   // Late calculation based on check-in time
-  const checkInHours = checkIn.getHours();
-  const checkInMinutes = checkIn.getMinutes();
-  const checkInTotal = checkInHours * 60 + checkInMinutes;
-  const lateMinutes = Math.max(0, checkInTotal - workStartMin);
+  const checkInMin = checkIn.getHours() * 60 + checkIn.getMinutes();
+  const lateMinutes = Math.max(0, checkInMin - workStartMin);
 
   // Early leave and total hours (if checkout exists)
   let earlyLeaveMinutes = 0;
   let totalHours = 0;
 
   if (checkOut) {
-    const checkOutHours = checkOut.getHours();
-    const checkOutMinutes = checkOut.getMinutes();
-    const checkOutTotal = checkOutHours * 60 + checkOutMinutes;
-    earlyLeaveMinutes = Math.max(0, workEndMin - checkOutTotal);
-    totalHours = Math.max(0, (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60));
+    const checkOutMin = checkOut.getHours() * 60 + checkOut.getMinutes();
+    earlyLeaveMinutes = Math.max(0, workEndMin - checkOutMin);
+
+    // Tổng giờ thực làm = raw diff − thời gian nghỉ trưa trùng với ca làm
+    // Ví dụ: 08:00→17:00 − overlap(12:00→13:00) = 9h − 1h = 8h
+    const breakMins = breakOverlapMinutes(checkInMin, checkOutMin, breakStartMin, breakEndMin);
+    const rawMins   = checkOutMin - checkInMin;
+    totalHours = Math.max(0, (rawMins - breakMins) / 60);
   }
 
   const status = lateMinutes > 0 ? 'LATE' : 'PRESENT';
