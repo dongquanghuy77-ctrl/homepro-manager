@@ -61,14 +61,14 @@ export default async function EmployeesPage({ searchParams }: { searchParams: { 
                 {employees.map((emp: any) => (
                   <tr key={emp.id}>
                     <td>{emp.employeeCode}</td>
-                    <td>{emp.fullName}</td>
+                    <td>{emp.name}</td>
                     <td>{emp.department}</td>
                     <td>{emp.position}</td>
                     <td>{emp.phone}</td>
-                    <td>{emp.contractType}</td>
+                    <td>{emp.employmentType === 'FULL_TIME' ? 'Toàn thời gian' : emp.employmentType === 'PART_TIME' ? 'Bán thời gian' : 'Hợp đồng'}</td>
                     <td>
-                      <span className={`badge`} style={{ background: emp.status === 'ACTIVE' ? 'var(--color-success-bg)' : 'var(--color-danger-bg)', color: emp.status === 'ACTIVE' ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                        {emp.status}
+                      <span className={`badge`} style={{ background: emp.employeeStatus === 'ACTIVE' ? 'var(--color-success-bg)' : 'var(--color-danger-bg)', color: emp.employeeStatus === 'ACTIVE' ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                        {emp.employeeStatus === 'ACTIVE' ? 'Đang làm việc' : emp.employeeStatus === 'INACTIVE' ? 'Đã nghỉ' : emp.employeeStatus}
                       </span>
                     </td>
                     <td>

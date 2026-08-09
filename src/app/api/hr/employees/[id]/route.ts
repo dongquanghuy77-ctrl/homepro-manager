@@ -57,18 +57,51 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
   try {
     const body = await req.json();
-    const updateData: any = { ...body };
-    delete updateData.password;
-    delete updateData.username;
-    delete updateData.employeeCode;
-    
-    if (body.password) {
+
+    // Fix 3: Typed update payload — chỉ cho phép các field hợp lệ từ schema users
+    // Không nhận: password (handled separately), username, employeeCode (immutable)
+    interface EmployeeUpdatePayload {
+      name?: string;
+      position?: string;
+      phone?: string;
+      birthDate?: string;
+      department?: string;
+      employmentType?: string;
+      joinDate?: string;
+      managerId?: number | null;
+      note?: string;
+      role?: string;
+      active?: boolean;
+      employeeStatus?: string;
+      password?: string;
+      updatedAt?: Date;
+    }
+
+    const updateData: EmployeeUpdatePayload = {
+      updatedAt: new Date(),
+    };
+
+    // Whitelist approach: chỉ copy các field được phép cập nhật
+    if (typeof body.name === 'string')           updateData.name = body.name;
+    if (typeof body.position === 'string')       updateData.position = body.position;
+    if (typeof body.phone === 'string')          updateData.phone = body.phone;
+    if (typeof body.birthDate === 'string')      updateData.birthDate = body.birthDate;
+    if (typeof body.department === 'string')     updateData.department = body.department;
+    if (typeof body.employmentType === 'string') updateData.employmentType = body.employmentType;
+    if (typeof body.joinDate === 'string')       updateData.joinDate = body.joinDate;
+    if (body.managerId !== undefined)            updateData.managerId = body.managerId === null ? null : Number(body.managerId);
+    if (typeof body.note === 'string')           updateData.note = body.note;
+    if (typeof body.role === 'string')           updateData.role = body.role;
+    if (typeof body.active === 'boolean')        updateData.active = body.active;
+    if (typeof body.employeeStatus === 'string') updateData.employeeStatus = body.employeeStatus;
+
+    // Password hash riêng nếu được cung cấp
+    if (typeof body.password === 'string' && body.password.trim()) {
       updateData.password = await bcrypt.hash(body.password, 10);
     }
-    
-    updateData.updatedAt = new Date();
 
     const [oldUser] = await db.select().from(users).where(eq(users.id, id));
+    if (!oldUser) return NextResponse.json({ error: 'Không tìm thấy nhân viên' }, { status: 404 });
 
     const [updatedUser] = await db.update(users).set(updateData).where(eq(users.id, id)).returning({ id: users.id });
 
@@ -79,15 +112,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       actorId: session.id,
       actorName: session.name,
       oldValue: { ...oldUser, password: '[REDACTED]' },
-      newValue: body,
+      newValue: { ...body, password: body.password ? '[REDACTED]' : undefined },
       ipAddress: req.headers.get('x-forwarded-for') || 'unknown'
     });
 
     return NextResponse.json({ success: true, id: updatedUser.id });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const { session, error } = await requireAuth(req, ADMIN_ONLY);

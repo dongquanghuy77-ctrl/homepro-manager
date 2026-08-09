@@ -40,10 +40,13 @@ export default function EmployeeFilters() {
         <div className="form-group">
           <label className="form-label">Bộ phận</label>
           <select name="department" className="form-select" defaultValue={searchParams.get('department') || ''}>
-            <option value="">Tất cả</option>
-            <option value="IT">IT</option>
-            <option value="HR">HR</option>
-            <option value="SALES">Sales</option>
+            <option value="">Tất cả bộ phận</option>
+            <option value="Xưởng gỗ">Xưởng gỗ</option>
+            <option value="Thi công">Thi công</option>
+            <option value="Thiết kế">Thiết kế</option>
+            <option value="Kế toán">Kế toán</option>
+            <option value="Quản lý">Quản lý</option>
+            <option value="Khác">Khác</option>
           </select>
         </div>
         <div className="form-group">
