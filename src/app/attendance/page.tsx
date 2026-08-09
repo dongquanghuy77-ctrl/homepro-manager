@@ -251,7 +251,16 @@ function AddAttendanceModal({
             {/* ── Ngày + Trạng thái ─────────────────────────────────────────── */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label">Ngày *</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <label className="form-label" style={{ margin: 0 }}>
+                    Ngày&nbsp;<span style={{ color: 'var(--color-danger)' }}>*</span>
+                  </label>
+                  <button type="button" onClick={() => setSelDate(today)}
+                    style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none',
+                      border: 'none', cursor: 'pointer', padding: 0 }}>
+                    ⏱ Hôm nay
+                  </button>
+                </div>
                 {/* FIX-5: max=today chặn ngày tương lai */}
                 <input type="date" className="form-input" value={selDate}
                   max={today} onChange={e => setSelDate(e.target.value)} required />
