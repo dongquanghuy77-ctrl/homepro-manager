@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface AttendanceRecord {
@@ -61,7 +61,89 @@ function fmt(dateStr: string | null): string {
   return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 }
 
-// TimePicker24: number inputs, 24h, no native popup
+// PickerColumn: 1 c\u1ed9t scroll drum picker (c\u1ee9 \u0111\u01b0\u1edcng Ant Design Mobile)
+const ITEM_H = 40; // px m\u1ed7i m\u1ee5c
+const VISIBLE = 5; // s\u1ed1 m\u1ee5c hi\u1ec3n th\u1ecb
+
+function PickerColumn({
+  items, value, onChange, disabled,
+}: {
+  items: string[];
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Sync v\u1ecb tr\u00ed scroll khi value thay \u0111\u1ed5i t\u1eeb b\u00ean ngo\u00e0i
+  useEffect(() => {
+    const idx = items.indexOf(value);
+    if (ref.current && idx >= 0) {
+      ref.current.scrollTop = idx * ITEM_H;
+    }
+  }, [value, items]);
+
+  const handleScroll = () => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      if (!ref.current) return;
+      const idx = Math.round(ref.current.scrollTop / ITEM_H);
+      const clamped = Math.max(0, Math.min(items.length - 1, idx));
+      ref.current.scrollTo({ top: clamped * ITEM_H, behavior: 'smooth' });
+      onChange(items[clamped]);
+    }, 120);
+  };
+
+  return (
+    <div style={{ position: 'relative', width: 56, flexShrink: 0 }}>
+      {/* Fade mask tr\u00ean */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: ITEM_H * 2,
+        background: 'linear-gradient(to bottom, rgba(255,255,255,.95) 30%, transparent)',
+        pointerEvents: 'none', zIndex: 2,
+      }} />
+      {/* Fade mask d\u01b0\u1edbi */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: ITEM_H * 2,
+        background: 'linear-gradient(to top, rgba(255,255,255,.95) 30%, transparent)',
+        pointerEvents: 'none', zIndex: 2,
+      }} />
+      {/* Scrollable list */}
+      <div ref={ref} onScroll={handleScroll} className="drum-scroll"
+        style={{
+          height: ITEM_H * VISIBLE,
+          overflowY: disabled ? 'hidden' : 'scroll',
+          WebkitOverflowScrolling: 'touch',
+        }}>
+        <div style={{ height: ITEM_H * 2 }} /> {/* top padding */}
+        {items.map((item, i) => (
+          <div key={item}
+            onClick={() => {
+              if (!ref.current || disabled) return;
+              ref.current.scrollTo({ top: i * ITEM_H, behavior: 'smooth' });
+              onChange(item);
+            }}
+            style={{
+              height: ITEM_H,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              color: item === value ? '#2563EB' : '#9ca3af',
+              fontWeight: item === value ? 800 : 400,
+              fontSize: item === value ? 22 : 15,
+              transition: 'color .1s, font-size .1s, font-weight .1s',
+              userSelect: 'none',
+            }}>
+            {item}
+          </div>
+        ))}
+        <div style={{ height: ITEM_H * 2 }} /> {/* bottom padding */}
+      </div>
+    </div>
+  );
+}
+
+// TimePicker24: drum picker, n\u1ec1n tr\u1eafng, vi\u1ec1n xanh
 function TimePicker24({
   value, onChange, disabled,
 }: {
@@ -69,44 +151,40 @@ function TimePicker24({
   onChange: (v: string) => void;
   disabled?: boolean;
 }) {
-  const sp = (v: string) => { const p = (v || '').split(':'); return [p[0] ?? '', p[1] ?? '']; };
-  const [lh, setLh] = useState(() => sp(value)[0]);
-  const [lm, setLm] = useState(() => sp(value)[1]);
-  useEffect(() => { const [h, m] = sp(value); setLh(h); setLm(m); }, [value]);
-
-  const commit = (rawH: string, rawM: string) => {
-    if (!rawH && !rawM) { onChange(''); return; }
-    const h = String(Math.min(23, Math.max(0, parseInt(rawH) || 0))).padStart(2, '0');
-    const m = String(Math.min(59, Math.max(0, parseInt(rawM) || 0))).padStart(2, '0');
-    setLh(h); setLm(m); onChange(`${h}:${m}`);
-  };
-
-  const inp: React.CSSProperties = {
-    width: 42, background: 'none', border: 'none', color: 'inherit',
-    fontSize: 20, fontWeight: 700, textAlign: 'center', outline: 'none',
-    padding: 0, fontFamily: 'inherit', cursor: disabled ? 'not-allowed' : 'text',
-  };
+  const hours   = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+  const parts   = (value || '08:00').split(':');
+  const hh = parts[0] || '08';
+  const mm = parts[1] || '00';
 
   return (
     <>
-      <style>{`.tp24::-webkit-inner-spin-button,.tp24::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.tp24{-moz-appearance:textfield}.tp24-box:focus-within{border-color:var(--color-primary)!important;box-shadow:0 0 0 3px rgba(99,102,241,.18)!important}`}</style>
-      <div className="tp24-box" style={{
+      <style>{`.drum-scroll::-webkit-scrollbar{display:none}.drum-scroll{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+      <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        width: '100%', height: 44,
-        background: 'var(--color-surface-2)', border: '1.5px solid var(--color-border)',
-        borderRadius: 10, padding: '0 14px',
-        opacity: disabled ? 0.5 : 1, transition: 'border-color .15s, box-shadow .15s',
+        width: '100%', position: 'relative',
+        background: '#ffffff', border: '2px solid #2563EB',
+        borderRadius: 12, overflow: 'hidden',
+        opacity: disabled ? 0.55 : 1,
       }}>
-        <input type="number" className="tp24" min={0} max={23} inputMode="numeric"
-          placeholder="00" value={lh} disabled={disabled} style={inp}
-          onChange={e => setLh(e.target.value)} onBlur={e => commit(e.target.value, lm)}
-          onFocus={e => e.target.select()} />
-        <span style={{ fontSize: 22, fontWeight: 900, color: 'var(--color-primary)',
-          padding: '0 4px', userSelect: 'none', lineHeight: 1 }}>:</span>
-        <input type="number" className="tp24" min={0} max={59} inputMode="numeric"
-          placeholder="00" value={lm} disabled={disabled} style={inp}
-          onChange={e => setLm(e.target.value)} onBlur={e => commit(lh, e.target.value)}
-          onFocus={e => e.target.select()} />
+        {/* D\u1ea3i highlight m\u1ee5c \u0111ang ch\u1ecdn (gi\u1eefa) */}
+        <div style={{
+          position: 'absolute', top: '50%', left: 0, right: 0,
+          height: ITEM_H, transform: 'translateY(-50%)',
+          background: 'rgba(37,99,235,.09)',
+          borderTop: '1.5px solid rgba(37,99,235,.28)',
+          borderBottom: '1.5px solid rgba(37,99,235,.28)',
+          pointerEvents: 'none', zIndex: 1,
+        }} />
+        <PickerColumn items={hours} value={hh} disabled={disabled}
+          onChange={h => onChange(`${h}:${mm}`)} />
+        <span style={{
+          fontSize: 26, fontWeight: 900, color: '#2563EB',
+          padding: '0 6px', userSelect: 'none', zIndex: 3,
+          lineHeight: 1,
+        }}>:</span>
+        <PickerColumn items={minutes} value={mm} disabled={disabled}
+          onChange={m => onChange(`${hh}:${m}`)} />
       </div>
     </>
   );
