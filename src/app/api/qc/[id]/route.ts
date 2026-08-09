@@ -48,7 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         resolution: body.resolution,
         notes: body.notes,
         taskId: body.taskId || null,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date(),
       })
       .where(eq(qcIssues.id, id))
       .returning();

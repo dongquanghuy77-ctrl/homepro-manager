@@ -53,7 +53,7 @@ export async function PUT(
         status: finalStatus, priority,
         progress: finalProgress,
         notes,
-        updatedAt: sql`(datetime('now'))`,
+        updatedAt: new Date(),
       })
       .where(eq(tasks.id, id))
       .returning();

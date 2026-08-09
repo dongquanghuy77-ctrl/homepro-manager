@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     name: body.name, unit: body.unit, unitPrice: body.unitPrice,
     stockQty: body.stockQty, minStock: body.minStock,
     category: body.category, supplier: body.supplier, notes: body.notes,
-    updatedAt: new Date().toISOString(),
+    updatedAt: new Date(),
   }).where(eq(materials.id, id)).returning();
   if (!updated.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(updated[0]);

@@ -160,7 +160,7 @@ export default async function ProgressPage() {
                             </div>
                           </div>
                           <div style={{ minWidth: 160 }}>
-                            <ProgressBar value={t.progress} showLabel height={6} />
+                            <ProgressBar value={t.progress ?? 0} showLabel height={6} />
                           </div>
                           <TaskStatusBadge status={t.status as TaskStatus} />
                         </div>

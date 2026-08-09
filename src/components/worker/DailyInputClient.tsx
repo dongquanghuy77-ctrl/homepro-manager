@@ -15,7 +15,7 @@ interface Project {
   id: number;
   name: string;
   code: string;
-  manager: string;
+  manager: string | null;
 }
 
 interface DailyInputClientProps {

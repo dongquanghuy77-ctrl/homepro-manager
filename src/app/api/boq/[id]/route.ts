@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     qtyReceived: body.qtyReceived,
     category: body.category,
     notes: body.notes,
-    updatedAt: new Date().toISOString(),
+    updatedAt: new Date(),
   }).where(eq(boqItems.id, id)).returning();
   if (!updated.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(updated[0]);

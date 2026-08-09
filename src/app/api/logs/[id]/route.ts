@@ -25,7 +25,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         issues: body.issues,
         recordedBy: body.recordedBy,
         taskId: body.taskId || null,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date(),
       })
       .where(eq(workLogs.id, id))
       .returning();

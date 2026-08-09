@@ -29,6 +29,7 @@ export const tasks = pgTable('tasks', {
   title: text('title').notNull(),
   assignee: text('assignee'),
   startDate: text('start_date'),
+  endDate: text('end_date'),
   deadline: text('deadline'),
   priority: text('priority').notNull().default('MEDIUM'),
   status: text('status').notNull().default('NOT_STARTED'),
