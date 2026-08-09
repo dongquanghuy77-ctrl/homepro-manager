@@ -207,6 +207,7 @@ export const attendance = pgTable('attendance', {
   earlyLeaveMinutes: integer('early_leave_minutes').default(0),
   totalHours: real('total_hours').default(0),
   note: text('note'),
+  location: text('location'),              // "lat,lng" from browser Geolocation API (nullable)
   correctedBy: integer('corrected_by').references(() => users.id),
   correctedAt: timestamp('corrected_at'),
   createdAt: timestamp('created_at').defaultNow(),

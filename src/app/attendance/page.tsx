@@ -14,6 +14,7 @@ interface AttendanceRecord {
   earlyLeaveMinutes: number | null;
   totalHours:        number | null;
   note:         string | null;
+  location:     string | null;   // "lat,lng" from Geolocation API
   employeeName: string | null;
   employeeCode: string | null;
   department:   string | null;
@@ -74,6 +75,23 @@ function AddAttendanceModal({
   const [error,       setError]       = useState('');
   const [loading,     setLoading]     = useState(false);
   const [dupWarning,  setDupWarning]  = useState('');
+  const [location,    setLocation]    = useState<string | null>(null);
+  const [locStatus,   setLocStatus]   = useState<'idle'|'loading'|'ok'|'denied'>('idle');
+
+  // ── FIX-GPS: Lấy toạ độ GPS từ browser ───────────────────────────────────
+  const getLocation = () => {
+    if (!navigator.geolocation) { setLocStatus('denied'); return; }
+    setLocStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
+        setLocation(coords);
+        setLocStatus('ok');
+      },
+      () => setLocStatus('denied'),
+      { timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   // ── FIX-1: ABSENT / ON_LEAVE → time fields disabled & cleared ─────────────
   const timeDisabled = selStatus === 'ABSENT' || selStatus === 'ON_LEAVE';
@@ -142,6 +160,7 @@ function AddAttendanceModal({
           workDate:   selDate,
           status:     selStatus,
           note:       note.trim() || null,
+          location:   location,
           // +07:00 ensures server stores correct UTC equivalent of VN local time
           checkIn:  checkIn  ? `${selDate}T${checkIn}:00+07:00`  : null,
           checkOut: checkOut ? `${selDate}T${checkOut}:00+07:00` : null,
@@ -274,6 +293,25 @@ function AddAttendanceModal({
               <label className="form-label">Ghi chú</label>
               <input type="text" className="form-input" placeholder="Ghi chú thêm..."
                 value={note} onChange={e => setNote(e.target.value)} />
+            </div>
+
+            {/* ── Vị trí GPS ────────────────────────────────────────────────── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button type="button" onClick={getLocation} disabled={locStatus === 'loading'}
+                style={{ fontSize: 12, padding: '5px 10px', borderRadius: 6, border: '1px solid var(--color-border)',
+                  background: 'var(--color-surface-2)', color: 'var(--color-text)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 5 }}>
+                {locStatus === 'loading' ? '⏳ Đang lấy...' : '📍 Lấy vị trí'}
+              </button>
+              {locStatus === 'ok' && location && (
+                <a href={`https://maps.google.com/?q=${location}`} target="_blank" rel="noreferrer"
+                  style={{ fontSize: 12, color: 'var(--color-success)' }}>
+                  ✅ {location}
+                </a>
+              )}
+              {locStatus === 'denied' && (
+                <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>⚠️ Không có quyền định vị</span>
+              )}
             </div>
 
           </div>
@@ -564,6 +602,7 @@ export default function AttendancePage() {
                   <th>Tổng giờ</th>
                   <th>Trạng thái</th>
                   <th>Ghi chú</th>
+                  <th style={{ textAlign: 'center' }}>Vị trí</th>
                   <th style={{ textAlign: 'center' }}>Thao tác</th>
                 </tr>
               </thead>
@@ -587,8 +626,14 @@ export default function AttendancePage() {
                       ) : null}
                     </td>
                     <td><StatusBadge status={r.status} /></td>
-                    <td style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <td style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {r.note ?? '—'}
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      {r.location ? (
+                        <a href={`https://maps.google.com/?q=${r.location}`} target="_blank" rel="noreferrer"
+                          title={r.location} style={{ fontSize: 16, textDecoration: 'none' }}>📍</a>
+                      ) : <span style={{ opacity: 0.3 }}>—</span>}
                     </td>
                     <td>
                       <div style={{ display: 'flex', justifyContent: 'center' }}>

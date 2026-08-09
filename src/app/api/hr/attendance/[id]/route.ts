@@ -20,7 +20,7 @@ async function updateAttendanceRecord(
 
   try {
     const body = await req.json();
-    const { checkIn, checkOut, note, status } = body;
+    const { checkIn, checkOut, note, status, location } = body;
 
     const checkInDate  = checkIn  ? new Date(checkIn)  : null;
     const checkOutDate = checkOut ? new Date(checkOut) : null;
@@ -57,6 +57,7 @@ async function updateAttendanceRecord(
       checkIn:           checkIn  !== undefined ? checkInDate  : oldRecord.checkIn,
       checkOut:          checkOut !== undefined ? checkOutDate : oldRecord.checkOut,
       note:              note     !== undefined ? (note?.trim() || null) : oldRecord.note,
+      location:          location !== undefined ? (location?.trim() || null) : oldRecord.location,
       status:            computedStatus,
       lateMinutes:       computedLateMinutes,
       earlyLeaveMinutes: computedEarlyLeaveMinutes,

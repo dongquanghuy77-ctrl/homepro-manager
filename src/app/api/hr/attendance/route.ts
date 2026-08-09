@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
         earlyLeaveMinutes: attendance.earlyLeaveMinutes,
         totalHours:        attendance.totalHours,
         note:              attendance.note,
+        location:          attendance.location,
         correctedBy:       attendance.correctedBy,
         correctedAt:       attendance.correctedAt,
         updatedAt:         attendance.updatedAt,
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { employeeId, workDate, checkIn, checkOut, status, note } = body;
+    const { employeeId, workDate, checkIn, checkOut, status, note, location } = body;
 
     // ── Validation ────────────────────────────────────────────────────────────
     if (!employeeId || isNaN(Number(employeeId))) {
@@ -131,6 +132,7 @@ export async function POST(req: NextRequest) {
       earlyLeaveMinutes,
       totalHours,
       note:              note?.trim() || null,
+      location:          location?.trim() || null,
       createdAt:         now,
       updatedAt:         now,
     }).returning();
