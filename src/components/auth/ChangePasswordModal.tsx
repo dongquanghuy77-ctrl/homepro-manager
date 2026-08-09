@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Key, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Key, Lock } from 'lucide-react';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ChangePasswordModalProps {
 }
 
 export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,7 +18,11 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,9 +61,37 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
     }
   }
 
-  return (
-    <div className="modal-backdrop">
-      <div className="modal" style={{ maxWidth: 420 }}>
+  const modalContent = (
+    <div
+      className="modal-backdrop"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="modal"
+        style={{
+          maxWidth: 420,
+          width: '100%',
+          zIndex: 100000,
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
+          animation: 'fadeInScale 0.2s ease',
+        }}
+      >
         <div className="modal-header">
           <div className="modal-title flex items-center gap-2">
             <Key size={18} className="text-primary" /> Đổi mật khẩu cá nhân
@@ -123,4 +157,6 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

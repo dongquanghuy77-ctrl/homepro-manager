@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, FolderOpen, CheckSquare, TrendingUp, LayoutDashboard, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -20,10 +21,15 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ open, onClose, projects = [] }: CommandPaletteProps) {
+  const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const staticItems: CommandItem[] = [
     {
@@ -105,11 +111,15 @@ export default function CommandPalette({ open, onClose, projects = [] }: Command
     [filtered, selected, onClose]
   );
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
-    <div className="cmd-overlay" onClick={onClose}>
-      <div className="cmd-modal" onClick={(e) => e.stopPropagation()}>
+  const content = (
+    <div
+      className="cmd-overlay"
+      onClick={onClose}
+      style={{ zIndex: 99999, position: 'fixed', inset: 0 }}
+    >
+      <div className="cmd-modal" onClick={(e) => e.stopPropagation()} style={{ zIndex: 100000 }}>
         {/* Search Input */}
         <div className="cmd-search">
           <Search size={18} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
@@ -168,4 +178,6 @@ export default function CommandPalette({ open, onClose, projects = [] }: Command
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
