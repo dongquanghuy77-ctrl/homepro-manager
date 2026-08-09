@@ -37,7 +37,7 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'Cài đặt', icon: 'Settings', href: '/settings', sprint: 5 },
 ];
 
-const ACTIVE_SPRINT = 4;
+const ACTIVE_SPRINT = 5;
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Quản trị viên',

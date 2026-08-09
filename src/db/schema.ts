@@ -143,6 +143,46 @@ export const boqItems = pgTable('boq_items', {
 });
 
 // ============================================================
+// COSTS (CHI PHÍ PHÁT SINH DỰ ÁN)
+// ============================================================
+export const costs = pgTable('costs', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  amount: real('amount').notNull().default(0),
+  category: text('category').default('Vật tư mua ngoài'), // 'Vật tư mua ngoài' | 'Vận chuyển' | 'Nhân công ngoài' | 'Máy móc' | 'Khác'
+  costDate: text('cost_date').notNull(),
+  notes: text('notes'),
+  createdByName: text('created_by_name'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
+// CUSTOMERS (KHÁCH HÀNG / CRM)
+// ============================================================
+export const customers = pgTable('customers', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  address: text('address'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
+// SETTINGS (CÀI ĐẶT HỆ THỐNG XƯỞNG)
+// ============================================================
+export const settings = pgTable('settings', {
+  id: serial('id').primaryKey(),
+  key: text('key').notNull().unique(),
+  value: text('value'),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
 // TYPE EXPORTS
 // ============================================================
 export type Project = typeof projects.$inferSelect;
@@ -159,6 +199,12 @@ export type BoqItem = typeof boqItems.$inferSelect;
 export type NewBoqItem = typeof boqItems.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type Cost = typeof costs.$inferSelect;
+export type NewCost = typeof costs.$inferInsert;
+export type Customer = typeof customers.$inferSelect;
+export type NewCustomer = typeof customers.$inferInsert;
+export type Setting = typeof settings.$inferSelect;
+export type NewSetting = typeof settings.$inferInsert;
 
 export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
 
@@ -167,3 +213,4 @@ export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' 
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type QcSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type QcStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+
