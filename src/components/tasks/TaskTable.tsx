@@ -306,17 +306,17 @@ export default function TaskTable({ projectId, initialTasks, projectStartDate, p
                               className="form-range"
                               style={{ flex: 1, height: 6 }}
                               min={0} max={100} step={5}
-                              value={task.progress}
+                              value={task.progress ?? 0}
                               onChange={(e) => updateTaskField(task.id, 'progress', parseInt(e.target.value))}
                             />
                             <span style={{
                               fontSize: 12,
                               fontWeight: 700,
-                              color: task.progress === 100 ? '#10B981' : task.progress > 0 ? '#3B82F6' : '#94A3B8',
+                              color: task.progress === 100 ? '#10B981' : (task.progress ?? 0) > 0 ? '#3B82F6' : '#94A3B8',
                               minWidth: 36,
                               textAlign: 'right',
                             }}>
-                              {task.progress}%
+                              {task.progress ?? 0}%
                             </span>
                           </div>
                         </td>

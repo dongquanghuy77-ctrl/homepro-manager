@@ -73,7 +73,7 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
     } catch {}
   }
 
-  const statusConfig = PROJECT_STATUS[project.status];
+  const statusConfig = PROJECT_STATUS[project.status as keyof typeof PROJECT_STATUS] ?? PROJECT_STATUS['ACTIVE'];
 
   return (
     <>
@@ -187,17 +187,17 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
               <div className="grid-2" style={{ marginBottom: 16 }}>
                 <div className="form-group">
                   <label className="form-label">Khách hàng</label>
-                  <input className="form-input" value={form.customer} onChange={(e) => set('customer', e.target.value)} />
+                  <input className="form-input" value={form.customer ?? ''} onChange={(e) => set('customer', e.target.value)} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Quản lý</label>
-                  <input className="form-input" value={form.manager} onChange={(e) => set('manager', e.target.value)} />
+                  <input className="form-input" value={form.manager ?? ''} onChange={(e) => set('manager', e.target.value)} />
                 </div>
               </div>
               <div className="grid-2" style={{ marginBottom: 16 }}>
                 <div className="form-group">
                   <label className="form-label">Địa điểm</label>
-                  <input className="form-input" value={form.location} onChange={(e) => set('location', e.target.value)} />
+                  <input className="form-input" value={form.location ?? ''} onChange={(e) => set('location', e.target.value)} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Giá trị hợp đồng</label>

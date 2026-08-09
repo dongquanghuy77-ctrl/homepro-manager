@@ -219,12 +219,12 @@ function KanbanCard({
       </div>
 
       {/* Progress Bar */}
-      {task.progress > 0 && (
+      {(task.progress ?? 0) > 0 && (
         <div className="kanban-card-progress-wrap">
           <div
             className="kanban-card-progress-fill"
             style={{
-              width: `${task.progress}%`,
+              width: `${task.progress ?? 0}%`,
               background: task.progress === 100 ? '#10B981' : stageColor,
             }}
           />

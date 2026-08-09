@@ -64,7 +64,7 @@ export default function ProjectListClient({ projects }: ProjectListClientProps) 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 20 }}>
           {projects.map((project) => {
             const daysLeft = daysUntilDeadline(project.deadline);
-            const statusConfig = PROJECT_STATUS[project.status];
+            const statusConfig = PROJECT_STATUS[project.status as keyof typeof PROJECT_STATUS] ?? PROJECT_STATUS['ACTIVE'];
 
             return (
               <Link

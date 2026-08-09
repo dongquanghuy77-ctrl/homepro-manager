@@ -66,7 +66,7 @@ export function getDeadlineStatus(days: number | null): 'safe' | 'warning' | 'cr
 
 export function calculateProjectProgress(tasks: Task[]): number {
   if (tasks.length === 0) return 0;
-  const totalProgress = tasks.reduce((sum, task) => sum + task.progress, 0);
+  const totalProgress = tasks.reduce((sum, task) => sum + (task.progress ?? 0), 0);
   return Math.round(totalProgress / tasks.length);
 }
 
