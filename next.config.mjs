@@ -36,21 +36,10 @@ const nextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  // Sentry organization and project from DSN
   org: 'donghuy',
   project: 'homepro-manager',
-
-  // Only upload source maps in CI/production builds to save time locally
   silent: !process.env.CI,
-
-  // Automatically instrument Next.js data fetching methods, route handlers
-  autoInstrumentServerFunctions: true,
-
-  // Disable source map upload if SENTRY_AUTH_TOKEN not set (optional)
   sourcemaps: {
     disable: !process.env.SENTRY_AUTH_TOKEN,
   },
-
-  // Prevents Sentry from adding extra bloat in dev mode
-  disableLogger: true,
 });
