@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { cookies } from 'next/headers';
+import bcrypt from 'bcryptjs';
+import { createSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,12 +16,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu' }, { status: 400 });
     }
 
+    // Fetch user by username only (password compare happens via bcrypt)
     const [user] = await db
       .select()
       .from(users)
-      .where(and(eq(users.username, username.trim()), eq(users.password, password.trim())));
+      .where(eq(users.username, username.trim()));
 
     if (!user) {
+      return NextResponse.json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' }, { status: 401 });
+    }
+
+    // Compare password: supports both bcrypt hashes and legacy plain-text
+    let passwordMatch = false;
+    const isHashed = user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
+    if (isHashed) {
+      passwordMatch = await bcrypt.compare(password.trim(), user.password);
+    } else {
+      // Legacy plain-text check (temporary fallback — will be removed after full migration)
+      passwordMatch = user.password === password.trim();
+    }
+
+    if (!passwordMatch) {
       return NextResponse.json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' }, { status: 401 });
     }
 
@@ -35,14 +51,8 @@ export async function POST(req: NextRequest) {
       role: user.role,
     };
 
-    const cookieStore = cookies();
-    cookieStore.set('homepro_user', JSON.stringify(userPayload), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    // Create signed JWT session cookie
+    await createSession(userPayload);
 
     return NextResponse.json({ success: true, user: userPayload });
   } catch (err) {

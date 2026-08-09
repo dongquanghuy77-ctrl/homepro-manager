@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import * as XLSX from 'xlsx';
+import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const { error } = await requireAuth(request, ADMIN_OR_MANAGER);
+  if (error) return error;
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -141,6 +145,6 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('[POST /api/import]', error);
-    return NextResponse.json({ error: `Lỗi xử lý file Excel: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: 'Lỗi xử lý file. Vui lòng kiểm tra định dạng và thử lại.' }, { status: 500 });
   }
 }

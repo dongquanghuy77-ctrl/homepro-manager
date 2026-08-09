@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { costs, projects } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { requireAuth, ADMIN_OR_MANAGER, ALL_ROLES } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+  const { error } = await requireAuth(req, ALL_ROLES);
+  if (error) return error;
+
   try {
     const { searchParams } = new URL(req.url);
     const projectId = searchParams.get('projectId');
@@ -46,6 +50,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const { error } = await requireAuth(req, ADMIN_OR_MANAGER);
+  if (error) return error;
+
   try {
     const body = await req.json();
     const { projectId, title, amount, category, costDate, notes, createdByName } = body;

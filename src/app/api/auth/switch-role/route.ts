@@ -2,23 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { cookies } from 'next/headers';
+import { getSession, createSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = cookies();
-    const sessionCookie = cookieStore.get('homepro_user');
+    const currentUser = await getSession();
 
-    if (!sessionCookie || !sessionCookie.value) {
+    if (!currentUser) {
       return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
     }
 
-    const currentUser = JSON.parse(sessionCookie.value);
-
-    // Only ADMIN or existing session can switch role
-    if (currentUser.role !== 'ADMIN' && currentUser.originalRole !== 'ADMIN') {
+    // Only ADMIN (or someone using Admin's original session) can switch role
+    const effectiveRole = (currentUser as any).originalRole || currentUser.role;
+    if (effectiveRole !== 'ADMIN') {
       return NextResponse.json({ error: 'Chỉ Admin mới có quyền chuyển đổi vai trò kiểm thử' }, { status: 403 });
     }
 
@@ -43,16 +41,11 @@ export async function POST(req: NextRequest) {
       username: targetUser.username,
       name: targetUser.name,
       role: targetUser.role,
-      originalRole: currentUser.originalRole || currentUser.role, // Remember Admin original identity
+      originalRole: effectiveRole, // Preserve Admin's original identity
     };
 
-    cookieStore.set('homepro_user', JSON.stringify(userPayload), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    // Re-issue signed JWT cookie
+    await createSession(userPayload);
 
     return NextResponse.json({ success: true, user: userPayload });
   } catch (err) {

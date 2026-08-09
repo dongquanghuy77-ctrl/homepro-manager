@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects } from '@/db/schema';
 import { desc } from 'drizzle-orm';
+import { requireAuth, ADMIN_OR_MANAGER, ALL_ROLES } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { error } = await requireAuth(req, ALL_ROLES);
+  if (error) return error;
+
   try {
     const allProjects = await db.select().from(projects).orderBy(desc(projects.createdAt));
     return NextResponse.json(allProjects);
@@ -13,7 +17,10 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const { error } = await requireAuth(request, ADMIN_OR_MANAGER);
+  if (error) return error;
+
   try {
     const body = await request.json();
     const { code, name, customer, location, manager, startDate, deadline, contractValue, status, notes } = body;
