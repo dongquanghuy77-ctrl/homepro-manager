@@ -9,7 +9,7 @@ import { getTodayVN, getWorkHours, calculateAttendanceStats } from '@/lib/hr';
 
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth(req, ALL_ROLES);
-  if (error || !session) return NextResponse.json({ error: error || 'Unauthorized' }, { status: 401 });
+  if (error) return error;  // Return the actual error NextResponse
 
   try {
     const today = getTodayVN();
@@ -31,16 +31,17 @@ export async function POST(req: NextRequest) {
     const stats = calculateAttendanceStats(existing.checkIn, now, start, end);
 
     const [updatedRecord] = await db.update(attendance).set({
-      checkOut: now,
-      status: stats.status,
-      lateMinutes: stats.lateMinutes,
+      checkOut:          now,
+      status:            stats.status,
+      lateMinutes:       stats.lateMinutes,
       earlyLeaveMinutes: stats.earlyLeaveMinutes,
-      totalHours: stats.totalHours,
-      updatedAt: now
+      totalHours:        stats.totalHours,
+      updatedAt:         now,
     }).where(eq(attendance.id, existing.id)).returning();
 
     return NextResponse.json(updatedRecord);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

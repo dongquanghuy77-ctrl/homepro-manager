@@ -9,7 +9,7 @@ import { getTodayVN } from '@/lib/hr';
 
 export async function GET(req: NextRequest) {
   const { session, error } = await requireAuth(req, ALL_ROLES);
-  if (error || !session) return NextResponse.json({ error: error || 'Unauthorized' }, { status: 401 });
+  if (error) return error;  // Return the actual error NextResponse
 
   try {
     const today = getTodayVN();
@@ -19,26 +19,27 @@ export async function GET(req: NextRequest) {
 
     if (!record) {
       return NextResponse.json({
-        hasCheckedIn: false,
+        hasCheckedIn:  false,
         hasCheckedOut: false,
-        checkIn: null,
-        checkOut: null,
-        status: null,
-        lateMinutes: 0,
-        totalHours: 0
+        checkIn:       null,
+        checkOut:      null,
+        status:        null,
+        lateMinutes:   0,
+        totalHours:    0,
       });
     }
 
     return NextResponse.json({
-      hasCheckedIn: !!record.checkIn,
+      hasCheckedIn:  !!record.checkIn,
       hasCheckedOut: !!record.checkOut,
-      checkIn: record.checkIn,
-      checkOut: record.checkOut,
-      status: record.status,
-      lateMinutes: record.lateMinutes,
-      totalHours: record.totalHours
+      checkIn:       record.checkIn,
+      checkOut:      record.checkOut,
+      status:        record.status,
+      lateMinutes:   record.lateMinutes,
+      totalHours:    record.totalHours,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

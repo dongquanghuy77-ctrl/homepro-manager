@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { attendance } from '@/db/schema';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
@@ -9,7 +9,7 @@ import { getTodayVN, getWorkHours, calculateAttendanceStats } from '@/lib/hr';
 
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth(req, ALL_ROLES);
-  if (error) return error;
+  if (error) return error;  // Return the actual error NextResponse
 
   try {
     const today = getTodayVN();
@@ -27,15 +27,15 @@ export async function POST(req: NextRequest) {
     const stats = calculateAttendanceStats(now, null, start, end);
 
     const recordData = {
-      employeeId: session.id,
-      workDate: today,
-      checkIn: now,
-      status: stats.status,
-      lateMinutes: stats.lateMinutes,
+      employeeId:        session.id,
+      workDate:          today,
+      checkIn:           now,
+      status:            stats.status,
+      lateMinutes:       stats.lateMinutes,
       earlyLeaveMinutes: stats.earlyLeaveMinutes,
-      totalHours: stats.totalHours,
-      createdAt: now,
-      updatedAt: now
+      totalHours:        stats.totalHours,
+      createdAt:         now,
+      updatedAt:         now,
     };
 
     let newRecord;
@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(newRecord);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
