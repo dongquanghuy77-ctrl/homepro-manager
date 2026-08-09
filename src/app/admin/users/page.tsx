@@ -136,6 +136,25 @@ export default function UserManagementPage() {
     }
   }
 
+  async function handleSwitchRole(targetUsername: string) {
+    try {
+      const res = await fetch('/api/auth/switch-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUsername }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi khi chuyển đổi vai trò');
+      if (data.user.role === 'WORKER') {
+        window.location.href = '/nhan-vien';
+      } else {
+        window.location.href = '/';
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }
+
   return (
     <div className="page-container">
       {/* Header */}
@@ -160,6 +179,57 @@ export default function UserManagementPage() {
       {/* Status Alerts */}
       {success && <div className="alert alert-success mb-6">{success}</div>}
       {error && <div className="alert alert-danger mb-6">{error}</div>}
+
+      {/* Admin Quick Role Switcher Card */}
+      <div className="card mb-6" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+        <div className="card-header" style={{ paddingBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 18 }}>⚡</span>
+            <div>
+              <div className="card-title" style={{ fontSize: 15, color: '#38BDF8' }}>Công cụ Admin: Chuyển đổi nhanh Góc nhìn Vai trò</div>
+              <div className="card-subtitle" style={{ fontSize: 12 }}>Bấm vào để xem và trải nghiệm hệ thống dưới góc nhìn thực tế của từng vị trí</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10, marginTop: 8 }}>
+          <button
+            className="btn btn-secondary"
+            style={{ justifyContent: 'flex-start', background: 'rgba(239, 68, 68, 0.15)', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#FCA5A5' }}
+            onClick={() => handleSwitchRole('huy.dong')}
+          >
+            <span>👑 Admin (HUY)</span>
+          </button>
+          <button
+            className="btn btn-secondary"
+            style={{ justifyContent: 'flex-start', background: 'rgba(59, 130, 246, 0.15)', borderColor: 'rgba(59, 130, 246, 0.3)', color: '#93C5FD' }}
+            onClick={() => handleSwitchRole('quan.mai')}
+          >
+            <span>👔 Manager (QUÂN)</span>
+          </button>
+          <button
+            className="btn btn-secondary"
+            style={{ justifyContent: 'flex-start', background: 'rgba(245, 158, 11, 0.15)', borderColor: 'rgba(245, 158, 11, 0.3)', color: '#FDE68A' }}
+            onClick={() => handleSwitchRole('duy.le')}
+          >
+            <span>👷 Supervisor (DUY)</span>
+          </button>
+          <button
+            className="btn btn-secondary"
+            style={{ justifyContent: 'flex-start', background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#A7F3D0' }}
+            onClick={() => handleSwitchRole('phuc.tran')}
+          >
+            <span>🛠️ Worker (PHÚC)</span>
+          </button>
+          <button
+            className="btn btn-secondary"
+            style={{ justifyContent: 'flex-start', background: 'rgba(139, 92, 246, 0.15)', borderColor: 'rgba(139, 92, 246, 0.3)', color: '#DDD6FE' }}
+            onClick={() => handleSwitchRole('viewer')}
+          >
+            <span>👁️ Viewer (BGĐ)</span>
+          </button>
+        </div>
+      </div>
 
       {/* Users Table */}
       <div className="card">

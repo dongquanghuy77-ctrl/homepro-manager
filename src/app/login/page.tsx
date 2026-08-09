@@ -218,8 +218,8 @@ export default function LoginPage() {
 
         {/* Forgotten Password Notice */}
         <div style={{
-          marginTop: 20,
-          padding: '10px 12px',
+          marginTop: 24,
+          padding: '12px 14px',
           background: 'rgba(255, 255, 255, 0.04)',
           borderRadius: 10,
           border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -229,63 +229,6 @@ export default function LoginPage() {
           lineHeight: '1.5',
         }}>
           💡 <strong>Quên mật khẩu?</strong> Vui lòng liên hệ Admin hoặc Quản lý xưởng để được hỗ trợ cấp lại mật khẩu.
-        </div>
-
-        {/* Collapsible Demo Account Selector */}
-        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #1E293B' }}>
-          <button
-            type="button"
-            onClick={() => setShowDemo(!showDemo)}
-            style={{
-              width: '100%',
-              background: 'transparent',
-              border: 'none',
-              color: '#64748B',
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-            }}
-          >
-            <span>⚡ Tài khoản mẫu kiểm thử</span>
-            <span>{showDemo ? '▲' : '▼'}</span>
-          </button>
-
-          {showDemo && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
-              {demoAccounts.map((acc) => (
-                <button
-                  key={acc.user}
-                  type="button"
-                  onClick={() => fillAccount(acc.user, acc.pass)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    background: username === acc.user ? 'rgba(59, 130, 246, 0.2)' : '#1E293B',
-                    border: username === acc.user ? '1px solid #3B82F6' : '1px solid transparent',
-                    color: '#E2E8F0',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#F1F5F9' }}>{acc.badge}</div>
-                    <div style={{ fontSize: 11, color: '#94A3B8' }}>{acc.desc}</div>
-                  </div>
-                  <div style={{ fontSize: 11, color: '#38BDF8', fontWeight: 600 }}>
-                    {acc.user}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
