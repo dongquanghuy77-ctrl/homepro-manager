@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings,
-  Command,
+  Command, Menu, X, MoreHorizontal,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
@@ -28,12 +28,12 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'Cài đặt', icon: 'Settings', href: '/settings', sprint: 5 },
 ];
 
-// Sprint 4 items are now active
 const ACTIVE_SPRINT = 4;
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -46,6 +46,11 @@ export default function Sidebar() {
     return () => document.removeEventListener('keydown', handleKey);
   }, []);
 
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
@@ -56,16 +61,57 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="app-sidebar">
+      {/* Mobile Top Header */}
+      <header className="mobile-top-header">
+        <Link href="/" className="mobile-brand">
+          <span className="mobile-brand-icon">🏠</span>
+          <span className="mobile-brand-name">HomePro</span>
+        </Link>
+
+        <div className="mobile-header-actions">
+          <button
+            className="mobile-icon-btn"
+            onClick={() => setCmdOpen(true)}
+            title="Tìm kiếm (Ctrl+K)"
+          >
+            <Command size={18} />
+          </button>
+
+          <button
+            className="mobile-icon-btn mobile-menu-toggle"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Overlay Backdrop */}
+      {mobileOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar (Desktop & Mobile Drawer) */}
+      <aside className={`app-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
         {/* Logo */}
         <div className="sidebar-logo">
-          <Link href="/" className="sidebar-logo-brand" style={{ cursor: 'pointer' }}>
+          <Link href="/" className="sidebar-logo-brand" onClick={() => setMobileOpen(false)}>
             <div className="sidebar-logo-icon">🏠</div>
             <div className="sidebar-logo-text">
               <span className="sidebar-logo-name">HomePro</span>
               <span className="sidebar-logo-sub">Manager v2.0</span>
             </div>
           </Link>
+          <button
+            className="sidebar-close-mobile-btn"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* Search / Command */}
@@ -73,7 +119,7 @@ export default function Sidebar() {
           <button
             id="sidebar-cmd-btn"
             className="sidebar-search-btn"
-            onClick={() => setCmdOpen(true)}
+            onClick={() => { setCmdOpen(true); setMobileOpen(false); }}
             title="Tìm kiếm nhanh (Ctrl+K)"
           >
             <Command size={13} />
@@ -93,6 +139,7 @@ export default function Sidebar() {
                 key={item.id}
                 href={item.href}
                 className={`sidebar-item ${active ? 'active' : ''}`}
+                onClick={() => setMobileOpen(false)}
               >
                 <span className="sidebar-item-icon">
                   <Icon size={16} />
@@ -132,6 +179,45 @@ export default function Sidebar() {
           </div>
         </div>
       </aside>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="mobile-bottom-nav">
+        <Link
+          href="/"
+          className={`mobile-bottom-item ${pathname === '/' ? 'active' : ''}`}
+        >
+          <LayoutDashboard size={20} />
+          <span>Dashboard</span>
+        </Link>
+        <Link
+          href="/projects"
+          className={`mobile-bottom-item ${pathname.startsWith('/projects') ? 'active' : ''}`}
+        >
+          <Briefcase size={20} />
+          <span>Dự án</span>
+        </Link>
+        <Link
+          href="/tasks"
+          className={`mobile-bottom-item ${pathname.startsWith('/tasks') ? 'active' : ''}`}
+        >
+          <CheckSquare size={20} />
+          <span>Công việc</span>
+        </Link>
+        <Link
+          href="/vat-tu"
+          className={`mobile-bottom-item ${pathname.startsWith('/vat-tu') ? 'active' : ''}`}
+        >
+          <Package size={20} />
+          <span>Vật tư</span>
+        </Link>
+        <button
+          className={`mobile-bottom-item ${mobileOpen ? 'active' : ''}`}
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
+          <MoreHorizontal size={20} />
+          <span>Danh mục</span>
+        </button>
+      </nav>
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
     </>
