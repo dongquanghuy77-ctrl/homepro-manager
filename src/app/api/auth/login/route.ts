@@ -1,14 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { createSession } from '@/lib/session';
+import { loginRatelimit, getIP } from '@/lib/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    // ── Rate Limiting: 5 requests / 60s per IP ──────────────────
+    const ip = getIP(req);
+    const { success, limit, remaining, reset } = await loginRatelimit.limit(ip);
+
+    if (!success) {
+      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          error: `Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ${retryAfter} giây.`,
+          retryAfter,
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': String(limit),
+            'X-RateLimit-Remaining': String(remaining),
+            'Retry-After': String(retryAfter),
+          },
+        }
+      );
+    }
+    // ────────────────────────────────────────────────────────────
+
     const body = await req.json();
     const { username, password } = body;
 
@@ -32,7 +56,7 @@ export async function POST(req: NextRequest) {
     if (isHashed) {
       passwordMatch = await bcrypt.compare(password.trim(), user.password);
     } else {
-      // Legacy plain-text check (temporary fallback — will be removed after full migration)
+      // Legacy plain-text fallback (temporary until full migration)
       passwordMatch = user.password === password.trim();
     }
 

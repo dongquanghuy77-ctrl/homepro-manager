@@ -4,6 +4,7 @@ import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { getSession } from '@/lib/session';
+import { changePasswordRatelimit } from '@/lib/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,17 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
     }
+
+    // ── Rate Limiting: 3 attempts / 5 min per user ID ──────────
+    const { success, reset } = await changePasswordRatelimit.limit(`user:${session.id}`);
+    if (!success) {
+      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+      return NextResponse.json(
+        { error: `Quá nhiều lần đổi mật khẩu. Vui lòng thử lại sau ${Math.ceil(retryAfter / 60)} phút.` },
+        { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+      );
+    }
+    // ─────────────────────────────────────────────────────────────
 
     const body = await req.json();
     const { currentPassword, newPassword } = body;
