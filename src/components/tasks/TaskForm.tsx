@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Package } from 'lucide-react';
 import type { Task } from '@/db/schema';
 import { TASK_STATUS, TASK_PRIORITY, TASK_CATEGORIES, DEFAULT_ASSIGNEES } from '@/lib/constants';
 import { toDateInputValue } from '@/lib/utils';
+import TaskBomModal from '@/components/tasks/TaskBomModal';
 
 interface TaskFormProps {
   projectId: number;
@@ -15,8 +16,9 @@ interface TaskFormProps {
 
 export default function TaskForm({ projectId, task, onClose, onSaved }: TaskFormProps) {
   const isEdit = !!task;
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState('');
+  const [showBom,  setShowBom]  = useState(false);  // BOM Vật liệu modal
 
   const [form, setForm] = useState({
     category: task?.category || '',
@@ -210,6 +212,20 @@ export default function TaskForm({ projectId, task, onClose, onSaved }: TaskForm
           </div>
 
           <div className="modal-footer">
+            {/* Nút BOM Vật liệu — chỉ hiển thị khi chỉnh sửa task đã có */}
+            {isEdit && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ display: 'flex', gap: 6, alignItems: 'center', marginRight: 'auto' }}
+                onClick={() => setShowBom(true)}
+                id="open-bom-btn"
+                title="Xem danh sách vật tư / BOM Excel cho công việc này"
+              >
+                <Package size={15} />
+                BOM Vật liệu
+              </button>
+            )}
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Hủy
             </button>
@@ -224,6 +240,14 @@ export default function TaskForm({ projectId, task, onClose, onSaved }: TaskForm
             </button>
           </div>
         </form>
+
+        {/* BOM Modal — mở đè lên modal chỉnh sửa */}
+        {showBom && isEdit && (
+          <TaskBomModal
+            taskTitle={form.title || task!.title}
+            onClose={() => setShowBom(false)}
+          />
+        )}
       </div>
     </div>
   );
