@@ -23,7 +23,7 @@ import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth, ADMIN_ONLY } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
-import { writeHrAuditLog } from '@/lib/hr';
+import { writeHrAuditLog, writeHrAuditLogAsync } from '@/lib/hr';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -173,7 +173,8 @@ export async function POST(req: NextRequest) {
           updatedAt:      new Date(),
         }).where(eq(users.id, existing.id));
 
-        await writeHrAuditLog({
+        // Fire-and-forget: audit log không block luồng import chính
+        writeHrAuditLogAsync({
           action:     'EMPLOYEE_UPDATED',
           entityType: 'employee',
           entityId:   existing.id,
@@ -234,7 +235,8 @@ export async function POST(req: NextRequest) {
           note:           row.note           ?? null,
         }).returning({ id: users.id });
 
-        await writeHrAuditLog({
+        // Fire-and-forget: audit log không block luồng import chính
+        writeHrAuditLogAsync({
           action:     'EMPLOYEE_CREATED',
           entityType: 'employee',
           entityId:   newUser.id,

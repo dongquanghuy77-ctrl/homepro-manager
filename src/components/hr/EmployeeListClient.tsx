@@ -14,6 +14,7 @@ import { Search, Loader2, RefreshCw, Users } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useEmployees, type Employee } from '@/hooks/useEmployees';
 import EmployeeFilters from './EmployeeFilters';
+import AuditLogDrawer from './AuditLogDrawer';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -62,6 +63,15 @@ function StatusBadge({ status }: { status: string | null }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Type cho Drawer state
+// ─────────────────────────────────────────────────────────────────────────────
+interface AuditTarget {
+  id:   number;
+  name: string;
+  code: string | null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────────────────────────────────
 export default function EmployeeListClient({
@@ -72,6 +82,8 @@ export default function EmployeeListClient({
   const [rawSearch,     setRawSearch]     = useState('');
   const [department,    setDepartment]    = useState('');
   const [status,        setStatus]        = useState('');
+  // Drawer: thông tin nhân viên được chọn để xem lịch sử
+  const [auditTarget,   setAuditTarget]   = useState<AuditTarget | null>(null);
 
   // ── TẦNG 1: Debounce search 400ms ─────────────────────────────────────────
   // rawSearch thay đổi mỗi keystroke → debouncedSearch chỉ thay đổi sau 400ms dừng gõ
@@ -303,12 +315,29 @@ export default function EmployeeListClient({
                     <td><StatusBadge status={emp.employeeStatus} /></td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                        {/* Nút xem hồ sơ */}
                         <a
                           href={`/employees/${emp.id}`}
                           className="btn btn-ghost btn-sm"
                         >
                           Xem hồ sơ
                         </a>
+                        {/* Nút lịch sử (chỉ Admin/Manager thấy) */}
+                        {!isViewer && (
+                          <button
+                            id={`audit-log-btn-${emp.id}`}
+                            className="btn btn-ghost btn-sm"
+                            title="Xem lịch sử thay đổi"
+                            onClick={() => setAuditTarget({
+                              id:   emp.id,
+                              name: emp.name,
+                              code: emp.employeeCode,
+                            })}
+                            style={{ color: '#F59E0B' }}
+                          >
+                            🕒
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -318,6 +347,15 @@ export default function EmployeeListClient({
           </div>
         )}
       </div>
+
+      {/* ── Audit Log Drawer (trượt từ mép phải) ── */}
+      <AuditLogDrawer
+        employeeId={auditTarget?.id   ?? 0}
+        employeeName={auditTarget?.name ?? ''}
+        employeeCode={auditTarget?.code ?? null}
+        isOpen={auditTarget !== null}
+        onClose={() => setAuditTarget(null)}
+      />
     </div>
   );
 }

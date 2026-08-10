@@ -105,19 +105,31 @@ export async function writeHrAuditLog(params: {
 }) {
   try {
     await db.insert(hrAuditLogs).values({
-      action: params.action,
+      action:     params.action,
       entityType: params.entityType,
-      entityId: params.entityId,
-      actorId: params.actorId,
-      actorName: params.actorName,
-      oldValue: params.oldValue ? JSON.stringify(params.oldValue) : null,
-      newValue: params.newValue ? JSON.stringify(params.newValue) : null,
-      ipAddress: params.ipAddress,
+      entityId:   params.entityId,
+      actorId:    params.actorId,
+      actorName:  params.actorName,
+      oldValue:   params.oldValue ? JSON.stringify(params.oldValue) : null,
+      newValue:   params.newValue ? JSON.stringify(params.newValue) : null,
+      ipAddress:  params.ipAddress,
     });
   } catch (err) {
-    // Audit log failure should not break the main operation
+    // Audit log failure must NEVER break the main operation
     console.error('[HR Audit Log Error]', err);
   }
+}
+
+// ── Fire-and-forget variant ────────────────────────────────────────────────────
+// Dùng khi KHÔNG muốn cộng latency vào main request (import hàng loạt, etc.)
+// Promise được tách ra khỏi luồng chính → main flow hoàn thành tức thì.
+// Lỗi vẫn được catch bên trong writeHrAuditLog → không bao giờ UnhandledPromiseRejection.
+export function writeHrAuditLogAsync(
+  params: Parameters<typeof writeHrAuditLog>[0]
+): void {
+  // Tách Promise ra khỏi await chain → fire-and-forget
+  // void: ESLint/TS biết đây là intentional (không phải forgot-to-await)
+  void writeHrAuditLog(params);
 }
 
 // ── Today's date in Vietnam timezone (YYYY-MM-DD) ─────────────────────────────
