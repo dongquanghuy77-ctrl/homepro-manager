@@ -80,6 +80,42 @@ export const OT_MULTIPLIER = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ATTENDANCE ALLOWANCE — Phụ cấp chuyên cần
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * AllowanceTier — Cấu hình mức phụ cấp theo tổng phút vi phạm
+ *
+ * NGUYÊN TẮC: Đi muộn/về sớm KHÔNG phạt trừ lương gốc.
+ *             Hình phạt duy nhất: cắt giảm Phụ cấp chuyên cần.
+ *
+ * Thuật toán:
+ *   Sắp xếp tiers tăng dần theo maxViolationMins
+ *   → Tìm tier đầu tiên có totalViolationMins <= maxViolationMins
+ *   → Áp dụng pct đó vào maxAttendanceAllowance
+ */
+export interface AllowanceTier {
+  maxViolationMins: number;  // Nếu tổng vi phạm <= giá trị này → áp dụng pct
+  pct:              number;  // 0.0 (mất hết) đến 1.0 (100% phụ cấp)
+  label:            string;  // Mô tả để hiển thị trên phiếu lương
+}
+
+/**
+ * DEFAULT_ALLOWANCE_TIERS — Bộ cấu hình mặc định của xưởng
+ *
+ * Tier 0: 0 phút vi phạm  → 100% phụ cấp (chuyên cần hoàn hảo)
+ * Tier 1: 1-30 phút       → 50%  phụ cấp (nhắc nhở lần đầu)
+ * Tier 2: >30 phút         → 0%   phụ cấp (mất toàn bộ)
+ *
+ * Override bằng cách truyền customTiers vào calcAttendanceAllowance()
+ */
+export const DEFAULT_ALLOWANCE_TIERS: AllowanceTier[] = [
+  { maxViolationMins: 0,    pct: 1.0, label: 'Không vi phạm — 100% phụ cấp' },
+  { maxViolationMins: 30,   pct: 0.5, label: 'Vi phạm ≤30 phút — 50% phụ cấp' },
+  { maxViolationMins: 9999, pct: 0.0, label: 'Vi phạm >30 phút — mất toàn bộ phụ cấp' },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -117,8 +153,14 @@ export interface PayrollInput {
   unpaidLeaveDays:  number;   // Nghỉ không lương (UNPAID → trừ lương)
   absentDays:       number;   // Vắng không phép (→ trừ lương + kỷ luật)
 
+  // ── Phụ cấp chuyên cần (Attendance Allowance) ────────────────────────────
+  // NGUYÊN TẮC: Đi muộn / về sớm KHÔNG trừ vào lương gốc.
+  //             Hình phạt duy nhất là cắt giảm khoản phụ cấp chuyên cần này.
+  attendanceAllowance:    number;         // Mức phụ cấp tối đa/tháng (VND) — từ SalaryContract
+  totalLateEarlyMins:     number;         // Tổng phút đi muộn + về sớm trong tháng
+  allowanceTiers?:        AllowanceTier[]; // Override tiers (mặc định: DEFAULT_ALLOWANCE_TIERS)
+
   // ── Khấu trừ khác ─────────────────────────────────────────────────────────
-  latePenaltyMins:  number;   // Tổng phút đi muộn bị phạt (đã qua grace period)
   advanceDeduction: number;   // Tạm ứng đã lĩnh trong tháng (VND)
   otherDeductions:  number;   // Các khoản trừ khác (VND)
 
@@ -446,23 +488,96 @@ export function calcHolidayPay(
 }
 
 /**
+ * calcAttendanceAllowance — Phụ cấp chuyên cần (sau khi xét vi phạm)
+ *
+ * ─── NGUYÊN TẮC THEN CHỐT ────────────────────────────────────────────────────
+ * Đi muộn / về sớm KHÔNG trừ vào lương chính (lương T2-T7, OT, Lễ, CN).
+ * Lương lao động thực tế phải được bảo toàn 100%.
+ *
+ * Hình phạt DUY NHẤT cho vi phạm chuyên cần:
+ *   → Cắt giảm khoản "Phụ cấp chuyên cần" (attendance_allowance)
+ *   → Lương gốc KHÔNG bị động đến
+ *
+ * Thuật toán Tier:
+ *   Sắp tiers tăng dần theo maxViolationMins
+ *   Tìm tier đầu tiên: totalViolationMins <= tier.maxViolationMins
+ *   Áp dụng tier.pct × maxAllowance = allowance thực nhận
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * @param maxAllowance      Mức phụ cấp tối đa/tháng (từ salary_contracts)
+ * @param totalViolationMins Tổng phút đi muộn + về sớm trong tháng
+ * @param tiers             Bộ tiers cấu hình (mặc định: DEFAULT_ALLOWANCE_TIERS)
+ */
+export function calcAttendanceAllowance(
+  maxAllowance:       number,
+  totalViolationMins: number,
+  tiers:              AllowanceTier[] = DEFAULT_ALLOWANCE_TIERS,
+): PayrollLineItem {
+  if (maxAllowance <= 0) {
+    // Không có phụ cấp → trả line item bằng 0 (vẫn hiển thị để audit)
+    return {
+      code:        'ALLOWANCE_ATTENDANCE',
+      label:       'Phụ cấp chuyên cần',
+      formula:     'Không áp dụng (maxAllowance = 0)',
+      unit:        'tháng',
+      quantity:    1,
+      rate:        0,
+      multiplier:  0,
+      amount:      0,
+      isDeduction: false,
+    };
+  }
+
+  // Sắp tăng dần để tìm tier phù hợp
+  const sorted = [...tiers].sort((a, b) => a.maxViolationMins - b.maxViolationMins);
+  const tier   = sorted.find(t => totalViolationMins <= t.maxViolationMins)
+               ?? sorted[sorted.length - 1]; // fallback: tier cuối (thường pct=0)
+
+  const actualAllowance = round2(maxAllowance * tier.pct);
+  const fmt = (n: number) => n.toLocaleString('vi-VN');
+
+  let formula: string;
+  if (totalViolationMins === 0) {
+    formula = `${fmt(maxAllowance)} × 100% (không vi phạm)`;
+  } else if (tier.pct === 0) {
+    formula = `${fmt(maxAllowance)} × 0% (${totalViolationMins} phút vi phạm > ${sorted[sorted.length - 2]?.maxViolationMins ?? 0} phút → mất toàn bộ)`;
+  } else {
+    formula = `${fmt(maxAllowance)} × ${tier.pct * 100}% (${totalViolationMins} phút vi phạm — ${tier.label})`;
+  }
+
+  return {
+    code:        'ALLOWANCE_ATTENDANCE',
+    label:       `Phụ cấp chuyên cần (${tier.label})`,
+    formula,
+    unit:        'tháng',
+    quantity:    1,
+    rate:        actualAllowance,
+    multiplier:  tier.pct,
+    amount:      actualAllowance,
+    isDeduction: false,
+  };
+}
+
+/**
  * calcDeductions — Tổng hợp các khoản khấu trừ
+ *
+ * LƯU Ý: KHÔNG còn DEDUCT_LATE ở đây.
+ *         Đi muộn/về sớm chỉ ảnh hưởng calcAttendanceAllowance().
+ *         Lương gốc (T2-T7, OT, Lễ, CN) được bảo toàn 100%.
  */
 export function calcDeductions(
   officialSalary:   number,
   basicSalary:      number,
   unpaidLeaveDays:  number,
   absentDays:       number,
-  latePenaltyMins:  number,
   advanceDeduction: number,
   otherDeductions:  number,
   isPaidBhxh:       boolean,
 ): PayrollLineItem[] {
   const dayOfficial = dailyOfficialRate(officialSalary);
-  const hrOfficial  = dayOfficial / STANDARD_HOURS_PER_DAY;
   const lines: PayrollLineItem[] = [];
 
-  // Nghỉ không lương
+  // Nghỉ không lương (UNPAID LEAVE)
   if (unpaidLeaveDays > 0) {
     lines.push({
       code:        'DEDUCT_UNPAID',
@@ -477,7 +592,7 @@ export function calcDeductions(
     });
   }
 
-  // Vắng không phép
+  // Vắng không phép (ABSENT — mất lương cả ngày)
   if (absentDays > 0) {
     lines.push({
       code:        'DEDUCT_ABSENT',
@@ -492,23 +607,7 @@ export function calcDeductions(
     });
   }
 
-  // Trừ đi muộn (tính theo phút, đơn giá = hourlyOfficialRate / 60)
-  if (latePenaltyMins > 0) {
-    const latePenalty = round2((hrOfficial / 60) * latePenaltyMins);
-    lines.push({
-      code:        'DEDUCT_LATE',
-      label:       'Trừ: Đi muộn (phút phạt)',
-      formula:     `(${officialSalary.toLocaleString('vi-VN')} / 26 / 8 / 60) × ${latePenaltyMins} phút`,
-      unit:        'phút',
-      quantity:    latePenaltyMins,
-      rate:        round2(hrOfficial / 60),
-      multiplier:  1.0,
-      amount:      latePenalty,
-      isDeduction: true,
-    });
-  }
-
-  // BHXH nhân viên đóng: 8% + 1.5% + 1% = 10.5%
+  // BHXH nhân viên đóng: 8% + BHYT 1.5% + BHTN 1% = 10.5% basic_salary
   if (isPaidBhxh) {
     const bhxh = round2(basicSalary * 0.105);
     lines.push({
@@ -539,7 +638,7 @@ export function calcDeductions(
     });
   }
 
-  // Khác
+  // Khấu trừ khác
   if (otherDeductions > 0) {
     lines.push({
       code:        'DEDUCT_OTHER',
@@ -578,7 +677,10 @@ export function calculateMonthlyPayroll(input: PayrollInput): PayrollResult {
     sundayHours, sundayNightHours,
     holidayDaysOff, holidayWorkedWeekdayDays, holidayWorkedSundayDays,
     unpaidLeaveDays, absentDays,
-    latePenaltyMins, advanceDeduction, otherDeductions,
+    // Allowance fields (thay thế latePenaltyMins cũ)
+    attendanceAllowance, totalLateEarlyMins,
+    allowanceTiers,
+    advanceDeduction, otherDeductions,
     isPaidBhxh,
   } = input;
 
@@ -594,22 +696,53 @@ export function calculateMonthlyPayroll(input: PayrollInput): PayrollResult {
   if (totalOtHours > 40) {
     warnings.push(`Tổng OT ${totalOtHours}h/tháng — vượt ngưỡng 40h/tháng (Điều 107 BLLĐ 2019)`);
   }
+  if (totalLateEarlyMins > 0 && attendanceAllowance > 0) {
+    warnings.push(
+      `Vi phạm chuyên cần ${totalLateEarlyMins} phút — phụ cấp chuyên cần sẽ bị điều chỉnh theo tier`
+    );
+  }
 
-  // ── Tính từng khoản ─────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────────
+  // CÔNG THỨC LƯƠNG TỔNG CUỐI CÙNG (Final Salary Formula)
+  // ──────────────────────────────────────────────────────────────────────────────
+  // final_salary =
+  //   ① calcRegularPay()            → Lương T2-T7 + Phép năm
+  //   ② calcOtPay()                 → OT chiều/đêm T2-T7
+  //   ③ calcSundayPay()             → Chủ Nhật (giờ thường + đêm)
+  //   ④ calcHolidayPay()            → Ngày Lễ (nghỉ/làm T2-T7/làm CN)
+  //   ⑤ calcAttendanceAllowance()   → Phụ cấp chuyên cần (đã xét vi phạm)
+  //   - calcDeductions()            → Nghỉ KL + Vắng + BHXH + Tạm ứng
+  //
+  // ⚠️  Đi muộn/về sớm KHÔNG xuất hiện trong calcDeductions()
+  //     → Chỉ ảnh hưởng đến ⑤ (cắt phụ cấp chuyên cần)
+  //     → Lương gốc ①②③④ được bảo toàn tuyệt đối
+  // ──────────────────────────────────────────────────────────────────────────────
+
   const earningLines: PayrollLineItem[] = [
+    // ①
     ...calcRegularPay(officialSalary, regularWorkedDays, paidLeaveDays),
+    // ②
     ...calcOtPay(basicSalary, eveningOtHours, nightOtHours),
+    // ③
     ...calcSundayPay(basicSalary, sundayHours, sundayNightHours),
+    // ④
     ...calcHolidayPay(
       officialSalary, basicSalary,
       holidayDaysOff, holidayWorkedWeekdayDays, holidayWorkedSundayDays
+    ),
+    // ⑤ Phụ cấp chuyên cần — bị giảm/cắt nếu có vi phạm muộn/về sớm
+    calcAttendanceAllowance(
+      attendanceAllowance,
+      totalLateEarlyMins,
+      allowanceTiers ?? DEFAULT_ALLOWANCE_TIERS,
     ),
   ];
 
   const deductionLines = calcDeductions(
     officialSalary, basicSalary,
     unpaidLeaveDays, absentDays,
-    latePenaltyMins, advanceDeduction, otherDeductions,
+    // latePenaltyMins đã bị loại bỏ — không còn trừ phút muộn vào lương gốc
+    advanceDeduction, otherDeductions,
     isPaidBhxh,
   );
 

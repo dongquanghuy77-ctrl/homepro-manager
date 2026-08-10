@@ -73,7 +73,7 @@ const t2 = calculateMonthlyPayroll({
   sundayHours: 0, sundayNightHours: 0,
   holidayDaysOff: 0, holidayWorkedWeekdayDays: 0, holidayWorkedSundayDays: 0,
   unpaidLeaveDays: 0, absentDays: 0,
-  latePenaltyMins: 0, advanceDeduction: 0, otherDeductions: 0,
+  attendanceAllowance: 500_000, totalLateEarlyMins: 0, advanceDeduction: 0, otherDeductions: 0,
 });
 // grossEarnings trước BHXH = 22 × 461.538 = 10.153.846
 // BHXH NV = 8.400.000 × 10.5% = 882.000
@@ -94,7 +94,7 @@ const t3 = calculateMonthlyPayroll({
   sundayHours: 0, sundayNightHours: 0,
   holidayDaysOff: 0, holidayWorkedWeekdayDays: 0, holidayWorkedSundayDays: 0,
   unpaidLeaveDays: 0, absentDays: 0,
-  latePenaltyMins: 0, advanceDeduction: 0, otherDeductions: 0,
+  attendanceAllowance: 500_000, totalLateEarlyMins: 0, advanceDeduction: 0, otherDeductions: 0,
 });
 // 10 × 40.384 × 1.5 = 605.769
 const expectedOtEvening = Math.round(10 * hourlyBasicRate(BASIC) * 1.5);
@@ -112,7 +112,7 @@ const t4 = calculateMonthlyPayroll({
   sundayHours: 0, sundayNightHours: 0,
   holidayDaysOff: 0, holidayWorkedWeekdayDays: 0, holidayWorkedSundayDays: 0,
   unpaidLeaveDays: 0, absentDays: 0,
-  latePenaltyMins: 0, advanceDeduction: 0, otherDeductions: 0,
+  attendanceAllowance: 500_000, totalLateEarlyMins: 0, advanceDeduction: 0, otherDeductions: 0,
 });
 const expectedOtNight = Math.round(5 * hourlyBasicRate(BASIC) * 2.0);
 assert('OT night 5h', t4.grossEarnings, expectedOtNight, 5);
@@ -129,7 +129,7 @@ const t5 = calculateMonthlyPayroll({
   sundayHours: 0, sundayNightHours: 4,
   holidayDaysOff: 0, holidayWorkedWeekdayDays: 0, holidayWorkedSundayDays: 0,
   unpaidLeaveDays: 0, absentDays: 0,
-  latePenaltyMins: 0, advanceDeduction: 0, otherDeductions: 0,
+  attendanceAllowance: 500_000, totalLateEarlyMins: 0, advanceDeduction: 0, otherDeductions: 0,
 });
 const expectedSundayNight = Math.round(4 * hourlyBasicRate(BASIC) * 4.0);
 assert('Sunday night 4h × 4.0', t5.grossEarnings, expectedSundayNight, 5);
@@ -146,7 +146,7 @@ const t6 = calculateMonthlyPayroll({
   sundayHours: 0, sundayNightHours: 0,
   holidayDaysOff: 2, holidayWorkedWeekdayDays: 0, holidayWorkedSundayDays: 0,
   unpaidLeaveDays: 0, absentDays: 0,
-  latePenaltyMins: 0, advanceDeduction: 0, otherDeductions: 0,
+  attendanceAllowance: 500_000, totalLateEarlyMins: 0, advanceDeduction: 0, otherDeductions: 0,
 });
 const expectedHolidayOff = Math.round((BASIC / 26) * 2);
 assert('Lễ nghỉ 2 ngày (basic/26)', t6.grossEarnings, expectedHolidayOff, 5);
@@ -163,7 +163,7 @@ const t7 = calculateMonthlyPayroll({
   sundayHours: 0, sundayNightHours: 0,
   holidayDaysOff: 0, holidayWorkedWeekdayDays: 1, holidayWorkedSundayDays: 0,
   unpaidLeaveDays: 0, absentDays: 0,
-  latePenaltyMins: 0, advanceDeduction: 0, otherDeductions: 0,
+  attendanceAllowance: 500_000, totalLateEarlyMins: 0, advanceDeduction: 0, otherDeductions: 0,
 });
 const expectedHolidayWeekday = Math.round((OFFICIAL / 26) * 1 * 2.0);
 assert('Lễ T2-T7 1 ngày (official/26×2)', t7.grossEarnings, expectedHolidayWeekday, 5);
@@ -179,7 +179,7 @@ const t8 = calculateMonthlyPayroll({
   sundayHours: 16, sundayNightHours: 0,
   holidayDaysOff: 1, holidayWorkedWeekdayDays: 0, holidayWorkedSundayDays: 0,
   unpaidLeaveDays: 0, absentDays: 1,
-  latePenaltyMins: 30, advanceDeduction: 1_000_000, otherDeductions: 0,
+  attendanceAllowance: 500_000, totalLateEarlyMins: 0, advanceDeduction: 1_000_000, otherDeductions: 0,
 });
 
 console.log('\n' + formatPayrollSummary(t8));
