@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import * as XLSX from 'xlsx';
 import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
 import {
@@ -147,8 +147,20 @@ export async function POST(request: NextRequest) {
     for (const rawRow of processedRows) {
       const row = rawRow as Record<string, unknown>;
 
-      const code        = getField(row, colMap.fieldToColumn, 'code');
+      // ── BƯỚC 0: Chuẩn hóa mã dự án — trim + UPPER ────────────────────────
+      // Bất kể file Excel gửi "da-ak-260719 " hay "DA-AK-260719"
+      // → luôn so khớp với DB (vốn lưu dạng UPPER)
+      const codeRaw  = getField(row, colMap.fieldToColumn, 'code');
+      const code     = codeRaw.trim().toUpperCase();
       const projectName = getField(row, colMap.fieldToColumn, 'projectName');
+
+      // Log mắt xích nếu phát hiện code bị lệch khỏi chuẩn
+      if (codeRaw !== code) {
+        console.warn(
+          `[/api/import] ⚠️  Code lệch chuẩn — raw: "${codeRaw}" → normalized: "${code}"`,
+          `(dòng ${processedRows.indexOf(rawRow) + 1})`
+        );
+      }
 
       if (!code || !projectName) {
         skippedRows++;
@@ -164,15 +176,24 @@ export async function POST(request: NextRequest) {
       const pDeadline     = getField(row, colMap.fieldToColumn, 'deadline')      || null;
       const pNotes        = getField(row, colMap.fieldToColumn, 'projectNotes')  || '';
 
-      // Tìm hoặc tạo project
-      let projectId = projectCache.get(code);
+      // Tìm hoặc tạo project — so khớp CASE-INSENSITIVE
+      let projectId = projectCache.get(code);  // cache key là UPPER rồi
       if (!projectId) {
         try {
-          const [existing] = await db.select().from(projects).where(eq(projects.code, code));
+          // UPPER(TRIM(projects.code)) = code (cũng đã UPPER)
+          // → match được cả DB lưu thường lẫn DB lưu HOA
+          const [existing] = await db
+            .select()
+            .from(projects)
+            .where(eq(sql`UPPER(TRIM(${projects.code}))`, code));
+
           if (existing) {
             projectId = existing.id;
             existingProjectsCount++;   // ❤️ Đếm riêng: dự án đã có sẵn
+            console.log(`[/api/import] ✅ Dự án tồn tại: "${code}" → id=${existing.id}`);
           } else {
+            // Không tìm thấy — tạo mới với code đã được chuẩn hóa (UPPER)
+            console.log(`[/api/import] ➕ Tạo dự án mới: "${code}"`);
             const [newProj] = await db.insert(projects).values({
               code, name: projectName, customer, manager, location,
               contractValue, startDate: pStartDate, deadline: pDeadline,
@@ -183,6 +204,7 @@ export async function POST(request: NextRequest) {
           }
           projectCache.set(code, projectId);
         } catch (e) {
+          console.error(`[/api/import] ❌ Lỗi tra cứu dự án "${code}": ${String(e)}`);
           parseErrors.push(`Lỗi tạo dự án "${code}": ${String(e)}`);
           continue;
         }
