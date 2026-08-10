@@ -24,6 +24,14 @@ export const users = pgTable('users', {
   managerId: integer('manager_id'),                      // FK to users.id (self-referential)
   employeeStatus: text('employee_status').default('ACTIVE'), // ACTIVE | INACTIVE | ON_LEAVE
   note: text('note'),
+  // ── SPRINT 3 — Lương (Payroll Module) ────────────────────────────────────
+  // official_salary: Lương chính thức (bao gồm phụ cấp) — dùng tính lương ngày thường
+  //   Công thức: official_salary / 26 = đơn giá 1 ngày công (T2-T7)
+  // basic_salary: Lương cơ bản (mức BHXH đóng) — dùng tính OT, Chủ nhật, Lễ
+  //   Thường = 60-70% official_salary (theo Thông tư 23/2015/TT-BLĐTBXH)
+  //   Công thức: basic_salary / 26 / 8 = đơn giá 1 giờ làm thêm
+  officialSalary: real('official_salary').default(0),  // VND/tháng
+  basicSalary:    real('basic_salary').default(0),     // VND/tháng
   // ─────────────────────────────────────────────────────────────
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
