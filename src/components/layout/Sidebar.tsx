@@ -85,9 +85,24 @@ const NAV_ITEMS: NavItem[] = [
     id: 'hr-reports', label: 'Báo cáo NS', icon: 'FileBarChart2', href: '/hr/reports',
     sprint: 6, managerOnly: true, groupId: 'hr-group',
   },
+
+  // ── Xưởng Sản Xuất — Collapsible Group ───────────────────────────────────
+  {
+    id: 'xuong', label: 'Xưởng SX', icon: 'Factory', href: '/bom',
+    sprint: 7, managerOnly: true,
+    isGroupHeader: true, groupId: 'xuong-group',
+  },
+  {
+    id: 'bom',      label: 'BOQ / BOM',    icon: 'ClipboardList', href: '/bom',
+    sprint: 7, managerOnly: true, groupId: 'xuong-group',
+  },
+  {
+    id: 'tracking', label: 'Theo dõi QR',  icon: 'ScanLine',     href: '/tracking',
+    sprint: 7, managerOnly: true, groupId: 'xuong-group',
+  },
 ];
 
-const ACTIVE_SPRINT = 6;
+const ACTIVE_SPRINT = 7;
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN:      'Quản trị viên',
@@ -98,7 +113,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 // ─── HR paths that belong to the hr-group ────────────────────────────────────
-const HR_CHILD_PATHS = ['/employees', '/attendance', '/leave', '/overtime', '/hr/reports'];
+const HR_CHILD_PATHS    = ['/employees', '/attendance', '/leave', '/overtime', '/hr/reports'];
+const XUONG_CHILD_PATHS = ['/bom', '/tracking'];
+
 
 export default function Sidebar() {
   const pathname  = usePathname();
@@ -113,10 +130,14 @@ export default function Sidebar() {
 
   // Auto-expand the HR group when navigating to an HR sub-page
   useEffect(() => {
-    const inHR = HR_CHILD_PATHS.some(p => pathname.startsWith(p)) || pathname === '/hr';
-    if (inHR) {
-      setExpandedGroups(prev => new Set([...prev, 'hr-group']));
-    }
+    const inHR    = HR_CHILD_PATHS.some(p => pathname.startsWith(p)) || pathname === '/hr';
+    const inXuong = XUONG_CHILD_PATHS.some(p => pathname.startsWith(p));
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (inHR)    next.add('hr-group');
+      if (inXuong) next.add('xuong-group');
+      return next;
+    });
   }, [pathname]);
 
   // Keyboard shortcut Ctrl+K
