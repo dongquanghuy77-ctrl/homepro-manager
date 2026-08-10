@@ -15,7 +15,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const id = Number(params.id);
   if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
-  if (session.role !== 'ADMIN' && session.role !== 'MANAGER' && session.id !== id) {
+  // ADMIN, MANAGER, VIEWER \u0111\u01b0\u1ee3c xem m\u1ecdi h\u1ed3 s\u01a1; WORKER/SUPERVISOR ch\u1ec9 xem c\u1ee7a m\u00ecnh
+  if (session.role !== 'ADMIN' && session.role !== 'MANAGER' && session.role !== 'VIEWER' && session.id !== id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -21,6 +21,22 @@ interface Employee {
   active: boolean;
 }
 
+// ── Lấy role người dùng hiện tại (cho VIEWER read-only UI) ─────────────────
+async function getCurrentRole(): Promise<string> {
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('homepro_session')?.value;
+  const cookieHeader  = sessionCookie ? `homepro_session=${sessionCookie}` : '';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  try {
+    const res = await fetch(`${baseUrl}/api/auth/me`, {
+      headers: { Cookie: cookieHeader }, cache: 'no-store',
+    });
+    if (!res.ok) return '';
+    const data = await res.json();
+    return data.user?.role ?? '';
+  } catch { return ''; }
+}
+
 // ── Data fetching ─────────────────────────────────────────────────────────────
 async function getEmployees(searchParams: Record<string, string | string[] | undefined>): Promise<Employee[]> {
   const cookieStore = cookies();
@@ -81,6 +97,8 @@ export default async function EmployeesPage({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const employees = await getEmployees(searchParams);
+  const role      = await getCurrentRole();
+  const isViewer  = role === 'VIEWER';
 
   return (
     <div className="page-container">
@@ -99,7 +117,7 @@ export default async function EmployeesPage({
       </div>
 
       {/* Search & Filter + Add button */}
-      <EmployeeFilters />
+      <EmployeeFilters isViewer={isViewer} />
 
       {/* Employee Table */}
       <div className="card" style={{ marginTop: '1.5rem' }}>

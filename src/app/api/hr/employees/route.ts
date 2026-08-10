@@ -3,14 +3,14 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
-import { requireAuth, ADMIN_ONLY, ADMIN_OR_MANAGER } from '@/lib/auth';
+import { requireAuth, ADMIN_ONLY, ADMIN_OR_MANAGER, ALL_ROLES } from '@/lib/auth';
 import { eq, or, ilike, and, desc } from 'drizzle-orm';
 import { generateEmployeeCode, writeHrAuditLog } from '@/lib/hr';
 import bcrypt from 'bcryptjs';
 
-// ─── GET: Danh sách nhân viên (ADMIN, MANAGER) ───────────────────────────────
+// ─── GET: Danh sách nhân viên (VIEWER được xem, không thêm/sửa) ───────────────
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
   try {

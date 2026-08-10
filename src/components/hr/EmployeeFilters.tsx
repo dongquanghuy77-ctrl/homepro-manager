@@ -13,7 +13,7 @@ const DEPARTMENTS = [
   'Khác',
 ] as const;
 
-export default function EmployeeFilters() {
+export default function EmployeeFilters({ isViewer = false }: { isViewer?: boolean }) {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,9 +50,17 @@ export default function EmployeeFilters() {
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="card-title" style={{ margin: 0 }}>Tìm kiếm & Lọc</h2>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-            + Thêm nhân viên
-          </button>
+          {isViewer ? (
+            <span style={{ fontSize: 12, color: 'var(--color-warning)',
+              background: 'rgba(251,191,36,.12)', border: '1px solid rgba(251,191,36,.3)',
+              borderRadius: 6, padding: '4px 10px' }}>
+              👁️ Chế độ xem
+            </span>
+          ) : (
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+              + Thêm nhân viên
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', alignItems: 'flex-end' }}>
@@ -104,7 +112,7 @@ export default function EmployeeFilters() {
         </form>
       </div>
 
-      {isModalOpen && (
+      {!isViewer && isModalOpen && (
         <AddEmployeeModal onClose={() => setIsModalOpen(false)} />
       )}
     </>
