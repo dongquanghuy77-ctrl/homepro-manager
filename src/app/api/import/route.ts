@@ -9,6 +9,7 @@ import {
   runEncodingTest, type ColumnMapResult,
 } from '@/lib/import-parser';
 import { detectHeaderRow } from '@/lib/boq-parser';
+import { classifyTask, calcTaskDeadline } from '@/lib/work-order-router';
 
 // ── Trả lỗi 422 chuẩn với chi tiết cho UI ───────────────────────────────────
 function reject422(reason: string, details: string[], columnLog?: string[]) {
@@ -249,11 +250,22 @@ export async function POST(request: NextRequest) {
 
       if (taskTitle && projectId) {
         try {
-          // Nếu "Hạng mục" đã được dùng làm taskTitle, category để trống → dùng default
-          const category    = getField(row, colMap.fieldToColumn, 'category')     || 'Thi công';
-          const assignee    = getField(row, colMap.fieldToColumn, 'assignee')     || 'Huy';
-          const tStartDate  = getField(row, colMap.fieldToColumn, 'taskStartDate')|| null;
-          const tEndDate    = getField(row, colMap.fieldToColumn, 'taskEndDate')  || null;
+          // ── BƯỚC 1: Auto-Routing — Keyword Tokenization Matching ─────────
+          // classifyTask(title) → { workGroup, category, assignee, matchedKeyword }
+          // CẤM gán cứng default 'Thi công' hay 'Huy' cho mọi task
+          const routing = classifyTask(taskTitle);
+
+          // Ưu tiên: giá trị trong file Excel → fallback về Routing Engine
+          const category = getField(row, colMap.fieldToColumn, 'category') || routing.category;
+          const assignee = getField(row, colMap.fieldToColumn, 'assignee') || routing.assignee;
+
+          // ── BƯỚC 2: Critical Path Deadline ───────────────────────────────
+          // Tính deadline dựa vào project.deadline và workGroup
+          const tStartDate = getField(row, colMap.fieldToColumn, 'taskStartDate') || null;
+          const tEndDate   = getField(row, colMap.fieldToColumn, 'taskEndDate')   || null;
+          // pDeadline đã được đọc từ file hoặc null — dùng để tính task deadline
+          const taskDeadline = calcTaskDeadline(pDeadline, routing.workGroup);
+
           const priorityRaw = getField(row, colMap.fieldToColumn, 'priority').toUpperCase();
           const statusRaw   = getField(row, colMap.fieldToColumn, 'status').toUpperCase();
           const progressRaw = parseInt(getField(row, colMap.fieldToColumn, 'progress').replace(/[^0-9]/g, '')) || 0;
@@ -262,8 +274,8 @@ export async function POST(request: NextRequest) {
           // Chuẩn hóa priority
           let priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
           const pNorm = priorityRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
-          if (pNorm.includes('cao') || pNorm === 'high')   priority = 'HIGH';
-          else if (pNorm.includes('thap') || pNorm === 'low') priority = 'LOW';
+          if (pNorm.includes('cao') || pNorm === 'high')        priority = 'HIGH';
+          else if (pNorm.includes('thap') || pNorm === 'low')  priority = 'LOW';
 
           // Chuẩn hóa status
           let status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'OVERDUE' = 'NOT_STARTED';
@@ -272,15 +284,21 @@ export async function POST(request: NextRequest) {
           else if (sNorm.includes('dang') || sNorm === 'in_progress' || progressRaw > 0)    status = 'IN_PROGRESS';
           else if (sNorm.includes('tam dung') || sNorm === 'paused')                        status = 'PAUSED';
 
+          console.log(
+            `[/api/import] 🧩 Auto-Route: "${taskTitle}" → [${routing.workGroup}]`,
+            `category="${category}" assignee="${assignee}"`,
+            `deadline=${taskDeadline ?? 'null'} (keyword: "${routing.matchedKeyword ?? 'none'}")`
+          );
+
           // ✔ projectId đã vượt qua guard Number.isInteger() ở trên
-          //    Đây là số nguyên Integer ID từ DB, KHÔNG phải biến "code" (string)
           await db.insert(tasks).values({
-            projectId,          // ✔ Integer: existing.id hoặc newProj.id
-            category,
-            title: taskTitle,
-            assignee,
+            projectId,              // ✔ Integer: existing.id hoặc newProj.id
+            category,               // ✔ Routing Engine hoặc Excel
+            title:     taskTitle,
+            assignee,               // ✔ Routing Engine hoặc Excel
             startDate: tStartDate,
             endDate:   tEndDate,
+            deadline:  taskDeadline,  // ✔ Critical Path tự động tính
             status,
             priority,
             progress: status === 'COMPLETED' ? 100 : progressRaw,
@@ -289,7 +307,7 @@ export async function POST(request: NextRequest) {
           globalTaskIndex++;
           createdTasksCount++;
           console.log(
-            `[/api/import] 📋 Task #${globalTaskIndex} (auto-index) → "${taskTitle}" | projectId=${projectId} | dự án=${code}`
+            `[/api/import] 📋 Task #${globalTaskIndex} → "${taskTitle}" | projectId=${projectId} | dự án=${code}`
           );
         } catch (e) {
           // ❌ Log rõ ràng ra Vercel Logs — không được để lỗi âm thầm
