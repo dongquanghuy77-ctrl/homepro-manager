@@ -269,8 +269,56 @@ export const hrAuditLogs = pgTable('hr_audit_logs', {
 });
 
 // ============================================================
+// PRODUCTION BOM LINES (B\u01af\u1edaC 2: C\u1ea5u ki\u1ec7n s\u1ea3n xu\u1ea5t theo Zone BOQ)
+// Ph\u00e2n r\u00e3 nguy\u00ean v\u1eadt li\u1ec7u: v\u00e1n MDF, n\u1eb9p T inox, ch\u1ec9 d\u00e1n c\u1ea1nh, b\u1ea3n l\u1ec1, \u0111\u00e8n LED
+// ============================================================
+export const productionBomLines = pgTable('production_bom_lines', {
+  id:              serial('id').primaryKey(),
+  projectId:       integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  zoneId:          text('zone_id').notNull(),           // ZN-PH-01, ZN-PLV-02, ...
+  zoneName:        text('zone_name'),                   // Ph\u00f2ng h\u1ecd p, Ph\u00f2ng l\u00e0m vi\u1ec7c, ...
+  productName:     text('product_name').notNull(),      // T\u00ean s\u1ea3n ph\u1ea9m (sau Levenshtein)
+  materialCode:    text('material_code'),               // M\u00e3 v\u00e1n MDF/inox/...
+  materialId:      integer('material_id').references(() => materials.id, { onDelete: 'set null' }),
+  unit:            text('unit').notNull().default('c\u00e1i'), // m2, md, c\u00e1i, h\u1ec7
+  qty:             real('qty').notNull().default(0),
+  unitPrice:       real('unit_price').default(0),
+  total:           real('total').default(0),
+  supplyType:      text('supply_type').notNull().default('HOMEPRO_PRODUCTION'), // INSTALLATION_ONLY | HOMEPRO_PRODUCTION
+  note:            text('note'),
+  sttInZone:       integer('stt_in_zone'),              // S\u1ed1 th\u1ee9 t\u1ef1 trong ph\u00e2n khu
+  createdAt:       timestamp('created_at').defaultNow(),
+  updatedAt:       timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
+// MATERIAL TRACKING LOGS (B\u01af\u1edaC 2: Qu\u00e9t m\u00e3 QR theo c\u00f4ng \u0111o\u1ea1n t\u1ea1i x\u01b0\u1edfng)
+// Vòng đời: C\u1eaft v\u00e1n CNC \u2192 D\u00e1n c\u1ea1nh \u2192 \u0110\u00f3ng g\u00f3i \u2192 L\u1eafp \u0111\u1eb7t t\u1ea1i c\u00f4ng tr\u00ecnh
+// ============================================================
+export const materialTrackingLogs = pgTable('material_tracking_logs', {
+  id:            serial('id').primaryKey(),
+  projectId:     integer('project_id').references(() => projects.id, { onDelete: 'set null' }),
+  bomLineId:     integer('bom_line_id').references(() => productionBomLines.id, { onDelete: 'set null' }),
+  qrCode:        text('qr_code'),                       // M\u00e3 QR g\u00e1n tr\u00ean c\u1ea5u ki\u1ec7n
+  stage:         text('stage').notNull(),               // CNC | DAN_CANH | DONG_GOI | LAP_DAT
+  stageLabel:    text('stage_label'),                   // C\u1eaft v\u00e1n CNC | D\u00e1n c\u1ea1nh | \u0110\u00f3ng g\u00f3i | L\u1eafp \u0111\u1eb7t
+  scannedByName: text('scanned_by_name'),               // T\u00ean nh\u00e2n vi\u00ean qu\u00e9t
+  scannedById:   integer('scanned_by_id').references(() => users.id, { onDelete: 'set null' }),
+  location:      text('location'),                      // "lat,lon" ho\u1eb7c t\u00ean khu v\u1ef1c
+  note:          text('note'),
+  scannedAt:     timestamp('scanned_at').defaultNow(),
+});
+
+// ============================================================
 // TYPE EXPORTS
 // ============================================================
+export type ProductionBomLine    = typeof productionBomLines.$inferSelect;
+export type NewProductionBomLine = typeof productionBomLines.$inferInsert;
+export type MaterialTrackingLog    = typeof materialTrackingLogs.$inferSelect;
+export type NewMaterialTrackingLog = typeof materialTrackingLogs.$inferInsert;
+export type SupplyType = 'INSTALLATION_ONLY' | 'HOMEPRO_PRODUCTION';
+export type ProductionStage = 'CNC' | 'DAN_CANH' | 'DONG_GOI' | 'LAP_DAT';
+
 export type Project = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;
 export type Task = typeof tasks.$inferSelect;

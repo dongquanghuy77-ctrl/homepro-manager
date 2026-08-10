@@ -139,3 +139,134 @@ export function calculateLeaveDays(startDate: string, endDate: string): number {
   const diffTime = end.getTime() - start.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 }
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// BƯỚC 4: INTERVAL SPLITTING ALGORITHM (Tính OT theo Luật Lao Động VN)
+// Tham chiếu: Bộ Luật Lao động 2019, Điều 97-98 và Nghị định 12/2022/NĐ-CP
+// ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+export type DayType = 'WEEKDAY' | 'SUNDAY' | 'HOLIDAY';
+
+export interface OTBreakdown {
+  regularHours:  number;  // Giờ hành chính (x1.0)
+  otDayHours:    number;  // Tăng ca ban ngày (x1.5)
+  otNightHours:  number;  // Tăng ca ban đêm (x2.1)
+  regularPay:    number;  // VNĐ
+  otDayPay:      number;  // VNĐ
+  otNightPay:    number;  // VNĐ
+  totalPay:      number;  // VNĐ
+  dayType:       DayType;
+  breakMinutes:  number;  // Phút nghỉ đã trừ
+}
+
+// Cấu hình ca làm đặc trưng ngành nội thất:
+//   - Ca cơ bản: 08:00 – 17:30 (9.5h đồng hồ), nghỉ 12:00–13:30 (1.5h) = 8h làm thực tế
+//   - OT ngày: 17:30 – 22:00 (4.5h)  × 1.5
+//   - OT đêm: 22:00 trở đi    × 2.1 (150% OT + 30% đêm + 30% OT đêm)
+//   - Chủ nhật:                   × 2.0 áp dụng cho tất cả giờ
+//   - Ngày lễ quốc gia:             × 3.0
+
+const OT_SHIFT = {
+  regularStart:  8 * 60,       // 08:00 = 480 phút
+  regularEnd:    17 * 60 + 30, // 17:30 = 1050 phút
+  breakStart:    12 * 60,      // 12:00 = 720 phút
+  breakEnd:      13 * 60 + 30, // 13:30 = 810 phút  (1.5h nghỉ trưa)
+  otNightStart:  22 * 60,      // 22:00 = 1320 phút
+  coefRegular:   1.0,
+  coefOTDay:     1.5,
+  coefOTNight:   2.1,          // Bao gồm OT thường 150% + PC đêm 30% + PC OT đêm 30%
+  coefSunday:    2.0,
+  coefHoliday:   3.0,
+} as const;
+
+export function calculateOTEarnings(
+  checkIn:     Date,
+  checkOut:    Date,
+  hourlyRate:  number,          // VNĐ/giờ (ví dụ: lương ngày 600k / 8h = 75,000)
+  dayType:     DayType = 'WEEKDAY'
+): OTBreakdown {
+  const cinMin  = checkIn.getHours()  * 60 + checkIn.getMinutes();
+  const coutMin = checkOut.getHours() * 60 + checkOut.getMinutes();
+
+  const { regularStart, regularEnd, breakStart, breakEnd, otNightStart } = OT_SHIFT;
+
+  // ─ Giờ hành chính (regular) ─
+  const regS = Math.max(cinMin,  regularStart);
+  const regE = Math.min(coutMin, regularEnd);
+  let regularRawMin = Math.max(0, regE - regS);
+
+  // Trừ nghỉ trưa nếu trung với ca làm
+  const breakMin = Math.max(0, Math.min(regE, breakEnd) - Math.max(regS, breakStart));
+  regularRawMin  = Math.max(0, regularRawMin - breakMin);
+  const regularHours = regularRawMin / 60;
+
+  // ─ OT ban ngày: regularEnd → otNightStart ─
+  let otDayHours = 0;
+  if (coutMin > regularEnd) {
+    otDayHours = (Math.min(coutMin, otNightStart) - regularEnd) / 60;
+    otDayHours = Math.max(0, otDayHours);
+  }
+
+  // ─ OT ban đêm: otNightStart trở đi ─
+  let otNightHours = 0;
+  if (coutMin > otNightStart) {
+    otNightHours = (coutMin - otNightStart) / 60;
+  }
+
+  // ─ Hệ số theo loại ngày ─
+  const regCoef   = dayType === 'HOLIDAY' ? OT_SHIFT.coefHoliday
+                  : dayType === 'SUNDAY'  ? OT_SHIFT.coefSunday
+                  : OT_SHIFT.coefRegular;
+
+  const otDayCoef = dayType === 'HOLIDAY' ? OT_SHIFT.coefHoliday
+                  : dayType === 'SUNDAY'  ? OT_SHIFT.coefSunday
+                  : OT_SHIFT.coefOTDay;
+
+  // OT Night luôn x2.1 (phân biệt với hệ số ngày chủ nhật/lễ ở giờ hành chính)
+  const otNightCoef = OT_SHIFT.coefOTNight;
+
+  const regularPay  = Math.round(regularHours  * hourlyRate * regCoef);
+  const otDayPay    = Math.round(otDayHours    * hourlyRate * otDayCoef);
+  const otNightPay  = Math.round(otNightHours  * hourlyRate * otNightCoef);
+
+  return {
+    regularHours:  Math.round(regularHours  * 100) / 100,
+    otDayHours:    Math.round(otDayHours    * 100) / 100,
+    otNightHours:  Math.round(otNightHours  * 100) / 100,
+    regularPay,
+    otDayPay,
+    otNightPay,
+    totalPay:      regularPay + otDayPay + otNightPay,
+    dayType,
+    breakMinutes:  breakMin,
+  };
+}
+
+// ── Unit Test BƯỚC 4 (kiểm tra chính xác tới từng đồng) ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// Test-case: Lương ngày 600,000 VNĐ (75,000/h), làm 08:00–23:00 ngày thường
+// Expected output: 1,263,750 VNĐ
+export function runOTUnitTest(): { passed: boolean; results: string[]; breakdown: OTBreakdown } {
+  const HOURLY = 75_000;    // 600k / 8h
+
+  // Ngày 2000-01-03 (thứ 2, ngày thường)
+  const checkIn  = new Date(2000, 0, 3, 8,  0, 0);
+  const checkOut = new Date(2000, 0, 3, 23, 0, 0);
+
+  const bd = calculateOTEarnings(checkIn, checkOut, HOURLY, 'WEEKDAY');
+  const results: string[] = [];
+
+  results.push(`Regular: ${bd.regularHours}h × ${HOURLY} × 1.0 = ${bd.regularPay.toLocaleString()} VNĐ`);
+  results.push(`OT Day:  ${bd.otDayHours}h × ${HOURLY} × 1.5 = ${bd.otDayPay.toLocaleString()} VNĐ`);
+  results.push(`OT Night:${bd.otNightHours}h × ${HOURLY} × 2.1 = ${bd.otNightPay.toLocaleString()} VNĐ`);
+  results.push(`──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────`);
+  results.push(`Tổng: ${bd.totalPay.toLocaleString()} VNĐ`);
+  results.push(`Expected: 1,263,750 VNĐ`);
+
+  const passed = bd.totalPay === 1_263_750
+    && bd.regularHours  === 8
+    && bd.otDayHours    === 4.5
+    && bd.otNightHours  === 1;
+
+  results.push(`[${passed ? 'PASS ✅' : 'FAIL ❌'}] Kiểm tra đầu ra`);
+  return { passed, results, breakdown: bd };
+}

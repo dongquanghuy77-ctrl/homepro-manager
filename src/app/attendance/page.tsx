@@ -233,6 +233,10 @@ function AddAttendanceModal({
   const [location,    setLocation]    = useState<string | null>(null);
   const [locStatus,   setLocStatus]   = useState<'idle'|'loading'|'ok'|'denied'|'error'>('idle');
 
+  // BƯỚC 5: Idempotency Token — ngăn gửi trùng yêu cầu do mạng lag / bấm nhiều lần
+  const [idempotencyKey] = useState(() => `atd-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const [submitCooldown, setSubmitCooldown] = useState(false); // block 10s sau khi bấm
+
   // ── GPS: Lấy tọa độ (phân biệt lỗi theo GeolocationPositionError.code) ────
   const getLocation = () => {
     if (!navigator.geolocation) { setLocStatus('error'); return; }
@@ -290,8 +294,18 @@ function AddAttendanceModal({
     return () => clearTimeout(t);
   }, [selEmployee, selDate]);
 
-  // ── FIX-7: Fill current VN time ───────────────────────────────────────────
-  const fillNow = (field: 'in' | 'out') => {
+  // BƯỚC 5: fillNow gọi /api/server-time (chống gian lận giờ)
+  const fillNow = async (field: 'in' | 'out') => {
+    try {
+      const res = await fetch('/api/server-time');
+      if (res.ok) {
+        const { time } = await res.json() as { time: string };
+        if (field === 'in') setCheckIn(time);
+        else setCheckOut(time);
+        return;
+      }
+    } catch { /* fallback */ }
+    // Fallback nếu server không phản hồi
     const fmt = new Intl.DateTimeFormat('en-CA', {
       hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Ho_Chi_Minh',
     });
@@ -301,9 +315,10 @@ function AddAttendanceModal({
     else setCheckOut(t);
   };
 
-  // ── Submit ────────────────────────────────────────────────────────────────
+  // ── Submit + Idempotency (BƯỚC 5) ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitCooldown) return; // Chống spam submit
     setError('');
     if (!selEmployee) { setError('Vui lòng chọn nhân viên'); return; }
     if (!selDate)      { setError('Vui lòng chọn ngày');      return; }
@@ -314,17 +329,21 @@ function AddAttendanceModal({
       setError(`Trạng thái "${label}" yêu cầu nhập Giờ vào`);
       return;
     }
+    // Khóa nút 10s — ngăn gửi trùng do mạng lag
+    setSubmitCooldown(true);
+    setTimeout(() => setSubmitCooldown(false), 10_000);
     setLoading(true);
     try {
       const res = await fetch('/api/hr/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          employeeId: selEmployee,
-          workDate:   selDate,
-          status:     selStatus,
-          note:       note.trim() || null,
-          location:   location,
+          employeeId:     selEmployee,
+          workDate:       selDate,
+          status:         selStatus,
+          note:           note.trim() || null,
+          location:       location,
+          idempotencyKey, // BƯỚC 5: Token độc nhất chống trùng request
           // +07:00 ensures server stores correct UTC equivalent of VN local time
           checkIn:  checkIn  ? `${selDate}T${checkIn}:00+07:00`  : null,
           checkOut: checkOut ? `${selDate}T${checkOut}:00+07:00` : null,
@@ -544,9 +563,9 @@ function AddAttendanceModal({
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
               <button type="button" className="btn btn-ghost" onClick={onClose} disabled={loading}>Hủy</button>
               <button type="submit" className="btn btn-primary"
-                disabled={loading || !!timeError || isViewer}
-                title={isViewer ? 'Tài khoản xem không thể thực hiện tác vụ này' : ''}>
-                {isViewer ? '🔒 Chỉ xem' : (loading ? 'Đang lưu...' : '+ Lưu chấm công')}
+                disabled={loading || !!timeError || isViewer || submitCooldown}
+                title={isViewer ? 'T\u00e0i kho\u1ea3n xem kh\u00f4ng th\u1ec3 th\u1ef1c hi\u1ec7n t\u00e1c v\u1ee5 n\u00e0y' : submitCooldown ? 'Vui l\u00f2ng ch\u1edd 10 gi\u00e2y tr\u01b0\u1edbc khi g\u1eedi l\u1ea1i' : ''}>
+                {isViewer ? '\ud83d\udd12 Ch\u1ec9 xem' : loading ? '\u0110ang l\u01b0u...' : submitCooldown ? '\u23f3 \u0110\u1ee3i...' : '+ L\u01b0u ch\u1ea5m c\u00f4ng'}
               </button>
             </div>
           </div>
