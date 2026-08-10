@@ -267,12 +267,43 @@ function buildCalcNote(params: {
  * @returns         DailyCalculationResult — dữ liệu để upsert daily_calculations
  */
 export function calculateDailyAttendance(
-  record:  AttendanceInput,
+  record:  AttendanceInput & { status?: string; leaveRequestId?: number | null },
   rule:    ShiftRuleInput | null,
   options: { isPreliminary: boolean } = { isPreliminary: true }
 ): DailyCalculationResult {
 
   const calculatedAt = new Date();
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // SPRINT 2 — EARLY RETURN: Nghỉ phép hợp lệ (ON_LEAVE / SICK_LEAVE)
+  //
+  // Khi HR duyệt đơn nghỉ phép → API upsert attendance.status = 'ON_LEAVE'
+  // Rule Engine trả về 0 phạt và workCoefficient=1.0 → hưởng nguyên lương
+  // KPI dashboard đếm ON_LEAVE là "có phép" (không phải ABSENT)
+  // ══════════════════════════════════════════════════════════════════════════════
+  if (record.status === 'ON_LEAVE' || record.status === 'SICK_LEAVE') {
+    return {
+      employeeId:        record.employeeId,
+      workDate:          record.workDate,
+      shiftRuleId:       record.shiftRuleId,
+      scheduledStart:    null,
+      scheduledEnd:      null,
+      workedMinutes:     0,
+      standardMinutes:   rule ? roundMinutes(rule.standardHours * 60) : 480,
+      lateMinutes:       0,        // KHÔNG phạt muộn
+      earlyLeaveMinutes: 0,        // KHÔNG phạt về sớm
+      otMinutes:         0,
+      absentMinutes:     0,        // KHÔNG tính vắng (mấu chốt!)
+      workCoefficient:   1.0,      // Hưởng nguyên lương (Payroll)
+      otCoefficient:     0,
+      status:            record.status as AttendanceStatus,
+      calculatedAt,
+      calculationNote:   record.status === 'ON_LEAVE'
+        ? `✅ Nghỉ phép hợp lệ (leaveRequestId: ${record.leaveRequestId ?? 'N/A'})`
+        : `🏥 Nghỉ ốm có phép`,
+      isPreliminary:     false,
+    };
+  }
 
   // ── Trường hợp đặc biệt: Không có ca ──────────────────────────────────────
   if (!rule) {

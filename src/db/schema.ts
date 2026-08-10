@@ -266,6 +266,11 @@ export const attendance = pgTable('attendance', {
   adjustedHours:  real('adjusted_hours'),   // null = dùng totalHours gốc
   adjustReason:   text('adjust_reason'),    // Lý do điều chỉnh
 
+  // ─── LIÊN KẾT NGHỈ PHÉP (Sprint 2) ──────────────────────────────────────
+  // Khi HR duyệt đơn nghỉ → upsert record với status='ON_LEAVE' + leaveRequestId
+  // Rule Engine đọc leaveRequestId → không phạt vắng mặt
+  leaveRequestId: integer('leave_request_id').references(() => leaveRequests.id, { onDelete: 'set null' }),
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -276,18 +281,100 @@ export const attendance = pgTable('attendance', {
 export const leaveRequests = pgTable('leave_requests', {
   id: serial('id').primaryKey(),
   employeeId: integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  leaveType: text('leave_type').notNull().default('ANNUAL'), // ANNUAL | SICK | PERSONAL | UNPAID | OTHER
-  startDate: text('start_date').notNull(),        // YYYY-MM-DD
-  endDate: text('end_date').notNull(),            // YYYY-MM-DD
-  totalDays: real('total_days').notNull().default(1),
-  reason: text('reason'),
-  status: text('status').notNull().default('PENDING'), // PENDING | APPROVED | REJECTED | CANCELLED
+
+  // ─── Loại phép ───────────────────────────────────────────────────────────
+  leaveType:   text('leave_type').notNull().default('ANNUAL'), // Giữ text cho legacy compat
+  leaveTypeId: integer('leave_type_id').references(() => leaveTypes.id, { onDelete: 'set null' }),
+
+  // ─── Thời gian ───────────────────────────────────────────────────────────
+  startDate:  text('start_date').notNull(),  // YYYY-MM-DD
+  endDate:    text('end_date').notNull(),    // YYYY-MM-DD
+  period:     text('period').notNull().default('FULL_DAY'), // FULL_DAY | MORNING | AFTERNOON
+  totalDays:  real('total_days').notNull().default(1),
+  reason:     text('reason'),
+  attachmentUrl: text('attachment_url'),    // Link giấy tờ (bệnh viện, v.v.)
+
+  // ─── TRẠNG THÁI (State Machine) ──────────────────────────────────────────
+  // PENDING → PENDING_HR → APPROVED
+  //         ↘ REJECTED  (any level)
+  // APPROVED → CANCELLED (NV hủy trước ngày nghỉ)
+  status: text('status').notNull().default('PENDING'),
+
+  // ─── Legacy 1-cấp duyệt (giữ compat) ────────────────────────────────────
   reviewedBy: integer('reviewed_by').references(() => users.id),
   reviewedAt: timestamp('reviewed_at'),
   reviewNote: text('review_note'),
+
+  // ─── CẤP 1: Manager duyệt ────────────────────────────────────────────────
+  approvedByManager:   integer('approved_by_manager').references(() => users.id),
+  approvedByManagerAt: timestamp('approved_by_manager_at'),
+  managerNote:         text('manager_note'),
+
+  // ─── CẤP 2: HR chốt (chỉ với loại phép requiresApproval = 2) ─────────────
+  approvedByHr:   integer('approved_by_hr').references(() => users.id),
+  approvedByHrAt: timestamp('approved_by_hr_at'),
+  hrNote:         text('hr_note'),
+
+  // ─── Hủy đơn ─────────────────────────────────────────────────────────────
+  cancelledAt:  timestamp('cancelled_at'),
+  cancelReason: text('cancel_reason'),
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+// ============================================================
+// SPRINT 2 – LEAVE TYPES (DANH MỤC LOẠI PHÉP)
+// ============================================================
+export const leaveTypes = pgTable('leave_types', {
+  id:   serial('id').primaryKey(),
+  code: text('code').notNull().unique(), // 'ANNUAL' | 'SICK' | 'UNPAID' | 'MATERNITY' | 'COMPENSATORY'
+  name: text('name').notNull(),          // 'Nghỉ phép năm' | 'Nghỉ ốm' | ...
+  description: text('description'),
+
+  // ─── Quỹ phép ───────────────────────────────────────────────────────────
+  maxDaysPerYear:  real('max_days_per_year'),    // null = không giới hạn
+  isPaid:          boolean('is_paid').notNull().default(true),
+  isCarryOver:     boolean('is_carry_over').notNull().default(false),
+  maxCarryOverDays: integer('max_carry_over_days').default(5),
+
+  // ─── Duyệt ──────────────────────────────────────────────────────────────
+  requiresApproval: boolean('requires_approval').notNull().default(true),
+  approvalLevels:   integer('approval_levels').notNull().default(2), // 1 hoặc 2
+  maxDaysNoDoc:     integer('max_days_no_doc').default(3),  // Ko cần giấy tờ nếu <= X ngày
+
+  // ─── Ảnh hưởng lương (cho Payroll module sau) ────────────────────────────
+  // 'NONE' = hưởng nguyên lương | 'DEDUCT_BASIC' = trừ lương BHXH | 'DEDUCT_FULL' = không lương
+  payrollImpact: text('payroll_impact').notNull().default('NONE'),
+
+  isActive: boolean('is_active').notNull().default(true),
+  sortOrder: integer('sort_order').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ============================================================
+// SPRINT 2 – LEAVE BALANCES (QUỸ PHÉP TỒN)
+// ============================================================
+export const leaveBalances = pgTable('leave_balances', {
+  id:          serial('id').primaryKey(),
+  employeeId:  integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  leaveTypeId: integer('leave_type_id').notNull().references(() => leaveTypes.id, { onDelete: 'cascade' }),
+  year:        integer('year').notNull(),
+
+  // ─── Phân bổ ────────────────────────────────────────────────────────────
+  totalDays:    real('total_days').notNull().default(0),  // Phép được cấp trong năm
+  carryOverDays: real('carry_over_days').notNull().default(0), // Phép carry-over từ năm trước
+
+  // ─── Theo dõi realtime ───────────────────────────────────────────────────
+  // Invariant: remainingDays = totalDays + carryOverDays - usedDays
+  usedDays:    real('used_days').notNull().default(0),    // Đã APPROVED
+  pendingDays: real('pending_days').notNull().default(0), // Đang chờ duyệt (in-flight)
+
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+// UNIQUE: (employee_id, leave_type_id, year) — enforced via migration
 
 // ============================================================
 // HR MODULE 01 – OVERTIME REQUESTS (TĂNG CA)
@@ -409,9 +496,19 @@ export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' 
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 export type QcSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type QcStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
-export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'HALF_DAY' | 'ON_LEAVE' | 'NOT_CHECKED';
-export type LeaveType = 'ANNUAL' | 'SICK' | 'PERSONAL' | 'UNPAID' | 'OTHER';
-export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'HALF_DAY' | 'ON_LEAVE' | 'SICK_LEAVE' | 'NOT_CHECKED' | 'PENDING_CHECKOUT' | 'EARLY_LEAVE' | 'LATE_EARLY_LEAVE';
+export type LeaveTypeCode = 'ANNUAL' | 'SICK' | 'PERSONAL' | 'UNPAID' | 'MATERNITY' | 'PATERNITY' | 'COMPENSATORY' | 'OTHER';
+export type LeaveType = LeaveTypeCode; // backwards compat alias
+export type LeavePeriod = 'FULL_DAY' | 'MORNING' | 'AFTERNOON';
+export type LeaveRequestStatus = 'PENDING' | 'PENDING_HR' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+export type RequestStatus = LeaveRequestStatus; // backwards compat alias
+export type PayrollImpact = 'NONE' | 'DEDUCT_BASIC' | 'DEDUCT_FULL';
 export type EmploymentType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACT';
 export type EmployeeStatus = 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE';
 export type Department = 'Xưởng gỗ' | 'Thi công' | 'Thiết kế' | 'Kế toán' | 'Quản lý' | 'Khác';
+
+// Sprint 2 new types
+export type LeaveTypeRow = typeof leaveTypes.$inferSelect;
+export type NewLeaveTypeRow = typeof leaveTypes.$inferInsert;
+export type LeaveBalance = typeof leaveBalances.$inferSelect;
+export type NewLeaveBalance = typeof leaveBalances.$inferInsert;
