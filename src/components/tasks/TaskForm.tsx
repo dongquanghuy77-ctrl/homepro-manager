@@ -245,6 +245,7 @@ export default function TaskForm({ projectId, task, onClose, onSaved }: TaskForm
         {showBom && isEdit && (
           <TaskBomModal
             taskTitle={form.title || task!.title}
+            taskId={task!.id}
             onClose={() => setShowBom(false)}
           />
         )}
