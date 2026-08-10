@@ -3,13 +3,13 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db';
 import { attendance, users } from '@/db/schema';
-import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
+import { requireAuth, ADMIN_OR_MANAGER, ALL_ROLES } from '@/lib/auth';
 import { eq, and, desc, like } from 'drizzle-orm';
 import { getWorkHours, calculateAttendanceStats, writeHrAuditLog } from '@/lib/hr';
 
-// ─── GET: Danh sách chấm công (ADMIN, MANAGER) ───────────────────────────────
+// ─── GET: Danh sách chấm công (ADMIN, MANAGER xem tất cả | VIEWER chỉ đọc) ────────────
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
+  const { session, error } = await requireAuth(req, ALL_ROLES); // VIEWER được xem
   if (error) return error;
 
   try {

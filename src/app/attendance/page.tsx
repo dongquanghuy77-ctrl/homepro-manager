@@ -761,6 +761,9 @@ export default function AttendancePage() {
   const [showAdd,       setShowAdd]       = useState(false);
   const [editRecord,    setEditRecord]    = useState<AttendanceRecord | null>(null);
 
+  // Phân quyền trang chính: VIEWER — chỉ xem, không thêm/sửa (cứ đường GitHub Observer role)
+  const isViewer = currentUser?.role === 'VIEWER';
+
   // Lấy thông tin người dùng hiện tại (cho dropdown filter theo role)
   useEffect(() => {
     fetch('/api/auth/me')
@@ -827,9 +830,16 @@ export default function AttendancePage() {
           <h1 className="page-title">Chấm công</h1>
           <p className="page-subtitle">Quản lý thời gian làm việc của nhân viên</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-          + Chấm công
-        </button>
+        {isViewer ? (
+          <span style={{ fontSize: 12, color: 'var(--color-warning)', background: 'rgba(251,191,36,.12)',
+            border: '1px solid rgba(251,191,36,.3)', borderRadius: 6, padding: '4px 10px' }}>
+            👁️ Chế độ xem — không thêm/sửa được
+          </span>
+        ) : (
+          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+            + Chấm công
+          </button>
+        )}
       </div>
 
       {/* Stats row */}
@@ -916,7 +926,7 @@ export default function AttendancePage() {
                   <th>Trạng thái</th>
                   <th>Ghi chú</th>
                   <th style={{ textAlign: 'center' }}>Vị trí</th>
-                  <th style={{ textAlign: 'center' }}>Thao tác</th>
+                  {!isViewer && <th style={{ textAlign: 'center' }}>Thao tác</th>}
                 </tr>
               </thead>
               <tbody>
@@ -949,11 +959,13 @@ export default function AttendancePage() {
                       ) : <span style={{ opacity: 0.3 }}>—</span>}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setEditRecord(r)}>
-                          ✏️ Sửa
-                        </button>
-                      </div>
+                      {!isViewer && (
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <button className="btn btn-ghost btn-sm" onClick={() => setEditRecord(r)}>
+                            ✏️ Sửa
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
