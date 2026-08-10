@@ -1,10 +1,9 @@
 'use client';
 
 // HR Dashboard — client component
-// Fixed: was Server Component fetching internal API via localhost (fails on Vercel)
-// Fixed: field name mismatch (data.stats?.total vs data.totalEmployees)
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import PendingLeaveAlert from '@/components/hr/PendingLeaveAlert';
 
 interface DashboardData {
   totalEmployees: number;
@@ -87,6 +86,13 @@ export default function HRDashboardPage() {
         </div>
       </div>
 
+      {/* ══ Cảnh báo đơn chờ duyệt (SWR: dedup 60s, refresh 120s) ══ */}
+      <div style={{ marginBottom: 20 }}>
+        <PendingLeaveAlert
+          approvalUrl="/leave"
+        />
+      </div>
+
       {/* Filter */}
       <div className="card mb-6" style={{ padding: '16px' }}>
         <div className="grid-3">
@@ -152,7 +158,7 @@ export default function HRDashboardPage() {
           <div className="stat-card-value" style={{ color: '#F59E0B', marginBottom: '16px' }}>
             {loading ? '—' : data.pendingLeave}
           </div>
-          <Link href="/leave" className="btn btn-secondary">Xem chi tiết</Link>
+          <Link href="/leave" className="btn btn-secondary">⏱ Duyệt ngay</Link>
         </div>
         <div className="card">
           <div className="card-header">
