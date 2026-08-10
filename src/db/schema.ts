@@ -208,10 +208,35 @@ export const attendance = pgTable('attendance', {
   lateMinutes: integer('late_minutes').default(0),
   earlyLeaveMinutes: integer('early_leave_minutes').default(0),
   totalHours: real('total_hours').default(0),
-  note: text('note'),
-  location: text('location'),              // "lat,lng" from browser Geolocation API (nullable)
+
+  // ─── ĐA KÊnh: Nguồn chấm công (Rule Engine đọc để ưu tiên GPS) ─────────────────────
+  clockInSource:  text('clock_in_source').default('MANUAL'),
+  // 'WEB_GPS' | 'HARDWARE' | 'MANUAL' | 'ADMIN_CORRECTION'
+  clockOutSource: text('clock_out_source').default('MANUAL'),
+
+  deviceId: text('device_id'),
+  // ID thiết bị phần cứng (VD: 'terminal-A1', 'finger-02'); null nếu Web
+
+  // ─── GPS COORDINATES (tách riêng, độ chính xác cao hơn text) ───────────────────
+  // GPS Preservation Rule: không bao giờ ghi đè lat/lng có sẵn bằng null
+  checkInLat:  real('check_in_lat'),   // null nếu nguồn là HARDWARE
+  checkInLng:  real('check_in_lng'),
+  checkOutLat: real('check_out_lat'),
+  checkOutLng: real('check_out_lng'),
+  location: text('location'),          // deprecated legacy field (lat,lng string)
+
+  // ─── IDEMPOTENCY KEY ─────────────────────────────────────────────────────────
+  // Format: "empId:workDate" — UNIQUE constraint ngăn cản INSERT song song
+  idempotencyKey: text('idempotency_key').unique(),
+
+  // ─── SOURCES LOG (audit trail đa kênh) ────────────────────────────────────
+  // JSON array: '["WEB_GPS@06:00","HARDWARE@06:02"]'
+  confirmSources: text('confirm_sources').default('[]'),
+
+  note:        text('note'),
   correctedBy: integer('corrected_by').references(() => users.id),
   correctedAt: timestamp('corrected_at'),
+  correctionReason: text('correction_reason'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
