@@ -57,13 +57,22 @@ export default function BomClient({ projects, initialBomLines, defaultProject = 
   const grandTotal = useMemo(() =>
     filtered.reduce((s, b) => s + (b.total ?? 0), 0), [filtered]);
 
+  // BƯỚC 4: reload với cache:no-store để luôn lấy dữ liệu mới nhất từ DB
   const reload = async () => {
     if (!selProject) return;
     setLoading(true);
     try {
-      const r = await fetch(`/api/bom?projectId=${selProject}`);
+      const r = await fetch(`/api/bom?projectId=${selProject}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const { data } = await r.json();
-      setBomLines(prev => [...prev.filter(b => b.projectId !== parseInt(selProject)), ...(data ?? [])]);
+      setBomLines(prev => [
+        ...prev.filter(b => b.projectId !== parseInt(selProject)),
+        ...(data ?? []),
+      ]);
+    } catch (e) {
+      console.error('[reload BOM]', e);
     } finally { setLoading(false); }
   };
 
@@ -174,7 +183,7 @@ export default function BomClient({ projects, initialBomLines, defaultProject = 
         <ImportBomModal
           projectId={parseInt(selProject)}
           onClose={() => setShowImport(false)}
-          onSuccess={() => { setShowImport(false); reload(); }}
+          onSuccess={async () => { await reload(); setShowImport(false); }}
         />
       )}
     </div>
@@ -401,7 +410,7 @@ type ParsedPreview = {
 };
 
 function ImportBomModal({ projectId, onClose, onSuccess }: {
-  projectId: number; onClose: () => void; onSuccess: () => void;
+  projectId: number; onClose: () => void; onSuccess: () => Promise<void>;
 }) {
   const [step,    setStep]    = useState<'input' | 'preview' | 'done'>('input');
   const [csvText, setCsvText] = useState('');
@@ -411,21 +420,49 @@ function ImportBomModal({ projectId, onClose, onSuccess }: {
   const [err,     setErr]     = useState('');
   const [result,  setResult]  = useState<{ imported: number; corrected: number; warnings: string[] } | null>(null);
 
+  // BƯỚC 2: buildRawLines — nhận diện zone header linh hoạt
+  // Hỗ trợ cả định dạng ZN-XXX-NN và plain Vietnamese text như "PHÒNG HỌP"
   const buildRawLines = (csv: string) => {
     const lines = csv.trim().split('\n').filter(Boolean);
     const raw: Array<{ stt: number; zoneHeader?: string; productName: string; unit: string; qty: number; unitPrice: number; note: string }> = [];
     let stt = 1;
     for (const line of lines) {
       const parts = line.split(',').map(s => s.trim());
-      if (parts[0]?.match(/^ZN-[A-Z]+-\d{2}$/)) {
+
+      // Zone header kiểu ZN-XXX-NN (định dạng cũ)
+      const isZnFormat = parts[0]?.match(/^ZN-[A-Z0-9]+-\d{2}/i);
+      // Zone header kiểu plain text (chữ in hoa không có STT số, không có qty)
+      const isPlainHeader = !parts[0]?.match(/^\d/) && parts.length <= 3
+        && !parts[2] && (parts[0]?.length ?? 0) > 3;
+
+      if (isZnFormat) {
         raw.push({ stt: 0, zoneHeader: `${parts[0]} - ${parts[1] ?? ''}`, productName: '', unit: '', qty: 0, unitPrice: 0, note: '' });
         stt = 1;
+      } else if (isPlainHeader && parts[0]?.trim()) {
+        // Auto-gen zone ID từ tên phân khu tiếng Việt
+        raw.push({ stt: 0, zoneHeader: parts[0].trim(), productName: '', unit: '', qty: 0, unitPrice: 0, note: '' });
+        stt = 1;
       } else if (parts.length >= 4) {
-        raw.push({ stt: stt++, productName: parts[1] ?? '', unit: parts[2] ?? 'cái',
-          qty: parseFloat(parts[3]) || 0, unitPrice: parseFloat(parts[4]) || 0, note: parts[5] ?? '' });
+        // Dòng dữ liệu — parts: [STT, Tên, ĐV, SL, Đơn giá, Ghi chú]
+        const productName = parts[1] ?? parts[0] ?? '';
+        const unit        = parts[2] ?? 'cái';
+        // BƯỚC 1: qty=0 → 1.0 (không từ chối bản ghi)
+        const qty         = parseFloat(parts[3]) || 1.0;
+        const unitPrice   = parseFloat(parts[4]) || 0;
+        raw.push({ stt: stt++, productName, unit, qty, unitPrice, note: parts[5] ?? '' });
       }
     }
     return raw;
+  };
+
+  // BƯỚC 3: classifySupplyType cục bộ (xử lý đúng chữ Đ tiếng Việt)
+  const classifyLocal = (note: string, name: string): string => {
+    const n = (note + ' ' + name).toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+    if (n.includes('cdt') || n.includes('khong thuc hien') || n.includes('do cdt')) return 'INSTALLATION_ONLY';
+    if (/sofa|ghe sofa|ban an|dining|quat tran|ceiling fan|dieu hoa|may lanh|rem|curtain|tranh treo|may giat|tu lanh/.test(n))
+      return 'PROCUREMENT_COMMERCIAL';
+    return 'HOMEPRO_PRODUCTION';
   };
 
   const handleParse = () => {
@@ -434,23 +471,44 @@ function ImportBomModal({ projectId, onClose, onSuccess }: {
     const dataLines = raw.filter(r => !r.zoneHeader);
     if (dataLines.length === 0) { setErr('Không nhận dạng được dữ liệu. Kiểm tra định dạng CSV.'); return; }
     const preview: ParsedPreview[] = [];
-    let curZone = 'ZN-UNKNOWN'; let curName = '';
+    let curZone = 'ZN-GEN-00'; let curName = 'Tổng thể';
+    let zoneCounter = 0;
     for (const r of raw) {
       if (r.zoneHeader) {
-        const m = r.zoneHeader.match(/ZN-[A-Z]+-\d{2}/);
-        curZone = m?.[0] ?? 'ZN-UNKNOWN';
-        curName = r.zoneHeader.replace(curZone, '').replace(/[-,]/g, '').trim();
+        // Thử match ZN-xxx-nn trước
+        const m = r.zoneHeader.match(/ZN-[A-Z0-9]+-\d{2}/i);
+        if (m) {
+          curZone = m[0].toUpperCase();
+          curName = r.zoneHeader.replace(curZone, '').replace(/[-,]/g, '').trim();
+        } else {
+          // Auto-generate zone ID từ tên phòng
+          zoneCounter++;
+          const nameClean = r.zoneHeader.toUpperCase().normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '').replace(/Đ/g, 'D')
+            .replace(/[^A-Z0-9\s]/g, '').trim().split(/\s+/).slice(0, 2).join('')
+            .slice(0, 3);
+          curZone = `ZN-${nameClean || 'GEN'}-${String(zoneCounter).padStart(2, '0')}`;
+          curName = r.zoneHeader.trim();
+        }
         continue;
       }
       if (!r.productName) continue;
-      preview.push({ zoneId: curZone, zoneName: curName, productName: r.productName,
-        unit: r.unit, qty: r.qty, unitPrice: r.unitPrice, total: r.qty * r.unitPrice,
-        supplyType: /cdt|cĐt|không thực/i.test(r.note) ? 'INSTALLATION_ONLY' : 'HOMEPRO_PRODUCTION' });
+      preview.push({
+        zoneId:     curZone,
+        zoneName:   curName,
+        productName: r.productName,
+        unit:        r.unit || 'cái',
+        qty:         r.qty > 0 ? r.qty : 1.0,   // BƯỚC 1: luôn > 0
+        unitPrice:   r.unitPrice,
+        total:       (r.qty > 0 ? r.qty : 1.0) * r.unitPrice,
+        supplyType:  classifyLocal(r.note, r.productName),
+      });
     }
     setParsed(preview);
     setStep('preview');
   };
 
+  // BƯỚC 4: CRITICAL FIX — gọi reload() NGAY sau import thành công
   const handleImport = async () => {
     setSaving(true); setErr('');
     try {
@@ -462,6 +520,8 @@ function ImportBomModal({ projectId, onClose, onSuccess }: {
       if (!res.ok) { setErr(data.error ?? 'Lỗi import'); return; }
       setResult({ imported: data.imported, corrected: data.corrected, warnings: data.warnings ?? [] });
       setStep('done');
+      // ★ RELOAD NGAY: cập nhật UI không cần F5
+      await onSuccess();
     } catch { setErr('Không thể kết nối server'); }
     finally { setSaving(false); }
   };

@@ -24,7 +24,10 @@ export async function GET(req: NextRequest) {
     .where(eq(productionBomLines.projectId, parseInt(projectId)))
     .orderBy(productionBomLines.zoneId, productionBomLines.sttInZone);
 
-  return NextResponse.json({ data: rows, total: rows.length });
+  return NextResponse.json(
+    { data: rows, total: rows.length },
+    { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' } }
+  );
 }
 
 // POST /api/bom — T\u1ea1o m\u1edbi BOM line (ch\u1ec9 ADMIN/MANAGER)

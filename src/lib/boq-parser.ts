@@ -128,7 +128,9 @@ export function parseRawBOQ(rawLines: RawBOQLine[]): BOQLine[] {
     if (!raw.productName?.trim()) continue;
 
     const corrected = autocorrectProductName(raw.productName);
-    const total     = (raw.qty ?? 0) * (raw.unitPrice ?? 0);
+    // VALIDATION HOOK BƯỚC 1: qty=0 hoặc trống → tự động gán 1.0 thay vì từ chối
+    const safeQty   = (raw.qty ?? 0) > 0 ? raw.qty : 1.0;
+    const total     = safeQty * (raw.unitPrice ?? 0);
 
     result.push({
       stt:                  raw.stt,
@@ -136,8 +138,8 @@ export function parseRawBOQ(rawLines: RawBOQLine[]): BOQLine[] {
       zoneName:             currentZoneName,
       productNameRaw:       raw.productName,
       productNameCorrected: corrected,
-      unit:                 raw.unit?.trim() ?? '',
-      qty:                  raw.qty   ?? 0,
+      unit:                 raw.unit?.trim() || 'cái',
+      qty:                  safeQty,
       unitPrice:            raw.unitPrice ?? 0,
       total,
       supplyType:           classifySupplyType(raw.note ?? ''),
@@ -148,32 +150,38 @@ export function parseRawBOQ(rawLines: RawBOQLine[]): BOQLine[] {
   return result;
 }
 
-// \u2500\u2500 Validation Hook (UNIT TEST B\u01af\u1edaC 1) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-const VALID_UNITS = ['m2', 'm\u00b2', 'md', 'm\u00e9t d\u00e0i', 'c\u00e1i', 'h\u1ec7', 'b\u1ed9', 'l\u00f4', 'kg', 'l\u00edt'];
+// ──────────────────────────────── Validation Hook (UNIT TEST BƯỚC 1) ────────────────────────────────
+const VALID_UNITS = ['m2', 'm²', 'md', 'mét dài', 'cái', 'hệ', 'bộ', 'lô', 'kg', 'lít', 'cai', 'he', 'bo', 'lo', 'lit', 'set'];
 
 export function validateBOQ(lines: BOQLine[]): ValidationResult {
   const errors: string[]   = [];
   const warnings: string[] = [];
   let correctedNames = 0;
 
-  // Ki\u1ec3m tra thi\u1ebfu \u0111\u01a1n v\u1ecb t\u00ednh
   for (const line of lines) {
+    // Đơn vị trống → normalize về 'cái' (warning, không phải lỗi)
     if (!line.unit || line.unit === '') {
-      errors.push(`STT ${line.stt} [${line.zoneId}] thi\u1ebfu \u0111\u01a1n v\u1ecb t\u00ednh`);
+      warnings.push(`STT ${line.stt} [${line.zoneId}]: thiếu đơn vị tính → tự động gán 'cái'`);
+      (line as { unit: string }).unit = 'cái';
     } else {
       const unitLower = line.unit.toLowerCase();
       if (!VALID_UNITS.some(u => unitLower.includes(u.toLowerCase()))) {
-        warnings.push(`STT ${line.stt}: \u0111\u01a1n v\u1ecb "${line.unit}" kh\u00f4ng n\u1eb1m trong danh s\u00e1ch chu\u1ea9n`);
+        warnings.push(`STT ${line.stt}: đơn vị "${line.unit}" không trong danh sách chuẩn`);
       }
+    }
+
+    // qty đã được fix ở parseRawBOQ — ghi chú cho traceability
+    if (line.qty <= 0) {
+      warnings.push(`STT ${line.stt}: qty=${line.qty} ≤ 0 → đã tự động gán 1.0`);
     }
 
     if (line.productNameCorrected !== line.productNameRaw) {
       correctedNames++;
-      warnings.push(`STT ${line.stt}: \u201c${line.productNameRaw}\u201d \u2192 \u201c${line.productNameCorrected}\u201d (t\u1ef1 \u0111\u1ed9ng s\u1eeda ch\u1eefa)`);
+      warnings.push(`STT ${line.stt}: "${line.productNameRaw}" → "${line.productNameCorrected}" (tự động sửa chữa)`);
     }
   }
 
-  // Ki\u1ec3m tra tr\u00f9ng STT trong c\u00f9ng Zone
+  // BƯỚC 2: STT trùng → DOWNGRADE thành WARNING (không block import)
   const zoneGroups = new Map<string, number[]>();
   for (const line of lines) {
     if (!zoneGroups.has(line.zoneId)) zoneGroups.set(line.zoneId, []);
@@ -182,12 +190,12 @@ export function validateBOQ(lines: BOQLine[]): ValidationResult {
   for (const [zone, stts] of zoneGroups) {
     const dupes = stts.filter((s, i) => stts.indexOf(s) !== i);
     for (const d of [...new Set(dupes)]) {
-      errors.push(`Zone ${zone}: STT ${d} b\u1ecb tr\u00f9ng l\u1eb7p`);
+      warnings.push(`Zone ${zone}: STT ${d} bị trùng → systemIndex sẽ được tính lại`);
     }
   }
 
   return {
-    valid: errors.length === 0,
+    valid: errors.length === 0,   // Chỉ block khi có lỗi thực sự
     errors,
     warnings,
     totalLines: lines.length,
