@@ -40,7 +40,9 @@ export const projects = pgTable('projects', {
   customer: text('customer'),
   manager: text('manager'),
   location: text('location'),
-  contractValue: real('contract_value').default(0),
+  contractValue:      real('contract_value').default(0),
+  targetMaterialCost: real('target_material_cost').default(0), // Ngân sách vật tư mục tiêu
+  targetLaborCost:    real('target_labor_cost').default(0),    // Ngân sách nhân công mục tiêu
   status: text('status').notNull().default('ACTIVE'),
   startDate: text('start_date'),
   deadline: text('deadline'),
