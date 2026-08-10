@@ -82,6 +82,8 @@ export default async function TaskListPage({ params }: Props) {
           initialTasks={projectTasks}
           projectStartDate={project.startDate}
           projectDeadline={project.deadline}
+          projectName={project.name}
+          projectCode={project.code ?? undefined}
         />
       </div>
     </div>

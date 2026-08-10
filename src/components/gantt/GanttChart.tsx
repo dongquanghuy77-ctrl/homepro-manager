@@ -1,22 +1,54 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { FileDown, Loader2 } from 'lucide-react';
 import type { Task } from '@/db/schema';
 import { TASK_STATUS } from '@/lib/constants';
 import type { TaskStatus } from '@/db/schema';
 import { formatDate } from '@/lib/utils';
+import { exportGanttPdf } from '@/lib/gantt-pdf';
 
 // ============================================================
 // GANTT CHART COMPONENT
 // ============================================================
 
 interface GanttChartProps {
-  tasks: Task[];
-  projectStartDate?: string | null;
-  projectDeadline?: string | null;
+  tasks:              Task[];
+  projectStartDate?:  string | null;
+  projectDeadline?:   string | null;
+  projectName?:       string;   // Dùng cho tiêu đề PDF
+  projectCode?:       string;   // Mã dự án
+  exportedBy?:        string;   // Người xuất
 }
 
-export default function GanttChart({ tasks, projectStartDate, projectDeadline }: GanttChartProps) {
+export default function GanttChart({
+  tasks,
+  projectStartDate,
+  projectDeadline,
+  projectName  = 'Dự án',
+  projectCode,
+  exportedBy,
+}: GanttChartProps) {
+  const [exporting, setExporting] = useState(false);
+
+  function handleExportPdf() {
+    setExporting(true);
+    // setTimeout để UI cập nhật trước khi lò chạy generate
+    setTimeout(() => {
+      try {
+        exportGanttPdf(tasks, {
+          projectName,
+          projectCode,
+          projectStartDate,
+          projectDeadline,
+          exportedBy,
+        });
+      } finally {
+        setExporting(false);
+      }
+    }, 50);
+  }
+
   // Find date range across all tasks
   const { minDate, maxDate, totalDays, weeks } = useMemo(() => {
     const dates = tasks
@@ -209,9 +241,9 @@ export default function GanttChart({ tasks, projectStartDate, projectDeadline }:
         </div>
       ))}
 
-      {/* Today marker legend */}
+      {/* Legend + Export PDF */}
       <div className="gantt-legend">
-        <div className="flex items-center gap-4" style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
+        <div className="flex items-center gap-4" style={{ fontSize: 11, color: 'var(--color-text-muted)', flex: 1 }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ width: 2, height: 12, background: '#F59E0B', display: 'inline-block', borderRadius: 2 }} />
             Hôm nay
@@ -223,6 +255,42 @@ export default function GanttChart({ tasks, projectStartDate, projectDeadline }:
             </span>
           ))}
         </div>
+
+        {/* Nút xuất PDF */}
+        <button
+          id="gantt-export-pdf-btn"
+          onClick={handleExportPdf}
+          disabled={exporting || tasks.length === 0}
+          title="Xuất sơ đồ Gantt ra file PDF báo cáo"
+          style={{
+            display:        'flex',
+            alignItems:     'center',
+            gap:            6,
+            padding:        '6px 14px',
+            background:     exporting ? 'var(--color-surface-raised)' : 'linear-gradient(135deg,#2563EB,#7C3AED)',
+            border:         'none',
+            borderRadius:   7,
+            color:          '#fff',
+            fontWeight:     700,
+            fontSize:       12,
+            cursor:         exporting ? 'wait' : 'pointer',
+            boxShadow:      '0 2px 10px #2563EB44',
+            transition:     'all 0.2s',
+            whiteSpace:     'nowrap',
+            flexShrink:     0,
+          }}
+          onMouseEnter={(e) => {
+            if (!exporting) (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+          }}
+        >
+          {exporting
+            ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+            : <FileDown size={14} />}
+          {exporting ? 'Đang tạo...' : 'Xuất PDF'}
+        </button>
       </div>
     </div>
   );

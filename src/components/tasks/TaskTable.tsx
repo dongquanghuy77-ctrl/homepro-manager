@@ -11,13 +11,18 @@ import KanbanBoard from '@/components/kanban/KanbanBoard';
 import GanttChart from '@/components/gantt/GanttChart';
 
 interface TaskTableProps {
-  projectId: number;
-  initialTasks: Task[];
+  projectId:         number;
+  initialTasks:      Task[];
   projectStartDate?: string | null;
-  projectDeadline?: string | null;
+  projectDeadline?:  string | null;
+  projectName?:      string;   // Trưỳn cho PDF Gantt report
+  projectCode?:      string;   // Mã dự án cho PDF
 }
 
-export default function TaskTable({ projectId, initialTasks, projectStartDate, projectDeadline }: TaskTableProps) {
+export default function TaskTable({
+  projectId, initialTasks, projectStartDate, projectDeadline,
+  projectName, projectCode,
+}: TaskTableProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [showForm, setShowForm] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
@@ -373,6 +378,8 @@ export default function TaskTable({ projectId, initialTasks, projectStartDate, p
           tasks={filtered}
           projectStartDate={projectStartDate}
           projectDeadline={projectDeadline}
+          projectName={projectName}
+          projectCode={projectCode}
         />
       )}
 
