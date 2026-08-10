@@ -146,15 +146,19 @@ export async function POST(req: NextRequest) {
     seenCodes.add(row.employeeCode);
 
     try {
-      // 3. Check existing
+      // ── BƯỚC 3: Tìm theo employeeCode (khóa nghiệp vụ duy nhất) ──────────
       const [existing] = await db
-        .select({ id: users.id, employeeCode: users.employeeCode })
+        .select({ id: users.id, username: users.username })
         .from(users)
         .where(eq(users.employeeCode, row.employeeCode))
         .limit(1);
 
       if (existing) {
-        // ── UPDATE (chỉ cập nhật HR fields, KHÔNG đụng password/username) ──
+        // ════════════════════════════════════════════════════════════════
+        // UPSERT — NHÁNH UPDATE
+        // Nhân viên đã tồn tại theo employeeCode → chỉ cập nhật HR fields.
+        // TUYỆT ĐỐI KHÔNG CHẠM vào: username, password, role, active
+        // ════════════════════════════════════════════════════════════════
         await db.update(users).set({
           name:           row.name,
           position:       row.position       ?? null,
@@ -180,18 +184,36 @@ export async function POST(req: NextRequest) {
         result.updated++;
 
       } else {
-        // ── INSERT (tạo mới với username = employeeCode.lower, pass = '123456') ──
-        // Đảm bảo username unique (append số nếu trùng)
-        let username = row.employeeCode.toLowerCase();
-        const [collidingUser] = await db
-          .select({ id: users.id })
+        // ════════════════════════════════════════════════════════════════
+        // UPSERT — NHÁNH INSERT
+        // Nhân viên CHƯA tồn tại → tạo mới với username = employeeCode.lower
+        //
+        // Nếu username đó đã bị user KHÁC chiếm dụng → BÁO LỖI.
+        // TUYỆT ĐỐI KHÔNG sinh mã thay thế (_Date.now) vì:
+        //   - Vi phạm "1 nhân sự = 1 mã nhân sự"
+        //   - Gây nhân sự ảo nếu import lại file cũ
+        // ════════════════════════════════════════════════════════════════
+        const username = row.employeeCode.toLowerCase();
+
+        const [usernameConflict] = await db
+          .select({ id: users.id, employeeCode: users.employeeCode })
           .from(users)
           .where(eq(users.username, username))
           .limit(1);
-        if (collidingUser) {
-          username = `${username}_${Date.now()}`;
+
+        if (usernameConflict) {
+          // Tên đăng nhập đã bị dùng bởi nhân viên khác — từ chối, báo lỗi
+          result.errors.push({
+            row:     i + 1,
+            code:    row.employeeCode,
+            message: `Tên đăng nhập "${username}" đã tồn tại trong hệ thống (thuộc mã NV khác). `
+              + `Kiểm tra lại mã NV "${row.employeeCode}" hoặc liên hệ Admin.`,
+          });
+          result.skipped++;
+          continue;
         }
 
+        // Username an toàn → INSERT nhân viên mới
         const hashedPw = await bcrypt.hash('123456', 10);
 
         const [newUser] = await db.insert(users).values({
