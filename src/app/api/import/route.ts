@@ -8,6 +8,7 @@ import {
   buildColumnMap, getField, fixRowEncoding, hasEncodingIssue,
   runEncodingTest, type ColumnMapResult,
 } from '@/lib/import-parser';
+import { detectHeaderRow } from '@/lib/boq-parser';
 
 // ── Trả lỗi 422 chuẩn với chi tiết cho UI ───────────────────────────────────
 function reject422(reason: string, details: string[], columnLog?: string[]) {
@@ -47,19 +48,47 @@ export async function POST(request: NextRequest) {
     const sheetName = workbook.SheetNames[0];
     const sheet     = workbook.Sheets[sheetName];
 
-    // Sheet to JSON — lấy header từ hàng đầu tiên
-    const rawRows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, {
-      defval:   '',
-      raw:      false,
-      dateNF:   'yyyy-mm-dd',
+    // ── BƯỚC 1A: Đọc sheet thành mảng 2D (không giả định hàng 0 là header) ────
+    const allRows2D = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+      header:    1,        // Trả mảng 2D, không có key tự động
+      defval:    '',
+      raw:       false,
+      dateNF:    'yyyy-mm-dd',
     });
 
-    if (rawRows.length === 0) {
+    if (allRows2D.length === 0) {
       return reject422(
         'File Excel rỗng hoặc không đọc được dữ liệu',
         ['Sheet đầu tiên không có dòng dữ liệu nào.',
-         'Kiểm tra file có đúng định dạng .xlsx/.csv không.',
-         'Đảm bảo dòng đầu tiên là tiêu đề cột (header row).']
+         'Kiểm tra file có đúng định dạng .xlsx/.csv không.']
+      );
+    }
+
+    // ── BƯỚC 1B: Phát hiện hàng tiêu đề thông minh (quét 5 hàng đầu) ─────
+    const headerDetect = detectHeaderRow(allRows2D);
+    console.log('[/api/import] ── Smart Header Detection ──');
+    headerDetect.log.forEach(l => console.log(l));
+
+    // ── BƯỚC 1C: Xây dựng rawRows từ các dòng DƯỚI header row ──────────
+    const headerCells = headerDetect.headerCells;
+    const rawRows: Record<string, unknown>[] = [];
+    for (let r = headerDetect.rowIndex + 1; r < allRows2D.length; r++) {
+      const dataRow = allRows2D[r] as unknown[] ?? [];
+      const obj: Record<string, unknown> = {};
+      headerCells.forEach((h, i) => { if (h) obj[h] = dataRow[i] ?? ''; });
+      // Bỏ hàng hoàn toàn rỗng
+      if (Object.values(obj).some(v => String(v).trim() !== '')) rawRows.push(obj);
+    }
+
+    if (rawRows.length === 0) {
+      return reject422(
+        'Không có dữ liệu bên dưới hàng tiêu đề',
+        [
+          `Hàng tiêu đề được phát hiện tại dòng ${headerDetect.rowIndex + 1} (score=${headerDetect.score.toFixed(1)}).`,
+          'Các cột nhận diện: ' + headerCells.filter(Boolean).join(', '),
+          'Không có dòng dữ liệu nào bên dưới.',
+          'Kiểm tra lại file hoặc tải file mẫu để xem định dạng chuẩn.',
+        ]
       );
     }
 

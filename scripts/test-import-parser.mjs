@@ -3,6 +3,7 @@ import {
   hasEncodingIssue, fixEncoding, runEncodingTest,
   UI_REQUIRED_COLUMNS,
 } from '../src/lib/import-parser.ts';
+import { detectHeaderRow } from '../src/lib/boq-parser.ts';
 
 // ── CSV_TEMPLATE (copy từ ExcelImportModal để test độc lập) ───────────────
 const CSV_TEMPLATE =
@@ -204,6 +205,77 @@ assert(templateMap.fieldToColumn['quantity']    === 'Khối lượng',    'Templ
 assert(templateMap.fieldToColumn['unit']        === 'Đơn vị',       'Template: unit ← "Đơn vị"');
 assert(templateMap.fieldToColumn['unitPrice']   === 'Đơn giá',      'Template: unitPrice ← "Đơn giá"');
 assert(templateMap.missingRequired.length === 0,                     'Template: không thiếu required field');
+
+// ════════════════════════════════════════════════════════════
+// BƯỚC 5: detectHeaderRow — Smart Header Detection
+// ════════════════════════════════════════════════════════════
+console.log(hdr('BƯỚC 5: detectHeaderRow — Smart Header Detection (quét 5 hàng đầu)'));
+
+// ── Test 5a: File tiêu chuẩn — header ngay hàng 0 ───────────────────
+console.log('\n  [5a] File tiêu chuẩn — header ở hàng 1 (row 0)');
+const rows5a = [
+  ['STT', 'Hạng mục', 'Khối lượng', 'Đơn vị', 'Đơn giá', 'Thành tiền'],
+  [1, 'Lèn chân tường', 45.6, 'md', 350000, 15960000],
+  [2, 'Rèm che nắng', 18, 'm2', 450000, 8100000],
+];
+const r5a = detectHeaderRow(rows5a);
+assert(r5a.rowIndex === 0, 'detectHeaderRow: hàng 0 được chọn (standard BOQ)', `rowIndex=${r5a.rowIndex}`);
+assert(r5a.score >= 3, `Score ≥ 3/6 (STT + Hạng mục + KL + ĐV)`, `score=${r5a.score.toFixed(1)}`);
+assert(r5a.headerCells[0] === 'STT', 'headerCells[0] = "STT"');
+assert(r5a.headerCells[1] === 'Hạng mục', 'headerCells[1] = "Hạng mục"');
+
+// ── Test 5b: File có 1 dòng tiêu đề công ty ở hàng 0, header BOQ ở hàng 1 ──
+console.log('\n  [5b] File có dòng tiêu đề ở hàng 0, header BOQ ở hàng 1');
+const rows5b = [
+  ['BảNG BÁO GIÁ THI CÔNG NỘI THẤT - CÔNG TY ABC', '', '', '', '', ''],
+  ['STT', 'Hạng mục', 'Khối lượng', 'Đơn vị', 'Đơn giá', 'Thành tiền'],
+  [1, 'Tủ bếp', 12, 'm2', 1200000, 14400000],
+  [2, 'Vách ngăn kính', 8, 'm2', 950000, 7600000],
+];
+const r5b = detectHeaderRow(rows5b);
+assert(r5b.rowIndex === 1, 'detectHeaderRow: hàng 1 được chọn (tiêu đề công ty ở hàng 0)', `rowIndex=${r5b.rowIndex}`);
+assert(r5b.score > 0, 'Score > 0 khi phát hiện đúng hàng', `score=${r5b.score.toFixed(1)}`);
+
+// ── Test 5c: File có 2 dòng tiêu đề, header BOQ ở hàng 2 ──────────────
+console.log('\n  [5c] File có 2 dòng mô tả, header BOQ ở hàng 2');
+const rows5c = [
+  ['Công ty: HomePro Furniture', '', '', '', '', ''],
+  ['Dự án: Văn phòng ABC - Ngày: 10/08/2026', '', '', '', '', ''],
+  ['STT', 'Tên hạng mục', 'KL', 'ĐV', 'Đơn giá', 'Thành tiền'],
+  [1, 'Lèn chân tường', 45.6, 'md', 350000, 15960000],
+  [2, 'Rèm', 18, 'm2', 450000, 8100000],
+];
+const r5c = detectHeaderRow(rows5c);
+assert(r5c.rowIndex === 2, 'detectHeaderRow: hàng 2 được chọn (2 dòng mô tả ở trước)', `rowIndex=${r5c.rowIndex}`);
+
+// ── Test 5d: File có header tiếng Anh ───────────────────────────
+console.log('\n  [5d] File tiếng Anh: No., Item Description, Qty, Unit, Rate, Amount');
+const rows5d = [
+  ['No.', 'Item Description', 'Qty', 'Unit', 'Rate', 'Amount'],
+  [1, 'Wardrobe system', 3.2, 'm2', 950000, 3040000],
+  [2, 'Kitchen cabinet', 4.5, 'm2', 1200000, 5400000],
+];
+const r5d = detectHeaderRow(rows5d);
+assert(r5d.rowIndex === 0, 'detectHeaderRow: tiếng Anh — hàng 0 được chọn', `rowIndex=${r5d.rowIndex}`);
+assert(r5d.score >= 2, 'Score ≥ 2 cho header tiếng Anh', `score=${r5d.score.toFixed(1)}`);
+
+// ── Test 5e: File không có header rõ ràng (dữ liệu thuần tú) ────────
+console.log('\n  [5e] File thuần số — default hàng 0, không crash');
+const rows5e = [
+  [1, 'Lèn chân tường', 45.6, 'md', 350000],
+  [2, 'Rèm', 18, 'm2', 450000],
+  [3, 'Cửa bật', 3, 'cái', 1500000],
+];
+const r5e = detectHeaderRow(rows5e);
+assert(typeof r5e.rowIndex === 'number' && r5e.rowIndex >= 0, 'detectHeaderRow không crash với file thuần số', `rowIndex=${r5e.rowIndex}`);
+assert(Array.isArray(r5e.log) && r5e.log.length > 0, 'log không rỗng');
+assert(Array.isArray(r5e.headerCells), 'headerCells là array');
+
+// ── Test 5f: File rỗng ────────────────────────────────────────────
+console.log('\n  [5f] File rỗng — không crash');
+const r5f = detectHeaderRow([]);
+assert(r5f.rowIndex === 0, 'detectHeaderRow([]) trả rowIndex=0 (safe default)');
+assert(r5f.headerCells.length === 0, 'headerCells rỗng khi rows=[]');
 
 // ════════════════════════════════════════════════════════════
 // KẺT QUẢ TỔNG HỢP

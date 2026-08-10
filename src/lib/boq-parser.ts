@@ -18,6 +18,97 @@ export function levenshtein(a: string, b: string): number {
   return dp[m][n];
 }
 
+// ── normHeaderBoq: Bỏ dấu, lowercase, bỏ ký tự đặc biệt ─────────────────────
+// (inline để boq-parser.ts không phụ thuộc import-parser.ts)
+function normHeaderBoq(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// ── BOQ Header Keyword Signatures ─────────────────────────────────────────────
+// Mỗi nhóm đại diện cho 1 cột quan trọng trong file BOQ nội thất.
+// Score = số nhóm có ít nhất 1 từ khóa khớp với cell của hàng đó.
+const BOQ_HEADER_SIGNATURES: string[][] = [
+  // Nhóm STT
+  ['stt', 'no', 'item no', 'so thu tu', 'so tt', 'tt'],
+  // Nhóm Hạng mục / Tên sản phẩm
+  ['hang muc', 'ten san pham', 'san pham', 'item name', 'mo ta', 'noi dung', 'cau kien', 'ten hang muc'],
+  // Nhóm Khối lượng / Số lượng
+  ['khoi luong', 'so luong', 'quantity', 'qty', 'kl', 'sl', 'volume'],
+  // Nhóm Đơn vị
+  ['don vi', 'don vi tinh', 'unit', 'dvt', 'uom'],
+  // Nhóm Đơn giá
+  ['don gia', 'don gia vnd', 'unit price', 'price', 'rate', 'gia'],
+  // Nhóm Thành tiền / Tổng
+  ['thanh tien', 'tong cong', 'total', 'amount', 'gia tri', 'tong gia tri'],
+];
+
+/**
+ * detectHeaderRow — Quét tối đa 5 hàng đầu của sheet (2D array),
+ * chấm điểm từng hàng dựa theo BOQ_HEADER_SIGNATURES,
+ * trả về index của hàng có điểm cao nhất (= hàng tiêu đề thực sự).
+ *
+ * @param rows  2D array từ XLSX.utils.sheet_to_json(sheet, { header: 1 })
+ * @returns     Index của header row (0-based). Default = 0 nếu không phân biệt được.
+ */
+export function detectHeaderRow(rows: unknown[][]): {
+  rowIndex: number;
+  score: number;
+  headerCells: string[];
+  log: string[];
+} {
+  const SCAN_LIMIT = Math.min(5, rows.length);
+  const log: string[] = [];
+  let bestIdx   = 0;
+  let bestScore = -1;
+
+  for (let i = 0; i < SCAN_LIMIT; i++) {
+    const row = rows[i] as unknown[];
+    if (!Array.isArray(row) || row.length === 0) {
+      log.push(`  Hàng ${i + 1}: rỗng → bỏ qua`);
+      continue;
+    }
+
+    // Chuẩn hóa từng cell
+    const cellNorms = row.map(cell => normHeaderBoq(String(cell ?? '')));
+
+    // Chấm điểm: mỗi nhóm keyword = 1 điểm nếu có ít nhất 1 cell khớp
+    let score = 0;
+    const matched: string[] = [];
+
+    for (const group of BOQ_HEADER_SIGNATURES) {
+      const hit = group.find(kw =>
+        cellNorms.some(c => c !== '' && (c === kw || c.includes(kw) || (kw.length >= 3 && kw.includes(c) && c.length >= 2)))
+      );
+      if (hit) { score++; matched.push(hit); }
+    }
+
+    // Bonus: hàng toàn text (không phải số) → cộng thêm 0.5 (header thường là text)
+    const textCells = cellNorms.filter(c => c !== '' && isNaN(Number(c)));
+    const bonus = textCells.length / row.length >= 0.5 ? 0.5 : 0;
+    const total = score + bonus;
+
+    log.push(`  Hàng ${i + 1} | score=${score}+${bonus}=${total.toFixed(1)} | khớp=[${matched.join(', ')}] | cells=[${cellNorms.filter(Boolean).join(' | ')}]`);
+
+    if (total > bestScore) {
+      bestScore = total;
+      bestIdx   = i;
+    }
+  }
+
+  const headerCells = ((rows[bestIdx] ?? []) as unknown[]).map(c => String(c ?? '').trim());
+  log.push(`  ✅ Header row = hàng ${bestIdx + 1} (score=${bestScore.toFixed(1)})`);
+
+  return { rowIndex: bestIdx, score: bestScore, headerCells, log };
+}
+
+
 // T\u1eeb \u0111i\u1ec3n chu\u1ea9n cho c\u00e1c t\u00ean s\u1ea3n ph\u1ea9m n\u1ed9i th\u1ea5t
 const KNOWN_PRODUCT_NAMES = [
   'L\u00e8n ch\u00e2n t\u01b0\u1eddng', 'R\u00e8m che n\u1eafng', 'C\u1eeda b\u1eadt',
