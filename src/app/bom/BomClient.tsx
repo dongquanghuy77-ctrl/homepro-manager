@@ -28,9 +28,10 @@ export default function BomClient({ projects, initialBomLines }: {
     projects.find(p => p.status === 'ACTIVE')?.id.toString() ?? projects[0]?.id.toString() ?? ''
   );
   const [bomLines, setBomLines]     = useState<BomLine[]>(initialBomLines);
-  const [showAdd,  setShowAdd]      = useState(false);
-  const [loading,  setLoading]      = useState(false);
-  const [search,   setSearch]       = useState('');
+  const [showAdd,    setShowAdd]    = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [search,     setSearch]     = useState('');
 
   // L\u1ecdc theo d\u1ef1 \u00e1n + search
   const filtered = useMemo(() => bomLines.filter(b =>
@@ -74,15 +75,17 @@ export default function BomClient({ projects, initialBomLines }: {
       {/* ─ Header ─────────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>📋 BOQ / BOM X\u01b0\u1edfng</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>📋 BOQ / BOM Xưởng</h1>
           <p style={{ fontSize: 13, color: 'var(--color-muted)', marginTop: 4 }}>
-            Qu\u1ea3n l\u00fd c\u1ea5u ki\u1ec7n s\u1ea3n xu\u1ea5t theo ph\u00e2n khu — ph\u00e2n lo\u1ea1i HomePro SX / CĐT c\u1ea5p
+            Quản lý cấu kiện sản xuất theo phân khu — phân loại HomePro SX / CĐT cấp
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          + Th\u00eam d\u00f2ng BOM
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={() => setShowImport(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}>⬆ Import BOQ</button>
+          <button className="btn btn-primary" onClick={() => setShowAdd(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}>+ Thêm dòng BOM</button>
+        </div>
       </div>
 
       {/* ─ Toolbar ────────────────────────────────────────────────────────── */}
@@ -154,12 +157,21 @@ export default function BomClient({ projects, initialBomLines }: {
         );
       })}
 
-      {/* ─ Modal th\u00eam d\u00f2ng BOM ──────────────────────────────────────────────── */}
+      {/* ─ Modal thêm dòng BOM ──────────────────────────────────────────────── */}
       {showAdd && (
         <AddBomModal
           projectId={parseInt(selProject)}
           onClose={() => setShowAdd(false)}
           onSuccess={() => { setShowAdd(false); reload(); }}
+        />
+      )}
+
+      {/* ─ Modal Import BOQ (ETL Parser) ──────────────────────────────────── */}
+      {showImport && selProject && (
+        <ImportBomModal
+          projectId={parseInt(selProject)}
+          onClose={() => setShowImport(false)}
+          onSuccess={() => { setShowImport(false); reload(); }}
         />
       )}
     </div>
@@ -366,6 +378,182 @@ function AddBomModal({ projectId, onClose, onSuccess }: {
           <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
             {saving ? 'Đang lưu...' : '+ Lưu BOM'}
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─ Import BOQ Modal (ETL Parser 3 bước) ──────────────────────────────────────
+const SAMPLE_CSV = `ZN-PH-01,Phong hop,
+1,Len chan tuong,md,45.6,350000,HomePro sx
+2,Rem che nang,m2,18.0,450000,CĐT cap
+ZN-PLV-02,Phong lam viec,
+1,Ban lam viec,cai,8,2500000,
+2,Ke tuong,cai,12,800000,`;
+
+type ParsedPreview = {
+  zoneId: string; zoneName: string; productName: string;
+  unit: string; qty: number; unitPrice: number; total: number; supplyType: string;
+};
+
+function ImportBomModal({ projectId, onClose, onSuccess }: {
+  projectId: number; onClose: () => void; onSuccess: () => void;
+}) {
+  const [step,    setStep]    = useState<'input' | 'preview' | 'done'>('input');
+  const [csvText, setCsvText] = useState('');
+  const [parsed,  setParsed]  = useState<ParsedPreview[]>([]);
+  const [replace, setReplace] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [err,     setErr]     = useState('');
+  const [result,  setResult]  = useState<{ imported: number; corrected: number; warnings: string[] } | null>(null);
+
+  const buildRawLines = (csv: string) => {
+    const lines = csv.trim().split('\n').filter(Boolean);
+    const raw: Array<{ stt: number; zoneHeader?: string; productName: string; unit: string; qty: number; unitPrice: number; note: string }> = [];
+    let stt = 1;
+    for (const line of lines) {
+      const parts = line.split(',').map(s => s.trim());
+      if (parts[0]?.match(/^ZN-[A-Z]+-\d{2}$/)) {
+        raw.push({ stt: 0, zoneHeader: `${parts[0]} - ${parts[1] ?? ''}`, productName: '', unit: '', qty: 0, unitPrice: 0, note: '' });
+        stt = 1;
+      } else if (parts.length >= 4) {
+        raw.push({ stt: stt++, productName: parts[1] ?? '', unit: parts[2] ?? 'cái',
+          qty: parseFloat(parts[3]) || 0, unitPrice: parseFloat(parts[4]) || 0, note: parts[5] ?? '' });
+      }
+    }
+    return raw;
+  };
+
+  const handleParse = () => {
+    setErr('');
+    const raw = buildRawLines(csvText);
+    const dataLines = raw.filter(r => !r.zoneHeader);
+    if (dataLines.length === 0) { setErr('Không nhận dạng được dữ liệu. Kiểm tra định dạng CSV.'); return; }
+    const preview: ParsedPreview[] = [];
+    let curZone = 'ZN-UNKNOWN'; let curName = '';
+    for (const r of raw) {
+      if (r.zoneHeader) {
+        const m = r.zoneHeader.match(/ZN-[A-Z]+-\d{2}/);
+        curZone = m?.[0] ?? 'ZN-UNKNOWN';
+        curName = r.zoneHeader.replace(curZone, '').replace(/[-,]/g, '').trim();
+        continue;
+      }
+      if (!r.productName) continue;
+      preview.push({ zoneId: curZone, zoneName: curName, productName: r.productName,
+        unit: r.unit, qty: r.qty, unitPrice: r.unitPrice, total: r.qty * r.unitPrice,
+        supplyType: /cdt|cĐt|không thực/i.test(r.note) ? 'INSTALLATION_ONLY' : 'HOMEPRO_PRODUCTION' });
+    }
+    setParsed(preview);
+    setStep('preview');
+  };
+
+  const handleImport = async () => {
+    setSaving(true); setErr('');
+    try {
+      const res = await fetch('/api/bom/import', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, rawLines: buildRawLines(csvText), replaceZone: replace }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setErr(data.error ?? 'Lỗi import'); return; }
+      setResult({ imported: data.imported, corrected: data.corrected, warnings: data.warnings ?? [] });
+      setStep('done');
+    } catch { setErr('Không thể kết nối server'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal" style={{ maxWidth: 680 }}>
+        <div className="modal-header">
+          <h2 className="modal-title">⬆ Import BOQ — ETL Parser</h2>
+          <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {err && <div style={{ color: 'var(--color-danger)', fontSize: 13, background: 'rgba(239,68,68,0.08)', padding: '8px 12px', borderRadius: 8 }}>⚠️ {err}</div>}
+
+          {step === 'input' && (
+            <>
+              <div style={{ fontSize: 12, color: 'var(--color-muted)', background: 'rgba(59,130,246,0.06)', borderRadius: 8, padding: '10px 14px', lineHeight: 1.8 }}>
+                <strong>Định dạng CSV:</strong><br />
+                <code>ZN-PH-01,Phong hop,</code> ← Dòng phân khu (Zone ID, Tên zone)<br />
+                <code>1,Len chan tuong,md,45.6,350000,HomePro sx</code> ← STT, Tên, ĐV, SL, Đơn giá, Ghi chú
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <label className="form-label" style={{ margin: 0 }}>Dữ liệu BOQ (CSV)</label>
+                  <button type="button" onClick={() => setCsvText(SAMPLE_CSV)}
+                    style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    Dùng mẫu demo
+                  </button>
+                </div>
+                <textarea className="form-input" rows={10} value={csvText} onChange={e => setCsvText(e.target.value)}
+                  placeholder="Dán dữ liệu CSV tại đây..." style={{ fontFamily: 'monospace', fontSize: 12, resize: 'vertical' }} />
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
+                <input type="checkbox" checked={replace} onChange={e => setReplace(e.target.checked)} />
+                Xóa dữ liệu cũ của các zone trong file này trước khi import
+              </label>
+            </>
+          )}
+
+          {step === 'preview' && (
+            <>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-success)' }}>
+                ✅ Phân tích: <strong>{parsed.length} dòng</strong> từ <strong>{[...new Set(parsed.map(p => p.zoneId))].length} phân khu</strong>
+              </div>
+              <div style={{ maxHeight: 280, overflowY: 'auto', fontSize: 12 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead><tr style={{ background: 'rgba(0,0,0,0.04)' }}>
+                    {['Zone','Sản phẩm','ĐV','SL','Đơn giá','Thành tiền','Loại'].map(h =>
+                      <th key={h} style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--color-muted)', fontWeight: 600 }}>{h}</th>)}
+                  </tr></thead>
+                  <tbody>
+                    {parsed.map((p, i) => (
+                      <tr key={i} style={{ borderTop: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '5px 8px', color: '#3b82f6', fontWeight: 600, fontSize: 11 }}>{p.zoneId}</td>
+                        <td style={{ padding: '5px 8px' }}>{p.productName}</td>
+                        <td style={{ padding: '5px 8px', color: 'var(--color-muted)' }}>{p.unit}</td>
+                        <td style={{ padding: '5px 8px' }}>{p.qty}</td>
+                        <td style={{ padding: '5px 8px' }}>{p.unitPrice.toLocaleString('vi-VN')}</td>
+                        <td style={{ padding: '5px 8px', fontWeight: 600 }}>{p.total.toLocaleString('vi-VN')}</td>
+                        <td style={{ padding: '5px 8px' }}>
+                          <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 10,
+                            background: p.supplyType === 'HOMEPRO_PRODUCTION' ? 'rgba(59,130,246,0.12)' : 'rgba(156,163,175,0.15)',
+                            color: p.supplyType === 'HOMEPRO_PRODUCTION' ? '#3b82f6' : '#9ca3af' }}>
+                            {p.supplyType === 'HOMEPRO_PRODUCTION' ? 'HP SX' : 'CĐT'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#3b82f6' }}>
+                Tổng: {parsed.reduce((s, p) => s + p.total, 0).toLocaleString('vi-VN')} VNĐ
+              </div>
+            </>
+          )}
+
+          {step === 'done' && result && (
+            <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+              <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Import thành công!</div>
+              <div style={{ fontSize: 14, color: 'var(--color-muted)' }}>
+                <strong>{result.imported}</strong> dòng đã lưu vào database
+                {result.corrected > 0 && <><br /><span style={{ color: '#f59e0b' }}>⚡ {result.corrected} tên tự động sửa (Levenshtein)</span></>}
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '1rem 1.5rem', borderTop: '1px solid var(--color-border)' }}>
+          <button className="btn btn-ghost" onClick={() => step === 'preview' ? setStep('input') : onClose}>
+            {step === 'preview' ? '← Quay lại' : 'Đóng'}
+          </button>
+          {step === 'input' && <button className="btn btn-primary" onClick={handleParse} disabled={!csvText.trim()}>Phân tích →</button>}
+          {step === 'preview' && <button className="btn btn-primary" onClick={handleImport} disabled={saving}>{saving ? 'Đang import...' : `✅ Lưu ${parsed.length} dòng`}</button>}
+          {step === 'done' && <button className="btn btn-primary" onClick={onSuccess}>Xong →</button>}
         </div>
       </div>
     </div>

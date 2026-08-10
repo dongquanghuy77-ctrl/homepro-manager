@@ -8,6 +8,7 @@ import {
   Command, Menu, X, MoreHorizontal, LogOut, UserCheck, Key,
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
   ChevronDown, ChevronRight,
+  Factory, ScanLine, ClipboardList,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
@@ -18,6 +19,7 @@ const iconMap = {
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings, UserCheck,
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
   ChevronDown, ChevronRight,
+  Factory, ScanLine, ClipboardList,
 };
 
 interface UserState {
