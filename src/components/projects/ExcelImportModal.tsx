@@ -116,40 +116,49 @@ export default function ExcelImportModal({ onClose, onSuccess }: ExcelImportModa
                 </a>
               </div>
 
-              {/* Upload Box */}
-              <div
+              {/* Upload Box — dùng <label htmlFor> để mở file picker chuẩn */}
+              <label
+                htmlFor="excel-file-input"
                 style={{
-                  border: '2px dashed var(--color-border-light)',
+                  display: 'block',
+                  border: file ? '2px dashed #10B981' : '2px dashed var(--color-border-light)',
                   borderRadius: 12,
                   padding: '32px 20px',
                   textAlign: 'center',
-                  background: 'rgba(31, 41, 55, 0.4)',
+                  background: file ? 'rgba(16,185,129,0.06)' : 'rgba(31, 41, 55, 0.4)',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
-                onClick={() => document.getElementById('excel-file-input')?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#3B82F6'; }}
+                onDragLeave={(e) => { e.currentTarget.style.borderColor = file ? '#10B981' : 'var(--color-border-light)'; }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.borderColor = '#10B981';
+                  const dropped = e.dataTransfer.files[0];
+                  if (dropped && (dropped.name.endsWith('.xlsx') || dropped.name.endsWith('.xls') || dropped.name.endsWith('.csv'))) {
+                    setFile(dropped); setError('');
+                  } else {
+                    setError('Chỉ hỗ trợ file .xlsx, .xls, .csv');
+                  }
+                }}
               >
-                <Upload size={32} color="#3B82F6" style={{ margin: '0 auto 12px' }} />
+                <Upload size={32} color={file ? '#10B981' : '#3B82F6'} style={{ margin: '0 auto 12px' }} />
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)', marginBottom: 4 }}>
-                  {file ? file.name : 'Nhấp để chọn File Excel hoặc CSV từ máy'}
+                  {file ? `✅ ${file.name}` : 'Nhấp hoặc kéo-thả file vào đây'}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-                  Hỗ trợ định dạng `.xlsx`, `.xls`, `.csv`
+                  {file ? `${(file.size / 1024).toFixed(1)} KB` : 'Hỗ trợ định dạng `.xlsx`, `.xls`, `.csv`'}
                 </div>
                 <input
                   id="excel-file-input"
                   type="file"
-                  accept=".xlsx, .xls, .csv"
+                  accept=".xlsx,.xls,.csv"
                   style={{ display: 'none' }}
                   onChange={handleFileChange}
                 />
-              </div>
+              </label>
 
-              {file && (
-                <div style={{ marginTop: 12, fontSize: 13, color: '#10B981', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <FileSpreadsheet size={14} /> Đã chọn file: <strong>{file.name}</strong> ({(file.size / 1024).toFixed(1)} KB)
-                </div>
-              )}
+
             </>
           )}
         </div>
