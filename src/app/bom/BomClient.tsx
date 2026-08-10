@@ -1,7 +1,9 @@
 'use client';
-// src/app/bom/BomClient.tsx — Giao di\u1ec7n qu\u1ea3n l\u00fd BOQ/BOM theo Zone
+// src/app/bom/BomClient.tsx — Giao diện quản lý BOQ/BOM theo Zone
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { buildColumnMap, parseClientHeaders } from '@/lib/import-parser';
+import type { ColumnMapResult } from '@/lib/import-parser';
 
 type Project = { id: number; code: string; name: string; status: string };
 type BomLine = {
@@ -396,6 +398,103 @@ function AddBomModal({ projectId, onClose, onSuccess }: {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BOQ Column Schema — dùng trong Visual Matcher của ImportBomModal
+// ─────────────────────────────────────────────────────────────────────────────
+const BOQ_UI_COLUMNS = [
+  { field: 'index',     label: 'STT',                     required: false },
+  { field: 'itemName',  label: 'Tên sản phẩm / Hạng mục', required: true  },
+  { field: 'unit',      label: 'Đơn vị (ĐV)',              required: false },
+  { field: 'quantity',  label: 'Khối lượng / Số lượng',    required: false },
+  { field: 'unitPrice', label: 'Đơn giá',                  required: false },
+  { field: 'projectNotes', label: 'Ghi chú / Phân loại',  required: false },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BomColumnMatcherGrid — Bảng đối chiếu Xanh/Đỏ cho BOQ import
+// ─────────────────────────────────────────────────────────────────────────────
+function BomColumnMatcherGrid({
+  colMap, fileHeaders,
+}: { colMap: ColumnMapResult; fileHeaders: string[] }) {
+  const requiredMissing = BOQ_UI_COLUMNS.filter(c => c.required && !colMap.fieldToColumn[c.field]);
+  const canImport = requiredMissing.length === 0;
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      {/* Status badge */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          🔍 Đối chiếu cột
+          <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--color-muted)' }}>({fileHeaders.length} cột trong file)</span>
+        </span>
+        {canImport
+          ? <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 20, background: 'rgba(16,185,129,0.12)', color: '#10B981', fontWeight: 600 }}>✓ Sẵn sàng phân tích</span>
+          : <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 20, background: 'rgba(239,68,68,0.12)', color: '#EF4444', fontWeight: 600 }}>❌ Thiếu cột bắt buộc</span>}
+      </div>
+
+      {/* Grid */}
+      <div style={{ border: '1px solid var(--color-border)', borderRadius: 8, overflow: 'hidden', fontSize: 12 }}>
+        {/* Header */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 90px', background: 'rgba(0,0,0,0.05)', padding: '6px 12px', fontWeight: 700, fontSize: 11, color: 'var(--color-muted)', letterSpacing: '0.04em' }}>
+          <span>CỘT YÊU CẦU</span><span>CỘT TRONG FILE</span><span style={{ textAlign: 'center' }}>TRẠNG THÁI</span>
+        </div>
+
+        {BOQ_UI_COLUMNS.map((col, i) => {
+          const matched = colMap.fieldToColumn[col.field];
+          const isMatch  = !!matched;
+          const isMissRequired = col.required && !isMatch;
+          return (
+            <div key={col.field} style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr 90px',
+              padding: '8px 12px', alignItems: 'center',
+              background: isMissRequired ? 'rgba(239,68,68,0.07)' : isMatch ? 'rgba(16,185,129,0.05)' : 'transparent',
+              borderTop: i > 0 ? '1px solid var(--color-border)' : 'none',
+              transition: 'background 0.2s',
+            }}>
+              {/* Trái: tên cột yêu cầu */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontWeight: 600 }}>{col.label}</span>
+                {col.required && (
+                  <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 4, background: 'rgba(239,68,68,0.15)', color: '#EF4444', fontWeight: 700 }}>BẮT BUỘC</span>
+                )}
+              </div>
+              {/* Phải: tên cột trong file */}
+              <div style={{ color: isMatch ? '#059669' : '#9CA3AF', fontFamily: 'monospace', fontSize: 11 }}>
+                {matched ? `"${matched}"` : '—  chưa tìm thấy'}
+              </div>
+              {/* Trạng thái */}
+              <div style={{ textAlign: 'center' }}>
+                {isMissRequired
+                  ? <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 10, background: 'rgba(239,68,68,0.15)', color: '#EF4444', fontWeight: 700 }}>❌ Thiếu</span>
+                  : isMatch
+                    ? <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 10, background: 'rgba(16,185,129,0.15)', color: '#10B981', fontWeight: 700 }}>✓ Khớp</span>
+                    : <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 10, background: 'rgba(245,158,11,0.12)', color: '#F59E0B', fontWeight: 600 }}>⚠ Tùy chọn</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Cảnh báo block */}
+      {!canImport && (
+        <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, fontSize: 12, color: '#EF4444' }}>
+          ⛔ File thiếu cột <strong>"Tên sản phẩm / Hạng mục"</strong>.
+          Hãy đổi tên cột trong Excel thành: <code style={{ background: 'rgba(0,0,0,0.06)', padding: '1px 5px', borderRadius: 3 }}>"Hạng mục"</code>, <code style={{ background: 'rgba(0,0,0,0.06)', padding: '1px 5px', borderRadius: 3 }}>"Tên sản phẩm"</code> hoặc <code style={{ background: 'rgba(0,0,0,0.06)', padding: '1px 5px', borderRadius: 3 }}>"Item Name"</code>.
+        </div>
+      )}
+
+      {/* Cột không nhận diện */}
+      {colMap.unmappedHeaders.length > 0 && (
+        <div style={{ marginTop: 6, fontSize: 11, color: 'var(--color-muted)' }}>
+          🔵 Không nhận diện: {colMap.unmappedHeaders.map(h => (
+            <code key={h} style={{ margin: '0 3px', padding: '1px 5px', background: 'rgba(0,0,0,0.06)', borderRadius: 3 }}>"{h}"</code>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─ Import BOQ Modal (ETL Parser 3 bước) ──────────────────────────────────────
 const SAMPLE_CSV = `ZN-PH-01,Phong hop,
 1,Len chan tuong,md,45.6,350000,HomePro sx
@@ -412,13 +511,67 @@ type ParsedPreview = {
 function ImportBomModal({ projectId, onClose, onSuccess }: {
   projectId: number; onClose: () => void; onSuccess: () => Promise<void>;
 }) {
-  const [step,    setStep]    = useState<'input' | 'preview' | 'done'>('input');
-  const [csvText, setCsvText] = useState('');
-  const [parsed,  setParsed]  = useState<ParsedPreview[]>([]);
-  const [replace, setReplace] = useState(false);
-  const [saving,  setSaving]  = useState(false);
-  const [err,     setErr]     = useState('');
-  const [result,  setResult]  = useState<{ imported: number; corrected: number; warnings: string[] } | null>(null);
+  const [step,       setStep]       = useState<'input' | 'preview' | 'done'>('input');
+  const [csvText,    setCsvText]    = useState('');
+  const [parsed,     setParsed]     = useState<ParsedPreview[]>([]);
+  const [replace,    setReplace]    = useState(false);
+  const [saving,     setSaving]     = useState(false);
+  const [err,        setErr]        = useState('');
+  const [result,     setResult]     = useState<{ imported: number; corrected: number; warnings: string[] } | null>(null);
+  // ── File upload states ─────────────────────────────────────────────────────
+  const [inputMode,    setInputMode]    = useState<'file' | 'paste'>('file');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isDragOver,   setIsDragOver]   = useState(false);
+  const [parsing,      setParsing]      = useState(false);
+  const [fileHeaders,  setFileHeaders]  = useState<string[]>([]);
+  const [colMap,       setColMap]       = useState<ColumnMapResult | null>(null);
+
+  // ── Auto-parse headers khi chọn file ──────────────────────────────────────
+  useEffect(() => {
+    if (!uploadedFile) { setFileHeaders([]); setColMap(null); return; }
+    setParsing(true);
+    parseClientHeaders(uploadedFile).then(headers => {
+      setFileHeaders(headers);
+      setColMap(headers.length > 0 ? buildColumnMap(headers) : null);
+      setParsing(false);
+    });
+
+    // Đọc nội dung file → điền vào csvText để ETL parse được
+    const reader = new FileReader();
+    if (uploadedFile.name.endsWith('.csv') || uploadedFile.name.endsWith('.txt')) {
+      reader.onload = e => {
+        const txt = ((e.target?.result as string) ?? '').replace(/^\uFEFF/, '');
+        setCsvText(txt);
+      };
+      reader.readAsText(uploadedFile, 'utf-8');
+    } else if (uploadedFile.name.match(/\.xlsx?$/i)) {
+      reader.onload = async e => {
+        try {
+          const XLSX = await import('xlsx');
+          const data = e.target?.result as ArrayBuffer;
+          const wb = XLSX.read(new Uint8Array(data), { type: 'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          // Chuyển sheet → CSV text cho ETL parser
+          const csv = XLSX.utils.sheet_to_csv(ws);
+          setCsvText(csv);
+        } catch { setErr('Không đọc được file XLSX'); }
+      };
+      reader.readAsArrayBuffer(uploadedFile);
+    }
+  }, [uploadedFile]);
+
+  // canImport: file đủ cột bắt buộc
+  const canImportFile = !colMap
+    ? true  // chưa đọc được headers → vẫn cho thử
+    : BOQ_UI_COLUMNS.filter(c => c.required).every(c => !!colMap.fieldToColumn[c.field]);
+
+  // Hàm xử lý drop/change file
+  function handleFileAccept(f: File) {
+    if (!/\.(xlsx?|csv|txt)$/i.test(f.name)) {
+      setErr('Chỉ hỗ trợ .xlsx, .xls, .csv'); return;
+    }
+    setUploadedFile(f); setErr('');
+  }
 
   // BƯỚC 2: buildRawLines — nhận diện zone header linh hoạt
   // Hỗ trợ cả định dạng ZN-XXX-NN và plain Vietnamese text như "PHÒNG HỌP"
@@ -538,22 +691,118 @@ function ImportBomModal({ projectId, onClose, onSuccess }: {
 
           {step === 'input' && (
             <>
-              <div style={{ fontSize: 12, color: 'var(--color-muted)', background: 'rgba(59,130,246,0.06)', borderRadius: 8, padding: '10px 14px', lineHeight: 1.8 }}>
-                <strong>Định dạng CSV:</strong><br />
-                <code>ZN-PH-01,Phong hop,</code> ← Dòng phân khu (Zone ID, Tên zone)<br />
-                <code>1,Len chan tuong,md,45.6,350000,HomePro sx</code> ← STT, Tên, ĐV, SL, Đơn giá, Ghi chú
-              </div>
-              <div className="form-group" style={{ margin: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <label className="form-label" style={{ margin: 0 }}>Dữ liệu BOQ (CSV)</label>
-                  <button type="button" onClick={() => setCsvText(SAMPLE_CSV)}
-                    style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-                    Dùng mẫu demo
+              {/* ── Tab switcher ─────────────────────────────────────────── */}
+              <div style={{ display: 'flex', gap: 0, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--color-border)', fontSize: 12, marginBottom: 4 }}>
+                {(['file', 'paste'] as const).map(mode => (
+                  <button key={mode} type="button"
+                    onClick={() => setInputMode(mode)}
+                    style={{
+                      flex: 1, padding: '7px 0', border: 'none', cursor: 'pointer',
+                      fontWeight: inputMode === mode ? 700 : 400,
+                      background: inputMode === mode ? 'rgba(59,130,246,0.12)' : 'transparent',
+                      color: inputMode === mode ? '#3b82f6' : 'var(--color-muted)',
+                      transition: 'all 0.2s',
+                    }}>
+                    {mode === 'file' ? '📁 Tải file lên (Excel / CSV)' : '✏️  Dán thủ công (CSV)'}
                   </button>
-                </div>
-                <textarea className="form-input" rows={10} value={csvText} onChange={e => setCsvText(e.target.value)}
-                  placeholder="Dán dữ liệu CSV tại đây..." style={{ fontFamily: 'monospace', fontSize: 12, resize: 'vertical' }} />
+                ))}
               </div>
+
+              {/* ── MODE 1: FILE UPLOAD ──────────────────────────────────── */}
+              {inputMode === 'file' && (
+                <>
+                  {/* Dropzone */}
+                  <label
+                    htmlFor="bom-file-input"
+                    onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={e => {
+                      e.preventDefault(); setIsDragOver(false);
+                      const f = e.dataTransfer.files[0];
+                      if (f) handleFileAccept(f);
+                    }}
+                    style={{
+                      display: 'block',
+                      border: isDragOver ? '2px dashed #3b82f6' : uploadedFile ? '2px dashed #10B981' : '2px dashed var(--color-border-light)',
+                      borderRadius: 10, padding: uploadedFile ? '14px 20px' : '28px 20px',
+                      textAlign: 'center', cursor: 'pointer',
+                      background: isDragOver ? 'rgba(59,130,246,0.06)' : uploadedFile ? 'rgba(16,185,129,0.05)' : 'rgba(31,41,55,0.3)',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {uploadedFile ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontSize: 22 }}>📄</span>
+                          <div style={{ textAlign: 'left' }}>
+                            <div style={{ fontWeight: 700, fontSize: 13, color: '#10B981' }}>{uploadedFile.name}</div>
+                            <div style={{ fontSize: 11, color: 'var(--color-muted)' }}>
+                              {(uploadedFile.size / 1024).toFixed(1)} KB
+                              {parsing ? ' — Đang đọc headers...' : fileHeaders.length > 0 ? ` — ${fileHeaders.length} cột` : ''}
+                            </div>
+                          </div>
+                        </div>
+                        <button type="button"
+                          onClick={e => { e.preventDefault(); setUploadedFile(null); setCsvText(''); setFileHeaders([]); setColMap(null); }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--color-muted)', lineHeight: 1 }}
+                          title="Xóa file">
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ fontSize: 28, marginBottom: 8 }}>⬆️</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Nhấp hoặc kéo-thả file vào đây</div>
+                        <div style={{ fontSize: 11, color: 'var(--color-muted)' }}>Hỗ trợ .xlsx, .xls, .csv — có hoặc không có dòng tiêu đề</div>
+                      </>
+                    )}
+                    <input id="bom-file-input" type="file" accept=".xlsx,.xls,.csv,.txt"
+                      style={{ display: 'none' }}
+                      onChange={e => { const f = e.target.files?.[0]; if (f) handleFileAccept(f); }} />
+                  </label>
+
+                  {/* ── VISUAL COLUMN MATCHER ──────────────────────────── */}
+                  {uploadedFile && !parsing && colMap && fileHeaders.length > 0 && (
+                    <BomColumnMatcherGrid colMap={colMap} fileHeaders={fileHeaders} />
+                  )}
+
+                  {/* File không có headers (định dạng positional CSV) */}
+                  {uploadedFile && !parsing && fileHeaders.length === 0 && (
+                    <div style={{ fontSize: 12, color: '#F59E0B', padding: '8px 12px', background: 'rgba(245,158,11,0.08)', borderRadius: 6 }}>
+                      ⚠️ Không đọc được tiêu đề cột — file sẽ được phân tích theo thứ tự cột (positional).
+                    </div>
+                  )}
+
+                  {parsing && (
+                    <div style={{ fontSize: 12, color: 'var(--color-muted)', textAlign: 'center', padding: 8 }}>
+                      ⏳ Đang phân tích cột từ file...
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ── MODE 2: PASTE THỦ CÔNG ───────────────────────────────── */}
+              {inputMode === 'paste' && (
+                <>
+                  <div style={{ fontSize: 12, color: 'var(--color-muted)', background: 'rgba(59,130,246,0.06)', borderRadius: 8, padding: '10px 14px', lineHeight: 1.8 }}>
+                    <strong>Định dạng CSV positional:</strong><br />
+                    <code>ZN-PH-01,Phong hop,</code> ← Zone ID, Tên zone<br />
+                    <code>1,Len chan tuong,md,45.6,350000,HomePro sx</code> ← STT, Tên, ĐV, SL, Đơn giá, Ghi chú
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <label className="form-label" style={{ margin: 0 }}>Dữ liệu BOQ (CSV)</label>
+                      <button type="button" onClick={() => setCsvText(SAMPLE_CSV)}
+                        style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                        Dùng mẫu demo
+                      </button>
+                    </div>
+                    <textarea className="form-input" rows={10} value={csvText} onChange={e => setCsvText(e.target.value)}
+                      placeholder="Dán dữ liệu CSV tại đây..." style={{ fontFamily: 'monospace', fontSize: 12, resize: 'vertical' }} />
+                  </div>
+                </>
+              )}
+
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
                 <input type="checkbox" checked={replace} onChange={e => setReplace(e.target.checked)} />
                 Xóa dữ liệu cũ của các zone trong file này trước khi import
@@ -614,7 +863,16 @@ function ImportBomModal({ projectId, onClose, onSuccess }: {
           <button className="btn btn-ghost" onClick={() => step === 'preview' ? setStep('input') : onClose}>
             {step === 'preview' ? '← Quay lại' : 'Đóng'}
           </button>
-          {step === 'input' && <button className="btn btn-primary" onClick={handleParse} disabled={!csvText.trim()}>Phân tích →</button>}
+          {step === 'input' && (
+            <button className="btn btn-primary"
+              onClick={handleParse}
+              disabled={!csvText.trim() || (inputMode === 'file' && !!uploadedFile && !canImportFile)}
+              title={!canImportFile && uploadedFile ? 'File thiếu cột bắt buộc' : ''}
+              style={{ opacity: (!canImportFile && !!uploadedFile) ? 0.5 : 1 }}
+            >
+              {!canImportFile && uploadedFile ? '⛔ Thiếu cột bắt buộc' : 'Phân tích →'}
+            </button>
+          )}
           {step === 'preview' && <button className="btn btn-primary" onClick={handleImport} disabled={saving}>{saving ? 'Đang import...' : `✅ Lưu ${parsed.length} dòng`}</button>}
           {step === 'done' && <button className="btn btn-primary" onClick={onSuccess}>Xong →</button>}
         </div>
