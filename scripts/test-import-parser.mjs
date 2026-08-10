@@ -1,8 +1,15 @@
-// scripts/test-import-parser.mjs
-// Unit Test tự chạy cho import-parser.ts — BƯỚC 1 + BƯỚC 2 + BƯỚC 3
-// Chạy: npx tsx scripts/test-import-parser.mjs
+import {
+  normHeader, buildColumnMap, getField,
+  hasEncodingIssue, fixEncoding, runEncodingTest,
+  UI_REQUIRED_COLUMNS,
+} from '../src/lib/import-parser.ts';
 
-import { normHeader, buildColumnMap, getField, hasEncodingIssue, fixEncoding, runEncodingTest } from '../src/lib/import-parser.ts';
+// ── CSV_TEMPLATE (copy từ ExcelImportModal để test độc lập) ───────────────
+const CSV_TEMPLATE =
+  '\uFEFF' +
+  'Mã dự án,Tên dự án,STT,Hạng mục,Vật liệu / Quy cách,Khối lượng,Đơn vị,Đơn giá,Tên công việc,Người phụ trách,Trạng thái,Ư u tiên,Ghi chú\r\n' +
+  'DA-BM01,Văn phòng Chứng khoán Bảo Minh,,,,,,,,,,\r\n' +
+  ',,1,Kệ tivi treo,"MDF chống ẩm phủ Melamine, hậu 9mm phụ kiện Hafele",2.3,md,850000,,,,,\r\n';
 
 const C = { red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', blue: '\x1b[34m', cyan: '\x1b[36m', reset: '\x1b[0m', bold: '\x1b[1m' };
 const pass = (s) => `${C.green}✅ ${s}${C.reset}`;
@@ -107,13 +114,104 @@ assert(map1.log.length > 0, 'Column log không rỗng (có ít nhất 1 entry)')
 assert(map1.log.some(l => l.includes('✅')), 'Column log có dòng thành công (✅)');
 assert(mapBad.log.some(l => l.includes('⚠️')), 'Column log báo cảnh báo (⚠️) cho missing fields');
 
-// ══════════════════════════════════════════════════════════════════════
-// KẾT QUẢ
-// ══════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// BƯỚC 4: DOM Validation Hook — Template + Visual Column Matcher
+// ════════════════════════════════════════════════════════════
+console.log(hdr('BƯỚC 4: DOM Validation Hook — Template + Visual Column Matcher'));
+
+// ── Test 4a: Template CSV kiểm tra ────────────────────────────────
+console.log('\n  [4a] Kiểm tra nội dung file mẫu CSV');
+assert(CSV_TEMPLATE.startsWith('\uFEFF'),         'CSV_TEMPLATE bắt đầu bằng BOM \\uFEFF');
+assert(CSV_TEMPLATE.length > 0,                   'CSV_TEMPLATE không rỗng', `${CSV_TEMPLATE.length} bytes`);
+assert(CSV_TEMPLATE.includes('Mã dự án'),         'CSV_TEMPLATE có cột "Mã dự án"');
+assert(CSV_TEMPLATE.includes('Tên dự án'),        'CSV_TEMPLATE có cột "Tên dự án"');
+assert(CSV_TEMPLATE.includes('Khối lượng'),       'CSV_TEMPLATE có cột "Khối lượng"');
+assert(CSV_TEMPLATE.includes('Đơn vị'),            'CSV_TEMPLATE có cột "Đơn vị"');
+assert(CSV_TEMPLATE.includes('STT'),              'CSV_TEMPLATE có cột "STT"');
+assert(CSV_TEMPLATE.includes('Hạng mục'),          'CSV_TEMPLATE có cột "Hạng mục"');
+assert(CSV_TEMPLATE.includes('DA-BM01'),           'CSV_TEMPLATE có dữ liệu mẫu DA-BM01');
+
+// Giả lập: tạo Blob từ template, kiểm tra size
+const encoder = new TextEncoder();
+const encoded = encoder.encode(CSV_TEMPLATE);
+assert(encoded.byteLength > 200, 'Blob template > 200 bytes (có nội dung)',
+  `${encoded.byteLength} bytes`);
+
+// ── Test 4b: Visual Column Matcher — file đúng đủ cột ───────────────────
+console.log('\n  [4b] Giả lập file đủ cột — nút Import phải bật');
+const fullCols = ['Mã dự án','Tên dự án','STT','Hạng mục','Khối lượng','Đơn vị','Đơn giá'];
+const fullMap = buildColumnMap(fullCols);
+
+// Kiểm tra tất cả required col được map
+const requiredCols = UI_REQUIRED_COLUMNS.filter(c => c.required);
+const allRequiredMapped = requiredCols.every(c => !!fullMap.fieldToColumn[c.field]);
+assert(allRequiredMapped,                              'File đủ cột: tất cả required field được map');
+// Giả lập canImport logic của UI
+const canImportFull = requiredCols.every(c => !!fullMap.fieldToColumn[c.field]);
+assert(canImportFull,                                  'canImport=true khi file đủ cột (nút Import được bật)');
+
+assert(fullMap.fieldToColumn['index']    === 'STT',       'Map "STT" → index');
+assert(fullMap.fieldToColumn['category'] === 'Hạng mục',  'Map "Hạng mục" → category (field có ưu tiên cao hơn itemName)');
+assert(fullMap.fieldToColumn['quantity'] === 'Khối lượng', 'Map "Khối lượng" → quantity');
+assert(fullMap.fieldToColumn['unit']     === 'Đơn vị',    'Map "Đơn vị" → unit');
+assert(fullMap.fieldToColumn['unitPrice']=== 'Đơn giá',   'Map "Đơn giá" → unitPrice');
+
+// ── Test 4c: Visual Column Matcher — thiếu cột “Khối lượng” ─────────────
+console.log('\n  [4c] Giả lập file thiếu cột không bắt buộc ("Khối lượng")');
+const noQtyCols = ['Mã dự án','Tên dự án','STT','Hạng mục','Đơn vị'];
+const noQtyMap  = buildColumnMap(noQtyCols);
+const canImportNoQty = requiredCols.every(c => !!noQtyMap.fieldToColumn[c.field]);
+// 'Khối lượng' là KHÔNG bắt buộc (required=false) nên vẫn cho import
+assert(canImportNoQty, 'canImport=true dù thiếu "Khối lượng" (field không bắt buộc)');
+assert(!noQtyMap.fieldToColumn['quantity'], 'Tố cáo "quantity" không map được (thiếu cột)');
+
+// ── Test 4d: Visual Column Matcher — thiếu cột BẪT BUỘC (Mã dự án) ───────
+console.log('\n  [4d] Giả lập file thiếu cột BẪT BUỘC — nút Import phải bị vô hiệu hóa');
+const noCodeCols = ['Tên dự án','STT','Hạng mục','Khối lượng','Đơn vị'];
+const noCodeMap  = buildColumnMap(noCodeCols);
+const canImportNoCode = requiredCols.every(c => !!noCodeMap.fieldToColumn[c.field]);
+
+assert(!canImportNoCode,            'canImport=false khi thiếu "Mã dự án" (disabled=true)');
+assert(noCodeMap.missingRequired.includes('code'),
+                                    'missingRequired chứa "code" khi thiếu cột');
+
+// Kiểm tra UI_REQUIRED_COLUMNS structure
+console.log('\n  [4e] UI_REQUIRED_COLUMNS structure check');
+assert(UI_REQUIRED_COLUMNS.length >= 6, 'UI_REQUIRED_COLUMNS >= 6 entry',
+  `có ${UI_REQUIRED_COLUMNS.length} entries`);
+assert(UI_REQUIRED_COLUMNS.filter(c => c.required).length === 2,
+  'Chính xác 2 field bắt buộc (code, projectName)');
+assert(UI_REQUIRED_COLUMNS.some(c => c.field === 'quantity'),
+  'UI_REQUIRED_COLUMNS có field "quantity"');
+assert(UI_REQUIRED_COLUMNS.some(c => c.field === 'unit'),
+  'UI_REQUIRED_COLUMNS có field "unit"');
+assert(UI_REQUIRED_COLUMNS.every(c => c.label && c.hint && typeof c.required === 'boolean'),
+  'Tất cả UiColumn entries có đủ label, hint, required');
+
+// ── Test 4f: Tương đương test-case "tyếp chỷ bật" sỚm ────────────────────
+console.log('\n  [4f] Map BOQ fields từ file template mẫu');
+// Parse header row từ CSV_TEMPLATE (bỏ BOM)
+const templateNoBoM = CSV_TEMPLATE.replace(/^\uFEFF/, '');
+const templateFirstLine = templateNoBoM.split(/\r?\n/)[0];
+const templateHeaders = templateFirstLine.split(',').map(h => h.trim());
+const templateMap = buildColumnMap(templateHeaders);
+
+assert(templateMap.fieldToColumn['code']        === 'Mã dự án',   'Template: code ← "Mã dự án"');
+assert(templateMap.fieldToColumn['projectName'] === 'Tên dự án',  'Template: projectName ← "Tên dự án"');
+assert(templateMap.fieldToColumn['index']       === 'STT',           'Template: index ← "STT"');
+assert(templateMap.fieldToColumn['category']    === 'Hạng mục',      'Template: category ← "Hạng mục" (category có ưu tiên trước itemName)');
+assert(templateMap.fieldToColumn['quantity']    === 'Khối lượng',    'Template: quantity ← "Khối lượng"');
+assert(templateMap.fieldToColumn['unit']        === 'Đơn vị',       'Template: unit ← "Đơn vị"');
+assert(templateMap.fieldToColumn['unitPrice']   === 'Đơn giá',      'Template: unitPrice ← "Đơn giá"');
+assert(templateMap.missingRequired.length === 0,                     'Template: không thiếu required field');
+
+// ════════════════════════════════════════════════════════════
+// KẺT QUẢ TỔNG HỢP
+// ════════════════════════════════════════════════════════════
 console.log(`\n${C.bold}${C.cyan}${'═'.repeat(60)}${C.reset}`);
 console.log(`\n  Tổng tests: ${total} | Pass: ${totalPass} | Fail: ${total - totalPass}`);
 if (totalPass === total) {
-  console.log(`\n${C.bold}${C.green}  🎉 TẤT CẢ ${total} TESTS PASS — Import Parser sẵn sàng!${C.reset}\n`);
+  console.log(`\n${C.bold}${C.green}  🎉 TẤT CẢ ${total} TESTS PASS — Import Parser + Template + Visual Matcher OK!${C.reset}\n`);
 } else {
   console.log(`\n${C.red}  ❌ ${total - totalPass} tests thất bại${C.reset}\n`);
   process.exitCode = 1;

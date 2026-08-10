@@ -51,7 +51,7 @@ export const COLUMN_SYNONYMS: Record<string, string[]> = {
   // ── Công việc ──────────────────────────────────────────────────────────────
   taskTitle: [
     'tên công việc', 'ten cong viec', 'task title', 'tasktitle', 'title',
-    'công việc', 'cong viec', 'task', 'hạng mục công việc', 'hang muc',
+    'công việc', 'cong viec', 'task', 'hạng mục công việc',
     'tên hạng mục', 'ten hang muc', 'tên task', 'ten task',
   ],
   category: [
@@ -86,6 +86,34 @@ export const COLUMN_SYNONYMS: Record<string, string[]> = {
     'ghi chú task', 'ghi chu task', 'ghi chú công việc', 'task notes',
     'task note', 'note task',
   ],
+  // ── BOQ / BOM fields (dùng trong file mẫu BOQ tổng hợp) ────────────────────
+  index: [
+    'stt', 'no', 'so thu tu', 'so tt', 'number', 'num', 'tt',
+    'item no', 'item number', 'chỉ số', 'chi so',
+  ],
+  itemName: [
+    'hạng mục', 'hang muc', 'hạng mục công việc', 'hang muc cong viec',
+    'item name', 'item', 'description', 'mô tả', 'mo ta',
+    'cấu kiện', 'cau kien', 'vật liệu', 'vat lieu', 'sản phẩm', 'san pham',
+    'nội dung', 'noi dung',
+  ],
+  material: [
+    'vật liệu / quy cách', 'vat lieu quy cach', 'quy cách', 'quy cach',
+    'specification', 'spec', 'material', 'chất liệu', 'chat lieu',
+    'vật liệu', 'vat lieu',
+  ],
+  quantity: [
+    'khối lượng', 'khoi luong', 'số lượng', 'so luong', 'quantity', 'qty',
+    'kl', 'sl', 'volume', 'amount', 'quatity', // 'quatity' = lỗi đánh máy phổ biến
+  ],
+  unit: [
+    'đơn vị', 'don vi', 'unit', 'đv', 'uom', 'unit of measure',
+    'đơn vị tính', 'don vi tinh', 'dvt',
+  ],
+  unitPrice: [
+    'đơn giá', 'don gia', 'unit price', 'unitprice', 'price', 'giá',
+    'gia', 'đơn giá (vnd)', 'don gia vnd', 'rate',
+  ],
 };
 
 // ── Normalize chuỗi: bỏ dấu, lowercase, bỏ khoảng trắng thừa ────────────────
@@ -110,6 +138,73 @@ export interface ColumnMapResult {
 
 // Required fields — nếu thiếu sẽ báo lỗi chi tiết
 const REQUIRED_FIELDS = ['code', 'projectName'];
+
+// ── UI_REQUIRED_COLUMNS: Dùng trong Visual Column Matcher ────────────────────
+export interface UiColumn {
+  field:    string;   // tên field nội bộ
+  label:    string;   // tên cột hiển thị cho người dùng
+  hint:     string;   // mô tả ngắn
+  required: boolean;  // Bắt buộc hay không
+}
+
+export const UI_REQUIRED_COLUMNS: UiColumn[] = [
+  { field: 'code',        label: 'Mã dự án',        hint: 'Bắt buộc',    required: true  },
+  { field: 'projectName', label: 'Tên dự án',       hint: 'Bắt buộc',    required: true  },
+  { field: 'index',       label: 'STT',              hint: 'Khuyến nghị', required: false },
+  { field: 'category',    label: 'Hạng mục',         hint: 'Khuyến nghị', required: false },
+  { field: 'quantity',    label: 'Khối lượng / SL',  hint: 'Khuyến nghị', required: false },
+  { field: 'unit',        label: 'Đơn vị',           hint: 'Khuyến nghị', required: false },
+  { field: 'unitPrice',   label: 'Đơn giá',          hint: 'Tùy chọn',    required: false },
+];
+
+// ── parseClientHeaders: Đọc headers từ file phía client (không cần gọi API) ────
+// Dùng trong ExcelImportModal để preview trước khi upload
+export async function parseClientHeaders(file: File): Promise<string[]> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+
+    if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
+      reader.onload = (e) => {
+        const text = (e.target?.result as string) ?? '';
+        // Xóa BOM nếu có
+        const clean = text.replace(/^\uFEFF/, '');
+        const firstLine = clean.split(/\r?\n/)[0] ?? '';
+        // Xử lý cả quoted fields (có dấu phẩy trong ngoặc kép)
+        const headers: string[] = [];
+        let inQuote = false, cur = '';
+        for (const ch of firstLine + ',') {
+          if (ch === '"') { inQuote = !inQuote; }
+          else if (ch === ',' && !inQuote) { headers.push(cur.trim()); cur = ''; }
+          else { cur += ch; }
+        }
+        resolve(headers.filter(Boolean));
+      };
+      reader.onerror = () => resolve([]);
+      reader.readAsText(file, 'utf-8');
+
+    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      reader.onload = async (e) => {
+        try {
+          // Dynamic import — XLSX chạy được trong browser
+          const XLSX = await import('xlsx');
+          const data = e.target?.result as ArrayBuffer;
+          const wb = XLSX.read(new Uint8Array(data), { type: 'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '' });
+          const headers = (rows[0] as unknown[] ?? []).map(h => String(h).trim()).filter(Boolean);
+          resolve(headers);
+        } catch {
+          resolve([]);
+        }
+      };
+      reader.onerror = () => resolve([]);
+      reader.readAsArrayBuffer(file);
+
+    } else {
+      resolve([]);
+    }
+  });
+}
 
 // ── BƯỚC 1: Fuzzy Header Matching ────────────────────────────────────────────
 export function buildColumnMap(headers: string[]): ColumnMapResult {
@@ -136,7 +231,7 @@ export function buildColumnMap(headers: string[]): ColumnMapResult {
           break;
         }
         // Containment match: chỉ khi normS đủ dài (>= 4 chars) để tránh false positive
-        if (normS.length >= 4 && (normH.includes(normS) || normS.includes(normH))) {
+        if (normS.length >= 4 && normH.includes(normS)) {
           fieldToColumn[field] = header;
           mappedHeaders.add(header);
           log.push(`  ✅ [${field}] ← "${header}" (contains: "${syn}")`);
