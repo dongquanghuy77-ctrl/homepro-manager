@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export async function GET(
   _request: Request,
@@ -32,14 +32,18 @@ export async function PUT(
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
     const body = await request.json();
-    const { code, name, customer, location, manager, startDate, deadline, contractValue, status, notes } = body;
+    const { code, name, customer, location, manager, startDate, deadline,
+            contractValue, targetMaterialCost, targetLaborCost, status, notes } = body;
 
     const [updated] = await db
       .update(projects)
       .set({
         code, name, customer, location, manager,
-        startDate, deadline, contractValue, status, notes,
-        updatedAt: sql`(datetime('now'))`,
+        startDate, deadline, contractValue,
+        targetMaterialCost: targetMaterialCost ?? 0,
+        targetLaborCost:    targetLaborCost    ?? 0,
+        status, notes,
+        updatedAt: new Date(),
       })
       .where(eq(projects.id, id))
       .returning();

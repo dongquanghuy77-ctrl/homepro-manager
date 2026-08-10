@@ -35,7 +35,9 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
     manager: project.manager,
     startDate: toDateInputValue(project.startDate),
     deadline: toDateInputValue(project.deadline),
-    contractValue: project.contractValue?.toString() || '',
+    contractValue:      project.contractValue?.toString() || '',
+    targetMaterialCost: (project.targetMaterialCost ?? 0).toString(),
+    targetLaborCost:    (project.targetLaborCost ?? 0).toString(),
     status: project.status,
     notes: project.notes || '',
   });
@@ -53,7 +55,9 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          contractValue: form.contractValue ? parseFloat(form.contractValue) : 0,
+          contractValue:      form.contractValue      ? parseFloat(form.contractValue)      : 0,
+          targetMaterialCost: form.targetMaterialCost ? parseFloat(form.targetMaterialCost) : 0,
+          targetLaborCost:    form.targetLaborCost    ? parseFloat(form.targetLaborCost)    : 0,
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
@@ -211,6 +215,23 @@ export default function ProjectProfileClient({ project, stats, progress }: Proje
                 <div className="form-group">
                   <label className="form-label">Giá trị hợp đồng</label>
                   <input className="form-input" type="number" value={form.contractValue} onChange={(e) => set('contractValue', e.target.value)} />
+                </div>
+              </div>
+              {/* Ngân sách mục tiêu */}
+              <div className="grid-2" style={{ marginBottom: 16 }}>
+                <div className="form-group">
+                  <label className="form-label">🎯 Ngân sách vật tư (VNĐ)</label>
+                  <input className="form-input" type="number" min="0"
+                    value={form.targetMaterialCost}
+                    onChange={(e) => set('targetMaterialCost', e.target.value)}
+                    placeholder="0 — chưa đặt ngân sách" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">🎯 Ngân sách nhân công (VNĐ)</label>
+                  <input className="form-input" type="number" min="0"
+                    value={form.targetLaborCost}
+                    onChange={(e) => set('targetLaborCost', e.target.value)}
+                    placeholder="0 — chưa đặt ngân sách" />
                 </div>
               </div>
               <div className="grid-2" style={{ marginBottom: 16 }}>
