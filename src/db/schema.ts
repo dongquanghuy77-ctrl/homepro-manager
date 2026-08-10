@@ -520,3 +520,71 @@ export type LeaveTypeRow = typeof leaveTypes.$inferSelect;
 export type NewLeaveTypeRow = typeof leaveTypes.$inferInsert;
 export type LeaveBalance = typeof leaveBalances.$inferSelect;
 export type NewLeaveBalance = typeof leaveBalances.$inferInsert;
+
+// ============================================================
+// SPRINT 3 – MONTHLY PAYROLL (BẢNG LƯƠNG THÁNG)
+// ============================================================
+import { jsonb } from 'drizzle-orm/pg-core';
+
+export const monthlyPayroll = pgTable('monthly_payroll', {
+  id:            serial('id').primaryKey(),
+  employeeId:    integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  month:         integer('month').notNull(),    // 1-12
+  year:          integer('year').notNull(),
+
+  // ── Snapshot lương tại thời điểm tính ────────────────────────────────────
+  officialSalary:  real('official_salary').notNull().default(0),
+  basicSalary:     real('basic_salary').notNull().default(0),
+
+  // ── Ngày/giờ công tổng hợp từ DailyCalculations ─────────────────────────
+  regularWorkedDays:        real('regular_worked_days').notNull().default(0),
+  paidLeaveDays:            real('paid_leave_days').notNull().default(0),
+  eveningOtHours:           real('evening_ot_hours').notNull().default(0),
+  nightOtHours:             real('night_ot_hours').notNull().default(0),
+  sundayHours:              real('sunday_hours').notNull().default(0),
+  sundayNightHours:         real('sunday_night_hours').notNull().default(0),
+  holidayDaysOff:           real('holiday_days_off').notNull().default(0),
+  holidayWorkedWeekdayDays: real('holiday_worked_weekday_days').notNull().default(0),
+  holidayWorkedSundayDays:  real('holiday_worked_sunday_days').notNull().default(0),
+  unpaidLeaveDays:          real('unpaid_leave_days').notNull().default(0),
+  absentDays:               real('absent_days').notNull().default(0),
+
+  // ── Phụ cấp chuyên cần ───────────────────────────────────────────────────
+  attendanceAllowance:  real('attendance_allowance').notNull().default(0),
+  totalLateEarlyMins:   real('total_late_early_mins').notNull().default(0),
+
+  // ── Kết quả tính toán ────────────────────────────────────────────────────
+  grossEarnings:    real('gross_earnings').notNull().default(0),
+  totalDeductions:  real('total_deductions').notNull().default(0),
+  netSalary:        real('net_salary').notNull().default(0),
+  bhxhEmployee:     real('bhxh_employee').notNull().default(0),
+  bhxhEmployer:     real('bhxh_employer').notNull().default(0),
+
+  // ── Khấu trừ cụ thể ──────────────────────────────────────────────────────
+  advanceDeduction: real('advance_deduction').notNull().default(0),
+  otherDeductions:  real('other_deductions').notNull().default(0),
+
+  // ── Chi tiết dòng lương (JSON array of PayrollLineItem) ──────────────────
+  lineItemsJson: jsonb('line_items_json'),    // PayrollLineItem[] — đầy đủ để audit
+  warningsJson:  jsonb('warnings_json'),      // string[] — cảnh báo OT, dữ liệu thiếu
+
+  // ── Trạng thái — CƠ CHẾ CÔNG BỐ ────────────────────────────────────────
+  // DRAFT     : HR vừa chạy tính lương — chỉ HR/Admin thấy (nhân viên không thấy)
+  // PUBLISHED : HR đã chốt sổ và công bố — nhân viên thấy trên phiếu lương cá nhân
+  status: text('status').notNull().default('DRAFT'),
+  // DRAFT | PUBLISHED
+
+  // ── Phê duyệt & Thanh toán ───────────────────────────────────────────────
+  publishedBy:  integer('published_by').references(() => users.id),
+  publishedAt:  timestamp('published_at'),
+  note:         text('note'),
+
+  calculatedAt: timestamp('calculated_at').defaultNow(),
+  createdAt:    timestamp('created_at').defaultNow(),
+  updatedAt:    timestamp('updated_at').defaultNow(),
+});
+
+// Sprint 3 new types
+export type MonthlyPayroll    = typeof monthlyPayroll.$inferSelect;
+export type NewMonthlyPayroll = typeof monthlyPayroll.$inferInsert;
+export type PayrollStatus     = 'DRAFT' | 'PUBLISHED';
