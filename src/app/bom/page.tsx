@@ -7,13 +7,17 @@ import BomClient from './BomClient';
 export const metadata: Metadata = { title: 'BOQ / BOM — HomePro Manager' };
 export const dynamic = 'force-dynamic';
 
-export default async function BomPage() {
-  const allProjects  = await db.select({
+interface Props { searchParams: { project?: string } }
+
+export default async function BomPage({ searchParams }: Props) {
+  const defaultProject = searchParams?.project ?? '';
+
+  const allProjects = await db.select({
     id: projects.id, code: projects.code, name: projects.name, status: projects.status,
   }).from(projects).orderBy(projects.code);
 
-  const allBomLines  = await db.select().from(productionBomLines)
+  const allBomLines = await db.select().from(productionBomLines)
     .orderBy(productionBomLines.zoneId, productionBomLines.sttInZone);
 
-  return <BomClient projects={allProjects} initialBomLines={allBomLines} />;
+  return <BomClient projects={allProjects} initialBomLines={allBomLines} defaultProject={defaultProject} />;
 }

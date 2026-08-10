@@ -20,12 +20,15 @@ function fmt(n: number | null | undefined) {
   return n.toLocaleString('vi-VN');
 }
 
-export default function BomClient({ projects, initialBomLines }: {
+export default function BomClient({ projects, initialBomLines, defaultProject = '' }: {
   projects: Project[];
   initialBomLines: BomLine[];
+  defaultProject?: string;
 }) {
   const [selProject, setSelProject] = useState<string>(
-    projects.find(p => p.status === 'ACTIVE')?.id.toString() ?? projects[0]?.id.toString() ?? ''
+    defaultProject
+      ? defaultProject
+      : projects.find(p => p.status === 'ACTIVE')?.id.toString() ?? projects[0]?.id.toString() ?? ''
   );
   const [bomLines, setBomLines]     = useState<BomLine[]>(initialBomLines);
   const [showAdd,    setShowAdd]    = useState(false);
