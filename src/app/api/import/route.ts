@@ -4,6 +4,21 @@ import { projects, tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import * as XLSX from 'xlsx';
 import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
+import {
+  buildColumnMap, getField, fixRowEncoding, hasEncodingIssue,
+  runEncodingTest, type ColumnMapResult,
+} from '@/lib/import-parser';
+
+// ── Trả lỗi 422 chuẩn với chi tiết cho UI ───────────────────────────────────
+function reject422(reason: string, details: string[], columnLog?: string[]) {
+  return NextResponse.json({
+    error:       reason,
+    details,
+    columnLog:   columnLog ?? [],
+    projectsImported: 0,
+    tasksImported:    0,
+  }, { status: 422 });
+}
 
 export async function POST(request: NextRequest) {
   const { error } = await requireAuth(request, ADMIN_OR_MANAGER);
@@ -17,134 +32,214 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Vui lòng chọn file Excel hoặc CSV để tải lên' }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
+    // ── BƯỚC 2: Đọc file + phát hiện encoding ──────────────────────────────
+    const bytes  = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Read workbook with SheetJS
-    const workbook = XLSX.read(buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
+    // SheetJS đọc file — codepage: 65001 = UTF-8, 1258 = Windows Vietnamese
+    const workbook = XLSX.read(buffer, {
+      type:     'buffer',
+      codepage: 65001,   // Ưu tiên UTF-8
+      raw:      false,
+      cellDates: true,
+    });
 
-    // Convert sheet to JSON array
-    const rawRows: Record<string, any>[] = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet     = workbook.Sheets[sheetName];
+
+    // Sheet to JSON — lấy header từ hàng đầu tiên
+    const rawRows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, {
+      defval:   '',
+      raw:      false,
+      dateNF:   'yyyy-mm-dd',
+    });
 
     if (rawRows.length === 0) {
-      return NextResponse.json({ error: 'File Excel rỗng hoặc không đúng định dạng' }, { status: 400 });
+      return reject422(
+        'File Excel rỗng hoặc không đọc được dữ liệu',
+        ['Sheet đầu tiên không có dòng dữ liệu nào.',
+         'Kiểm tra file có đúng định dạng .xlsx/.csv không.',
+         'Đảm bảo dòng đầu tiên là tiêu đề cột (header row).']
+      );
     }
 
-    let createdProjectsCount = 0;
-    let createdTasksCount = 0;
-    const projectCache = new Map<string, number>();
-
-    // Helper map for normalizing headers
-    const findValue = (row: Record<string, any>, keys: string[]) => {
-      for (const k of keys) {
-        for (const rowKey of Object.keys(row)) {
-          if (rowKey.trim().toLowerCase() === k.toLowerCase()) {
-            return row[rowKey];
-          }
-        }
+    // ── BƯỚC 2: Tự động sửa lỗi encoding nếu phát hiện garbled text ─────────
+    let encodingFixed = false;
+    const processedRows = rawRows.map(row => {
+      const rowStr = JSON.stringify(row);
+      if (hasEncodingIssue(rowStr)) {
+        encodingFixed = true;
+        return fixRowEncoding(row);
       }
-      return '';
-    };
+      return row;
+    });
+    // Log encoding test khi chạy
+    const encTest = runEncodingTest();
+    console.log('[/api/import] Encoding self-test:', encTest.passed ? 'PASS' : 'WARN',
+      encTest.results.join('\n'));
+    if (encodingFixed) {
+      console.log('[/api/import] ⚠️  Đã phát hiện và sửa lỗi encoding Windows-1258→UTF-8');
+    }
 
-    for (const row of rawRows) {
-      const code = String(findValue(row, ['Mã dự án', 'code', 'ProjectCode'])).trim();
-      const projectName = String(findValue(row, ['Tên dự án', 'name', 'ProjectName'])).trim();
-      const customer = String(findValue(row, ['Khách hàng', 'customer'])).trim() || 'Khách hàng';
-      const manager = String(findValue(row, ['Quản lý', 'manager'])).trim() || 'Huy';
-      const location = String(findValue(row, ['Địa điểm', 'location'])).trim();
-      const rawValue = findValue(row, ['Hợp đồng (VND)', 'Hợp đồng', 'contract_value', 'contractValue']);
-      const contractValue = parseFloat(String(rawValue).replace(/[^0-9.]/g, '')) || 0;
-      const pStartDate = String(findValue(row, ['Ngày bắt đầu dự án', 'start_date', 'startDate'])).trim();
-      const pDeadline = String(findValue(row, ['Deadline dự án', 'deadline'])).trim();
-      const pNotes = String(findValue(row, ['Ghi chú dự án', 'notes'])).trim();
+    // ── BƯỚC 1: Fuzzy Header Matching ────────────────────────────────────────
+    const headers = Object.keys(processedRows[0] ?? {});
+    const colMap: ColumnMapResult = buildColumnMap(headers);
+
+    // Log chi tiết lên console để dev kiểm tra
+    console.log('[/api/import] ── Column Map Log ──');
+    colMap.log.forEach(l => console.log(' ', l));
+
+    // BƯỚC 3: Nếu thiếu cả code lẫn projectName → trả 422 chi tiết
+    if (colMap.missingRequired.length > 0) {
+      const details: string[] = [
+        `Không tìm thấy cột bắt buộc: ${colMap.missingRequired.join(', ')}`,
+        `Các cột hiện có trong file: ${headers.join(' | ')}`,
+        '',
+        'Hướng dẫn sửa:',
+        '  • Cột Mã dự án: đặt tên là "Mã dự án", "code", hoặc "Project Code"',
+        '  • Cột Tên dự án: đặt tên là "Tên dự án", "name", hoặc "Project Name"',
+        '  • Tải file mẫu từ nút "📥 Tải File Mẫu" để xem định dạng chuẩn.',
+      ];
+      return reject422(
+        `Lỗi: File thiếu cột bắt buộc — "${colMap.missingRequired.join('", "')}"`,
+        details,
+        colMap.log
+      );
+    }
+
+    // ── Parse từng dòng ──────────────────────────────────────────────────────
+    let createdProjectsCount = 0;
+    let createdTasksCount    = 0;
+    let skippedRows          = 0;
+    const projectCache = new Map<string, number>();
+    const parseErrors: string[] = [];
+
+    for (const rawRow of processedRows) {
+      const row = rawRow as Record<string, unknown>;
+
+      const code        = getField(row, colMap.fieldToColumn, 'code');
+      const projectName = getField(row, colMap.fieldToColumn, 'projectName');
 
       if (!code || !projectName) {
-        continue; // Skip rows without project code or name
+        skippedRows++;
+        continue;
       }
 
-      // Find or create project
+      const customer      = getField(row, colMap.fieldToColumn, 'customer')      || 'Khách hàng';
+      const manager       = getField(row, colMap.fieldToColumn, 'manager')       || 'Huy';
+      const location      = getField(row, colMap.fieldToColumn, 'location')      || '';
+      const contractRaw   = getField(row, colMap.fieldToColumn, 'contractValue');
+      const contractValue = parseFloat(contractRaw.replace(/[^0-9.]/g, ''))      || 0;
+      const pStartDate    = getField(row, colMap.fieldToColumn, 'startDate')     || null;
+      const pDeadline     = getField(row, colMap.fieldToColumn, 'deadline')      || null;
+      const pNotes        = getField(row, colMap.fieldToColumn, 'projectNotes')  || '';
+
+      // Tìm hoặc tạo project
       let projectId = projectCache.get(code);
-
       if (!projectId) {
-        const [existing] = await db.select().from(projects).where(eq(projects.code, code));
-        if (existing) {
-          projectId = existing.id;
-        } else {
-          const [newProj] = await db
-            .insert(projects)
-            .values({
-              code,
-              name: projectName,
-              customer,
-              manager,
-              location,
-              contractValue,
-              startDate: pStartDate || null,
-              deadline: pDeadline || null,
-              status: 'ACTIVE',
-              notes: pNotes,
-            })
-            .returning();
-          projectId = newProj.id;
-          createdProjectsCount++;
+        try {
+          const [existing] = await db.select().from(projects).where(eq(projects.code, code));
+          if (existing) {
+            projectId = existing.id;
+          } else {
+            const [newProj] = await db.insert(projects).values({
+              code, name: projectName, customer, manager, location,
+              contractValue, startDate: pStartDate, deadline: pDeadline,
+              status: 'ACTIVE', notes: pNotes,
+            }).returning();
+            projectId = newProj.id;
+            createdProjectsCount++;
+          }
+          projectCache.set(code, projectId);
+        } catch (e) {
+          parseErrors.push(`Lỗi tạo dự án "${code}": ${String(e)}`);
+          continue;
         }
-        projectCache.set(code, projectId);
       }
 
-      // Check if task exists in this row
-      const taskTitle = String(findValue(row, ['Tên công việc', 'title', 'TaskTitle'])).trim();
-      if (taskTitle) {
-        const category = String(findValue(row, ['Hạng mục công việc', 'Hạng mục', 'category'])).trim() || 'Thi công';
-        const assignee = String(findValue(row, ['Người phụ trách', 'assignee'])).trim() || 'Huy';
-        const tStartDate = String(findValue(row, ['Ngày bắt đầu task', 'start_date'])).trim();
-        const tEndDate = String(findValue(row, ['Hạn công việc', 'end_date', 'endDate'])).trim();
-        const priorityRaw = String(findValue(row, ['Ưu tiên', 'priority'])).trim().toUpperCase();
-        const statusRaw = String(findValue(row, ['Trạng thái', 'status'])).trim().toUpperCase();
-        const progressRaw = parseInt(String(findValue(row, ['Tiến độ %', 'progress'])).replace(/[^0-9]/g, '')) || 0;
-        const taskNotes = String(findValue(row, ['Ghi chú task', 'notes'])).trim();
+      // Tạo task nếu có
+      const taskTitle = getField(row, colMap.fieldToColumn, 'taskTitle');
+      if (taskTitle && projectId) {
+        try {
+          const category    = getField(row, colMap.fieldToColumn, 'category')     || 'Thi công';
+          const assignee    = getField(row, colMap.fieldToColumn, 'assignee')     || 'Huy';
+          const tStartDate  = getField(row, colMap.fieldToColumn, 'taskStartDate')|| null;
+          const tEndDate    = getField(row, colMap.fieldToColumn, 'taskEndDate')  || null;
+          const priorityRaw = getField(row, colMap.fieldToColumn, 'priority').toUpperCase();
+          const statusRaw   = getField(row, colMap.fieldToColumn, 'status').toUpperCase();
+          const progressRaw = parseInt(getField(row, colMap.fieldToColumn, 'progress').replace(/[^0-9]/g, '')) || 0;
+          const taskNotes   = getField(row, colMap.fieldToColumn, 'taskNotes')   || '';
 
-        // Priority normalization
-        let priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
-        if (priorityRaw.includes('CAO') || priorityRaw === 'HIGH') priority = 'HIGH';
-        else if (priorityRaw.includes('THẤP') || priorityRaw === 'LOW') priority = 'LOW';
+          // Chuẩn hóa priority
+          let priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
+          const pNorm = priorityRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
+          if (pNorm.includes('cao') || pNorm === 'high')   priority = 'HIGH';
+          else if (pNorm.includes('thap') || pNorm === 'low') priority = 'LOW';
 
-        // Status normalization
-        let status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'OVERDUE' = 'NOT_STARTED';
-        if (statusRaw.includes('HOÀN THÀNH') || statusRaw === 'COMPLETED' || progressRaw === 100) {
-          status = 'COMPLETED';
-        } else if (statusRaw.includes('ĐANG') || statusRaw === 'IN_PROGRESS' || progressRaw > 0) {
-          status = 'IN_PROGRESS';
-        } else if (statusRaw.includes('TẠM DỪNG') || statusRaw === 'PAUSED') {
-          status = 'PAUSED';
+          // Chuẩn hóa status
+          let status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'OVERDUE' = 'NOT_STARTED';
+          const sNorm = statusRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
+          if (sNorm.includes('hoan thanh') || sNorm === 'completed' || progressRaw === 100) status = 'COMPLETED';
+          else if (sNorm.includes('dang') || sNorm === 'in_progress' || progressRaw > 0)    status = 'IN_PROGRESS';
+          else if (sNorm.includes('tam dung') || sNorm === 'paused')                        status = 'PAUSED';
+
+          await db.insert(tasks).values({
+            projectId, category, title: taskTitle, assignee,
+            startDate: tStartDate, endDate: tEndDate, status, priority,
+            progress: status === 'COMPLETED' ? 100 : progressRaw,
+            notes: taskNotes,
+          });
+          createdTasksCount++;
+        } catch (e) {
+          parseErrors.push(`Lỗi tạo task "${taskTitle}": ${String(e)}`);
         }
-
-        await db.insert(tasks).values({
-          projectId,
-          category,
-          title: taskTitle,
-          assignee,
-          startDate: tStartDate || null,
-          endDate: tEndDate || null,
-          status,
-          priority,
-          progress: status === 'COMPLETED' ? 100 : progressRaw,
-          notes: taskNotes,
-        });
-
-        createdTasksCount++;
       }
     }
 
+    // ── BƯỚC 3: Trả 422 nếu kết quả = 0 mà không phải file rỗng ─────────────
+    if (createdProjectsCount === 0 && processedRows.length > 0) {
+      const details: string[] = [
+        `File có ${processedRows.length} dòng nhưng không tạo được dự án nào.`,
+        skippedRows > 0
+          ? `${skippedRows} dòng bị bỏ qua do thiếu "Mã dự án" hoặc "Tên dự án".`
+          : 'Tất cả dòng bị bỏ qua — kiểm tra giá trị cột "Mã dự án" không được rỗng.',
+        '',
+        `Cột đã nhận diện được:`,
+        ...Object.entries(colMap.fieldToColumn).map(([f, c]) => `  • ${f} ← "${c}"`),
+        '',
+        'Cột CHƯA nhận diện được:',
+        ...colMap.unmappedHeaders.map(h => `  ⚠️  "${h}"`),
+        '',
+        parseErrors.length > 0 ? `Lỗi kỹ thuật: ${parseErrors.join('; ')}` : '',
+        'Hãy tải file mẫu và đối chiếu tên cột.',
+      ].filter(Boolean);
+
+      return reject422(
+        `Lỗi: Import thành công nhưng tạo được 0 dự án — file có thể sai cột`,
+        details,
+        colMap.log
+      );
+    }
+
+    // ── Trả 201 thành công ────────────────────────────────────────────────────
     return NextResponse.json({
-      success: true,
-      message: `Nhập dữ liệu thành công!`,
+      success:          true,
+      message:          `Nhập dữ liệu thành công!`,
       projectsImported: createdProjectsCount,
-      tasksImported: createdTasksCount,
-    });
-  } catch (error: any) {
-    console.error('[POST /api/import]', error);
-    return NextResponse.json({ error: 'Lỗi xử lý file. Vui lòng kiểm tra định dạng và thử lại.' }, { status: 500 });
+      tasksImported:    createdTasksCount,
+      skippedRows,
+      encodingFixed,
+      columnMap:        colMap.fieldToColumn,
+      warnings:         parseErrors.length > 0 ? parseErrors : undefined,
+    }, { status: 201 });
+
+  } catch (err: unknown) {
+    console.error('[POST /api/import]', err);
+    return NextResponse.json({
+      error:   'Lỗi xử lý file. Vui lòng kiểm tra định dạng và thử lại.',
+      details: [String(err)],
+      projectsImported: 0,
+      tasksImported:    0,
+    }, { status: 500 });
   }
 }
