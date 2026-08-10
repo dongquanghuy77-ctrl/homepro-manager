@@ -141,6 +141,10 @@ export async function POST(request: NextRequest) {
     let existingProjectsCount = 0;   // Dự án đã tồn tại — vẫn nạp được cấu kiện
     let createdTasksCount     = 0;
     let skippedRows           = 0;
+    // ❗ globalTaskIndex: bộ đếm nội bộ tăng dần cho MỌI task hợp lệ
+    //    TUYỆT ĐỐI không dùng cột STT/index từ Excel làm định danh task
+    //    STT Excel có thể reset về 1 khi đổi phân khu → gây ghi đè/trùng
+    let globalTaskIndex       = 0;
     const projectCache = new Map<string, number>();
     const parseErrors: string[] = [];
 
@@ -242,7 +246,11 @@ export async function POST(request: NextRequest) {
             progress: status === 'COMPLETED' ? 100 : progressRaw,
             notes: taskNotes,
           });
+          globalTaskIndex++;
           createdTasksCount++;
+          console.log(
+            `[/api/import] 📋 Task #${globalTaskIndex} (auto-index) → "${taskTitle}" | dự án=${code}`
+          );
         } catch (e) {
           parseErrors.push(`Lỗi tạo task "${taskTitle}": ${String(e)}`);
         }

@@ -50,20 +50,33 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ── B\u01af\u1edaC 3: Insert v\u00e0o DB ─────────────────────────────────────────────────
-  const toInsert = parsed.map((p, i) => ({
-    projectId,
-    zoneId:      p.zoneId || 'ZN-UNKNOWN',
-    zoneName:    p.zoneName || p.zoneId || '',
-    productName: p.productNameCorrected,
-    unit:        p.unit || 'cái',
-    qty:         p.qty,
-    unitPrice:   p.unitPrice,
-    total:       p.total,
-    supplyType:  p.supplyType,
-    note:        p.note || null,
-    sttInZone:   p.stt,
-  }));
+  // ── BƯỚC 3: Insert vào DB ──────────────────────────────────────────────
+  // ❗ autoLineIndex tăng dần nội bộ — TUYỆT ĐỐI không lấy STT từ Excel
+  //    STT trong Excel có thể reset về 1 giữa phân khu hoặc bị trùng
+  let autoLineIndex = 0;
+  const toInsert = parsed.map((p) => {
+    autoLineIndex++;
+    // Log để dev trace nếu STT Excel lệch khỏi index nội bộ
+    if (p.stt !== autoLineIndex) {
+      console.warn(
+        `[/api/bom/import] ⚠️  STT Excel=${p.stt} khác autoIndex=${autoLineIndex}`,
+        `| zone=${p.zoneId} | sản phẩm="${p.productNameCorrected}"`
+      );
+    }
+    return {
+      projectId,
+      zoneId:      p.zoneId || 'ZN-UNKNOWN',
+      zoneName:    p.zoneName || p.zoneId || '',
+      productName: p.productNameCorrected,
+      unit:        p.unit || 'cái',
+      qty:         p.qty,
+      unitPrice:   p.unitPrice,
+      total:       p.total,
+      supplyType:  p.supplyType,
+      note:        p.note || null,
+      sttInZone:   autoLineIndex,   // ✔ Tăng dần tự động, không bị ảnh hưởng bởi STT Excel
+    };
+  });
 
   const inserted = await db.insert(productionBomLines).values(toInsert).returning({ id: productionBomLines.id });
 
