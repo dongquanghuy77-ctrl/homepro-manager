@@ -192,9 +192,13 @@ export async function POST(request: NextRequest) {
             .where(eq(sql`UPPER(TRIM(${projects.code}))`, code));
 
           if (existing) {
+            // ✔ Luôn lấy existing.id (Integer) — KHÔNG bao giờ dùng biến "code" (string)
             projectId = existing.id;
-            existingProjectsCount++;   // ❤️ Đếm riêng: dự án đã có sẵn
-            console.log(`[/api/import] ✅ Dự án tồn tại: "${code}" → id=${existing.id}`);
+            existingProjectsCount++;
+            console.log(
+              `[/api/import] ✅ Dự án tồn tại: "${code}" → id=${existing.id}`,
+              `(kiểu: ${typeof existing.id})`
+            );
           } else {
             // Không tìm thấy — tạo mới với code đã được chuẩn hóa (UPPER)
             console.log(`[/api/import] ➕ Tạo dự án mới: "${code}"`);
@@ -203,8 +207,10 @@ export async function POST(request: NextRequest) {
               contractValue, startDate: pStartDate, deadline: pDeadline,
               status: 'ACTIVE', notes: pNotes,
             }).returning();
+            // ✔ Luôn lấy newProj.id (Integer)
             projectId = newProj.id;
             createdProjectsCount++;
+            console.log(`[/api/import] ✅ Tạo mới OK: "${code}" → id=${newProj.id}`);
           }
           projectCache.set(code, projectId);
         } catch (e) {
@@ -212,6 +218,16 @@ export async function POST(request: NextRequest) {
           parseErrors.push(`Lỗi tạo dự án "${code}": ${String(e)}`);
           continue;
         }
+      }
+
+      // Guard chắc chắn: projectId phải là số nguyên hợp lệ trước khi INSERT tasks
+      if (!Number.isInteger(projectId) || projectId <= 0) {
+        console.error(
+          `[/api/import] ❌ projectId không hợp lệ cho dự án "${code}": projectId=${projectId}`,
+          `(kiểu: ${typeof projectId}) — bỏ qua dòng này`
+        );
+        skippedRows++;
+        continue;
       }
 
       // Tạo task nếu có
@@ -240,19 +256,32 @@ export async function POST(request: NextRequest) {
           else if (sNorm.includes('dang') || sNorm === 'in_progress' || progressRaw > 0)    status = 'IN_PROGRESS';
           else if (sNorm.includes('tam dung') || sNorm === 'paused')                        status = 'PAUSED';
 
+          // ✔ projectId đã vượt qua guard Number.isInteger() ở trên
+          //    Đây là số nguyên Integer ID từ DB, KHÔNG phải biến "code" (string)
           await db.insert(tasks).values({
-            projectId, category, title: taskTitle, assignee,
-            startDate: tStartDate, endDate: tEndDate, status, priority,
+            projectId,          // ✔ Integer: existing.id hoặc newProj.id
+            category,
+            title: taskTitle,
+            assignee,
+            startDate: tStartDate,
+            endDate:   tEndDate,
+            status,
+            priority,
             progress: status === 'COMPLETED' ? 100 : progressRaw,
-            notes: taskNotes,
+            notes:    taskNotes,
           });
           globalTaskIndex++;
           createdTasksCount++;
           console.log(
-            `[/api/import] 📋 Task #${globalTaskIndex} (auto-index) → "${taskTitle}" | dự án=${code}`
+            `[/api/import] 📋 Task #${globalTaskIndex} (auto-index) → "${taskTitle}" | projectId=${projectId} | dự án=${code}`
           );
         } catch (e) {
-          parseErrors.push(`Lỗi tạo task "${taskTitle}": ${String(e)}`);
+          // ❌ Log rõ ràng ra Vercel Logs — không được để lỗi âm thầm
+          console.error(
+            `[/api/import] ❌ Lỗi INSERT task "${taskTitle}" vào dự án ${code} (id=${projectId}):`,
+            String(e)
+          );
+          parseErrors.push(`Lỗi tạo task "${taskTitle}" (dự án ${code}): ${String(e)}`);
         }
       }
     }
