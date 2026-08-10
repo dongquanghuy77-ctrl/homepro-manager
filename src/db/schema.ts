@@ -237,6 +237,35 @@ export const attendance = pgTable('attendance', {
   correctedBy: integer('corrected_by').references(() => users.id),
   correctedAt: timestamp('corrected_at'),
   correctionReason: text('correction_reason'),
+
+  // ─── LUỒNG DUYỆT 2 CẤP (Manager → HR) ───────────────────────────────────
+  //
+  // State machine:
+  //   (after clock-out) PENDING_MANAGER
+  //       ↓ Manager approve
+  //   PENDING_HR
+  //       ↓ HR 'Chốt công'
+  //   APPROVED
+  //       ↓ reject (either level)
+  //   REJECTED
+  //
+  approvalStatus: text('approval_status').notNull().default('PENDING_MANAGER'),
+  // PENDING_MANAGER | PENDING_HR | APPROVED | REJECTED
+
+  // Cấp 1: Manager duyệt
+  approvedByManager:   integer('approved_by_manager').references(() => users.id),
+  approvedByManagerAt: timestamp('approved_by_manager_at'),
+  managerNote:         text('manager_note'),
+
+  // Cấp 2: HR chốt công
+  approvedByHr:   integer('approved_by_hr').references(() => users.id),
+  approvedByHrAt: timestamp('approved_by_hr_at'),
+  hrNote:         text('hr_note'),
+
+  // HR có thể điều chỉnh giờ công (override totalHours)
+  adjustedHours:  real('adjusted_hours'),   // null = dùng totalHours gốc
+  adjustReason:   text('adjust_reason'),    // Lý do điều chỉnh
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

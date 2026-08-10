@@ -36,7 +36,9 @@ export async function requireAuth(
 }
 
 // Convenience RBAC helpers
-export const ADMIN_ONLY = ['ADMIN'];
-export const ADMIN_OR_MANAGER = ['ADMIN', 'MANAGER'];
-export const ALL_STAFF = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER'];
-export const ALL_ROLES = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER'];
+export const ADMIN_ONLY         = ['ADMIN'];
+export const ADMIN_OR_MANAGER   = ['ADMIN', 'MANAGER'];
+export const ADMIN_OR_HR        = ['ADMIN'];               // ADMIN = HR cấp 2
+export const MANAGER_AND_ABOVE  = ['ADMIN', 'MANAGER'];    // Có thể xét duyệt cấp 1
+export const ALL_STAFF          = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER'];
+export const ALL_ROLES          = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER'];

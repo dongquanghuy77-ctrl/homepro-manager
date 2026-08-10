@@ -93,16 +93,18 @@ export async function generateEmployeeCode(): Promise<string> {
 }
 
 // ── Audit log writer ──────────────────────────────────────────────────────────
-export async function writeHrAuditLog(params: {
-  action: string;
+export type AuditLogParams = {
+  action:     string;
   entityType: string;
-  entityId?: number;
-  actorId?: number;
+  entityId?:  number;
+  actorId?:   number;
   actorName?: string;
-  oldValue?: object;
-  newValue?: object;
+  oldValue?:  object;
+  newValue?:  object;
   ipAddress?: string;
-}) {
+};
+
+export async function writeHrAuditLog(params: AuditLogParams) {
   try {
     await db.insert(hrAuditLogs).values({
       action:     params.action,
@@ -124,12 +126,27 @@ export async function writeHrAuditLog(params: {
 // Dùng khi KHÔNG muốn cộng latency vào main request (import hàng loạt, etc.)
 // Promise được tách ra khỏi luồng chính → main flow hoàn thành tức thì.
 // Lỗi vẫn được catch bên trong writeHrAuditLog → không bao giờ UnhandledPromiseRejection.
-export function writeHrAuditLogAsync(
-  params: Parameters<typeof writeHrAuditLog>[0]
-): void {
+export function writeHrAuditLogAsync(params: AuditLogParams): void {
   // Tách Promise ra khỏi await chain → fire-and-forget
   // void: ESLint/TS biết đây là intentional (không phải forgot-to-await)
   void writeHrAuditLog(params);
+}
+
+// ── TRANSACTIONAL variant (dùng trong db.transaction()) ────────────────────────────────
+// Đảm bảo STATUS UPDATE + AUDIT LOG là một đơn vị nguyên tử (atomic).
+// Không có try/catch → lỗi propagate lên → PostgreSQL tự ROLLBACK cả 2 statements.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function writeHrAuditLogInTx(tx: { insert: (t: any) => any }, params: AuditLogParams): Promise<void> {
+  await tx.insert(hrAuditLogs).values({
+    action:     params.action,
+    entityType: params.entityType,
+    entityId:   params.entityId,
+    actorId:    params.actorId,
+    actorName:  params.actorName,
+    oldValue:   params.oldValue ? JSON.stringify(params.oldValue) : null,
+    newValue:   params.newValue ? JSON.stringify(params.newValue) : null,
+    ipAddress:  params.ipAddress,
+  });
 }
 
 // ── Today's date in Vietnam timezone (YYYY-MM-DD) ─────────────────────────────
