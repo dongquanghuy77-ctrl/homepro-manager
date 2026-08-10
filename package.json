@@ -9,7 +9,8 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:seed": "node scripts/seed.mjs",
-    "migrate": "node scripts/migrate_sprint3.mjs"
+    "migrate": "node scripts/migrate_sprint3.mjs",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -37,6 +38,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "drizzle-kit": "^0.23.2",
+    "tsx": "^4.23.12",
     "typescript": "^5.5.3"
   }
 }
