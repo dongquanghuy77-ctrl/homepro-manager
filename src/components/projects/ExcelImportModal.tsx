@@ -22,6 +22,7 @@ interface ExcelImportModalProps {
 
 interface ImportResult {
   projectsImported: number;
+  projectsUpdated?: number;   // Dự án đã tồn tại, được cập nhật cấu kiện
   tasksImported:    number;
   skippedRows?:     number;
   encodingFixed?:   boolean;
@@ -284,6 +285,7 @@ export default function ExcelImportModal({ onClose, onSuccess }: ExcelImportModa
 
       setResult({
         projectsImported: data.projectsImported,
+        projectsUpdated:  data.projectsUpdated ?? 0,
         tasksImported:    data.tasksImported,
         skippedRows:      data.skippedRows,
         encodingFixed:    data.encodingFixed,
@@ -321,11 +323,25 @@ export default function ExcelImportModal({ onClose, onSuccess }: ExcelImportModa
           {result && (
             <div style={{ textAlign: 'center', padding: '24px 16px' }}>
               <CheckCircle2 size={52} color="#10B981" style={{ margin: '0 auto 16px' }} />
-              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Import thành công!</h3>
+              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
+                {result.projectsImported > 0 ? 'Import thành công!' : '✅ Cập nhật thành công!'}
+              </h3>
               <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginBottom: 16 }}>
-                Đã thêm{' '}
-                <strong style={{ color: '#10B981' }}>{result.projectsImported} dự án mới</strong> và{' '}
-                <strong style={{ color: '#3B82F6' }}>{result.tasksImported} công việc</strong>.
+                {result.projectsImported > 0 ? (
+                  <>
+                    Đã thêm{' '}
+                    <strong style={{ color: '#10B981' }}>{result.projectsImported} dự án mới</strong>{' '}và{' '}
+                    <strong style={{ color: '#3B82F6' }}>{result.tasksImported} công việc</strong>.
+                  </>
+                ) : (
+                  <>
+                    Đã cập nhật dữ liệu cấu kiện cho{' '}
+                    <strong style={{ color: '#10B981' }}>
+                      {result.projectsUpdated ?? 1} dự án hiện tại
+                    </strong>{' '}—{' '}
+                    <strong style={{ color: '#3B82F6' }}>{result.tasksImported} công việc</strong> được nạp vào.
+                  </>
+                )}
               </p>
               {result.skippedRows != null && result.skippedRows > 0 && (
                 <p style={{ fontSize: 12, color: '#F59E0B' }}>

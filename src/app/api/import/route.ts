@@ -136,10 +136,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Parse từng dòng ──────────────────────────────────────────────────────
-    let createdProjectsCount = 0;
-    let createdTasksCount    = 0;
-    let skippedRows          = 0;
+    // ── Parse từng dòng ───────────────────────────────────────────────────
+    let createdProjectsCount  = 0;   // Dự án mới tạo
+    let existingProjectsCount = 0;   // Dự án đã tồn tại — vẫn nạp được cấu kiện
+    let createdTasksCount     = 0;
+    let skippedRows           = 0;
     const projectCache = new Map<string, number>();
     const parseErrors: string[] = [];
 
@@ -170,6 +171,7 @@ export async function POST(request: NextRequest) {
           const [existing] = await db.select().from(projects).where(eq(projects.code, code));
           if (existing) {
             projectId = existing.id;
+            existingProjectsCount++;   // ❤️ Đếm riêng: dự án đã có sẵn
           } else {
             const [newProj] = await db.insert(projects).values({
               code, name: projectName, customer, manager, location,
@@ -225,10 +227,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── BƯỚC 3: Trả 422 nếu kết quả = 0 mà không phải file rỗng ─────────────
-    if (createdProjectsCount === 0 && processedRows.length > 0) {
+    // ── BƯỚC 3: Kiểm tra kết quả — chỉ báo lỗi khi KHÔNG làm gì được cả ─────────
+    //
+    //  ✅ Thành công nếu: dự án mới tạo > 0
+    //  ✅ Thành công nếu: dự án đã có sẵn và có task/cấu kiện được nạp vào
+    //  ✅ Thành công nếu: có bất kỳ task nào được tạo
+    //  ❌ Lỗi chỉ khi: không có dự án nào được chạm vào (neither new nor existing)
+    const totalProjectsTouched = createdProjectsCount + existingProjectsCount;
+    if (totalProjectsTouched === 0 && processedRows.length > 0) {
       const details: string[] = [
-        `File có ${processedRows.length} dòng nhưng không tạo được dự án nào.`,
+        `File có ${processedRows.length} dòng nhưng không tìm được dự án nào (mới lẫn cũ).`,
         skippedRows > 0
           ? `${skippedRows} dòng bị bỏ qua do thiếu "Mã dự án" hoặc "Tên dự án".`
           : 'Tất cả dòng bị bỏ qua — kiểm tra giá trị cột "Mã dự án" không được rỗng.',
@@ -244,17 +252,22 @@ export async function POST(request: NextRequest) {
       ].filter(Boolean);
 
       return reject422(
-        `Lỗi: Import thành công nhưng tạo được 0 dự án — file có thể sai cột`,
+        `Lỗi: File được xử lý nhưng không gắn được vào dự án nào — kiểm tra cột Mã dự án`,
         details,
         colMap.log
       );
     }
 
-    // ── Trả 201 thành công ────────────────────────────────────────────────────
+    // ── Trả 201 thành công ─────────────────────────────────────────────────
+    const successMessage = createdProjectsCount > 0
+      ? `Nhập dữ liệu thành công! Đã tạo ${createdProjectsCount} dự án mới và ${createdTasksCount} công việc.`
+      : `Import thành công! Đã cập nhật dữ liệu cấu kiện cho dự án hiện tại.`;
+
     return NextResponse.json({
       success:          true,
-      message:          `Nhập dữ liệu thành công!`,
+      message:          successMessage,
       projectsImported: createdProjectsCount,
+      projectsUpdated:  existingProjectsCount,   // Dự án cũ được cập nhật
       tasksImported:    createdTasksCount,
       skippedRows,
       encodingFixed,
