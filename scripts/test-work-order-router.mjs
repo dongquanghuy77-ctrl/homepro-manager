@@ -27,12 +27,12 @@ console.log('══════════════════════�
 const r1 = classifyTask('Kệ tivi treo tường');
 assert(r1.workGroup === 'PRODUCTION',   `"Kệ tivi treo tường" → PRODUCTION (got: ${r1.workGroup}, keyword: "${r1.matchedKeyword}")`);
 assert(r1.category === 'Sản xuất xưởng', `category = "Sản xuất xưởng" (got: "${r1.category}")`);
-assert(r1.assignee === 'Quản đốc xưởng mộc', `assignee = "Quản đốc xưởng mộc" (got: "${r1.assignee}")`);
+assert(r1.assignee === 'Minh', `assignee = "Minh" (Xưởng mộc) (got: "${r1.assignee}")`);
 
 const r2 = classifyTask('Sofa văng 3 chỗ');
 assert(r2.workGroup === 'PROCUREMENT',   `"Sofa văng 3 chỗ" → PROCUREMENT (got: ${r2.workGroup})`);
 assert(r2.category === 'Thu mua / Thương mại', `category = "Thu mua / Thương mại" (got: "${r2.category}")`);
-assert(r2.assignee === 'Nhân viên Thu mua', `assignee = "Nhân viên Thu mua" (got: "${r2.assignee}")`);
+assert(r2.assignee === 'Tuấn', `assignee = "Tuấn" (Thu mua) (got: "${r2.assignee}")`);
 
 const r3 = classifyTask('Sơn hiệu ứng vách');
 assert(r3.workGroup === 'INSTALLATION', `"Sơn hiệu ứng vách" → INSTALLATION (got: ${r3.workGroup})`);

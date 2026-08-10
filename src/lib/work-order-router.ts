@@ -1,11 +1,20 @@
 // src/lib/work-order-router.ts
 // ══════════════════════════════════════════════════════════════════════════════
 // HomePro MES — Auto-Routing & Work Order Classification Engine
-// Phiên bản: 1.1.0 | Fixes:
-//   - Word-boundary matching (không để 'tu' khớp sai vào 'tuong')
-//   - Thứ tự rules: PRODUCTION → INSTALLATION → PROCUREMENT
-//   - Timezone-safe date: dùng local methods thay toISOString()
+// Phươn bản: 1.2.0 | Staff mapping: DEFAULT_ASSIGNEES
+//   - PRODUCTION  → Minh   (Xưởng sản xuất mộc)
+//   - PROCUREMENT → Tuấn  (Thu mua vật tư)
+//   - INSTALLATION → Huy   (Giám sát thi công công trình)
+//   - UNCLASSIFIED → Huy  (Fallback giám sát)
 // ══════════════════════════════════════════════════════════════════════════════
+
+// Phân ánh DEFAULT_ASSIGNEES từ src/lib/constants.ts
+// ['Huy', 'Minh', 'Tuấn', 'Long', 'An']
+//  Huy   → Giám sát dự án / QC / Thi công
+//  Minh  → Xưởng sản xuất mộc
+//  Tuấn  → Thu mua vật tư / vật liệu
+//  Long  → Hỗ trợ sản xuất hoặc lắp đặt
+//  An    → Hỗ trợ tổng hợp
 
 // ── Nhóm công việc (Work Group) ──────────────────────────────────────────────
 export type WorkGroup =
@@ -63,11 +72,11 @@ interface RoutingRule {
 
 export const ROUTING_RULES: RoutingRule[] = [
   // ── NHÓM 1: Sản xuất xưởng mộc (PRODUCTION) ─────────────────────────────
-  // Ưu tiên compound keywords để tránh false positive
+  // Phụ trách: Minh — Cán bộ xưởng sản xuất mộc
   {
     workGroup: 'PRODUCTION',
     category:  'Sản xuất xưởng',
-    assignee:  'Quản đốc xưởng mộc',
+    assignee:  'Minh',   // ← DEFAULT_ASSIGNEES[1]: Xưởng mộc
     keywords: [
       // Tủ (dùng compound, tránh 'tu' → 'tuong')
       'tu ao', 'tu quan ao', 'tu bep', 'tu dau giuong',
@@ -89,12 +98,13 @@ export const ROUTING_RULES: RoutingRule[] = [
     ],
   },
 
-  // ── NHÓM 3: Thi công / Lắp đặt (INSTALLATION) ────────────────────────────
+  // ── NHÓM 3: Thi công / Lắp đặt (INSTALLATION) ────────────────────────────────────
+  // Phụ trách: Huy — Giám sát thi công / QC dự án
   // CHECK TRƯỚC PROCUREMENT để 'lap dat thiet bi' → INSTALLATION (không phải PROCUREMENT)
   {
     workGroup: 'INSTALLATION',
     category:  'Thi công công trình',
-    assignee:  'Huy',
+    assignee:  'Huy',   // ← DEFAULT_ASSIGNEES[0]: Giám sát thi công
     keywords: [
       'son hieu ung',   // sơn hiệu ứng vách
       'son tuong',      // sơn tường
@@ -110,12 +120,13 @@ export const ROUTING_RULES: RoutingRule[] = [
     ],
   },
 
-  // ── NHÓM 2: Thu mua / Thương mại (PROCUREMENT) ───────────────────────────
+  // ── NHÓM 2: Thu mua / Thương mại (PROCUREMENT) ────────────────────────────────────
+  // Phụ trách: Tuấn — Nhân viên thu mua vật tư
   // Check sau INSTALLATION để tránh 'thiet bi' match trước 'lap dat'
   {
     workGroup: 'PROCUREMENT',
     category:  'Thu mua / Thương mại',
-    assignee:  'Nhân viên Thu mua',
+    assignee:  'Tuấn',  // ← DEFAULT_ASSIGNEES[2]: Thu mua vật tư
     keywords: [
       'guong',          // gương (6 chars, an toàn)
       'sofa',           // sofa
@@ -158,7 +169,7 @@ export function classifyTask(title: string): RoutingResult {
   return {
     workGroup:      'UNCLASSIFIED',
     category:       'Thi công công trình',
-    assignee:       'Huy',
+    assignee:       'Huy',   // ← Fallback: Giám sát dự án
     matchedKeyword: null,
   };
 }
@@ -285,6 +296,18 @@ export function runRouterTests(): RouterTestResult {
       `(expected: ${tc.expectedGroup}, kw: "${r.matchedKeyword}")`
     );
   }
+
+  // Kiểm tra assignee là tên thật từ DEFAULT_ASSIGNEES
+  const validAssignees = ['Huy', 'Minh', 'Tuấn', 'Long', 'An'];
+  const rProd  = classifyTask('Kệ tivi treo');
+  const rProc  = classifyTask('Sofa văng');
+  const rInst  = classifyTask('Sơn hiệu ứng');
+  if (!validAssignees.includes(rProd.assignee))  { passed = false; }
+  if (!validAssignees.includes(rProc.assignee))  { passed = false; }
+  if (!validAssignees.includes(rInst.assignee))  { passed = false; }
+  results.push(`[${validAssignees.includes(rProd.assignee)  ? 'PASS' : 'FAIL'}] PRODUCTION assignee ở list DEFAULT_ASSIGNEES: "${rProd.assignee}"`);
+  results.push(`[${validAssignees.includes(rProc.assignee)  ? 'PASS' : 'FAIL'}] PROCUREMENT assignee ở list DEFAULT_ASSIGNEES: "${rProc.assignee}"`);
+  results.push(`[${validAssignees.includes(rInst.assignee)  ? 'PASS' : 'FAIL'}] INSTALLATION assignee ở list DEFAULT_ASSIGNEES: "${rInst.assignee}"`);
 
   const first3Groups = testCases.slice(0, 3).map(tc => classifyTask(tc.title).workGroup);
   const allDiff = new Set(first3Groups).size === 3;
