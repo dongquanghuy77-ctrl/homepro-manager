@@ -152,7 +152,7 @@ const canImportFull = requiredCols.every(c => !!fullMap.fieldToColumn[c.field]);
 assert(canImportFull,                                  'canImport=true khi file đủ cột (nút Import được bật)');
 
 assert(fullMap.fieldToColumn['index']    === 'STT',       'Map "STT" → index');
-assert(fullMap.fieldToColumn['category'] === 'Hạng mục',  'Map "Hạng mục" → category (field có ưu tiên cao hơn itemName)');
+assert(fullMap.fieldToColumn['taskTitle'] === 'Hạng mục',  'Map "Hạng mục" → taskTitle (taskTitle synonyms được xử lý trước category, có "hạng mục")');
 assert(fullMap.fieldToColumn['quantity'] === 'Khối lượng', 'Map "Khối lượng" → quantity');
 assert(fullMap.fieldToColumn['unit']     === 'Đơn vị',    'Map "Đơn vị" → unit');
 assert(fullMap.fieldToColumn['unitPrice']=== 'Đơn giá',   'Map "Đơn giá" → unitPrice');
@@ -200,7 +200,7 @@ const templateMap = buildColumnMap(templateHeaders);
 assert(templateMap.fieldToColumn['code']        === 'Mã dự án',   'Template: code ← "Mã dự án"');
 assert(templateMap.fieldToColumn['projectName'] === 'Tên dự án',  'Template: projectName ← "Tên dự án"');
 assert(templateMap.fieldToColumn['index']       === 'STT',           'Template: index ← "STT"');
-assert(templateMap.fieldToColumn['category']    === 'Hạng mục',      'Template: category ← "Hạng mục" (category có ưu tiên trước itemName)');
+assert(templateMap.fieldToColumn['taskTitle']    === 'Hạng mục',      'Template: taskTitle ← "Hạng mục" (taskTitle có synonym "hạng mục", ưu tiên trước category)');
 assert(templateMap.fieldToColumn['quantity']    === 'Khối lượng',    'Template: quantity ← "Khối lượng"');
 assert(templateMap.fieldToColumn['unit']        === 'Đơn vị',       'Template: unit ← "Đơn vị"');
 assert(templateMap.fieldToColumn['unitPrice']   === 'Đơn giá',      'Template: unitPrice ← "Đơn giá"');

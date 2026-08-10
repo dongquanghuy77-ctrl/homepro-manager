@@ -231,9 +231,25 @@ export async function POST(request: NextRequest) {
       }
 
       // Tạo task nếu có
-      const taskTitle = getField(row, colMap.fieldToColumn, 'taskTitle');
+      // ── Fallback chain: Tên công việc → Hạng mục (itemName) → category ──────
+      // Nếu file BOQ chỉ có cột "Hạng mục" (không có "Tên công việc"),
+      // dùng giá trị "Hạng mục" làm tiêu đề task để KHÔNG bỏ sót dòng nào
+      const taskTitle = getField(row, colMap.fieldToColumn, 'taskTitle')
+        || getField(row, colMap.fieldToColumn, 'itemName')
+        || getField(row, colMap.fieldToColumn, 'category');
+
+      if (taskTitle) {
+        console.log(
+          `[/api/import] 📝 taskTitle source: "${taskTitle}" | ` +
+          `taskTitle-col="${colMap.fieldToColumn['taskTitle'] ?? '–'}" ` +
+          `itemName-col="${colMap.fieldToColumn['itemName'] ?? '–'}" ` +
+          `category-col="${colMap.fieldToColumn['category'] ?? '–'}"`
+        );
+      }
+
       if (taskTitle && projectId) {
         try {
+          // Nếu "Hạng mục" đã được dùng làm taskTitle, category để trống → dùng default
           const category    = getField(row, colMap.fieldToColumn, 'category')     || 'Thi công';
           const assignee    = getField(row, colMap.fieldToColumn, 'assignee')     || 'Huy';
           const tStartDate  = getField(row, colMap.fieldToColumn, 'taskStartDate')|| null;

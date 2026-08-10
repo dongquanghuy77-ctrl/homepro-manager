@@ -53,6 +53,9 @@ export const COLUMN_SYNONYMS: Record<string, string[]> = {
     'tên công việc', 'ten cong viec', 'task title', 'tasktitle', 'title',
     'công việc', 'cong viec', 'task', 'hạng mục công việc',
     'tên hạng mục', 'ten hang muc', 'tên task', 'ten task',
+    // Fallback: nếu file BOQ chỉ có cột "Hạng mục" không có "Tên công việc"
+    // Chú ý: chỉ khớp khi CHƯA có cột nào khác dùng synonym này
+    'hạng mục', 'hang muc', 'nội dung', 'noi dung',
   ],
   category: [
     'hạng mục công việc', 'hang muc cong viec', 'hạng mục', 'hang muc',
