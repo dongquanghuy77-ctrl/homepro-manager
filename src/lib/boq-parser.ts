@@ -64,8 +64,11 @@ export function extractZoneId(headerText: string): { zoneId: string; zoneName: s
 export type SupplyType = 'INSTALLATION_ONLY' | 'HOMEPRO_PRODUCTION';
 
 export function classifySupplyType(note: string): SupplyType {
-  const n = note.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  if (n.includes('cdt cap') || n.includes('khong thuc hien') || n.includes('do cdt')) {
+  const n = note.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')   // bỏ dấu thanh
+    .replace(/đ/g, 'd');               // Đ → D (không phân rã bởi NFD)
+  if (n.includes('cdt') || n.includes('khong thuc hien') || n.includes('do cdt') || n.includes('cdt cap')) {
     return 'INSTALLATION_ONLY';
   }
   return 'HOMEPRO_PRODUCTION';
