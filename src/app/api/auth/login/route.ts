@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
@@ -5,8 +7,6 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { createSession } from '@/lib/session';
 import { checkLoginRateLimit, getIP } from '@/lib/ratelimit';
-
-export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,38 +34,134 @@ export async function POST(req: NextRequest) {
     // ────────────────────────────────────────────────────────────
 
     const body = await req.json();
-    const { username, password } = body;
+    const { username, password, identifier, pin } = body;
 
-    if (!username || !password) {
-      return NextResponse.json({ error: 'Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu' }, { status: 400 });
+    const loginInput = (identifier || username || '').trim();
+
+    if (!loginInput) {
+      return NextResponse.json(
+        { error: 'Vui lòng nhập Email, Số điện thoại hoặc Tên đăng nhập' },
+        { status: 400 }
+      );
     }
 
-    // Fetch user by username only (password compare happens via bcrypt)
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.username, username.trim()));
+    // Phân loại: EMAIL (chứa @), PHONE (toàn số, 8-15 ký tự), USERNAME (khác)
+    let type: 'EMAIL' | 'PHONE' | 'USERNAME' = 'USERNAME';
+    if (loginInput.includes('@')) {
+      type = 'EMAIL';
+    } else if (/^\+?\d{8,15}$/.test(loginInput.replace(/[\s\.-]/g, ''))) {
+      type = 'PHONE';
+    }
+
+    // Kiểm tra tính đầy đủ thông tin xác thực
+    if (type === 'PHONE') {
+      if (!pin) {
+        return NextResponse.json({ error: 'Vui lòng nhập mã PIN 6 số' }, { status: 400 });
+      }
+    } else {
+      if (!password) {
+        return NextResponse.json({ error: 'Vui lòng nhập mật khẩu' }, { status: 400 });
+      }
+    }
+
+    // Truy vấn cơ sở dữ liệu
+    let user;
+    if (type === 'EMAIL') {
+      const [u] = await db.select().from(users).where(eq(users.email, loginInput));
+      user = u;
+    } else if (type === 'PHONE') {
+      const normalizedPhone = loginInput.replace(/[\s\.-]/g, '');
+      const [u] = await db.select().from(users).where(eq(users.phone, normalizedPhone));
+      user = u;
+    } else {
+      const [u] = await db.select().from(users).where(eq(users.username, loginInput));
+      user = u;
+    }
 
     if (!user) {
-      return NextResponse.json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' }, { status: 401 });
-    }
-
-    // Compare password: supports both bcrypt hashes and legacy plain-text
-    let passwordMatch = false;
-    const isHashed = user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
-    if (isHashed) {
-      passwordMatch = await bcrypt.compare(password.trim(), user.password);
-    } else {
-      // Legacy plain-text fallback (temporary until full migration)
-      passwordMatch = user.password === password.trim();
-    }
-
-    if (!passwordMatch) {
-      return NextResponse.json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Thông tin đăng nhập hoặc mật khẩu/mã PIN không chính xác' },
+        { status: 401 }
+      );
     }
 
     if (!user.active) {
       return NextResponse.json({ error: 'Tài khoản đã bị tạm khóa' }, { status: 403 });
+    }
+
+    // Xử lý xác thực theo phân loại
+    if (type === 'PHONE') {
+      const now = new Date();
+
+      // Kiểm tra khóa tài khoản do brute-force PIN
+      if (user.pinLockedUntil && new Date(user.pinLockedUntil) > now) {
+        const diffMs = new Date(user.pinLockedUntil).getTime() - now.getTime();
+        const minutesLeft = Math.ceil(diffMs / 60000);
+        return NextResponse.json(
+          { error: `Tài khoản đã bị khóa tạm thời do nhập sai PIN quá 5 lần. Vui lòng thử lại sau ${minutesLeft} phút.` },
+          { status: 403 }
+        );
+      }
+
+      if (!user.pinHash) {
+        return NextResponse.json(
+          { error: 'Tài khoản này chưa được cấu hình mã PIN. Vui lòng đăng nhập bằng Mật khẩu.' },
+          { status: 400 }
+        );
+      }
+
+      // Kiểm tra khớp PIN
+      const pinStr = String(pin).trim();
+      let pinMatch = false;
+      const isPinHashed = user.pinHash.startsWith('$2b$') || user.pinHash.startsWith('$2a$');
+      if (isPinHashed) {
+        pinMatch = await bcrypt.compare(pinStr, user.pinHash);
+      } else {
+        pinMatch = user.pinHash === pinStr; // Plain text fallback
+      }
+
+      if (!pinMatch) {
+        const newAttempts = user.failedPinAttempts + 1;
+        let lockTime = null;
+        let errMsg = `Mã PIN không chính xác. Bạn còn ${5 - newAttempts} lần thử.`;
+
+        if (newAttempts >= 5) {
+          lockTime = new Date(now.getTime() + 15 * 60 * 1000); // Khóa 15 phút
+          errMsg = 'Tài khoản đã bị tạm khóa 15 phút do nhập sai mã PIN quá 5 lần.';
+        }
+
+        await db
+          .update(users)
+          .set({
+            failedPinAttempts: lockTime ? 0 : newAttempts,
+            pinLockedUntil: lockTime,
+          })
+          .where(eq(users.id, user.id));
+
+        return NextResponse.json({ error: errMsg }, { status: 401 });
+      }
+
+      // Thành công -> Reset số lần sai
+      await db
+        .update(users)
+        .set({ failedPinAttempts: 0, pinLockedUntil: null })
+        .where(eq(users.id, user.id));
+    } else {
+      // Xác thực Mật khẩu (EMAIL hoặc USERNAME)
+      let passwordMatch = false;
+      const isHashed = user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
+      if (isHashed) {
+        passwordMatch = await bcrypt.compare(password.trim(), user.password);
+      } else {
+        passwordMatch = user.password === password.trim();
+      }
+
+      if (!passwordMatch) {
+        return NextResponse.json(
+          { error: 'Thông tin đăng nhập hoặc mật khẩu không chính xác' },
+          { status: 401 }
+        );
+      }
     }
 
     const userPayload = {
@@ -76,7 +172,7 @@ export async function POST(req: NextRequest) {
       departmentId: (user as { departmentId?: number | null }).departmentId ?? null,
     };
 
-    // Create signed JWT session cookie
+    // Tạo signed session JWT cookie
     await createSession(userPayload);
 
     return NextResponse.json({ success: true, user: userPayload });
