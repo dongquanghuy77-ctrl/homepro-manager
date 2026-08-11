@@ -18,7 +18,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Clock, User, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
 import useSWR from 'swr';
-import type { AuditLogEntry } from '@/app/api/hr/employees/[id]/audit-logs/route';
+import type { AuditLogEntry } from '@/lib/audit-log-types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Action config (label + màu + icon)
