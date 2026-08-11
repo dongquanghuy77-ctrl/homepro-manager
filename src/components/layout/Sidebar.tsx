@@ -9,6 +9,7 @@ import {
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
   ChevronDown, ChevronRight,
   Factory, ScanLine, ClipboardList, BarChart2,
+  Inbox, Banknote,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
@@ -20,6 +21,7 @@ const iconMap = {
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
   ChevronDown, ChevronRight,
   Factory, ScanLine, ClipboardList, BarChart2,
+  Inbox, Banknote,
 };
 
 interface UserState {
@@ -87,6 +89,14 @@ const NAV_ITEMS: NavItem[] = [
     id: 'hr-reports', label: 'Báo cáo NS', icon: 'FileBarChart2', href: '/hr/reports',
     sprint: 6, managerOnly: true, groupId: 'hr-group',
   },
+  {
+    id: 'payroll', label: 'Bảng lương', icon: 'Banknote', href: '/payroll',
+    sprint: 6, managerOnly: true, groupId: 'hr-group',
+  },
+  {
+    id: 'hr-disputes', label: 'Khiếu nại lương', icon: 'Inbox', href: '/hr/disputes',
+    sprint: 6, managerOnly: true, groupId: 'hr-group',
+  },
 
   // ── Xưởng Sản Xuất — Collapsible Group ───────────────────────────────────
   {
@@ -119,7 +129,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 // ─── HR paths that belong to the hr-group ────────────────────────────────────
-const HR_CHILD_PATHS    = ['/employees', '/attendance', '/leave', '/overtime', '/hr/reports'];
+const HR_CHILD_PATHS    = ['/employees', '/attendance', '/leave', '/overtime', '/hr/reports', '/payroll', '/hr/disputes'];
 const XUONG_CHILD_PATHS = ['/bom', '/tracking'];
 
 
