@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import '../styles/globals.css';
-import Sidebar from '@/components/layout/Sidebar';
 import AppShell from '@/components/layout/AppShell';
+import LayoutWrapper from '@/components/layout/LayoutWrapper';
 
 export const metadata: Metadata = {
   title: 'HomePro Manager — Quản lý dự án nội thất',
@@ -13,12 +13,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi">
       <body>
         <AppShell>
-          <div className="app-layout">
-            <Sidebar />
-            <main className="app-main">
-              {children}
-            </main>
-          </div>
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
         </AppShell>
       </body>
     </html>
