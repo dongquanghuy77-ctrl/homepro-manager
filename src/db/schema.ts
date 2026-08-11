@@ -300,6 +300,13 @@ export const attendance = pgTable('attendance', {
   // Rule Engine đọc leaveRequestId → không phạt vắng mặt
   leaveRequestId: integer('leave_request_id').references(() => leaveRequests.id, { onDelete: 'set null' }),
 
+  // ─── OFFLINE SYNC & FRAUD DETECTION ──────────────────────────────────────
+  isOfflineSync:    boolean('is_offline_sync').notNull().default(false),
+  clientTimestamp:  timestamp('client_timestamp'),
+  offlineSyncDelta: integer('offline_sync_delta'), // Lệch thời gian tính bằng phút
+  isFlagged:        boolean('is_flagged').notNull().default(false),
+  flagReason:       text('flag_reason'),
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

@@ -38,7 +38,7 @@
     "@types/node": "^20.14.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "drizzle-kit": "^0.23.2",
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.12",
     "typescript": "^5.5.3"
   }

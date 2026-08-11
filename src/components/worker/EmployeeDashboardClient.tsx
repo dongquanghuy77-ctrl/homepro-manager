@@ -4,13 +4,62 @@
 // Trang chu All-in-one danh cho Cong nhan (Mobile-first)
 // Chuc nang: Cham cong GPS, Xem quy phep, Xem lich su, Gui yeu cau nghi phep/tang ca, Bao cao cong viec hang ngay
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   MapPin, Calendar, Clock, LogOut, FileText, Send, User, 
   ChevronRight, CheckCircle2, AlertTriangle, Check, Briefcase, PlusCircle, History
 } from 'lucide-react';
 import DailyInputClient from './DailyInputClient';
+
+// ─── NATIVE INDEXEDDB HELPER FOR OFFLINE ATTENDANCE ──────────────────────────
+const openOfflineDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') return reject('SSR Environment');
+    const request = window.indexedDB.open('HomeProOfflineDB', 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('attendance_logs')) {
+        db.createObjectStore('attendance_logs', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const saveOfflineRecord = async (record: { clientTimestamp: string; type: 'IN' | 'OUT'; location: string }) => {
+  const db = await openOfflineDB();
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('attendance_logs', 'readwrite');
+    const store = tx.objectStore('attendance_logs');
+    const request = store.add(record);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const getOfflineRecords = async (): Promise<Array<{ id?: number; clientTimestamp: string; type: 'IN' | 'OUT'; location: string }>> => {
+  const db = await openOfflineDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('attendance_logs', 'readonly');
+    const store = tx.objectStore('attendance_logs');
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const clearOfflineRecords = async () => {
+  const db = await openOfflineDB();
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('attendance_logs', 'readwrite');
+    const store = tx.objectStore('attendance_logs');
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+};
 
 interface Project {
   id: number;
@@ -78,6 +127,68 @@ export default function EmployeeDashboardClient({
   const [otProjectId, setOtProjectId] = useState('');
   const [otLoading, setOtLoading] = useState(false);
 
+  // Register PWA Manifest and Service Worker in client context
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // 1. Inject Manifest Link dynamically
+    let link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement;
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = '/manifest.json';
+      document.head.appendChild(link);
+    }
+
+    // 2. Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(
+        (reg) => console.log('PWA Service Worker registered successfully:', reg.scope),
+        (err) => console.error('PWA Service Worker registration failed:', err)
+      );
+    }
+  }, []);
+
+  // Background Sync when network returns online
+  useEffect(() => {
+    async function syncOfflineRecords() {
+      try {
+        const records = await getOfflineRecords();
+        if (records.length === 0) return;
+
+        console.log(`Syncing ${records.length} offline attendance logs...`);
+        const res = await fetch('/api/hr/attendance/clock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ records }),
+        });
+
+        if (res.ok) {
+          await clearOfflineRecords();
+          setGpsSuccess('Đã tự động đồng bộ hóa chấm công ngoại tuyến lên hệ thống!');
+          // Fetch today's actual record from API to refresh UI
+          const todayRes = await fetch('/api/hr/attendance/today');
+          if (todayRes.ok) {
+            const todayData = await todayRes.json();
+            setTodayRecord(todayData);
+          }
+          router.refresh();
+        }
+      } catch (err) {
+        console.error('Failed to sync offline logs:', err);
+      }
+    }
+
+    // Initial check on mount
+    syncOfflineRecords();
+
+    // Listen to network transitions
+    window.addEventListener('online', syncOfflineRecords);
+    return () => {
+      window.removeEventListener('online', syncOfflineRecords);
+    };
+  }, [router]);
+
   // Logout trigger
   async function handleLogout() {
     if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
@@ -110,10 +221,46 @@ export default function EmployeeDashboardClient({
         setCoordsStr(locationString);
 
         const isCheckOut = todayRecord?.checkIn && !todayRecord?.checkOut;
+        const clockType = isCheckOut ? 'OUT' : 'IN';
         const endpoint = isCheckOut 
           ? '/api/hr/attendance/checkout' 
           : '/api/hr/attendance/checkin';
 
+        // ─── OFFLINE MODE: IF OFFLINE, SAVE TO INDEXEDDB ────────────────────────
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+          try {
+            await saveOfflineRecord({
+              clientTimestamp: new Date().toISOString(),
+              type: clockType,
+              location: locationString,
+            });
+
+            if (clockType === 'IN') {
+              setTodayRecord({
+                id: -999, // temporary ID
+                checkIn: new Date(),
+                checkOut: null,
+                status: 'PENDING_SYNC',
+                totalHours: 0,
+              });
+              setGpsSuccess(`Đã ghi nhận Vào Ca Ngoại tuyến lúc ${new Date().toLocaleTimeString('vi-VN')}! Hệ thống sẽ tự động đồng bộ khi khôi phục mạng.`);
+            } else {
+              setTodayRecord(prev => ({
+                ...prev,
+                checkOut: new Date(),
+                status: 'PENDING_SYNC',
+              } as any));
+              setGpsSuccess(`Đã ghi nhận Ra Ca Ngoại tuyến lúc ${new Date().toLocaleTimeString('vi-VN')}! Hệ thống sẽ tự động đồng bộ khi khôi phục mạng.`);
+            }
+          } catch (err: any) {
+            setGpsError('Không thể lưu chấm công ngoại tuyến: ' + err.message);
+          } finally {
+            setGpsLoading(false);
+          }
+          return;
+        }
+
+        // ─── ONLINE MODE: SEND TO BACKEND DIRECTLY ──────────────────────────────
         try {
           const res = await fetch(endpoint, {
             method: 'POST',
@@ -132,7 +279,35 @@ export default function EmployeeDashboardClient({
           );
           router.refresh();
         } catch (err: any) {
-          setGpsError(err.message || 'Lỗi kết nối máy chủ');
+          // Fallback to IndexedDB offline storage if fetch request fails (weak signal)
+          console.warn('Network request failed, falling back to offline IndexedDB storage:', err);
+          try {
+            await saveOfflineRecord({
+              clientTimestamp: new Date().toISOString(),
+              type: clockType,
+              location: locationString,
+            });
+
+            if (clockType === 'IN') {
+              setTodayRecord({
+                id: -999,
+                checkIn: new Date(),
+                checkOut: null,
+                status: 'PENDING_SYNC',
+                totalHours: 0,
+              });
+              setGpsSuccess(`Mạng yếu! Đã lưu Vào Ca Ngoại tuyến lúc ${new Date().toLocaleTimeString('vi-VN')}. Bản ghi sẽ tự động đồng bộ khi có kết nối ổn định.`);
+            } else {
+              setTodayRecord(prev => ({
+                ...prev,
+                checkOut: new Date(),
+                status: 'PENDING_SYNC',
+              } as any));
+              setGpsSuccess(`Mạng yếu! Đã lưu Ra Ca Ngoại tuyến lúc ${new Date().toLocaleTimeString('vi-VN')}. Bản ghi sẽ tự động đồng bộ khi có kết nối ổn định.`);
+            }
+          } catch (offlineErr: any) {
+            setGpsError('Lỗi kết nối máy chủ và không thể lưu ngoại tuyến: ' + offlineErr.message);
+          }
         } finally {
           setGpsLoading(false);
         }
