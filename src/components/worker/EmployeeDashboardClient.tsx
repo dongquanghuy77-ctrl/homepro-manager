@@ -11,6 +11,7 @@ import {
   ChevronRight, CheckCircle2, AlertTriangle, Check, Briefcase, PlusCircle, History
 } from 'lucide-react';
 import DailyInputClient from './DailyInputClient';
+import PwaInstallPrompt from './PwaInstallPrompt';
 
 // ─── NATIVE INDEXEDDB HELPER FOR OFFLINE ATTENDANCE ──────────────────────────
 const openOfflineDB = (): Promise<IDBDatabase> => {
@@ -108,6 +109,10 @@ export default function EmployeeDashboardClient({
   const [gpsSuccess, setGpsSuccess] = useState('');
   const [coordsStr, setCoordsStr] = useState('');
 
+  // States for PWA install helper (A2HS)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showPwaPrompt, setShowPwaPrompt] = useState(false);
+
   // Modals for requests
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showOtModal, setShowOtModal] = useState(false);
@@ -147,6 +152,18 @@ export default function EmployeeDashboardClient({
         (err) => console.error('PWA Service Worker registration failed:', err)
       );
     }
+
+    // 3. Listen to beforeinstallprompt event for A2HS installation triggers
+    const handleBeforeInstallPrompt = (e: Event) => {
+      console.log('beforeinstallprompt event fired and captured');
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
   // Background Sync when network returns online
@@ -188,6 +205,18 @@ export default function EmployeeDashboardClient({
       window.removeEventListener('online', syncOfflineRecords);
     };
   }, [router]);
+
+  // PWA Prompt trigger helper (UX Delay logic)
+  function triggerPwaPrompt() {
+    if (typeof window === 'undefined') return;
+    const hasSeen = localStorage.getItem('has_seen_pwa_prompt');
+    if (hasSeen !== 'true') {
+      setTimeout(() => {
+        setShowPwaPrompt(true);
+        localStorage.setItem('has_seen_pwa_prompt', 'true');
+      }, 2000);
+    }
+  }
 
   // Logout trigger
   async function handleLogout() {
@@ -252,6 +281,7 @@ export default function EmployeeDashboardClient({
               } as any));
               setGpsSuccess(`Đã ghi nhận Ra Ca Ngoại tuyến lúc ${new Date().toLocaleTimeString('vi-VN')}! Hệ thống sẽ tự động đồng bộ khi khôi phục mạng.`);
             }
+            triggerPwaPrompt();
           } catch (err: any) {
             setGpsError('Không thể lưu chấm công ngoại tuyến: ' + err.message);
           } finally {
@@ -277,6 +307,7 @@ export default function EmployeeDashboardClient({
               ? `Chấm công Ra Ca thành công lúc ${new Date(data.checkOut).toLocaleTimeString('vi-VN')}!`
               : `Chấm công Vào Ca thành công lúc ${new Date(data.checkIn).toLocaleTimeString('vi-VN')}!`
           );
+          triggerPwaPrompt();
           router.refresh();
         } catch (err: any) {
           // Fallback to IndexedDB offline storage if fetch request fails (weak signal)
@@ -305,6 +336,7 @@ export default function EmployeeDashboardClient({
               } as any));
               setGpsSuccess(`Mạng yếu! Đã lưu Ra Ca Ngoại tuyến lúc ${new Date().toLocaleTimeString('vi-VN')}. Bản ghi sẽ tự động đồng bộ khi có kết nối ổn định.`);
             }
+            triggerPwaPrompt();
           } catch (offlineErr: any) {
             setGpsError('Lỗi kết nối máy chủ và không thể lưu ngoại tuyến: ' + offlineErr.message);
           }
@@ -933,6 +965,13 @@ export default function EmployeeDashboardClient({
           <span>Báo cáo ngày</span>
         </button>
       </nav>
+
+      {/* PWA Install Promotion (Bottom Sheet) */}
+      <PwaInstallPrompt
+        deferredPrompt={deferredPrompt}
+        isOpen={showPwaPrompt}
+        onClose={() => setShowPwaPrompt(false)}
+      />
     </div>
   );
 }
