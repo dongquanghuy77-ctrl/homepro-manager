@@ -21,6 +21,7 @@
     "bcryptjs": "^3.0.3",
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.45.2",
+    "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
     "jose": "^6.2.8",
     "jspdf": "^4.2.1",

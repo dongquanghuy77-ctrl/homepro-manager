@@ -95,6 +95,7 @@ export default function PayrollMasterDashboard() {
   // ── UI state ──────────────────────────────────────────────────────────────
   const [calculating, setCalculating] = useState(false);
   const [publishing,  setPublishing]  = useState(false);
+  const [exporting,   setExporting]   = useState(false);
   const [toast,       setToast]       = useState<{ type: 'success'|'error'; msg: string } | null>(null);
   const [expandedId,  setExpandedId]  = useState<number | null>(null);
   const [expandData,  setExpandData]  = useState<Record<number, (LineItem | Record<string,unknown>)[]>>({});
@@ -177,6 +178,39 @@ export default function PayrollMasterDashboard() {
     }
   };
 
+  // ── Export Excel ──────────────────────────────────────────────────────────
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      // Fetch binary từ API — server trả file Excel binary
+      // Không dùng window.open() (bị popup blocker) — dùng <a> click trick
+      const exportUrl = `/api/hr/payroll/export?month=${month}&year=${year}&status=${status}`;
+      const res = await fetch(exportUrl);
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      // Lấy filename từ Content-Disposition header
+      const cdHeader = res.headers.get('Content-Disposition') ?? '';
+      const fnMatch  = cdHeader.match(/filename\*=UTF-8''(.+)/);
+      const filename = fnMatch ? decodeURIComponent(fnMatch[1]) : `bang-luong-${String(month).padStart(2,'0')}-${year}.xlsx`;
+      const a = document.createElement('a');
+      a.href     = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('success', `✅ Đã xuất: ${filename}`);
+    } catch (e) {
+      showToast('error', `❌ Xuất Excel thất bại: ${String(e)}`);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const rows      = data?.rows      ?? [];
   const agg       = data?.aggregate ?? null;
   const pgn       = data?.pagination ?? { page: 1, limit: 25, total: 0, totalPages: 1 };
@@ -240,6 +274,16 @@ export default function PayrollMasterDashboard() {
             style={{ background: '#F59E0B', color: '#1a1a1a' }}
           >
             {publishing ? '⏳ Đang công bố...' : `📢 Công Bố${selectAll ? ' Tất Cả' : selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}`}
+          </button>
+          <button
+            id="btn-export-excel"
+            className="btn btn-ghost"
+            onClick={handleExport}
+            disabled={exporting || !data?.pagination.total || (data?.pagination.total ?? 0) === 0}
+            title={`Xuất toàn bộ ${data?.pagination.total ?? 0} bản ghi tháng ${month}/${year} ra Excel`}
+            style={{ border: '1px solid #10B981', color: '#10B981' }}
+          >
+            {exporting ? '⏳ Đang xuất...' : '📊 Xuất Excel'}
           </button>
         </div>
       </div>
