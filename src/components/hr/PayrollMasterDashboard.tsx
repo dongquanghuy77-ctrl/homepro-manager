@@ -99,6 +99,7 @@ export default function PayrollMasterDashboard() {
   const [toast,       setToast]       = useState<{ type: 'success'|'error'; msg: string } | null>(null);
   const [expandedId,  setExpandedId]  = useState<number | null>(null);
   const [expandData,  setExpandData]  = useState<Record<number, (LineItem | Record<string,unknown>)[]>>({});
+  const [exportingRowId, setExportingRowId] = useState<number | null>(null); // per-row export spinner
 
   // ── SWR key ───────────────────────────────────────────────────────────────
   const apiUrl = `/api/hr/payroll?month=${month}&year=${year}&status=${status}&dept=${dept}&search=${encodeURIComponent(search)}&page=${page}&limit=25`;
@@ -208,6 +209,35 @@ export default function PayrollMasterDashboard() {
       showToast('error', `❌ Xuất Excel thất bại: ${String(e)}`);
     } finally {
       setExporting(false);
+    }
+  };
+
+  // ── Export Excel 1 phiếu lương cá nhân ────────────────────────────────────
+  const handleExportSingle = async (rowId: number, empName: string, empCode: string | null, m: number, y: number) => {
+    setExportingRowId(rowId);
+    try {
+      const res = await fetch(`/api/hr/payroll/${rowId}/export-single`);
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const cdHeader = res.headers.get('Content-Disposition') ?? '';
+      const fnMatch  = cdHeader.match(/filename\*=UTF-8''(.+)/);
+      const filename = fnMatch
+        ? decodeURIComponent(fnMatch[1])
+        : `phieu-luong-${empCode ?? 'nv'}-T${String(m).padStart(2,'0')}-${y}.xlsx`;
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('success', `📥 Đã xuất: ${empName} — ${filename}`);
+    } catch (e) {
+      showToast('error', `❌ Xuất thất bại: ${String(e)}`);
+    } finally {
+      setExportingRowId(null);
     }
   };
 
@@ -370,6 +400,7 @@ export default function PayrollMasterDashboard() {
                 <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700 }}>Thực nhận</th>
                 <th style={{ padding: '10px 12px', textAlign: 'center' }}>Trạng thái</th>
                 <th style={{ padding: '10px 12px', textAlign: 'center' }}>Chi tiết</th>
+                <th style={{ padding: '10px 12px', textAlign: 'center' }}>📥 Excel</th>
               </tr>
             </thead>
 
@@ -461,6 +492,28 @@ export default function PayrollMasterDashboard() {
                         style={{ fontSize: 12, padding: '2px 8px' }}
                       >
                         {expandedId === row.id ? '▲ Thu' : '▼ Chi tiết'}
+                      </button>
+                    </td>
+
+                    {/* Per-row Excel export */}
+                    <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                      <button
+                        id={`btn-export-single-${row.id}`}
+                        onClick={() => handleExportSingle(row.id, row.employeeName, row.employeeCode, row.month, row.year)}
+                        disabled={exportingRowId === row.id}
+                        title={`Xuất phiếu lương Excel — ${row.employeeName}`}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '3px 10px', borderRadius: 8, fontSize: 11,
+                          border: '1px solid rgba(16,185,129,0.4)',
+                          background: exportingRowId === row.id ? 'rgba(16,185,129,0.05)' : 'rgba(16,185,129,0.1)',
+                          color: '#10B981', cursor: exportingRowId === row.id ? 'wait' : 'pointer',
+                          fontWeight: 600, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                        }}
+                        onMouseEnter={e => { if (exportingRowId !== row.id) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(16,185,129,0.2)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = exportingRowId === row.id ? 'rgba(16,185,129,0.05)' : 'rgba(16,185,129,0.1)'; }}
+                      >
+                        {exportingRowId === row.id ? '⏳' : '⬇'} .xlsx
                       </button>
                     </td>
                   </tr>
