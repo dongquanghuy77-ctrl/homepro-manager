@@ -9,11 +9,14 @@ import { getTodayVN, getWorkHours, calculateAttendanceStats } from '@/lib/hr';
 
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth(req, ALL_ROLES);
-  if (error) return error;  // Return the actual error NextResponse
+  if (error) return error;
 
   try {
     const today = getTodayVN();
     const now = new Date();
+
+    const body = await req.json().catch(() => ({}));
+    const { location } = body;
 
     const [existing] = await db.select().from(attendance)
       .where(and(eq(attendance.employeeId, session.id), eq(attendance.workDate, today)));
@@ -36,6 +39,7 @@ export async function POST(req: NextRequest) {
       lateMinutes:       stats.lateMinutes,
       earlyLeaveMinutes: stats.earlyLeaveMinutes,
       totalHours:        stats.totalHours,
+      location:          location ? String(location).trim() : existing.location, // update or keep checkin location
       updatedAt:         now,
     }).where(eq(attendance.id, existing.id)).returning();
 
