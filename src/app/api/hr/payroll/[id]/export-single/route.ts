@@ -138,25 +138,55 @@ export async function GET(
     ws.getRow(r).height = 18;
   }
 
-  // ─── Helper: 2-col info row (B=label, C:D merged = value) ────────────────
+  // ─── Helper: 2-col info row (B:C merged=label, D=value) ─────────────────
+  // HÀNH VI: Ghi value vào ô C (merge anchor C:D). Dùng cho text fields.
   function infoRow(ws: ExcelJS.Worksheet, r: number, label: string, value: string | number, isCurrency = false) {
     ws.getRow(r).height = 15;
+    const cA = ws.getCell(`A${r}`);
+    cA.border = thin;
+
+    ws.mergeCells(`B${r}:C${r}`);
     const cB = ws.getCell(`B${r}`);
     cB.value = label;
     cB.font  = { size: 10, color: { argb: 'FF4B5563' } };
     cB.alignment = { vertical: 'middle', indent: 2 };
     cB.border = thin;
 
-    ws.mergeCells(`C${r}:D${r}`);
-    const cD = ws.getCell(`C${r}`);
+    const cD = ws.getCell(`D${r}`);
     cD.value = value;
     cD.font  = { size: 10, bold: true };
-    cD.alignment = { vertical: 'middle', indent: 1 };
+    cD.alignment = { vertical: 'middle', indent: 1, horizontal: isCurrency ? 'right' : 'left' };
     cD.border = thin;
-    if (isCurrency) {
-      cD.numFmt = '#,##0 "₫"';
-    }
-    ws.getCell(`A${r}`).border = thin;
+    if (isCurrency) cD.numFmt = '#,##0 "\u20ab"';
+  }
+
+  // ─── Helper: ANCHOR ROW — B=label, C=sublabel, D=number (KHÔNG merge) ────
+  // QUAN TRỌNG: Value ghi thẳng vào D${r} để formula =D9/26*D13 hoạt động!
+  function anchorRow(ws: ExcelJS.Worksheet, r: number, label: string, value: number) {
+    ws.getRow(r).height = 15;
+    const cA = ws.getCell(`A${r}`);
+    cA.border = thin;
+
+    const cB = ws.getCell(`B${r}`);
+    cB.value = label;
+    cB.font  = { size: 10, color: { argb: 'FF4B5563' } };
+    cB.alignment = { vertical: 'middle', indent: 2 };
+    cB.border = thin;
+
+    const cC = ws.getCell(`C${r}`);
+    cC.value = '← Dữ liệu anchor (formula tham chiếu ô này)';
+    cC.font  = { size: 9, italic: true, color: { argb: 'FF9CA3AF' } };
+    cC.alignment = { vertical: 'middle', indent: 1 };
+    cC.border = thin;
+
+    // ← GHI VÀO D${r} trực tiếp — KHÔNG merge — để =D9/26*D13 ra đúng số!
+    const cD = ws.getCell(`D${r}`);
+    cD.value  = value;          // JS number → Excel số (SUM được!)
+    cD.numFmt = '#,##0 "\u20ab"';
+    cD.font   = { size: 10, bold: true, color: { argb: 'FF1D4ED8' } };
+    cD.alignment = { horizontal: 'right', vertical: 'middle' };
+    cD.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEFF6FF' } };
+    cD.border = { ...thin, left: { style: 'medium', color: { argb: 'FF3B82F6' } } };
   }
 
   // ─── Helper: data-input row (B=label, C=sub-label, D=value number) ───────
@@ -313,8 +343,8 @@ export async function GET(
   infoRow(ws, 6,  'Mã nhân viên',             row.employeeCode ?? '—');
   infoRow(ws, 7,  'Phòng ban',                row.department   ?? '—');
   infoRow(ws, 8,  'Chức vụ',                  row.position     ?? '—');
-  infoRow(ws, 9,  'Lương chính thức',         num(row.officialSalary), true);   // ← D9
-  infoRow(ws, 10, 'Lương cơ bản (BHXH)',      num(row.basicSalary),    true);   // ← D10
+  anchorRow(ws, 9,  'Lương chính thức',        num(row.officialSalary));   // ← D9 anchor
+  anchorRow(ws, 10, 'Lương cơ bản (BHXH)',     num(row.basicSalary));      // ← D10 anchor
 
   ws.getRow(11).height = 6;  // spacer
 
