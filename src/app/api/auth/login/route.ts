@@ -4,7 +4,7 @@ import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { createSession } from '@/lib/session';
-import { loginRatelimit, getIP } from '@/lib/ratelimit';
+import { checkLoginRateLimit, getIP } from '@/lib/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     // ── Rate Limiting: 5 requests / 60s per IP ──────────────────
     const ip = getIP(req);
-    const { success, limit, remaining, reset } = await loginRatelimit.limit(ip);
+    const { success, limit, remaining, reset } = await checkLoginRateLimit(ip);
 
     if (!success) {
       const retryAfter = Math.ceil((reset - Date.now()) / 1000);

@@ -4,7 +4,7 @@ import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { getSession } from '@/lib/session';
-import { changePasswordRatelimit } from '@/lib/ratelimit';
+import { checkChangePasswordRateLimit } from '@/lib/ratelimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Rate Limiting: 3 attempts / 5 min per user ID ──────────
-    const { success, reset } = await changePasswordRatelimit.limit(`user:${session.id}`);
+    const { success, reset } = await checkChangePasswordRateLimit(`user:${session.id}`);
     if (!success) {
       const retryAfter = Math.ceil((reset - Date.now()) / 1000);
       return NextResponse.json(
