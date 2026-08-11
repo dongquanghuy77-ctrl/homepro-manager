@@ -170,6 +170,7 @@ export async function POST(req: NextRequest) {
       name:         user.name,
       role:         user.role,
       departmentId: (user as { departmentId?: number | null }).departmentId ?? null,
+      requirePasswordChange: (user as any).requirePasswordChange ?? false,
     };
 
     // Tạo signed session JWT cookie

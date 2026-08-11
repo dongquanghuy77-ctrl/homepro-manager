@@ -27,14 +27,10 @@ export async function POST(req: NextRequest) {
     // ─────────────────────────────────────────────────────────────
 
     const body = await req.json();
-    const { currentPassword, newPassword } = body;
+    const { currentPassword, newPassword, newPin } = body;
 
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json({ error: 'Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới' }, { status: 400 });
-    }
-
-    if (newPassword.trim().length < 6) {
-      return NextResponse.json({ error: 'Mật khẩu mới phải có ít nhất 6 ký tự' }, { status: 400 });
+    if (!newPassword && !newPin) {
+      return NextResponse.json({ error: 'Vui lòng cung cấp mật khẩu mới hoặc mã PIN mới' }, { status: 400 });
     }
 
     // Fetch current user from DB
@@ -44,30 +40,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Không tìm thấy tài khoản' }, { status: 404 });
     }
 
-    // Verify current password — support both bcrypt and legacy plain-text
-    let passwordMatch = false;
-    const isHashed = user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
-    if (isHashed) {
-      passwordMatch = await bcrypt.compare(currentPassword.trim(), user.password);
-    } else {
-      passwordMatch = user.password === currentPassword.trim();
+    const updates: any = {
+      requirePasswordChange: false,
+      updatedAt: new Date(),
+    };
+
+    if (newPassword) {
+      if (newPassword.trim().length < 6) {
+        return NextResponse.json({ error: 'Mật khẩu mới phải có ít nhất 6 ký tự' }, { status: 400 });
+      }
+      
+      // Verify current password if currentPassword is provided
+      if (currentPassword) {
+        let passwordMatch = false;
+        const isHashed = user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
+        if (isHashed) {
+          passwordMatch = await bcrypt.compare(currentPassword.trim(), user.password);
+        } else {
+          passwordMatch = user.password === currentPassword.trim();
+        }
+
+        if (!passwordMatch) {
+          return NextResponse.json({ error: 'Mật khẩu hiện tại không chính xác' }, { status: 400 });
+        }
+      }
+
+      // Hash the new password before saving
+      updates.password = await bcrypt.hash(newPassword.trim(), 10);
     }
 
-    if (!passwordMatch) {
-      return NextResponse.json({ error: 'Mật khẩu hiện tại không chính xác' }, { status: 400 });
+    if (newPin) {
+      const pinStr = String(newPin).trim();
+      if (pinStr.length !== 6 || /\D/.test(pinStr)) {
+        return NextResponse.json({ error: 'Mã PIN mới phải gồm đúng 6 chữ số' }, { status: 400 });
+      }
+      updates.pinHash = await bcrypt.hash(pinStr, 10);
     }
-
-    // Hash the new password before saving
-    const hashedNew = await bcrypt.hash(newPassword.trim(), 10);
 
     await db
       .update(users)
-      .set({ password: hashedNew, updatedAt: new Date() })
+      .set(updates)
       .where(eq(users.id, session.id));
 
-    return NextResponse.json({ success: true, message: 'Đổi mật khẩu thành công!' });
+    return NextResponse.json({ success: true, message: 'Cập nhật thông tin xác thực thành công!' });
   } catch (err) {
     console.error('Change password error:', err);
-    return NextResponse.json({ error: 'Không thể đổi mật khẩu' }, { status: 500 });
+    return NextResponse.json({ error: 'Không thể cập nhật thông tin xác thực' }, { status: 500 });
   }
 }

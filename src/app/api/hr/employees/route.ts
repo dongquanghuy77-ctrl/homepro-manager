@@ -18,10 +18,12 @@ export async function GET(req: NextRequest) {
     const department = searchParams.get('department')?.trim() || null;
     const status = searchParams.get('status')?.trim() || null;
     const search = searchParams.get('search')?.trim() || null;
+    const role = searchParams.get('role')?.trim() || null;
 
     const conditions = [];
     if (department) conditions.push(eq(users.department, department));
     if (status)     conditions.push(eq(users.employeeStatus, status));
+    if (role)       conditions.push(eq(users.role, role));
     if (search) {
       conditions.push(
         or(

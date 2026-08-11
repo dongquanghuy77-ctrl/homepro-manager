@@ -35,6 +35,7 @@ export const users = pgTable('users', {
   pinHash: text('pin_hash'),                             // Nullable, chứa hash của mã PIN 6 số
   failedPinAttempts: integer('failed_pin_attempts').notNull().default(0), // Số lần nhập sai PIN liên tiếp
   pinLockedUntil: timestamp('pin_locked_until'),         // Thời điểm mở khóa tài khoản
+  requirePasswordChange: boolean('require_password_change').notNull().default(false), // Bắt buộc đổi mật khẩu/PIN ở lần đăng nhập tiếp theo
   // ── HR Module 01 fields ──────────────────────────────────────
   employeeCode: text('employee_code').unique(),          // NV001, NV002...
   department: text('department'),                        // Xưởng gỗ | Thi công | Thiết kế | Kế toán | Quản lý

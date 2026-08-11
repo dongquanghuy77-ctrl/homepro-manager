@@ -82,6 +82,7 @@ export default async function EmployeesPage() {
       <EmployeeListClient
         initialEmployees={initialEmployees}
         isViewer={isViewer}
+        currentUserRole={role}
       />
     </div>
   );

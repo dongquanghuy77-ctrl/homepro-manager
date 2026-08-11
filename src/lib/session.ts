@@ -18,6 +18,7 @@ export interface SessionPayload {
   role: string;
   departmentId?: number | null;   // FK to departments.id — dùng cho RBAC filter
   originalRole?: string;          // Dùng cho switch-role (kiểm thử)
+  requirePasswordChange?: boolean; // Bắt buộc đổi mật khẩu/PIN ở lần đăng nhập tiếp theo
 }
 
 // Create and set a signed JWT cookie

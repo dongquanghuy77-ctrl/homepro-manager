@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   // References for OTP fields to control focus programmatically
   const pinRefs = [
@@ -427,9 +428,31 @@ export default function LoginPage() {
           )}
         </div>
 
+        {/* Forgotten Password Notice */}
+        <div style={{
+          marginTop: 20,
+          textAlign: 'center'
+        }}>
+          <button
+            type="button"
+            onClick={() => setShowForgotModal(true)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#3B82F6',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Quên Mật khẩu / mã PIN?
+          </button>
+        </div>
+
         {/* Footer info */}
         <div style={{
-          marginTop: 28,
+          marginTop: 20,
           padding: '12px 14px',
           background: 'rgba(255, 255, 255, 0.02)',
           borderRadius: 12,
@@ -442,6 +465,73 @@ export default function LoginPage() {
           💡 <strong>Mẹo:</strong> Khối văn phòng đăng nhập bằng Email/Password. Khối sản xuất đăng nhập bằng SĐT/PIN 6 số.
         </div>
       </div>
+
+      {showForgotModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16,
+        }}>
+          <div style={{
+            background: '#0F172A',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: 16,
+            padding: '24px 28px',
+            maxWidth: 400,
+            width: '100%',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+            textAlign: 'center',
+            fontFamily: '"Outfit", "Inter", sans-serif',
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 48,
+              height: 48,
+              borderRadius: 12,
+              background: 'rgba(59, 130, 246, 0.1)',
+              color: '#3B82F6',
+              marginBottom: 16,
+            }}>
+              <KeyRound size={24} />
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#F8FAFC', margin: '0 0 10px 0' }}>
+              Quên Mật khẩu / PIN?
+            </h3>
+            <p style={{ fontSize: 14, color: '#94A3B8', margin: '0 0 20px 0', lineHeight: '1.5' }}>
+              Vui lòng liên hệ bộ phận Hành chính Nhân sự (Hotline: <strong style={{ color: '#F8FAFC' }}>0905 123 456</strong>) để được cấp lại mã truy cập.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(false)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: 8,
+                background: '#2563EB',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Đồng ý
+            </button>
+          </div>
+        </div>
+      )}
+
       <style jsx global>{`
         @keyframes spin {
           to { transform: rotate(360deg); }

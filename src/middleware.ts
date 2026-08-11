@@ -11,7 +11,8 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/api/demo') ||
     pathname.startsWith('/favicon.ico') ||
     pathname === '/login' ||
-    pathname === '/demo'
+    pathname === '/demo' ||
+    pathname === '/change-password'
   ) {
     return NextResponse.next();
   }
@@ -23,6 +24,11 @@ export async function middleware(req: NextRequest) {
   if (!session) {
     const loginUrl = new URL('/login', req.url);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // FORCE PASSWORD CHANGE logic
+  if (session.requirePasswordChange && pathname !== '/change-password') {
+    return NextResponse.redirect(new URL('/change-password', req.url));
   }
 
   const { role } = session;
