@@ -415,10 +415,10 @@ export async function GET(
   // ══════════════════════════════════════════════════════════════════════════
   const buffer   = await wb.xlsx.writeBuffer();
   const empCode  = row.employeeCode ?? `EMP${row.employeeId}`;
-  const empName  = (row.employeeName ?? 'nhanvien').replace(/\s+/g, '-').toLowerCase();
   const filename = `phieu-luong-${empCode}-T${String(row.month).padStart(2,'0')}-${row.year}.xlsx`;
 
-  return new NextResponse(buffer as Buffer, {
+  // Dùng Uint8Array thay Buffer để tương thích NextResponse BodyInit type
+  return new NextResponse(new Uint8Array(buffer as ArrayBuffer), {
     status: 200,
     headers: {
       'Content-Type':        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

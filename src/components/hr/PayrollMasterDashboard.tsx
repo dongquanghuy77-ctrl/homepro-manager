@@ -24,6 +24,8 @@ interface PayrollRow {
   employeeCode:     string | null;
   employeeName:     string;
   department:       string | null;
+  month:            number;
+  year:             number;
   regularWorkedDays: number;
   paidLeaveDays:    number;
   eveningOtHours:   number;
