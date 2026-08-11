@@ -16,6 +16,8 @@ export interface SessionPayload {
   username: string;
   name: string;
   role: string;
+  departmentId?: number | null;   // FK to departments.id — dùng cho RBAC filter
+  originalRole?: string;          // Dùng cho switch-role (kiểm thử)
 }
 
 // Create and set a signed JWT cookie

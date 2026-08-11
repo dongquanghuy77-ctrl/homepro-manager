@@ -42,14 +42,19 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse }      from 'next/server';
 import { db }                             from '@/db';
 import { monthlyPayroll, users }          from '@/db/schema';
-import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
-import { eq, and, sql, desc, ilike }      from 'drizzle-orm';
+import { requireAuth, MANAGER_AND_ABOVE, getEffectiveTeamMemberIds } from '@/lib/auth';
+import { eq, and, sql, desc, ilike, inArray } from 'drizzle-orm';
 
 const DEFAULT_PAGE_SIZE = 25; // Số rows/trang — đủ để review mà không quá tải
 
 export async function GET(req: NextRequest) {
   const { session, error } = await requireAuth(req, MANAGER_AND_ABOVE);
   if (error) return error;
+
+  const allowedEmployeeIds = await getEffectiveTeamMemberIds(session);
+  const teamFilter = allowedEmployeeIds.length > 0
+    ? inArray(monthlyPayroll.employeeId, allowedEmployeeIds)
+    : eq(monthlyPayroll.employeeId, -1);
 
   const url      = new URL(req.url);
   const month    = parseInt(url.searchParams.get('month') ?? String(new Date().getMonth() + 1));
@@ -65,6 +70,7 @@ export async function GET(req: NextRequest) {
   const conditions = [
     eq(monthlyPayroll.month, month),
     eq(monthlyPayroll.year,  year),
+    teamFilter,
     ...(status ? [eq(monthlyPayroll.status, status)] : []),
   ];
 
@@ -137,7 +143,13 @@ export async function GET(req: NextRequest) {
       countTotal:    sql<number>`COUNT(*)`,
     })
     .from(monthlyPayroll)
-    .where(and(eq(monthlyPayroll.month, month), eq(monthlyPayroll.year, year)));
+    .where(
+      and(
+        eq(monthlyPayroll.month, month),
+        eq(monthlyPayroll.year, year),
+        teamFilter
+      )
+    );
 
   const total    = Number(countRow?.total   ?? 0);
   const totalPages = Math.ceil(total / limit);
@@ -164,3 +176,4 @@ export async function GET(req: NextRequest) {
   res.headers.set('Cache-Control', 'no-store');
   return res;
 }
+

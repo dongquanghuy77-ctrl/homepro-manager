@@ -3,23 +3,28 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db';
 import { attendance, users } from '@/db/schema';
-import { requireAuth, ADMIN_OR_MANAGER, ALL_ROLES } from '@/lib/auth';
-import { eq, and, desc, like } from 'drizzle-orm';
+import { requireAuth, ADMIN_OR_MANAGER, ALL_ROLES, getEffectiveTeamMemberIds } from '@/lib/auth';
+import { eq, and, desc, like, inArray } from 'drizzle-orm';
 import { getWorkHours, calculateAttendanceStats, writeHrAuditLog } from '@/lib/hr';
 
-// ─── GET: Danh sách chấm công (ADMIN, MANAGER xem tất cả | VIEWER chỉ đọc) ────────────
+// ─── GET: Danh sách chấm công (lọc theo quyền) ────────────
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireAuth(req, ALL_ROLES); // VIEWER được xem
+  const { session, error } = await requireAuth(req, ALL_ROLES); // ALL_ROLES includes VIEWER
   if (error) return error;
 
   try {
+    const allowedEmployeeIds = await getEffectiveTeamMemberIds(session);
+    const teamFilter = allowedEmployeeIds.length > 0
+      ? inArray(attendance.employeeId, allowedEmployeeIds)
+      : eq(attendance.employeeId, -1);
+
     const { searchParams } = new URL(req.url);
     const date       = searchParams.get('date')?.trim()       || null;
     const employeeId = searchParams.get('employeeId')?.trim() || null;
     const department = searchParams.get('department')?.trim() || null;
     const month      = searchParams.get('month')?.trim()      || null; // YYYY-MM
 
-    const conditions = [];
+    const conditions = [teamFilter];
     if (date)       conditions.push(eq(attendance.workDate, date));
     if (employeeId) conditions.push(eq(attendance.employeeId, parseInt(employeeId, 10)));
     if (department) conditions.push(eq(users.department, department));
@@ -48,7 +53,7 @@ export async function GET(req: NextRequest) {
       })
       .from(attendance)
       .leftJoin(users, eq(attendance.employeeId, users.id))
-      .where(conditions.length ? and(...conditions) : undefined)
+      .where(and(...conditions))
       .orderBy(desc(attendance.workDate), attendance.employeeId);
 
     return NextResponse.json(records);
@@ -75,13 +80,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'workDate bắt buộc, định dạng YYYY-MM-DD' }, { status: 400 });
     }
 
+    const empIdNum = Number(employeeId);
+
+    // ── RBAC Authorization Check ──────────────────────────────────────────────
+    const allowedEmployeeIds = await getEffectiveTeamMemberIds(session);
+    if (!allowedEmployeeIds.includes(empIdNum)) {
+      return NextResponse.json({ error: 'Bạn không có quyền quản lý nhân viên này' }, { status: 403 });
+    }
+
     const validStatuses = ['PRESENT', 'ABSENT', 'LATE', 'HALF_DAY', 'ON_LEAVE'];
     if (status && !validStatuses.includes(status)) {
       return NextResponse.json({ error: `status không hợp lệ. Cho phép: ${validStatuses.join(', ')}` }, { status: 400 });
     }
 
     // ── Check employee exists ──────────────────────────────────────────────────
-    const empIdNum = Number(employeeId);
     const [employee] = await db.select({ id: users.id, name: users.name })
       .from(users).where(eq(users.id, empIdNum));
     if (!employee) {
@@ -160,3 +172,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+

@@ -35,10 +35,22 @@ export async function requireAuth(
   return { session, error: null };
 }
 
-// Convenience RBAC helpers
-export const ADMIN_ONLY         = ['ADMIN'];
-export const ADMIN_OR_MANAGER   = ['ADMIN', 'MANAGER'];
-export const ADMIN_OR_HR        = ['ADMIN'];               // ADMIN = HR cấp 2
-export const MANAGER_AND_ABOVE  = ['ADMIN', 'MANAGER'];    // Có thể xét duyệt cấp 1
-export const ALL_STAFF          = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER'];
-export const ALL_ROLES          = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER'];
+// ── Role constants ────────────────────────────────────────────────────────────
+// Enum thực tế: ADMIN | HR | MANAGER | SUPERVISOR | WORKER | VIEWER
+export const ADMIN_ONLY        = ['ADMIN'];
+export const HR_AND_ABOVE      = ['ADMIN', 'HR'];               // Xem/quản lý module HR + Lương
+export const ADMIN_OR_HR       = ['ADMIN', 'HR'];               // Khớp với các route cũ check quyền HR/Admin
+export const MANAGER_AND_ABOVE = ['ADMIN', 'HR', 'MANAGER'];   // ← HR được vào trang HR
+export const ADMIN_OR_MANAGER  = ['ADMIN', 'MANAGER'];          // Không bao gồm HR
+export const ALL_STAFF         = ['ADMIN', 'HR', 'MANAGER', 'SUPERVISOR', 'WORKER'];
+export const ALL_ROLES         = ['ADMIN', 'HR', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER'];
+
+// ── Re-export RBAC helpers (import một chỗ duy nhất) ─────────────────────────
+export {
+  getEffectiveTeamMemberIds,
+  getAccessibleDepartmentIds,
+  getAccessibleDepartmentsWithLevel,
+  getMyApprovalLevel,
+  canApproveRequest,
+  getActiveDelegationDepartmentIds,
+} from '@/lib/rbac';

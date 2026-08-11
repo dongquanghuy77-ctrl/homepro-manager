@@ -1,6 +1,22 @@
 import { pgTable, serial, text, integer, real, timestamp, boolean } from 'drizzle-orm/pg-core';
 
 
+// ============================================================
+// DEPARTMENTS (PHÒNG BAN / TỔ)
+// Bảng chính thức hóa phòng ban — thay thế trường text users.department
+// ============================================================
+export const departments = pgTable('departments', {
+  id:        serial('id').primaryKey(),
+  code:      text('code').notNull().unique(), // 'XUONG_GO' | 'THI_CONG' | 'KHO' | 'KE_TOAN' | 'THIET_KE'
+  name:      text('name').notNull(),          // 'Xưởng Gỗ' | 'Thi Công' | ...
+  block:     text('block'),                   // 'SAN_XUAT' | 'VAN_PHONG' | 'KHO'
+  parentId:  integer('parent_id'),            // FK self-ref departments.id (Khối → Phòng)
+  sortOrder: integer('sort_order').default(0),
+  isActive:  boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+
 
 // ============================================================
 // USERS
@@ -22,6 +38,7 @@ export const users = pgTable('users', {
   employmentType: text('employment_type').default('FULL_TIME'), // FULL_TIME | PART_TIME | CONTRACT
   joinDate: text('join_date'),                           // DD/MM/YYYY
   managerId: integer('manager_id'),                      // FK to users.id (self-referential)
+  departmentId: integer('department_id'),               // FK to departments.id (RBAC core — không dùng .references() tránh circular)
   employeeStatus: text('employee_status').default('ACTIVE'), // ACTIVE | INACTIVE | ON_LEAVE
   note: text('note'),
   // ── SPRINT 3 — Lương (Payroll Module) ────────────────────────────────────
@@ -308,6 +325,13 @@ export const leaveRequests = pgTable('leave_requests', {
   // APPROVED → CANCELLED (NV hủy trước ngày nghỉ)
   status: text('status').notNull().default('PENDING'),
 
+  // ─── APPROVAL LEVEL ĐỘNG (chống overlap nhiều cấp quản lý) ───────────────
+  // Mỗi đơn chỉ hiển thị trong queue của 1 cấp duy nhất tại 1 thời điểm
+  // Khi cấp N duyệt: currentApprovalLevel tăng lên N+1, chỉ cấp N+1 thấy
+  currentApprovalLevel: integer('current_approval_level').notNull().default(1),
+  maxApprovalLevels:    integer('max_approval_levels').notNull().default(2),
+  // maxApprovalLevels lấy từ leaveTypes.approvalLevels khi tạo đơn
+
   // ─── Legacy 1-cấp duyệt (giữ compat) ────────────────────────────────────
   reviewedBy: integer('reviewed_by').references(() => users.id),
   reviewedAt: timestamp('reviewed_at'),
@@ -397,8 +421,21 @@ export const overtimeRequests = pgTable('overtime_requests', {
   reason: text('reason'),
   projectId: integer('project_id').references(() => projects.id, { onDelete: 'set null' }),
   status: text('status').notNull().default('PENDING'), // PENDING | APPROVED | REJECTED | CANCELLED
+
+  // ─── LUỒNG DUYỆT 2 CẤP (giống leave_requests) ─────────────────────────────
+  currentApprovalLevel: integer('current_approval_level').notNull().default(1),
+  maxApprovalLevels:    integer('max_approval_levels').notNull().default(1),
+
+  // Cấp 1: Manager trực tiếp
   approvedBy: integer('approved_by').references(() => users.id),
   approvedAt: timestamp('approved_at'),
+  approveNote: text('approve_note'),
+
+  // Cấp 2: HR chốt (nếu max_approval_levels=2)
+  approvedByHr:   integer('approved_by_hr').references(() => users.id),
+  approvedByHrAt: timestamp('approved_by_hr_at'),
+  hrNote:         text('hr_note'),
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -498,7 +535,10 @@ export type OvertimeRequest = typeof overtimeRequests.$inferSelect;
 export type NewOvertimeRequest = typeof overtimeRequests.$inferInsert;
 export type HrAuditLog = typeof hrAuditLogs.$inferSelect;
 
-export type UserRole = 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
+export type UserRole = 'ADMIN' | 'HR' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
+// HR: Phụ trách nhân sự + lương — thấy toàn bộ module HR, KHÔNG thấy Dự án
+// MANAGER: Trưởng phòng/Quản đốc — thấy dự án + duyệt team mình
+// SUPERVISOR: Tổ phó/Trưởng nhóm — mục tiêu hợp lệ cho Manager ủy quyền (Delegation)
 export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
 export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'OVERDUE';
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
@@ -624,3 +664,88 @@ export const payslipDisputes = pgTable('payslip_disputes', {
 export type PayslipDispute    = typeof payslipDisputes.$inferSelect;
 export type NewPayslipDispute = typeof payslipDisputes.$inferInsert;
 export type DisputeStatus     = 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'CLOSED';
+
+
+// ============================================================
+// RBAC — MANAGER DEPARTMENTS (LÕI PHÂN QUYỀN)
+// Bất kỳ user nào có role MANAGER phải tra cứu bảng này
+// để biết họ được phép xem/duyệt phòng ban nào + ở cấp mấy
+// ============================================================
+export const managerDepartments = pgTable('manager_departments', {
+  id:              serial('id').primaryKey(),
+  managerId:       integer('manager_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  departmentId:    integer('department_id').notNull().references(() => departments.id, { onDelete: 'cascade' }),
+
+  // Cấp quản lý trong phòng ban này — dùng khớp với currentApprovalLevel
+  managementLevel: integer('management_level').notNull().default(1),
+  // 1 = Tổ trưởng / Trưởng nhóm (duyệt cấp 1 — trực tiếp)
+  // 2 = Quản đốc / Trưởng phòng  (duyệt cấp 2)
+  // 3 = Giám đốc / BGĐ            (duyệt cấp 3 nếu cần)
+
+  canView:    boolean('can_view').notNull().default(true),    // Xem dữ liệu phòng
+  canApprove: boolean('can_approve').notNull().default(false), // Duyệt đơn từ phòng
+  canManage:  boolean('can_manage').notNull().default(false),  // Tạo/sửa/xóa (trưởng phòng)
+
+  createdAt:  timestamp('created_at').defaultNow(),
+  // UNIQUE(manager_id, department_id) — enforced via migration
+});
+
+
+// ============================================================
+// RBAC — DELEGATIONS (ỦY QUYỀN TẠM THỜI)
+// Manager ủy quyền cho SUPERVISOR trong thời gian có giới hạn
+// Nguyên tắc cứng: Delegate KHÔNG được re-delegate
+// ============================================================
+export const delegations = pgTable('delegations', {
+  id:            serial('id').primaryKey(),
+  delegatorId:   integer('delegator_id').notNull().references(() => users.id),
+  // Người ủy quyền — phải là MANAGER
+  delegateId:    integer('delegate_id').notNull().references(() => users.id),
+  // Người nhận ủy quyền — phải là SUPERVISOR
+
+  // Phạm vi quyền được ủy quyền
+  scope:         text('scope').array().notNull(),
+  // Ví dụ: ['APPROVE_ATTENDANCE', 'APPROVE_LEAVE', 'APPROVE_OT']
+
+  // Phạm vi phòng ban — subset của phòng Manager quản lý
+  departmentIds: integer('department_ids').array().notNull(),
+
+  startAt:  timestamp('start_at').notNull(),
+  endAt:    timestamp('end_at').notNull(),
+  reason:   text('reason'),           // 'Đi công tác Hà Nội 3 ngày'
+
+  isActive:  boolean('is_active').notNull().default(true),
+  revokedAt: timestamp('revoked_at'),  // Thời điểm thu hồi sớm (nếu có)
+  createdBy: integer('created_by').references(() => users.id), // Admin tạo
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+
+// ============================================================
+// RBAC — LEAVE APPROVALS (AUDIT TRAIL TỪNG CẤP DUYỆT)
+// Ghi lại ai duyệt gì ở cấp nào — không thể xóa/sửa
+// ============================================================
+export const leaveApprovals = pgTable('leave_approvals', {
+  id:            serial('id').primaryKey(),
+  requestId:     integer('request_id').notNull().references(() => leaveRequests.id, { onDelete: 'cascade' }),
+  approverId:    integer('approver_id').notNull().references(() => users.id),
+  approvalLevel: integer('approval_level').notNull(),  // Cấp nào đã hành động (1, 2, 3)
+  action:        text('action').notNull(),
+  // 'APPROVED' | 'REJECTED' | 'DELEGATED_APPROVED' | 'DELEGATED_REJECTED'
+  comment:       text('comment'),
+  delegatedFor:  integer('delegated_for').references(() => users.id),
+  // Nếu là ủy quyền: ID của Manager gốc (approver đang thay mặt ai)
+  approvedAt:    timestamp('approved_at').defaultNow(),
+});
+
+// Type exports — RBAC
+export type DepartmentRow    = typeof departments.$inferSelect;
+export type NewDepartmentRow = typeof departments.$inferInsert;
+export type ManagerDepartment    = typeof managerDepartments.$inferSelect;
+export type NewManagerDepartment = typeof managerDepartments.$inferInsert;
+export type Delegation    = typeof delegations.$inferSelect;
+export type NewDelegation = typeof delegations.$inferInsert;
+export type LeaveApproval    = typeof leaveApprovals.$inferSelect;
+export type NewLeaveApproval = typeof leaveApprovals.$inferInsert;
+export type ManagementLevel = 1 | 2 | 3;
+export type DelegationScope = 'APPROVE_ATTENDANCE' | 'APPROVE_LEAVE' | 'APPROVE_OT' | 'VIEW_TEAM_PAYROLL';

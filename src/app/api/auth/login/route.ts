@@ -69,10 +69,11 @@ export async function POST(req: NextRequest) {
     }
 
     const userPayload = {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      role: user.role,
+      id:           user.id,
+      username:     user.username,
+      name:         user.name,
+      role:         user.role,
+      departmentId: (user as { departmentId?: number | null }).departmentId ?? null,
     };
 
     // Create signed JWT session cookie
