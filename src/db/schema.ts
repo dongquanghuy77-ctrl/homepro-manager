@@ -588,3 +588,39 @@ export const monthlyPayroll = pgTable('monthly_payroll', {
 export type MonthlyPayroll    = typeof monthlyPayroll.$inferSelect;
 export type NewMonthlyPayroll = typeof monthlyPayroll.$inferInsert;
 export type PayrollStatus     = 'DRAFT' | 'PUBLISHED';
+
+// ============================================================
+// SPRINT 3 – PAYSLIP DISPUTES (KHIẾU NẠI PHIẾU LƯƠNG)
+// ============================================================
+export const payslipDisputes = pgTable('payslip_disputes', {
+  id:         serial('id').primaryKey(),
+
+  // FK tới phiếu lương (1 phiếu lương → nhiều lần khiếu nại nếu CLOSED/RESOLVED cũ)
+  payrollId:  integer('payroll_id').notNull().references(() => monthlyPayroll.id, { onDelete: 'cascade' }),
+  // Denormalized để query nhanh theo nhân viên (không cần JOIN monthly_payroll)
+  employeeId: integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  month:      integer('month').notNull(),
+  year:       integer('year').notNull(),
+
+  // Nội dung khiếu nại của nhân viên
+  reason:     text('reason').notNull(),
+
+  // State machine:
+  //   OPEN → HR xem xét → UNDER_REVIEW → giải quyết → RESOLVED hoặc CLOSED
+  //   RESOLVED: HR chấp thuận và sẽ điều chỉnh
+  //   CLOSED:   Bác bỏ / đã giải quyết xong
+  status:     text('status').notNull().default('OPEN'),
+  // OPEN | UNDER_REVIEW | RESOLVED | CLOSED
+
+  // Phản hồi của HR
+  hrResponse:  text('hr_response'),
+  reviewedBy:  integer('reviewed_by').references(() => users.id),
+  reviewedAt:  timestamp('reviewed_at'),
+
+  createdAt:   timestamp('created_at').defaultNow(),
+  updatedAt:   timestamp('updated_at').defaultNow(),
+});
+
+export type PayslipDispute    = typeof payslipDisputes.$inferSelect;
+export type NewPayslipDispute = typeof payslipDisputes.$inferInsert;
+export type DisputeStatus     = 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'CLOSED';
