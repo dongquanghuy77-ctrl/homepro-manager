@@ -12,12 +12,35 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse }      from 'next/server';
 import { db }                             from '@/db';
 import { monthlyPayroll }                 from '@/db/schema';
-import { requireAuth, ADMIN_ONLY }        from '@/lib/auth';
+import { getSessionFromRequest }          from '@/lib/session';
+import { DefaultAuthorizationService }    from '@/lib/permissions/service';
+import { DbPermissionRepository }         from '@/lib/permissions/repository';
 import { eq, and, inArray }               from 'drizzle-orm';
 
 export async function PATCH(req: NextRequest) {
-  const { session, error } = await requireAuth(req, ADMIN_ONLY);
-  if (error) return error;
+  const session = await getSessionFromRequest(req);
+  if (!session) {
+    return NextResponse.json({ error: 'Chưa đăng nhập.' }, { status: 401 });
+  }
+
+  // --- DUAL AUTHORIZATION / PERMISSION EVALUATION ---
+  try {
+    const authService = new DefaultAuthorizationService(new DbPermissionRepository());
+    const isAllowed = await authService.evaluate({
+      role: session.role,
+      permission: 'payroll.publish',
+      requestedScope: 'COMPANY',
+      accessorId: session.id
+    });
+    if (!isAllowed) {
+      return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
+    }
+  } catch (err: any) {
+    if (err.message.includes('UAT_DATABASE_REQUIRED')) {
+      return NextResponse.json({ error: err.message }, { status: 503 });
+    }
+    return NextResponse.json({ error: 'Authorization error.' }, { status: 500 });
+  }
 
   const body = await req.json().catch(() => ({}));
   const { ids, month, year } = body as {

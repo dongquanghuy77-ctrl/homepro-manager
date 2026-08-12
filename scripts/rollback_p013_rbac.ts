@@ -15,7 +15,7 @@ async function rollbackRbac() {
     console.log('[OK] Cleared role_permissions.');
 
     // Delete system roles
-    const systemRoles = ['BOD', 'HR', 'MANAGER', 'ACCOUNTANT', 'WORKER', 'DESIGNER', 'STAFF'];
+    const systemRoles = ['BOD', 'ADMIN', 'HR', 'MANAGER', 'ACCOUNTANT', 'WORKER', 'DESIGNER', 'STAFF'];
     for (const role of systemRoles) {
       await db.execute(sql`DELETE FROM "roles" WHERE code = ${role}`);
     }

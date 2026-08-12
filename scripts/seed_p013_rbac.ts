@@ -13,7 +13,7 @@ async function seedRbac() {
 
   // Define Roles
   const roles = [
-    { code: 'BOD', name: 'Board of Directors', description: 'Toàn quyền hệ thống', is_system: true },
+    { code: 'ADMIN', name: 'Board of Directors', description: 'Toàn quyền hệ thống', is_system: true },
     { code: 'HR', name: 'Human Resources', description: 'Quản trị nhân sự', is_system: true },
     { code: 'MANAGER', name: 'Manager', description: 'Quản lý phòng ban', is_system: true },
     { code: 'ACCOUNTANT', name: 'Accountant', description: 'Kế toán', is_system: true },
@@ -33,7 +33,7 @@ async function seedRbac() {
 
   // Map Roles to Permissions
   const rolePermissionMapping: Record<string, string[]> = {
-    'BOD': [
+    'ADMIN': [
       'employee.read.all', 'employee.write.all',
       'attendance.read.all', 'attendance.write.all',
       'leave.read.all', 'leave.approve.all',
@@ -44,7 +44,7 @@ async function seedRbac() {
       'employee.read.all', 'employee.write.all',
       'attendance.read.all', 'attendance.write.all',
       'leave.read.all', 'leave.approve.all',
-      'payroll.read.all'
+      'payroll.read.all', 'payroll.calculate'
     ],
     'MANAGER': [
       'employee.read.department',

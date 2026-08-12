@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     const authService = new DefaultAuthorizationService(new DbPermissionRepository());
     const isAllowed = await authService.evaluate({
       role: session.role,
-      permission: 'PAYROLL_CALCULATE',
+      permission: 'payroll.calculate',
       requestedScope: 'COMPANY',
       accessorId: session.id
     });
