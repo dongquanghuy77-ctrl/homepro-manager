@@ -5,6 +5,7 @@ import { withSentryConfig } from '@sentry/nextjs';
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3'],
+    instrumentationHook: true,
   },
 
   async headers() {

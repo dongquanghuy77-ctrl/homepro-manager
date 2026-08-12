@@ -83,7 +83,7 @@ async function main() {
   // 1. PAYROLL CALCULATE AUTHORIZATION
   // We pass month: -1 to ensure it fails at input validation (400) if authorization (403) passes, avoiding DB mutation.
   console.log('\n--- PAYROLL CALCULATE (POST) ---');
-  let res = await CalculatePayrollPOST(await createRequest('POST', 'http://localhost/api/hr/payroll/calculate', admin, { month: -1, year: 2026 }));
+  let res: any = await CalculatePayrollPOST(await createRequest('POST', 'http://localhost/api/hr/payroll/calculate', admin, { month: -1, year: 2026 }));
   runTest('ADMIN calculate payroll', 400, res.status, 'PAYROLL'); // Should pass auth and hit 400
 
   res = await CalculatePayrollPOST(await createRequest('POST', 'http://localhost/api/hr/payroll/calculate', accountant, { month: -1, year: 2026 }));
@@ -119,6 +119,21 @@ async function main() {
 
   res = await EmployeeGET(await createRequest('GET', `http://localhost/api/hr/employees/${empB.id}`, empA), { params: { id: String(empB.id) } });
   runTest('WORKER read OTHER profile (IDOR)', 403, res.status, 'IDOR');
+
+  // 3. PAYROLL (GET)
+  console.log('\n--- PAYROLL (GET) ---');
+  const { GET: PayrollGET } = await import('../src/app/api/hr/payroll/route');
+  const payrollReqAdmin = await createRequest('GET', `http://localhost/api/hr/payroll?month=2026-07`, admin);
+  res = await PayrollGET(payrollReqAdmin);
+  runTest('ADMIN read payroll', 200, res.status, 'ROLE');
+
+  const payrollReqMgr = await createRequest('GET', `http://localhost/api/hr/payroll?month=2026-07`, mgrA);
+  res = await PayrollGET(payrollReqMgr);
+  runTest('MANAGER read payroll (Own Dept)', 200, res.status, 'ISOLATION');
+
+  const payrollReqWorker = await createRequest('GET', `http://localhost/api/hr/payroll?month=2026-07`, empA);
+  res = await PayrollGET(payrollReqWorker);
+  runTest('WORKER read payroll (Self)', 200, res.status, 'ROLE');
 
   // Generate Report
   console.log('\n=== TEST RESULTS ===');

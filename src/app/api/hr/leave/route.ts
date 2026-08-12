@@ -5,7 +5,8 @@ import { db } from '@/db';
 import { leaveRequests, users } from '@/db/schema';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { calculateLeaveDays, writeHrAuditLog } from '@/lib/hr';
-import { eq, and, desc, gte, lte } from 'drizzle-orm';
+import { eq, and, desc, gte, lte, inArray, or } from 'drizzle-orm';
+import { getEffectiveTeamMemberIds } from '@/lib/rbac';
 
 // ── Valid leave types and statuses ────────────────────────────────────────────
 const VALID_LEAVE_TYPES = ['ANNUAL', 'SICK', 'PERSONAL', 'UNPAID', 'OTHER'] as const;
@@ -25,10 +26,23 @@ export async function GET(req: NextRequest) {
 
     const conditions = [];
 
-    // ADMIN và MANAGER thấy tất cả (hoặc filter theo employeeId)
-    // Các role khác chỉ thấy đơn của chính mình
-    if (session.role === 'ADMIN' || session.role === 'MANAGER') {
+    const { getLeaveApprovalLevel } = await import('@/lib/permissions/checker');
+    const approvalLevel = await getLeaveApprovalLevel(session);
+
+    if (approvalLevel === 2) {
       if (employeeId) conditions.push(eq(leaveRequests.employeeId, Number(employeeId)));
+    } else if (approvalLevel === 1) {
+      if (employeeId) {
+        conditions.push(eq(leaveRequests.employeeId, Number(employeeId)));
+        conditions.push(eq(users.departmentId, session.departmentId!));
+      } else {
+        conditions.push(
+          or(
+            eq(leaveRequests.employeeId, session.id),
+            eq(users.departmentId, session.departmentId!)
+          )
+        );
+      }
     } else {
       conditions.push(eq(leaveRequests.employeeId, session.id));
     }

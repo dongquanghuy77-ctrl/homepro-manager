@@ -30,31 +30,35 @@ export async function GET(req: NextRequest) {
   const month  = url.searchParams.get('month');       // YYYY-MM
   const empId  = url.searchParams.get('employeeId');  // Admin/Manager: xem đơn của NV cụ thể
 
-  const isAdmin   = session.role === 'ADMIN';
-  const isManager = session.role === 'MANAGER';
+  const { getLeaveApprovalLevel } = await import('@/lib/permissions/checker');
+  const approvalLevel = await getLeaveApprovalLevel(session);
+
+  const isAdmin   = approvalLevel === 2;
+  const isManager = approvalLevel === 1;
 
   // Role-based filter:
-  //   WORKER/VIEWER → chỉ xem đơn của mình
-  //   MANAGER       → xem đơn PENDING của nhân viên dưới quyền + đơn của mình
-  //   ADMIN         → xem tất cả
+  //   0 (None)  → chỉ xem đơn của mình
+  //   1 (Dept)  → xem đơn PENDING của nhân viên cùng bộ phận + đơn của mình
+  //   2 (All)   → xem tất cả
   const conditions = [];
 
-  if (!isAdmin) {
-    if (isManager) {
-      // Manager: đơn của mình + đơn PENDING cần duyệt
-      conditions.push(
-        or(
-          eq(leaveRequests.employeeId, session.id),
+  if (approvalLevel === 0) {
+    // Worker: chỉ đơn của mình
+    conditions.push(eq(leaveRequests.employeeId, session.id));
+  } else if (approvalLevel === 1) {
+    // Manager: đơn của mình + đơn của nhân viên cùng bộ phận
+    conditions.push(
+      or(
+        eq(leaveRequests.employeeId, session.id),
+        and(
+          eq(users.departmentId, session.departmentId!),
           or(
             eq(leaveRequests.status, 'PENDING'),
             eq(leaveRequests.status, 'PENDING_HR'),
           )
         )
-      );
-    } else {
-      // Worker: chỉ đơn của mình
-      conditions.push(eq(leaveRequests.employeeId, session.id));
-    }
+      )
+    );
   }
 
   // Optional filters
@@ -129,10 +133,20 @@ export async function POST(req: NextRequest) {
   }
 
   // Xác định employee: Worker chỉ được tạo đơn của mình
-  const targetEmployeeId = (session.role === 'ADMIN' || session.role === 'MANAGER')
-    && onBehalfOfEmployeeId
-      ? onBehalfOfEmployeeId
-      : session.id;
+  let targetEmployeeId = session.id;
+
+  if (onBehalfOfEmployeeId && onBehalfOfEmployeeId !== session.id) {
+    const { canWriteLeave } = await import('@/lib/permissions/checker');
+    const [target] = await db.select({ id: users.id, departmentId: users.departmentId }).from(users).where(eq(users.id, onBehalfOfEmployeeId)).limit(1);
+    if (!target) {
+      return NextResponse.json({ error: 'Nhân viên không tồn tại' }, { status: 404 });
+    }
+    if (await canWriteLeave(session, target.id, target.departmentId)) {
+      targetEmployeeId = onBehalfOfEmployeeId;
+    } else {
+      return NextResponse.json({ error: 'Bạn không có quyền tạo đơn thay cho nhân viên này' }, { status: 403 });
+    }
+  }
 
   // Tính số ngày
   const totalDays = calcTotalLeaveDays(

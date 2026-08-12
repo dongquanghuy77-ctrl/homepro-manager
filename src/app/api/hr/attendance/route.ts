@@ -13,10 +13,19 @@ export async function GET(req: NextRequest) {
   if (error) return error;
 
   try {
-    const allowedEmployeeIds = await getEffectiveTeamMemberIds(session);
-    const teamFilter = allowedEmployeeIds.length > 0
-      ? inArray(attendance.employeeId, allowedEmployeeIds)
-      : eq(attendance.employeeId, -1);
+    const { getAttendanceReadScope } = await import('@/lib/permissions/checker');
+    const readScope = await getAttendanceReadScope(session);
+
+    if (readScope === 'NONE') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const conditions = [];
+    if (readScope === 'DEPARTMENT') {
+      conditions.push(eq(users.departmentId, session.departmentId!));
+    } else if (readScope === 'SELF') {
+      conditions.push(eq(attendance.employeeId, session.id));
+    }
 
     const { searchParams } = new URL(req.url);
     const date       = searchParams.get('date')?.trim()       || null;
@@ -24,10 +33,12 @@ export async function GET(req: NextRequest) {
     const department = searchParams.get('department')?.trim() || null;
     const month      = searchParams.get('month')?.trim()      || null; // YYYY-MM
 
-    const conditions = [teamFilter];
     if (date)       conditions.push(eq(attendance.workDate, date));
     if (employeeId) conditions.push(eq(attendance.employeeId, parseInt(employeeId, 10)));
-    if (department) conditions.push(eq(users.department, department));
+    
+    // Ignore frontend department filter if readScope is DEPARTMENT or SELF
+    if (department && readScope === 'ALL') conditions.push(eq(users.department, department));
+    
     if (month)      conditions.push(like(attendance.workDate, `${month}-%`));
 
     const records = await db
@@ -65,7 +76,7 @@ export async function GET(req: NextRequest) {
 
 // ─── POST: Admin/Manager tạo bản ghi chấm công cho nhân viên bất kỳ ──────────
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
   try {
@@ -82,22 +93,22 @@ export async function POST(req: NextRequest) {
 
     const empIdNum = Number(employeeId);
 
+    // ── Check employee exists ──────────────────────────────────────────────────
+    const [employee] = await db.select({ id: users.id, name: users.name, departmentId: users.departmentId })
+      .from(users).where(eq(users.id, empIdNum));
+    if (!employee) {
+      return NextResponse.json({ error: 'Nhân viên không tồn tại' }, { status: 404 });
+    }
+
     // ── RBAC Authorization Check ──────────────────────────────────────────────
-    const allowedEmployeeIds = await getEffectiveTeamMemberIds(session);
-    if (!allowedEmployeeIds.includes(empIdNum)) {
+    const { canWriteAttendance } = await import('@/lib/permissions/checker');
+    if (!(await canWriteAttendance(session, employee.id, employee.departmentId))) {
       return NextResponse.json({ error: 'Bạn không có quyền quản lý nhân viên này' }, { status: 403 });
     }
 
     const validStatuses = ['PRESENT', 'ABSENT', 'LATE', 'HALF_DAY', 'ON_LEAVE'];
     if (status && !validStatuses.includes(status)) {
       return NextResponse.json({ error: `status không hợp lệ. Cho phép: ${validStatuses.join(', ')}` }, { status: 400 });
-    }
-
-    // ── Check employee exists ──────────────────────────────────────────────────
-    const [employee] = await db.select({ id: users.id, name: users.name })
-      .from(users).where(eq(users.id, empIdNum));
-    if (!employee) {
-      return NextResponse.json({ error: 'Nhân viên không tồn tại' }, { status: 404 });
     }
 
     // ── Check duplicate (employee_id + work_date UNIQUE) ──────────────────────

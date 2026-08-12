@@ -33,7 +33,7 @@ type ReviewAction = 'APPROVE' | 'REJECT' | 'CANCEL';
 // State machine: valid transitions per (currentStatus, role, action)
 // ─────────────────────────────────────────────────────────────────────────────
 function getNextStatus(
-  current: string, action: ReviewAction, role: string, approvalLevels: number
+  current: string, action: ReviewAction, approvalLevel: number, maxLevels: number
 ): string | null {
   if (action === 'CANCEL') {
     // NV có thể hủy đơn của mình (PENDING hoặc PENDING_HR trước khi ngày nghỉ)
@@ -50,13 +50,13 @@ function getNextStatus(
   if (action === 'APPROVE') {
     if (current === 'PENDING') {
       // 1 cấp duyệt (ốm, bù, thai sản): Manager approve → APPROVED ngay
-      if (approvalLevels === 1) return 'APPROVED';
+      if (maxLevels === 1) return 'APPROVED';
       // 2 cấp: Manager → PENDING_HR
-      if (role === 'MANAGER') return 'PENDING_HR';
+      if (approvalLevel === 1) return 'PENDING_HR';
       // Admin có thể approve thẳng từ PENDING
-      if (role === 'ADMIN') return 'APPROVED';
+      if (approvalLevel === 2) return 'APPROVED';
     }
-    if (current === 'PENDING_HR' && role === 'ADMIN') return 'APPROVED';
+    if (current === 'PENDING_HR' && approvalLevel === 2) return 'APPROVED';
     return null;
   }
 
@@ -70,7 +70,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const { session, error } = await requireAuth(req, MANAGER_AND_ABOVE);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
   const requestId = parseInt(params.id, 10);
@@ -106,15 +106,23 @@ export async function PATCH(
   }
 
   const req2 = existing.request;
-  const approvalLevels = existing.approvalLevels ?? 2;
+  const maxLevels = existing.approvalLevels ?? 2;
+
+  const { getLeaveApprovalLevel, hasPermissionCode } = await import('@/lib/permissions/checker');
+  const approvalLevel = await getLeaveApprovalLevel(session);
+  const isAdminCancel = await hasPermissionCode(session.role, 'leave.write.all');
 
   // NV chỉ được CANCEL đơn của mình
-  if (action === 'CANCEL' && req2.employeeId !== session.id && session.role !== 'ADMIN') {
+  if (action === 'CANCEL' && req2.employeeId !== session.id && !isAdminCancel) {
     return NextResponse.json({ error: 'Chỉ được hủy đơn của chính mình' }, { status: 403 });
   }
 
+  if (action !== 'CANCEL' && approvalLevel === 0) {
+    return NextResponse.json({ error: 'Bạn không có quyền duyệt đơn nghỉ phép' }, { status: 403 });
+  }
+
   // ── Xác định trạng thái tiếp theo ────────────────────────────────────────
-  const nextStatus = getNextStatus(req2.status, action, session.role, approvalLevels);
+  const nextStatus = getNextStatus(req2.status, action, approvalLevel, maxLevels);
   if (nextStatus === null) {
     return NextResponse.json({
       error: `Không thể thực hiện "${action}" từ trạng thái "${req2.status}"`,
@@ -137,7 +145,7 @@ export async function PATCH(
         updatedAt: now,
       };
 
-      if (session.role === 'MANAGER' && action === 'APPROVE') {
+      if (approvalLevel === 1 && action === 'APPROVE') {
         updateData.approvedByManager   = session.id;
         updateData.approvedByManagerAt = now;
         updateData.managerNote         = note ?? null;
@@ -146,7 +154,7 @@ export async function PATCH(
         updateData.reviewedAt = now;
         updateData.reviewNote = note ?? null;
       }
-      if (session.role === 'ADMIN' && action === 'APPROVE') {
+      if (approvalLevel === 2 && action === 'APPROVE') {
         updateData.approvedByHr   = session.id;
         updateData.approvedByHrAt = now;
         updateData.hrNote         = note ?? null;
@@ -158,8 +166,8 @@ export async function PATCH(
         updateData.reviewedBy = session.id;
         updateData.reviewedAt = now;
         updateData.reviewNote = note ?? null;
-        if (session.role === 'MANAGER') updateData.managerNote = note ?? null;
-        if (session.role === 'ADMIN')   updateData.hrNote      = note ?? null;
+        if (approvalLevel === 1) updateData.managerNote = note ?? null;
+        if (approvalLevel === 2) updateData.hrNote      = note ?? null;
       }
       if (action === 'CANCEL') {
         updateData.cancelledAt  = now;

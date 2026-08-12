@@ -13,24 +13,25 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { db }                        from '@/db';
 import { attendance, users }         from '@/db/schema';
-import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { eq, and, inArray }          from 'drizzle-orm';
 import { getTodayVN }                from '@/lib/hr';
 
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireAuth(req, MANAGER_AND_ABOVE);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
+
+  const { getAttendanceApprovalLevel } = await import('@/lib/permissions/checker');
+  const approvalLevel = await getAttendanceApprovalLevel(session);
+  if (approvalLevel === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const url   = new URL(req.url);
   const date  = url.searchParams.get('date') || getTodayVN();
   const statusFilter = url.searchParams.get('status'); // optional override
 
-  // Xác định trạng thái cần hiển thị theo role
-  const isAdmin   = session.role === 'ADMIN';
-  const isManager = session.role === 'MANAGER';
+  const isAdmin   = approvalLevel === 2;
+  const isManager = approvalLevel === 1;
 
-  // MANAGER: xem PENDING_MANAGER
-  // ADMIN:   xem PENDING_HR (hoặc status override)
   const defaultStatuses = isAdmin
     ? ['PENDING_HR']
     : ['PENDING_MANAGER'];
@@ -72,16 +73,12 @@ export async function GET(req: NextRequest) {
         and(
           eq(attendance.workDate, date),
           inArray(attendance.approvalStatus, statuses),
-          // MANAGER chỉ xem nhân viên cùng bộ phận
-          // (Nếu department của session user = null → Admin, xem tất cả)
-          // Manager-level filter by department sẽ được thực hiện client-side
-          // vì session không có department (cần thêm vào SessionPayload)
-          // TODO: Add departmentFilter khi session.department được persist
+          isManager && session.departmentId ? eq(users.departmentId, session.departmentId) : undefined
         )
       )
       .orderBy(attendance.workDate);
 
-    return NextResponse.json({ records, date, statuses, role: session.role });
+    return NextResponse.json({ records, date, statuses });
 
   } catch (err) {
     console.error('[AttendanceReview GET]', err);

@@ -32,6 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         createdAt:   leaveRequests.createdAt,
         employeeName: users.name,
         department:   users.department,
+        departmentId: users.departmentId,
       })
       .from(leaveRequests)
       .leftJoin(users, eq(leaveRequests.employeeId, users.id))
@@ -39,8 +40,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     if (!row) return NextResponse.json({ error: 'Không tìm thấy đơn nghỉ phép' }, { status: 404 });
 
-    // Chỉ ADMIN/MANAGER hoặc chính chủ đơn mới được xem
-    if (session.role !== 'ADMIN' && session.role !== 'MANAGER' && row.employeeId !== session.id) {
+    const { canReadLeave } = await import('@/lib/permissions/checker');
+    if (!(await canReadLeave(session, row.employeeId, row.departmentId))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

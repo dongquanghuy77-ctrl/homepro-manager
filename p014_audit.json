@@ -1,0 +1,291 @@
+{
+  "totalUsers": 32,
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "name": "Quản trị viên",
+      "department_id": 6,
+      "position": "Quản trị hệ thống",
+      "role": "ADMIN"
+    },
+    {
+      "id": 2,
+      "username": "manager",
+      "name": "Huy - Quản lý xưởng",
+      "department_id": 1,
+      "position": "Quản lý xưởng",
+      "role": "MANAGER"
+    },
+    {
+      "id": 3,
+      "username": "supervisor",
+      "name": "Nguyễn Văn Minh - Giám sát công trình",
+      "department_id": 2,
+      "position": "Giám sát công trình",
+      "role": "MANAGER"
+    },
+    {
+      "id": 4,
+      "username": "worker",
+      "name": "Trần Văn Thợ - Công nhân thi công",
+      "department_id": 1,
+      "position": "Thợ mộc",
+      "role": "WORKER"
+    },
+    {
+      "id": 5,
+      "username": "viewer",
+      "name": "Ban Giám Đốc (Xem)",
+      "department_id": 6,
+      "position": "Ban Giám Đốc",
+      "role": "ADMIN"
+    },
+    {
+      "id": 6,
+      "username": "huy.dong",
+      "name": "ĐỒNG QUANG HUY",
+      "department_id": 6,
+      "position": "Giám đốc điều hành",
+      "role": "ADMIN"
+    },
+    {
+      "id": 7,
+      "username": "duy.le",
+      "name": "LÊ TRUNG DUY",
+      "department_id": 2,
+      "position": "Giám sát lắp đặt",
+      "role": "MANAGER"
+    },
+    {
+      "id": 8,
+      "username": "tuan.ngo",
+      "name": "NGÔ ANH TUẤN",
+      "department_id": 2,
+      "position": "Giám sát sơn & hoàn thiện",
+      "role": "MANAGER"
+    },
+    {
+      "id": 9,
+      "username": "quan.mai",
+      "name": "MAI QUỐC QUÂN",
+      "department_id": 2,
+      "position": "Quản lý dự án",
+      "role": "MANAGER"
+    },
+    {
+      "id": 11,
+      "username": "phuc.tran",
+      "name": "TRẦN THANH PHÚC",
+      "department_id": 1,
+      "position": "Thợ mộc CNC",
+      "role": "WORKER"
+    },
+    {
+      "id": 12,
+      "username": "thuong.pham",
+      "name": "PHẠM MINH THƯƠNG",
+      "department_id": 1,
+      "position": "Thợ sơn PU",
+      "role": "WORKER"
+    },
+    {
+      "id": 13,
+      "username": "cuong.nguyen73",
+      "name": "NGUYỄN VĂN CƯỜNG (1973)",
+      "department_id": 2,
+      "position": "Thợ lắp đặt nội thất",
+      "role": "WORKER"
+    },
+    {
+      "id": 14,
+      "username": "luy.tran",
+      "name": "TRẦN VĂN LŨY",
+      "department_id": 1,
+      "position": "Thợ mộc",
+      "role": "WORKER"
+    },
+    {
+      "id": 15,
+      "username": "vinh.huynh",
+      "name": "HUỲNH THÀNH VINH",
+      "department_id": 2,
+      "position": "Thợ lắp đặt",
+      "role": "WORKER"
+    },
+    {
+      "id": 16,
+      "username": "hung.nguyen",
+      "name": "NGUYỄN VIẾT HÙNG",
+      "department_id": 1,
+      "position": "Thợ mộc",
+      "role": "WORKER"
+    },
+    {
+      "id": 17,
+      "username": "son.le",
+      "name": "LÊ VĂN SƠN",
+      "department_id": 1,
+      "position": "Thợ sơn",
+      "role": "WORKER"
+    },
+    {
+      "id": 18,
+      "username": "cuong.nguyen70",
+      "name": "NGUYỄN VĂN CƯỜNG (1970)",
+      "department_id": 1,
+      "position": "Thợ tiện gỗ",
+      "role": "WORKER"
+    },
+    {
+      "id": 19,
+      "username": "tien.nguyen",
+      "name": "NGUYỄN QUỐC TIẾN",
+      "department_id": 3,
+      "position": "Thủ kho vật tư",
+      "role": "WORKER"
+    },
+    {
+      "id": 20,
+      "username": "minhtran",
+      "name": "Trần Ngọc Minh",
+      "department_id": 2,
+      "position": "Thợ lắp đặt",
+      "role": "WORKER"
+    },
+    {
+      "id": 21,
+      "username": "demo",
+      "name": "Tài khoản Demo",
+      "department_id": 6,
+      "position": "Khách tham quan",
+      "role": "STAFF"
+    },
+    {
+      "id": 23,
+      "username": "letramkt",
+      "name": "LÊ DƯƠNG NGỌC TRÂM",
+      "department_id": 5,
+      "position": "Kế toán trưởng",
+      "role": "ACCOUNTANT"
+    },
+    {
+      "id": 24,
+      "username": "thanhhangkt",
+      "name": "thanh hằng",
+      "department_id": 5,
+      "position": null,
+      "role": "ACCOUNTANT"
+    },
+    {
+      "id": 25,
+      "username": "managera",
+      "name": "Manager A",
+      "department_id": 7,
+      "position": null,
+      "role": "MANAGER"
+    },
+    {
+      "id": 26,
+      "username": "hra",
+      "name": "HR",
+      "department_id": 7,
+      "position": null,
+      "role": "HR"
+    },
+    {
+      "id": 27,
+      "username": "empa",
+      "name": "Emp A",
+      "department_id": 7,
+      "position": null,
+      "role": "WORKER"
+    },
+    {
+      "id": 28,
+      "username": "empb",
+      "name": "Emp B",
+      "department_id": 8,
+      "position": null,
+      "role": "WORKER"
+    },
+    {
+      "id": 45,
+      "username": "managera_9677",
+      "name": "Manager A",
+      "department_id": 18,
+      "position": null,
+      "role": "MANAGER"
+    },
+    {
+      "id": 46,
+      "username": "hra_9677",
+      "name": "HR",
+      "department_id": 18,
+      "position": null,
+      "role": "HR"
+    },
+    {
+      "id": 53,
+      "username": "managera_0542",
+      "name": "Manager A",
+      "department_id": 22,
+      "position": null,
+      "role": "MANAGER"
+    },
+    {
+      "id": 54,
+      "username": "hra_0542",
+      "name": "HR",
+      "department_id": 22,
+      "position": null,
+      "role": "HR"
+    },
+    {
+      "id": 55,
+      "username": "empa_0542",
+      "name": "Emp A",
+      "department_id": 22,
+      "position": null,
+      "role": "WORKER"
+    },
+    {
+      "id": 56,
+      "username": "empb_0542",
+      "name": "Emp B",
+      "department_id": 23,
+      "position": null,
+      "role": "WORKER"
+    }
+  ],
+  "managerDepartments": [
+    {
+      "manager_id": 25,
+      "department_id": 7
+    },
+    {
+      "manager_id": 53,
+      "department_id": 22
+    },
+    {
+      "manager_id": 2,
+      "department_id": 1
+    },
+    {
+      "manager_id": 9,
+      "department_id": 2
+    },
+    {
+      "manager_id": 3,
+      "department_id": 2
+    },
+    {
+      "manager_id": 7,
+      "department_id": 2
+    },
+    {
+      "manager_id": 8,
+      "department_id": 2
+    }
+  ]
+}

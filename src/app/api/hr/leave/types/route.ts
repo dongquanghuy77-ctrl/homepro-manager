@@ -25,10 +25,14 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ types });
 }
 
-// POST — seed hoặc upsert loại phép (ADMIN only)
 export async function POST(req: NextRequest) {
-  const { error } = await requireAuth(req, ADMIN_ONLY);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
+
+  const { hasPermissionCode } = await import('@/lib/permissions/checker');
+  if (!(await hasPermissionCode(session.role, 'leave.write.all'))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   await seedLeaveTypes();
   return NextResponse.json({ message: '5 loại phép mặc định đã được khởi tạo' });

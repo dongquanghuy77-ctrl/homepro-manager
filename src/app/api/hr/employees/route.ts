@@ -14,6 +14,13 @@ export async function GET(req: NextRequest) {
   if (error) return error;
 
   try {
+    const { getEmployeeReadScope } = await import('@/lib/permissions/checker');
+    const readScope = await getEmployeeReadScope(session);
+    
+    if (readScope === 'NONE') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const department = searchParams.get('department')?.trim() || null;
     const status = searchParams.get('status')?.trim() || null;
@@ -21,7 +28,16 @@ export async function GET(req: NextRequest) {
     const role = searchParams.get('role')?.trim() || null;
 
     const conditions = [];
-    if (department) conditions.push(eq(users.department, department));
+    
+    if (readScope === 'DEPARTMENT') {
+      conditions.push(eq(users.departmentId, session.departmentId!));
+    } else if (readScope === 'SELF') {
+      conditions.push(eq(users.id, session.id));
+    }
+
+    // Ignore frontend department filter if readScope is DEPARTMENT or SELF
+    if (department && readScope === 'ALL') conditions.push(eq(users.department, department));
+    
     if (status)     conditions.push(eq(users.employeeStatus, status));
     if (role)       conditions.push(eq(users.role, role));
     if (search) {
@@ -68,8 +84,13 @@ export async function GET(req: NextRequest) {
 
 // ─── POST: Tạo nhân viên mới (ADMIN only) ────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireAuth(req, ADMIN_ONLY);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
+
+  const { canWriteEmployee } = await import('@/lib/permissions/checker');
+  if (!(await canWriteEmployee(session, 0, null))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   try {
     const body = await req.json();

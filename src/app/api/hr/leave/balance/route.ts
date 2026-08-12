@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse }      from 'next/server';
 import { db }                             from '@/db';
-import { leaveBalances, leaveTypes }      from '@/db/schema';
+import { leaveBalances, leaveTypes, users }      from '@/db/schema';
 import { requireAuth, ALL_ROLES }         from '@/lib/auth';
 import { eq, and, sql }                   from 'drizzle-orm';
 
@@ -25,10 +25,19 @@ export async function GET(req: NextRequest) {
   const empParam   = url.searchParams.get('employeeId');
   const year       = yearParam ? parseInt(yearParam) : new Date().getFullYear();
 
-  // Admin có thể xem balance của bất kỳ nhân viên nào
-  const targetId = (session.role === 'ADMIN' && empParam)
-    ? parseInt(empParam)
-    : session.id;
+  let targetId = session.id;
+
+  if (empParam && parseInt(empParam) !== session.id) {
+    const { canReadLeave } = await import('@/lib/permissions/checker');
+    const targetEmpId = parseInt(empParam);
+    const [targetEmp] = await db.select({ id: users.id, departmentId: users.departmentId }).from(users).where(eq(users.id, targetEmpId)).limit(1);
+    
+    if (targetEmp && await canReadLeave(session, targetEmp.id, targetEmp.departmentId)) {
+      targetId = targetEmp.id;
+    } else {
+      return NextResponse.json({ error: 'Bạn không có quyền xem quỹ phép của nhân viên này' }, { status: 403 });
+    }
+  }
 
   // ── Lấy tất cả balance của nhân viên trong năm ──
   const rows = await db

@@ -1,0 +1,2501 @@
+[
+  {
+    "table_name": "attendance",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('attendance_id_seq'::regclass)"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "employee_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "work_date",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "check_in",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "check_out",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'NOT_CHECKED'::text"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "late_minutes",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "early_leave_minutes",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "total_hours",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "corrected_by",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "corrected_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "location",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "is_offline_sync",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "client_timestamp",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "offline_sync_delta",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "is_flagged",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "flag_reason",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "clock_in_source",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'MANUAL'::text"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "clock_out_source",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'MANUAL'::text"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "device_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "check_in_lat",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "check_in_lng",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "check_out_lat",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "check_out_lng",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "idempotency_key",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "confirm_sources",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'[]'::text"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "correction_reason",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "approval_status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'PENDING_MANAGER'::text"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "approved_by_manager",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "approved_by_manager_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "manager_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "approved_by_hr",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "approved_by_hr_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "hr_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "adjusted_hours",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "adjust_reason",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "leave_request_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('boq_items_id_seq'::regclass)"
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "material_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "material_name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "unit",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'cai'::text"
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "unit_price",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "qty_required",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "qty_ordered",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "qty_received",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "boq_items",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "costs",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('costs_id_seq'::regclass)"
+  },
+  {
+    "table_name": "costs",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "costs",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "costs",
+    "column_name": "amount",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "costs",
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'Vật tư mua ngoài'::text"
+  },
+  {
+    "table_name": "costs",
+    "column_name": "cost_date",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "costs",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "costs",
+    "column_name": "created_by_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "costs",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "costs",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "customers",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('customers_id_seq'::regclass)"
+  },
+  {
+    "table_name": "customers",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "customers",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "customers",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "customers",
+    "column_name": "address",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "customers",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "customers",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "customers",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('delegations_id_seq'::regclass)"
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "delegator_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "delegate_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "scope",
+    "data_type": "ARRAY",
+    "is_nullable": "NO",
+    "column_default": "'{}'::text[]"
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "department_ids",
+    "data_type": "ARRAY",
+    "is_nullable": "NO",
+    "column_default": "'{}'::integer[]"
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "start_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "end_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "reason",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "true"
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "revoked_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "created_by",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "delegations",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "departments",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('departments_id_seq'::regclass)"
+  },
+  {
+    "table_name": "departments",
+    "column_name": "code",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "departments",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "departments",
+    "column_name": "block",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "departments",
+    "column_name": "parent_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "departments",
+    "column_name": "sort_order",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "departments",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "true"
+  },
+  {
+    "table_name": "departments",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('hr_audit_logs_id_seq'::regclass)"
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "action",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "entity_type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "entity_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "actor_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "actor_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "old_value",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "new_value",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "ip_address",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "hr_audit_logs",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('leave_approvals_id_seq'::regclass)"
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "request_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "approver_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "approval_level",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "action",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "comment",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "delegated_for",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_approvals",
+    "column_name": "approved_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('leave_requests_id_seq'::regclass)"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "employee_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "leave_type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'ANNUAL'::text"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "start_date",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "end_date",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "total_days",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "1"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "reason",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'PENDING'::text"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "reviewed_by",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "reviewed_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "review_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "current_approval_level",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "1"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "max_approval_levels",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "2"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "leave_type_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "period",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'FULL_DAY'::text"
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "attachment_url",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "approved_by_manager",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "approved_by_manager_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "manager_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "approved_by_hr",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "approved_by_hr_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "hr_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "cancelled_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_requests",
+    "column_name": "cancel_reason",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('shadow.leave_types_id_seq'::regclass)"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "code",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "max_days_per_year",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "is_paid",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "true"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "is_carry_over",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "max_carry_over_days",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "5"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "requires_approval",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "true"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "approval_levels",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "2"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "max_days_no_doc",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "3"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "payroll_impact",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'NONE'::text"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "true"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "sort_order",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "leave_types",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('manager_departments_id_seq'::regclass)"
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "manager_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "department_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "management_level",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "1"
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "can_view",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "true"
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "can_approve",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false"
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "can_manage",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false"
+  },
+  {
+    "table_name": "manager_departments",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('material_tracking_logs_id_seq'::regclass)"
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "bom_line_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "qr_code",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "stage",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "stage_label",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "scanned_by_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "scanned_by_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "location",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "material_tracking_logs",
+    "column_name": "scanned_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "materials",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('materials_id_seq'::regclass)"
+  },
+  {
+    "table_name": "materials",
+    "column_name": "code",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "materials",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "materials",
+    "column_name": "unit",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'cai'::text"
+  },
+  {
+    "table_name": "materials",
+    "column_name": "unit_price",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "materials",
+    "column_name": "stock_qty",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "materials",
+    "column_name": "min_stock",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "materials",
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "materials",
+    "column_name": "supplier",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "materials",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "materials",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "materials",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('monthly_payroll_id_seq'::regclass)"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "employee_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "month",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "year",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "official_salary",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "basic_salary",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "regular_worked_days",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "paid_leave_days",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "evening_ot_hours",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "night_ot_hours",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "sunday_hours",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "sunday_night_hours",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "holiday_days_off",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "holiday_worked_weekday_days",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "holiday_worked_sunday_days",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "unpaid_leave_days",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "absent_days",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "attendance_allowance",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "total_late_early_mins",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "gross_earnings",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "total_deductions",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "net_salary",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "bhxh_employee",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "bhxh_employer",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "advance_deduction",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "other_deductions",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "line_items_json",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "warnings_json",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'DRAFT'::text"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "published_by",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "published_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "calculated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "monthly_payroll",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('overtime_requests_id_seq'::regclass)"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "employee_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "work_date",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "start_time",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "end_time",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "total_hours",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "reason",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'PENDING'::text"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "approved_by",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "approved_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "current_approval_level",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "1"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "max_approval_levels",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "1"
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "approve_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "approved_by_hr",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "approved_by_hr_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "overtime_requests",
+    "column_name": "hr_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('payslip_disputes_id_seq'::regclass)"
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "payroll_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "employee_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "month",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "year",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "reason",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'OPEN'::text"
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "hr_response",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "reviewed_by",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "reviewed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "payslip_disputes",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('production_bom_lines_id_seq'::regclass)"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "zone_id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "zone_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "product_name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "material_code",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "material_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "unit",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'cai'::text"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "qty",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "unit_price",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "total",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "supply_type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'HOMEPRO_PRODUCTION'::text"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "stt_in_zone",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "production_bom_lines",
+    "column_name": "updated_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('projects_id_seq'::regclass)"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "code",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "customer",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "manager",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "location",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "contract_value",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'ACTIVE'::text"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "start_date",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "deadline",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "projects",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "target_material_cost",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "projects",
+    "column_name": "target_labor_cost",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('qc_issues_id_seq'::regclass)"
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "code",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "location",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "severity",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'MEDIUM'::text"
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'OPEN'::text"
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "reported_by",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "assigned_to",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "due_date",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "resolved_date",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "resolution",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "qc_issues",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "settings",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('settings_id_seq'::regclass)"
+  },
+  {
+    "table_name": "settings",
+    "column_name": "key",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "settings",
+    "column_name": "value",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "settings",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('tasks_id_seq'::regclass)"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "''::text"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "assignee",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "start_date",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "deadline",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "priority",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'MEDIUM'::text"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'NOT_STARTED'::text"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "progress",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "tasks",
+    "column_name": "end_date",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('users_id_seq'::regclass)"
+  },
+  {
+    "table_name": "users",
+    "column_name": "username",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "password",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "role",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'WORKER'::text"
+  },
+  {
+    "table_name": "users",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "active",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "true"
+  },
+  {
+    "table_name": "users",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "users",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "users",
+    "column_name": "position",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "birth_date",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "employee_code",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "department",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "employment_type",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'FULL_TIME'::text"
+  },
+  {
+    "table_name": "users",
+    "column_name": "join_date",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "manager_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "employee_status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'ACTIVE'::text"
+  },
+  {
+    "table_name": "users",
+    "column_name": "note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "official_salary",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "users",
+    "column_name": "basic_salary",
+    "data_type": "real",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "users",
+    "column_name": "pin_hash",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "failed_pin_attempts",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "users",
+    "column_name": "pin_locked_until",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "users",
+    "column_name": "require_password_change",
+    "data_type": "boolean",
+    "is_nullable": "NO",
+    "column_default": "false"
+  },
+  {
+    "table_name": "users",
+    "column_name": "department_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('work_logs_id_seq'::regclass)"
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "project_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "task_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "log_date",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "category",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "workers",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "worker_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "hours_worked",
+    "data_type": "real",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "weather",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "progress_note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "issues",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "recorded_by",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "work_logs",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  }
+]

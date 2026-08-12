@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionFromRequest } from '@/lib/session';
+import { getSessionFromRequest } from '@/lib/session.edge';
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

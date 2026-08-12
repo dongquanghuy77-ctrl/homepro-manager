@@ -42,19 +42,34 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse }      from 'next/server';
 import { db }                             from '@/db';
 import { monthlyPayroll, users }          from '@/db/schema';
-import { requireAuth, MANAGER_AND_ABOVE, getEffectiveTeamMemberIds } from '@/lib/auth';
+import { requireAuth, ALL_ROLES, getEffectiveTeamMemberIds } from '@/lib/auth';
 import { eq, and, sql, desc, ilike, inArray } from 'drizzle-orm';
 
 const DEFAULT_PAGE_SIZE = 25; // Số rows/trang — đủ để review mà không quá tải
 
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireAuth(req, MANAGER_AND_ABOVE);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
-  const allowedEmployeeIds = await getEffectiveTeamMemberIds(session);
-  const teamFilter = allowedEmployeeIds.length > 0
-    ? inArray(monthlyPayroll.employeeId, allowedEmployeeIds)
-    : eq(monthlyPayroll.employeeId, -1);
+  const { getPayrollReadScope } = await import('@/lib/permissions/checker');
+  const scope = await getPayrollReadScope(session);
+
+  if (scope === 'NONE') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  let teamFilter;
+  if (scope === 'ALL') {
+    teamFilter = eq(monthlyPayroll.employeeId, monthlyPayroll.employeeId); // always true
+  } else if (scope === 'DEPARTMENT') {
+    const allowedEmployeeIds = await getEffectiveTeamMemberIds(session);
+    teamFilter = allowedEmployeeIds.length > 0
+      ? inArray(monthlyPayroll.employeeId, allowedEmployeeIds)
+      : eq(monthlyPayroll.employeeId, -1);
+  } else {
+    // SELF
+    teamFilter = eq(monthlyPayroll.employeeId, session.id);
+  }
 
   const url      = new URL(req.url);
   const month    = parseInt(url.searchParams.get('month') ?? String(new Date().getMonth() + 1));

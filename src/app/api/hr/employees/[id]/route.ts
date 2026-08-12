@@ -15,8 +15,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const id = Number(params.id);
   if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
-  // ADMIN, MANAGER, VIEWER \u0111\u01b0\u1ee3c xem m\u1ecdi h\u1ed3 s\u01a1; WORKER/SUPERVISOR ch\u1ec9 xem c\u1ee7a m\u00ecnh
-  if (session.role !== 'ADMIN' && session.role !== 'MANAGER' && session.role !== 'VIEWER' && session.id !== id) {
+  // Get target user to check permissions against their department
+  const [target] = await db.select({ id: users.id, departmentId: users.departmentId }).from(users).where(eq(users.id, id));
+  if (!target) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  const { canReadEmployee } = await import('@/lib/permissions/checker');
+  if (!(await canReadEmployee(session, target.id, target.departmentId))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -52,11 +56,19 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const { session, error } = await requireAuth(req, ADMIN_ONLY);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
   const id = Number(params.id);
   if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
+
+  const [target] = await db.select({ id: users.id, departmentId: users.departmentId }).from(users).where(eq(users.id, id));
+  if (!target) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  const { canWriteEmployee } = await import('@/lib/permissions/checker');
+  if (!(await canWriteEmployee(session, target.id, target.departmentId))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   try {
     const body = await req.json();
@@ -130,11 +142,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const { session, error } = await requireAuth(req, ADMIN_ONLY);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
   const id = Number(params.id);
   if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
+
+  const [target] = await db.select({ id: users.id, departmentId: users.departmentId }).from(users).where(eq(users.id, id));
+  if (!target) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  const { canWriteEmployee } = await import('@/lib/permissions/checker');
+  if (!(await canWriteEmployee(session, target.id, target.departmentId))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   try {
     const body = await req.json();

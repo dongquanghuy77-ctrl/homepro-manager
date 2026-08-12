@@ -2,17 +2,18 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { attendance } from '@/db/schema';
-import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
+import { attendance, users } from '@/db/schema';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { getWorkHours, calculateAttendanceStats, writeHrAuditLog } from '@/lib/hr';
+import { getEffectiveTeamMemberIds } from '@/lib/rbac';
 
 // ── Shared update logic for PUT and PATCH ─────────────────────────────────────
 async function updateAttendanceRecord(
   req: NextRequest,
   params: { id: string }
 ): Promise<NextResponse> {
-  const { session, error } = await requireAuth(req, ADMIN_OR_MANAGER);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
   const id = Number(params.id);
@@ -26,9 +27,26 @@ async function updateAttendanceRecord(
     const checkOutDate = checkOut ? new Date(checkOut) : null;
     const now          = new Date();
 
-    const [oldRecord] = await db.select().from(attendance).where(eq(attendance.id, id));
+    const [oldRecord] = await db.select({
+      id: attendance.id,
+      employeeId: attendance.employeeId,
+      checkIn: attendance.checkIn,
+      checkOut: attendance.checkOut,
+      note: attendance.note,
+      location: attendance.location,
+      status: attendance.status,
+      lateMinutes: attendance.lateMinutes,
+      earlyLeaveMinutes: attendance.earlyLeaveMinutes,
+      totalHours: attendance.totalHours,
+      departmentId: users.departmentId
+    }).from(attendance).innerJoin(users, eq(attendance.employeeId, users.id)).where(eq(attendance.id, id));
     if (!oldRecord) {
       return NextResponse.json({ error: 'Không tìm thấy bản ghi chấm công' }, { status: 404 });
+    }
+
+    const { canWriteAttendance } = await import('@/lib/permissions/checker');
+    if (!(await canWriteAttendance(session, oldRecord.employeeId, oldRecord.departmentId))) {
+      return NextResponse.json({ error: 'Bạn không có quyền sửa bản ghi của nhân viên này' }, { status: 403 });
     }
 
     // Validate status nếu được cung cấp

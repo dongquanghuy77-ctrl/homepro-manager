@@ -31,7 +31,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db }                        from '@/db';
-import { attendance }                from '@/db/schema';
+import { attendance, users }         from '@/db/schema';
 import { eq }                        from 'drizzle-orm';
 import { requireAuth, MANAGER_AND_ABOVE, ADMIN_OR_HR } from '@/lib/auth';
 import { writeHrAuditLogInTx }       from '@/lib/hr';
@@ -105,11 +105,6 @@ export async function PATCH(
     return NextResponse.json({ error: 'action không hợp lệ' }, { status: 400 });
   }
 
-  // EDIT chỉ dành cho ADMIN (HR)
-  if (action === 'EDIT' && session.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Chỉ HR mới được điều chỉnh giờ công' }, { status: 403 });
-  }
-
   // EDIT bắt buộc có adjustedHours
   if (action === 'EDIT') {
     if (typeof adjustedHours !== 'number' || adjustedHours < 0 || adjustedHours > 24) {
@@ -148,17 +143,33 @@ export async function PATCH(
     }
 
     // ── Kiểm tra quyền theo trạng thái ─────────────────────────────────────
-    // Manager chỉ xử lý được PENDING_MANAGER
-    if (session.role === 'MANAGER' && currentStatus !== 'PENDING_MANAGER') {
-      return NextResponse.json({
-        error: `Manager chỉ có thể duyệt bản ghi ở trạng thái PENDING_MANAGER (hiện tại: ${currentStatus})`,
-      }, { status: 403 });
+    const { getAttendanceApprovalLevel } = await import('@/lib/permissions/checker');
+    const approvalLevel = await getAttendanceApprovalLevel(session);
+    if (approvalLevel === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+    const isManager = approvalLevel === 1;
+    const isAdmin   = approvalLevel === 2;
+
+    // Manager (Level 1) chỉ xử lý được PENDING_MANAGER và phải cùng phòng ban
+    if (isManager) {
+      if (currentStatus !== 'PENDING_MANAGER') {
+        return NextResponse.json({
+          error: `Manager chỉ có thể duyệt bản ghi ở trạng thái PENDING_MANAGER (hiện tại: ${currentStatus})`,
+        }, { status: 403 });
+      }
+      const [target] = await db.select({ departmentId: users.departmentId }).from(users).where(eq(users.id, existing.employeeId));
+      if (target.departmentId !== session.departmentId) {
+        return NextResponse.json({ error: 'Chỉ được duyệt nhân viên cùng bộ phận' }, { status: 403 });
+      }
+    }
+
+    // EDIT chỉ dành cho HR/Admin (Level 2)
+    if (action === 'EDIT' && !isAdmin) {
+      return NextResponse.json({ error: 'Chỉ HR mới được điều chỉnh giờ công' }, { status: 403 });
     }
 
     // ── Build update data theo action ────────────────────────────────────────
     const now = new Date();
-    const isManager = session.role === 'MANAGER';
-    const isAdmin   = session.role === 'ADMIN';
 
     const updateData: Partial<typeof attendance.$inferInsert> = {
       approvalStatus: nextStatus,

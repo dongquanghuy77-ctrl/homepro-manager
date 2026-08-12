@@ -15,14 +15,18 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse }   from 'next/server';
 import { db }                          from '@/db';
 import { leaveRequests, users }        from '@/db/schema';
-import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { eq, and, inArray, or, sql }   from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireAuth(req, MANAGER_AND_ABOVE);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
 
-  const isAdmin = session.role === 'ADMIN';
+  const { getLeaveApprovalLevel } = await import('@/lib/permissions/checker');
+  const approvalLevel = await getLeaveApprovalLevel(session);
+  if (approvalLevel === 0) return NextResponse.json({ total: 0, pending: 0, pendingHr: 0 });
+
+  const isAdmin = approvalLevel === 2;
 
   let pendingCount  = 0;
   let pendingHrCount = 0;
@@ -39,43 +43,19 @@ export async function GET(req: NextRequest) {
     pendingCount   = Number(row?.pending   ?? 0);
     pendingHrCount = Number(row?.pendingHr ?? 0);
 
-  } else {
-    // Manager: thấy PENDING của nhân viên thuộc quyền mình (u.manager_id = session.id)
-    // + PENDING_HR của toàn bộ (HR cần duyệt vòng 2)
-    const subordinateIds = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(
-        and(
-          eq(users.managerId, session.id),
-          eq(users.active,    true),
-        )
-      );
+  } else if (approvalLevel === 1) {
+    // Manager: thấy PENDING của nhân viên cùng bộ phận
+    const [row] = await db
+      .select({
+        pending:   sql<number>`COUNT(*) FILTER (WHERE ${leaveRequests.status} = 'PENDING')`,
+        pendingHr: sql<number>`COUNT(*) FILTER (WHERE ${leaveRequests.status} = 'PENDING_HR')`,
+      })
+      .from(leaveRequests)
+      .innerJoin(users, eq(leaveRequests.employeeId, users.id))
+      .where(eq(users.departmentId, session.departmentId!));
 
-    const subIds = subordinateIds.map(u => u.id);
-
-    if (subIds.length > 0) {
-      const [row] = await db
-        .select({
-          pending:   sql<number>`COUNT(*) FILTER (WHERE ${leaveRequests.status} = 'PENDING')`,
-          pendingHr: sql<number>`COUNT(*) FILTER (WHERE ${leaveRequests.status} = 'PENDING_HR')`,
-        })
-        .from(leaveRequests)
-        .where(
-          or(
-            // PENDING: đơn của cấp dưới chờ mình duyệt
-            and(
-              eq(leaveRequests.status, 'PENDING'),
-              inArray(leaveRequests.employeeId, subIds),
-            ),
-            // PENDING_HR: tất cả đơn Manager đã duyệt, đang chờ HR chốt (Admin/HR thấy)
-            eq(leaveRequests.status, 'PENDING_HR'),
-          )
-        );
-
-      pendingCount   = Number(row?.pending   ?? 0);
-      pendingHrCount = Number(row?.pendingHr ?? 0);
-    }
+    pendingCount   = Number(row?.pending   ?? 0);
+    pendingHrCount = Number(row?.pendingHr ?? 0);
   }
 
   const total = pendingCount + pendingHrCount;

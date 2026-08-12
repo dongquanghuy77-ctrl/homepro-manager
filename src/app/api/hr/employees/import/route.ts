@@ -21,7 +21,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { requireAuth, ADMIN_ONLY } from '@/lib/auth';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import { writeHrAuditLog, writeHrAuditLogAsync } from '@/lib/hr';
 
@@ -81,9 +81,13 @@ function validateRow(row: EmployeeImportRow, idx: number): string | null {
 // POST Handler
 // ─────────────────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  // Chỉ Admin mới được import hàng loạt
-  const { session, error } = await requireAuth(req, ADMIN_ONLY);
+  const { session, error } = await requireAuth(req, ALL_ROLES);
   if (error) return error;
+
+  const { canWriteEmployee } = await import('@/lib/permissions/checker');
+  if (!(await canWriteEmployee(session, 0, null))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   let body: { rows?: EmployeeImportRow[] };
   try {
