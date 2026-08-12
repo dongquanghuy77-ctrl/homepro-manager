@@ -29,6 +29,7 @@ interface UserState {
   username: string;
   name: string;
   role: 'ADMIN' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
+  permissions?: Record<string, boolean>;
 }
 
 // ─── Nav item type ────────────────────────────────────────────────────────────
@@ -40,6 +41,7 @@ interface NavItem {
   sprint: number;
   adminOnly?: boolean;
   managerOnly?: boolean;
+  requiredPermission?: string;
   /** Marks this item as the collapsible group header */
   isGroupHeader?: boolean;
   /** Items with the same groupId are rendered as children of the group header */
@@ -91,7 +93,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'payroll', label: 'Bảng lương', icon: 'Banknote', href: '/payroll',
-    sprint: 6, managerOnly: true, groupId: 'hr-group',
+    sprint: 6, requiredPermission: 'payroll.view', groupId: 'hr-group',
   },
   {
     id: 'hr-disputes', label: 'Khiếu nại lương', icon: 'Inbox', href: '/hr/disputes',
@@ -214,6 +216,7 @@ export default function Sidebar() {
     if (item.sprint > ACTIVE_SPRINT) return false;
     if (item.adminOnly   && currentUser?.role !== 'ADMIN') return false;
     if (item.managerOnly && currentUser?.role !== 'ADMIN' && currentUser?.role !== 'MANAGER') return false;
+    if (item.requiredPermission && !currentUser?.permissions?.[item.requiredPermission]) return false;
     return true;
   });
 

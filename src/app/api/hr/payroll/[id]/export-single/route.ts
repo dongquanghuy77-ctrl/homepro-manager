@@ -8,8 +8,9 @@ import { NextRequest, NextResponse }     from 'next/server';
 import { db }                             from '@/db';
 import { monthlyPayroll, users }          from '@/db/schema';
 import { eq }                             from 'drizzle-orm';
-import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
+import { requireAuth }                    from '@/lib/auth';
 import ExcelJS                            from 'exceljs';
+import { writeHrAuditLog }                from '@/lib/hr';
 
 const num = (v: unknown): number => Math.round(Number(v) || 0);
 
@@ -39,8 +40,13 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const { error } = await requireAuth(req, MANAGER_AND_ABOVE);
+  const { error, session } = await requireAuth(req);
   if (error) return error;
+
+  const { canExportPayroll } = await import('@/lib/permissions/checker');
+  if (!(await canExportPayroll(session))) {
+    return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
+  }
 
   const id = Number(params.id);
   if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
@@ -600,6 +606,14 @@ export async function GET(
   // ── EXPORT ────────────────────────────────────────────────────────────────
   const buffer   = await wb.xlsx.writeBuffer();
   const empCode  = row.employeeCode ?? `EMP${row.employeeId}`;
+  
+  await writeHrAuditLog(
+    session.id,
+    'PAYROLL_EXPORT',
+    'monthly_payroll',
+    row.id,
+    `Xuất file Excel phiếu lương cá nhân cho nhân viên ${empCode} tháng ${row.month}/${row.year}`
+  );
   const filename = `phieu-luong-${empCode}-T${String(row.month).padStart(2,'0')}-${row.year}.xlsx`;
 
   return new NextResponse(new Uint8Array(buffer as ArrayBuffer), {

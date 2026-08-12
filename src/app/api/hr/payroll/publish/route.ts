@@ -16,6 +16,7 @@ import { getSessionFromRequest }          from '@/lib/session';
 import { DefaultAuthorizationService }    from '@/lib/permissions/service';
 import { DbPermissionRepository }         from '@/lib/permissions/repository';
 import { eq, and, inArray }               from 'drizzle-orm';
+import { writeHrAuditLog }                from '@/lib/hr';
 
 export async function PATCH(req: NextRequest) {
   const session = await getSessionFromRequest(req);
@@ -23,23 +24,9 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Chưa đăng nhập.' }, { status: 401 });
   }
 
-  // --- DUAL AUTHORIZATION / PERMISSION EVALUATION ---
-  try {
-    const authService = new DefaultAuthorizationService(new DbPermissionRepository());
-    const isAllowed = await authService.evaluate({
-      role: session.role,
-      permission: 'payroll.publish',
-      requestedScope: 'COMPANY',
-      accessorId: session.id
-    });
-    if (!isAllowed) {
-      return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
-    }
-  } catch (err: any) {
-    if (err.message.includes('UAT_DATABASE_REQUIRED')) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
-    }
-    return NextResponse.json({ error: 'Authorization error.' }, { status: 500 });
+  const { canPublishPayroll } = await import('@/lib/permissions/checker');
+  if (!(await canPublishPayroll(session))) {
+    return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
   }
 
   const body = await req.json().catch(() => ({}));
@@ -99,12 +86,22 @@ export async function PATCH(req: NextRequest) {
       .returning({ id: monthlyPayroll.id });
   }
 
+  if (updated.length > 0) {
+    await writeHrAuditLog(
+      session.id,
+      'PAYROLL_PUBLISH',
+      'monthly_payroll',
+      -1,
+      `Công bố ${updated.length} bảng lương tháng ${month}/${year}`
+    );
+  }
+
   return NextResponse.json({
     success: true,
-    message: `Đã công bố ${updated.length} phiếu lương tháng ${month}/${year}`,
-    publishedCount: updated.length,
-    publishedIds:   updated.map(r => r.id),
-    publishedBy:    session.id,
-    publishedAt:    new Date().toISOString(),
+    message: `Đã công bố thành công ${updated.length} bảng lương`,
+    updatedCount: updated.length,
+    publishedIds: updated.map(r => r.id),
+    publishedBy:  session.id,
+    publishedAt:  new Date().toISOString(),
   });
 }

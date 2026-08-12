@@ -24,6 +24,7 @@ import { DefaultAuthorizationService }    from '@/lib/permissions/service';
 import { DbPermissionRepository }         from '@/lib/permissions/repository';
 import { eq, and, sql, inArray }          from 'drizzle-orm';
 import { calculateMonthlyPayroll, PayrollInput, DEFAULT_ALLOWANCE_TIERS } from '@/lib/payroll';
+import { writeHrAuditLog }                from '@/lib/hr';
 
 // Danh sách ngày Lễ Quốc gia VN (YYYY-MM-DD) — caller có thể override via settings
 const VN_HOLIDAYS_2026: string[] = [
@@ -52,23 +53,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Chưa đăng nhập.' }, { status: 401 });
   }
 
-  // --- DUAL AUTHORIZATION / PERMISSION EVALUATION ---
-  try {
-    const authService = new DefaultAuthorizationService(new DbPermissionRepository());
-    const isAllowed = await authService.evaluate({
-      role: session.role,
-      permission: 'payroll.calculate',
-      requestedScope: 'COMPANY',
-      accessorId: session.id
-    });
-    if (!isAllowed) {
-      return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
-    }
-  } catch (err: any) {
-    if (err.message.includes('UAT_DATABASE_REQUIRED')) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
-    }
-    return NextResponse.json({ error: 'Authorization error.' }, { status: 500 });
+  const { canCreatePayroll } = await import('@/lib/permissions/checker');
+  if (!(await canCreatePayroll(session))) {
+    return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
   }
 
   const body = await req.json().catch(() => ({}));
@@ -295,6 +282,16 @@ export async function POST(req: NextRequest) {
       console.error(`[PAYROLL_CALC_ERROR] Employee ${emp.id}:`, e);
       errors.push({ employeeId: emp.id, message: e.message || String(e) });
     }
+  }
+
+  if (processed.length > 0) {
+    await writeHrAuditLog(
+      session.id,
+      'PAYROLL_CALCULATE',
+      'monthly_payroll',
+      -1,
+      `Tính lương tháng ${month}/${year} cho ${processed.length} nhân sự (DRAFT)`
+    );
   }
 
   return NextResponse.json({

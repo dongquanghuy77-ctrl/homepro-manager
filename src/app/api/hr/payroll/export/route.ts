@@ -50,9 +50,10 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse }      from 'next/server';
 import { db }                             from '@/db';
 import { monthlyPayroll, users }          from '@/db/schema';
-import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
+import { requireAuth }                    from '@/lib/auth';
 import { eq, and, desc }                  from 'drizzle-orm';
 import ExcelJS                            from 'exceljs';
+import { writeHrAuditLog }                from '@/lib/hr';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -99,8 +100,13 @@ function styleTotalCell(cell: Cell) {
 // MAIN HANDLER
 // ─────────────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireAuth(req, MANAGER_AND_ABOVE);
+  const { session, error } = await requireAuth(req);
   if (error) return error;
+
+  const { canExportPayroll } = await import('@/lib/permissions/checker');
+  if (!(await canExportPayroll(session))) {
+    return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
+  }
 
   const url    = new URL(req.url);
   const month  = parseInt(url.searchParams.get('month') ?? String(new Date().getMonth() + 1));
@@ -380,6 +386,14 @@ export async function GET(req: NextRequest) {
 
   // ── 3. Serialize workbook → Buffer ────────────────────────────────────────
   const buffer = await wb.xlsx.writeBuffer();
+
+  await writeHrAuditLog(
+    session.id,
+    'PAYROLL_EXPORT',
+    'monthly_payroll',
+    -1,
+    `Xuất file Excel bảng lương toàn công ty tháng ${month}/${year}`
+  );
 
   const filename = `bang-luong-${String(month).padStart(2, '0')}-${year}${status === 'PUBLISHED' ? '-published' : ''}.xlsx`;
 

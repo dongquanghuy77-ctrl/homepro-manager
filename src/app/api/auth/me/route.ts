@@ -24,5 +24,15 @@ export async function GET(req: NextRequest) {
     .from(users)
     .where(eq(users.id, session.id));
 
-  return NextResponse.json({ user: user ?? null });
+  const { hasPermissionCode } = await import('@/lib/permissions/checker');
+  const canViewPayroll = await hasPermissionCode(session.role, 'payroll.view');
+
+  return NextResponse.json({ 
+    user: user ? {
+      ...user,
+      permissions: {
+        'payroll.view': canViewPayroll
+      }
+    } : null 
+  });
 }

@@ -785,3 +785,73 @@ export type Permission = typeof permissions.$inferSelect;
 export type NewPermission = typeof permissions.$inferInsert;
 export type RolePermission = typeof rolePermissions.$inferSelect;
 export type NewRolePermission = typeof rolePermissions.$inferInsert;
+
+// ============================================================
+// P0.15 HR CORE DATA MODEL
+// ============================================================
+
+export const positions = pgTable('positions', {
+  id: serial('id').primaryKey(),
+  code: text('code').unique(),
+  name: text('name').notNull(),
+  status: text('status').notNull().default('ACTIVE'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const employees = pgTable('employees', {
+  id: serial('id').primaryKey(),
+  employeeCode: text('employee_code').notNull().unique(),
+  userId: integer('user_id').unique().references(() => users.id, { onDelete: 'set null' }),
+  fullName: text('full_name').notNull(),
+  departmentId: integer('department_id').notNull().references(() => departments.id, { onDelete: 'restrict' }),
+  positionId: integer('position_id').references(() => positions.id, { onDelete: 'restrict' }),
+  managerId: integer('manager_id'), // Evaluated at logic level to self
+  employmentStatus: text('employment_status').notNull().default('ACTIVE'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const employmentContracts = pgTable('employment_contracts', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  contractType: text('contract_type').notNull().default('FULL_TIME'),
+  status: text('status').notNull().default('ACTIVE'),
+  startDate: text('start_date').notNull(),
+  endDate: text('end_date'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const salaryProfiles = pgTable('salary_profiles', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  baseSalary: real('base_salary').notNull().default(0),
+  effectiveFrom: text('effective_from').notNull(),
+  effectiveTo: text('effective_to'),
+  status: text('status').notNull().default('ACTIVE'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const salaryComponents = pgTable('salary_components', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // ALLOWANCE, DEDUCTION, etc.
+  taxable: boolean('taxable').notNull().default(false),
+  status: text('status').notNull().default('ACTIVE'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const employeeSalaryComponents = pgTable('employee_salary_components', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  componentId: integer('component_id').notNull().references(() => salaryComponents.id, { onDelete: 'restrict' }),
+  amount: real('amount').notNull().default(0),
+  effectiveFrom: text('effective_from').notNull(),
+  effectiveTo: text('effective_to'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+

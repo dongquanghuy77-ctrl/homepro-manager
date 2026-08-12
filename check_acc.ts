@@ -1,0 +1,1 @@
+import { db } from './src/db'; import { users } from './src/db/schema'; import { eq } from 'drizzle-orm'; async function run() { const acc = await db.select({username: users.username, role: users.role, department: users.department}).from(users).where(eq(users.department, 'K? to n')); console.log(JSON.stringify(acc, null, 2)); process.exit(0); } run();  

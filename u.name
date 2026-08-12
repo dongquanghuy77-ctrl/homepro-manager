@@ -1,0 +1,1 @@
+import { db } from './src/db'; import { users } from './src/db/schema'; async function run() { const allUsers = await db.select({ id: users.id, username: users.username, name: users.name, role: users.role }).from(users); console.log(JSON.stringify(allUsers.filter(u = 

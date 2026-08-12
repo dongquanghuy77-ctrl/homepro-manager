@@ -27,17 +27,26 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search')?.trim() || null;
     const role = searchParams.get('role')?.trim() || null;
 
+    const filters: any = { department, status, search, role };
+    if (readScope === 'DEPARTMENT') {
+      filters.allowedDepartmentId = session.departmentId!;
+    } else if (readScope === 'SELF') {
+      filters.allowedUserId = session.id;
+    }
+
+    // 1. Fetch Mapped HR Core Employees
+    const { getEmployeeList } = await import('@/lib/repositories/hr-core');
+    const mappedEmployees = await getEmployeeList(filters);
+
+    // 2. Fetch Unmapped Legacy Users (MANUAL_INPUT) for backward compatibility
     const conditions = [];
-    
     if (readScope === 'DEPARTMENT') {
       conditions.push(eq(users.departmentId, session.departmentId!));
     } else if (readScope === 'SELF') {
       conditions.push(eq(users.id, session.id));
     }
-
-    // Ignore frontend department filter if readScope is DEPARTMENT or SELF
-    if (department && readScope === 'ALL') conditions.push(eq(users.department, department));
     
+    if (department && readScope === 'ALL') conditions.push(eq(users.department, department));
     if (status)     conditions.push(eq(users.employeeStatus, status));
     if (role)       conditions.push(eq(users.role, role));
     if (search) {
@@ -50,7 +59,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const employeeList = await db.select({
+    const unmappedUsers = await db.select({
       id:             users.id,
       username:       users.username,
       name:           users.name,
@@ -69,13 +78,27 @@ export async function GET(req: NextRequest) {
       note:           users.note,
       createdAt:      users.createdAt,
       updatedAt:      users.updatedAt,
-      // password is intentionally NOT selected
     })
       .from(users)
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(users.createdAt));
 
-    return NextResponse.json(employeeList);
+    // Filter out SYSTEM accounts and already mapped ones
+    const mappedIds = new Set(mappedEmployees.map(e => e.id));
+    const legacyEmployees = unmappedUsers.filter(u => 
+      u.username !== 'admin' && 
+      u.username !== 'viewer' && 
+      !mappedIds.has(u.id)
+    );
+
+    // 3. Merge and Sort
+    const combined = [...mappedEmployees, ...legacyEmployees].sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return NextResponse.json(combined);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Lỗi không xác định';
     return NextResponse.json({ error: message }, { status: 500 });
@@ -134,10 +157,12 @@ export async function POST(req: NextRequest) {
     const safeEmploymentType = validEmploymentTypes.includes(employmentType)
       ? employmentType : 'FULL_TIME';
 
-    const [newUser] = await db.insert(users).values({
+    const { createEmployeeTransaction } = await import('@/lib/services/hr-core');
+    
+    const result = await createEmployeeTransaction({
       name:           name.trim(),
       username:       username.trim().toLowerCase(),
-      password:       hashedPassword,
+      passwordHash:   hashedPassword,
       position:       position?.trim() || null,
       role:           safeRole,
       phone:          phone?.trim() || null,
@@ -149,22 +174,14 @@ export async function POST(req: NextRequest) {
       managerId:      managerId ? Number(managerId) : null,
       note:           note?.trim() || null,
       employeeCode,
-      active:         true,
-      employeeStatus: 'ACTIVE',
-    }).returning({ id: users.id, employeeCode: users.employeeCode });
-
-    await writeHrAuditLog({
-      action:     'EMPLOYEE_CREATED',
-      entityType: 'employee',
-      entityId:   newUser.id,
-      actorId:    session.id,
-      actorName:  session.name,
-      newValue:   { name, username, department, position, role },
-      ipAddress:  req.headers.get('x-forwarded-for') || 'unknown',
+      officialSalary: body.officialSalary || 0,
+      actorId:        session.id,
+      actorName:      session.name,
+      ipAddress:      req.headers.get('x-forwarded-for') || 'unknown',
     });
 
     return NextResponse.json(
-      { success: true, id: newUser.id, employeeCode: newUser.employeeCode },
+      { success: true, id: result.id, employeeCode: result.employeeCode },
       { status: 201 }
     );
   } catch (err: unknown) {
