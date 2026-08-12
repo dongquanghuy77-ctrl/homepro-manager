@@ -1,0 +1,6 @@
+DECISION=WAITING
+PHASE=P0.11-C
+REASON=Awaiting architect review of the bridge protocol
+REQUIRED_ACTIONS=Review and grant GO for P0.12
+NEXT_PHASE=P0.12
+ISSUED_AT=2026-08-12T19:59:00+07:00

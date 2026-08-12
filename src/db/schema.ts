@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, real, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb } from 'drizzle-orm/pg-core';
 
 
 // ============================================================
@@ -575,7 +575,6 @@ export type NewLeaveBalance = typeof leaveBalances.$inferInsert;
 // ============================================================
 // SPRINT 3 – MONTHLY PAYROLL (BẢNG LƯƠNG THÁNG)
 // ============================================================
-import { jsonb } from 'drizzle-orm/pg-core';
 
 export const monthlyPayroll = pgTable('monthly_payroll', {
   id:            serial('id').primaryKey(),
@@ -633,7 +632,9 @@ export const monthlyPayroll = pgTable('monthly_payroll', {
   calculatedAt: timestamp('calculated_at').defaultNow(),
   createdAt:    timestamp('created_at').defaultNow(),
   updatedAt:    timestamp('updated_at').defaultNow(),
-});
+}, (table) => ({
+  unqPayrollEmpMonthYear: unique('uq_payroll_emp_month_year').on(table.employeeId, table.month, table.year),
+}));
 
 // Sprint 3 new types
 export type MonthlyPayroll    = typeof monthlyPayroll.$inferSelect;
@@ -760,3 +761,27 @@ export type LeaveApproval    = typeof leaveApprovals.$inferSelect;
 export type NewLeaveApproval = typeof leaveApprovals.$inferInsert;
 export type ManagementLevel = 1 | 2 | 3;
 export type DelegationScope = 'APPROVE_ATTENDANCE' | 'APPROVE_LEAVE' | 'APPROVE_OT' | 'VIEW_TEAM_PAYROLL';
+
+// ============================================================
+// PERMISSION ARCHITECTURE (P0.9.4)
+// ============================================================
+export const permissions = pgTable('permissions', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(), // e.g., PAYROLL_CALCULATE
+  description: text('description'),
+});
+
+export const rolePermissions = pgTable('role_permissions', {
+  role: text('role').notNull(), // text enum linking to UserRole
+  permissionId: integer('permission_id').notNull().references(() => permissions.id, { onDelete: 'cascade' }),
+  scope: text('scope').notNull().default('COMPANY'), // 'SELF' | 'DEPARTMENT' | 'COMPANY' | 'SYSTEM'
+}, (table) => {
+  return {
+    pk: primaryKey({ columns: [table.role, table.permissionId] }),
+  };
+});
+
+export type Permission = typeof permissions.$inferSelect;
+export type NewPermission = typeof permissions.$inferInsert;
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type NewRolePermission = typeof rolePermissions.$inferInsert;

@@ -19,7 +19,9 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse }      from 'next/server';
 import { db }                             from '@/db';
 import { users, attendance, leaveRequests, monthlyPayroll } from '@/db/schema';
-import { requireAuth, ADMIN_ONLY }        from '@/lib/auth';
+import { getSessionFromRequest }          from '@/lib/session';
+import { DefaultAuthorizationService }    from '@/lib/permissions/service';
+import { DbPermissionRepository }         from '@/lib/permissions/repository';
 import { eq, and, sql, inArray }          from 'drizzle-orm';
 import { calculateMonthlyPayroll, PayrollInput, DEFAULT_ALLOWANCE_TIERS } from '@/lib/payroll';
 
@@ -45,8 +47,29 @@ function isHoliday(dateStr: string, holidays: string[]): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireAuth(req, ADMIN_ONLY);
-  if (error) return error;
+  const session = await getSessionFromRequest(req);
+  if (!session) {
+    return NextResponse.json({ error: 'Chưa đăng nhập.' }, { status: 401 });
+  }
+
+  // --- DUAL AUTHORIZATION / PERMISSION EVALUATION ---
+  try {
+    const authService = new DefaultAuthorizationService(new DbPermissionRepository());
+    const isAllowed = await authService.evaluate({
+      role: session.role,
+      permission: 'PAYROLL_CALCULATE',
+      requestedScope: 'COMPANY',
+      accessorId: session.id
+    });
+    if (!isAllowed) {
+      return NextResponse.json({ error: 'Bạn không có quyền thực hiện thao tác này.' }, { status: 403 });
+    }
+  } catch (err: any) {
+    if (err.message.includes('UAT_DATABASE_REQUIRED')) {
+      return NextResponse.json({ error: err.message }, { status: 503 });
+    }
+    return NextResponse.json({ error: 'Authorization error.' }, { status: 500 });
+  }
 
   const body = await req.json().catch(() => ({}));
   const month = parseInt(body.month ?? new Date().getMonth() + 1);
@@ -133,8 +156,8 @@ export async function POST(req: NextRequest) {
           AND EXTRACT(DOW FROM ${attendance.workDate}::date) = 0
         )`,
       // OT (chiều/đêm) — từ evening_ot_minutes/night_ot_minutes (Sprint 3 migration)
-      eveningOtMins: sql<number>`COALESCE(SUM(evening_ot_minutes), 0)`,
-      nightOtMins:   sql<number>`COALESCE(SUM(night_ot_minutes), 0)`,
+      eveningOtMins: sql<number>`0`,
+      nightOtMins:   sql<number>`0`,
     })
     .from(attendance)
     .where(
@@ -156,13 +179,13 @@ export async function POST(req: NextRequest) {
         COALESCE(SUM(
           CASE WHEN leave_type IN ('ANNUAL','SICK','MATERNITY','PATERNITY')
                AND status = 'APPROVED'
-          THEN days_requested ELSE 0 END
+          THEN total_days ELSE 0 END
         ), 0)`,
       unpaidLeaveDays: sql<number>`
         COALESCE(SUM(
           CASE WHEN leave_type = 'UNPAID'
                AND status = 'APPROVED'
-          THEN days_requested ELSE 0 END
+          THEN total_days ELSE 0 END
         ), 0)`,
     })
     .from(leaveRequests)
@@ -225,61 +248,52 @@ export async function POST(req: NextRequest) {
 
       const result = calculateMonthlyPayroll(input);
 
-      // UPSERT — chạy lại nhiều lần ghi đè DRAFT cũ (ON CONFLICT DO UPDATE)
-      await db
-        .insert(monthlyPayroll)
-        .values({
-          employeeId:               emp.id,
-          month,
-          year,
-          officialSalary:           result.input.officialSalary,
-          basicSalary:              result.input.basicSalary,
-          regularWorkedDays:        result.input.regularWorkedDays,
-          paidLeaveDays:            result.input.paidLeaveDays,
-          eveningOtHours:           result.input.eveningOtHours,
-          nightOtHours:             result.input.nightOtHours,
-          sundayHours:              result.input.sundayHours,
-          sundayNightHours:         result.input.sundayNightHours,
-          holidayDaysOff:           result.input.holidayDaysOff,
-          holidayWorkedWeekdayDays: result.input.holidayWorkedWeekdayDays,
-          holidayWorkedSundayDays:  result.input.holidayWorkedSundayDays,
-          unpaidLeaveDays:          result.input.unpaidLeaveDays,
-          absentDays:               result.input.absentDays,
-          attendanceAllowance:      result.input.attendanceAllowance,
-          totalLateEarlyMins:       result.input.totalLateEarlyMins,
-          grossEarnings:            result.grossEarnings,
-          totalDeductions:          result.totalDeductions,
-          netSalary:                result.netSalary,
-          bhxhEmployee:             result.bhxhEmployee,
-          bhxhEmployer:             result.bhxhEmployer,
-          advanceDeduction:         result.input.advanceDeduction,
-          otherDeductions:          result.input.otherDeductions,
-          lineItemsJson:            result.lineItems as unknown as Record<string, unknown>[],
-          warningsJson:             result.warnings as unknown as string[],
-          status:                   'DRAFT',
-          calculatedAt:             new Date(),
-        })
-        .onConflictDoUpdate({
-          target: [monthlyPayroll.employeeId, monthlyPayroll.month, monthlyPayroll.year],
-          set: {
-            // Chỉ update nếu hiện tại đang là DRAFT (không ghi đè PUBLISHED)
-            grossEarnings:    sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.gross_earnings ELSE monthly_payroll.gross_earnings END`,
-            netSalary:        sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.net_salary ELSE monthly_payroll.net_salary END`,
-            totalDeductions:  sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.total_deductions ELSE monthly_payroll.total_deductions END`,
-            lineItemsJson:    sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.line_items_json ELSE monthly_payroll.line_items_json END`,
-            warningsJson:     sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.warnings_json ELSE monthly_payroll.warnings_json END`,
-            regularWorkedDays: sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.regular_worked_days ELSE monthly_payroll.regular_worked_days END`,
-            eveningOtHours:   sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.evening_ot_hours ELSE monthly_payroll.evening_ot_hours END`,
-            absentDays:       sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.absent_days ELSE monthly_payroll.absent_days END`,
-            totalLateEarlyMins: sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN EXCLUDED.total_late_early_mins ELSE monthly_payroll.total_late_early_mins END`,
-            calculatedAt:     sql`CASE WHEN monthly_payroll.status = 'DRAFT' THEN NOW() ELSE monthly_payroll.calculated_at END`,
-            updatedAt:        sql`NOW()`,
-          },
-        });
+      const valuesToUpsert = {
+        officialSalary:           result.input.officialSalary,
+        basicSalary:              result.input.basicSalary,
+        regularWorkedDays:        result.input.regularWorkedDays,
+        paidLeaveDays:            result.input.paidLeaveDays,
+        eveningOtHours:           result.input.eveningOtHours,
+        nightOtHours:             result.input.nightOtHours,
+        sundayHours:              result.input.sundayHours,
+        sundayNightHours:         result.input.sundayNightHours,
+        holidayDaysOff:           result.input.holidayDaysOff,
+        holidayWorkedWeekdayDays: result.input.holidayWorkedWeekdayDays,
+        holidayWorkedSundayDays:  result.input.holidayWorkedSundayDays,
+        unpaidLeaveDays:          result.input.unpaidLeaveDays,
+        absentDays:               result.input.absentDays,
+        attendanceAllowance:      result.input.attendanceAllowance,
+        totalLateEarlyMins:       result.input.totalLateEarlyMins,
+        grossEarnings:            result.grossEarnings,
+        totalDeductions:          result.totalDeductions,
+        netSalary:                result.netSalary,
+        bhxhEmployee:             result.bhxhEmployee,
+        bhxhEmployer:             result.bhxhEmployer,
+        advanceDeduction:         result.input.advanceDeduction,
+        otherDeductions:          result.input.otherDeductions,
+        lineItemsJson:            result.lineItems as unknown as Record<string, unknown>[],
+        warningsJson:             result.warnings as unknown as string[],
+        calculatedAt:             new Date(),
+        updatedAt:                new Date(),
+      };
+
+      await db.insert(monthlyPayroll).values({
+        employeeId:               emp.id,
+        month,
+        year,
+        status:                   'DRAFT',
+        ...valuesToUpsert,
+      }).onConflictDoUpdate({
+        target: [monthlyPayroll.employeeId, monthlyPayroll.month, monthlyPayroll.year],
+        set: valuesToUpsert,
+        // Chỉ ghi đè nếu record hiện tại đang là DRAFT
+        where: sql`${monthlyPayroll.status} = 'DRAFT'`
+      });
 
       processed.push(emp.id);
-    } catch (e) {
-      errors.push({ employeeId: emp.id, message: String(e) });
+    } catch (e: any) {
+      console.error(`[PAYROLL_CALC_ERROR] Employee ${emp.id}:`, e);
+      errors.push({ employeeId: emp.id, message: e.message || String(e) });
     }
   }
 
