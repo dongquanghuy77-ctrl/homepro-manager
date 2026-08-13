@@ -6,6 +6,7 @@ import { attendance } from '@/db/schema';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { eq, and } from 'drizzle-orm';
 import { getTodayVN, getWorkHours, calculateAttendanceStats } from '@/lib/hr';
+import { createSession } from '@/lib/session';
 
 export async function POST(req: NextRequest) {
   const { session, error } = await requireAuth(req, ALL_ROLES);
@@ -48,6 +49,19 @@ export async function POST(req: NextRequest) {
     } else {
       [newRecord] = await db.insert(attendance).values(recordData).returning();
     }
+
+    // INVALIDATE & REFRESH SESSION JWT
+    // So that middleware knows the user has checked in today
+    await createSession({
+      id: session.id,
+      username: session.username,
+      name: session.name,
+      role: session.role,
+      departmentId: session.departmentId,
+      originalRole: session.originalRole,
+      requirePasswordChange: session.requirePasswordChange,
+      lastAttendanceDate: today
+    });
 
     return NextResponse.json(newRecord);
   } catch (err: unknown) {

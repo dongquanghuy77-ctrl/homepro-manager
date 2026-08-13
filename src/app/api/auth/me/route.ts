@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
-
-const ALL_ROLES = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER'];
 
 export async function GET(req: NextRequest) {
   const { session, error } = await requireAuth(req, ALL_ROLES);
@@ -16,6 +14,7 @@ export async function GET(req: NextRequest) {
   const [user] = await db
     .select({
       id:           users.id,
+      username:     users.username,
       name:         users.name,
       role:         users.role,
       employeeCode: users.employeeCode,
@@ -23,6 +22,10 @@ export async function GET(req: NextRequest) {
     })
     .from(users)
     .where(eq(users.id, session.id));
+
+  if (user) {
+    (user as any).lastAttendanceDate = session.lastAttendanceDate;
+  }
 
   const { hasPermissionCode } = await import('@/lib/permissions/checker');
   const canViewPayroll = await hasPermissionCode(session.role, 'payroll.view');

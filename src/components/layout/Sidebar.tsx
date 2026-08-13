@@ -67,7 +67,7 @@ const NAV_ITEMS: NavItem[] = [
   // và đồng thời toggle expand/collapse các mục con
   {
     id: 'hr', label: 'Nhân sự', icon: 'Users', href: '/hr',
-    sprint: 6, managerOnly: true,
+    sprint: 6,
     isGroupHeader: true, groupId: 'hr-group',
   },
   // Group children — indent 12px, icons riêng biệt, không trùng nhau

@@ -40,16 +40,17 @@ export default async function EmployeeDashboardPage() {
       .limit(1)
       .then(rows => rows[0] || null),
 
-    // 2. Leave balances for current year
-    db
-      .select({
-        remaining: sql<number>`COALESCE(total_days + carry_over_days - used_days - pending_days, 0)`,
-        leaveTypeName: leaveTypes.name,
-        leaveTypeCode: leaveTypes.code,
-      })
-      .from(leaveBalances)
-      .innerJoin(leaveTypes, eq(leaveBalances.leaveTypeId, leaveTypes.id))
-      .where(and(eq(leaveBalances.employeeId, session.id), eq(leaveBalances.year, currentYear))),
+    // 2. Leave balances for current year (Resilient Fallback)
+    db.select({
+      id: leaveBalances.id,
+      leaveTypeId: leaveBalances.leaveTypeId,
+      totalDays: leaveBalances.totalDays,
+      usedDays: leaveBalances.usedDays,
+    })
+    .from(leaveBalances)
+    .where(and(eq(leaveBalances.employeeId, session.id), eq(leaveBalances.year, currentYear)))
+    .then(rows => rows as any[])
+    .catch(() => [] as any[]), // Fallback an toàn nếu bảng chưa được migrate
 
     // 3. Last 5 attendance records
     db

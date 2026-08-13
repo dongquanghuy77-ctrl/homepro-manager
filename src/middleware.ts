@@ -12,7 +12,8 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/favicon.ico') ||
     pathname === '/login' ||
     pathname === '/demo' ||
-    pathname === '/change-password'
+    pathname === '/change-password' ||
+    pathname.startsWith('/api')
   ) {
     return NextResponse.next();
   }
@@ -31,10 +32,38 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/change-password', req.url));
   }
 
-  const { role } = session;
+  const { role, lastAttendanceDate } = session;
 
-  // WORKER role: auto-redirect to mobile portal /nhan-vien
-  if (role === 'WORKER' && !pathname.startsWith('/nhan-vien') && !pathname.startsWith('/api')) {
+  // GET TODAY VN (Edge compatible)
+  const offset = 7 * 60 * 60 * 1000;
+  const now = new Date(Date.now() + offset);
+  const todayVN = now.toISOString().split('T')[0];
+
+  // Enforce Attendance Gate
+  if (lastAttendanceDate !== todayVN && pathname !== '/attendance-gate') {
+    return NextResponse.redirect(new URL('/attendance-gate', req.url));
+  }
+  
+  if (lastAttendanceDate === todayVN && pathname === '/attendance-gate') {
+    // Redirect away from gate if already checked in
+    if (role === 'WORKER' || role === 'STAFF' || role === 'DESIGNER') return NextResponse.redirect(new URL('/nhan-vien', req.url));
+    if (role === 'HR') return NextResponse.redirect(new URL('/hr', req.url));
+    if (role === 'ACCOUNTANT') return NextResponse.redirect(new URL('/payroll', req.url));
+    if (role === 'MANAGER') return NextResponse.redirect(new URL('/projects', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
+  // Restrict access to root dashboard (/)
+  if (pathname === '/') {
+    if (role === 'WORKER' || role === 'STAFF' || role === 'DESIGNER') return NextResponse.redirect(new URL('/nhan-vien', req.url));
+    if (role === 'HR') return NextResponse.redirect(new URL('/hr', req.url));
+    if (role === 'ACCOUNTANT') return NextResponse.redirect(new URL('/payroll', req.url));
+    if (role === 'MANAGER') return NextResponse.redirect(new URL('/projects', req.url));
+    // ADMIN and VIEWER are allowed on /
+  }
+
+  // WORKER/STAFF/DESIGNER role: strictly restricted to /nhan-vien
+  if ((role === 'WORKER' || role === 'STAFF' || role === 'DESIGNER') && !pathname.startsWith('/nhan-vien') && !pathname.startsWith('/api') && !pathname.startsWith('/payslip') && pathname !== '/attendance-gate') {
     return NextResponse.redirect(new URL('/nhan-vien', req.url));
   }
 

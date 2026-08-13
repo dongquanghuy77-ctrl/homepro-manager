@@ -285,13 +285,13 @@ export async function POST(req: NextRequest) {
   }
 
   if (processed.length > 0) {
-    await writeHrAuditLog(
-      session.id,
-      'PAYROLL_CALCULATE',
-      'monthly_payroll',
-      -1,
-      `Tính lương tháng ${month}/${year} cho ${processed.length} nhân sự (DRAFT)`
-    );
+    await writeHrAuditLog({
+      actorId: session.id,
+      action: 'PAYROLL_CALCULATE',
+      entityType: 'monthly_payroll',
+      entityId: -1,
+      newValue: { message: `Tính lương tháng ${month}/${year} cho ${processed.length} nhân sự (DRAFT)` }
+    });
   }
 
   return NextResponse.json({

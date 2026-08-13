@@ -42,8 +42,8 @@ export const HR_AND_ABOVE      = ['ADMIN', 'HR'];               // Xem/quản l�
 export const ADMIN_OR_HR       = ['ADMIN', 'HR'];               // Khớp với các route cũ check quyền HR/Admin
 export const MANAGER_AND_ABOVE = ['ADMIN', 'HR', 'MANAGER'];   // ← HR được vào trang HR
 export const ADMIN_OR_MANAGER  = ['ADMIN', 'MANAGER'];          // Không bao gồm HR
-export const ALL_STAFF         = ['ADMIN', 'HR', 'MANAGER', 'SUPERVISOR', 'WORKER', 'ACCOUNTANT'];
-export const ALL_ROLES         = ['ADMIN', 'HR', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER', 'ACCOUNTANT'];
+export const ALL_STAFF         = ['ADMIN', 'HR', 'MANAGER', 'SUPERVISOR', 'WORKER', 'ACCOUNTANT', 'STAFF', 'DESIGNER'];
+export const ALL_ROLES         = ['ADMIN', 'HR', 'MANAGER', 'SUPERVISOR', 'WORKER', 'VIEWER', 'ACCOUNTANT', 'STAFF', 'DESIGNER'];
 
 // ── Re-export RBAC helpers (import một chỗ duy nhất) ─────────────────────────
 export {

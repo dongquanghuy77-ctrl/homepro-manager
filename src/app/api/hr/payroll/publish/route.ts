@@ -87,13 +87,13 @@ export async function PATCH(req: NextRequest) {
   }
 
   if (updated.length > 0) {
-    await writeHrAuditLog(
-      session.id,
-      'PAYROLL_PUBLISH',
-      'monthly_payroll',
-      -1,
-      `Công bố ${updated.length} bảng lương tháng ${month}/${year}`
-    );
+    await writeHrAuditLog({
+      actorId: session.id,
+      action: 'PAYROLL_PUBLISH',
+      entityType: 'monthly_payroll',
+      entityId: -1,
+      newValue: { message: `Công bố ${updated.length} bảng lương tháng ${month}/${year}` }
+    });
   }
 
   return NextResponse.json({

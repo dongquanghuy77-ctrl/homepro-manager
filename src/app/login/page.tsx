@@ -89,12 +89,8 @@ export default function LoginPage() {
         throw new Error(data.error || 'Đăng nhập thất bại');
       }
 
-      // Điều hướng dựa theo role
-      if (data.user.role === 'WORKER') {
-        router.push('/nhan-vien');
-      } else {
-        router.push('/');
-      }
+      // Điều hướng tới Attendance Gate (Server-side middleware sẽ chặn nếu bypass)
+      router.push('/attendance-gate');
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Lỗi kết nối máy chủ');

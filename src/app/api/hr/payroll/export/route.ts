@@ -387,13 +387,13 @@ export async function GET(req: NextRequest) {
   // ── 3. Serialize workbook → Buffer ────────────────────────────────────────
   const buffer = await wb.xlsx.writeBuffer();
 
-  await writeHrAuditLog(
-    session.id,
-    'PAYROLL_EXPORT',
-    'monthly_payroll',
-    -1,
-    `Xuất file Excel bảng lương toàn công ty tháng ${month}/${year}`
-  );
+  await writeHrAuditLog({
+    actorId: session.id,
+    action: 'PAYROLL_EXPORT',
+    entityType: 'monthly_payroll',
+    entityId: -1,
+    newValue: { message: `Xuất file Excel bảng lương toàn công ty tháng ${month}/${year}` }
+  });
 
   const filename = `bang-luong-${String(month).padStart(2, '0')}-${year}${status === 'PUBLISHED' ? '-published' : ''}.xlsx`;
 

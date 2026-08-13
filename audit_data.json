@@ -1,0 +1,374 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "name": "Quản trị viên",
+      "role": "ADMIN",
+      "department": "Quản lý",
+      "active": true
+    },
+    {
+      "id": 2,
+      "username": "manager",
+      "name": "Huy - Quản lý xưởng",
+      "role": "MANAGER",
+      "department": "Quản lý",
+      "active": true
+    },
+    {
+      "id": 3,
+      "username": "supervisor",
+      "name": "Nguyễn Văn Minh - Giám sát công trình",
+      "role": "MANAGER",
+      "department": "Xưởng gỗ",
+      "active": true
+    },
+    {
+      "id": 4,
+      "username": "worker",
+      "name": "Trần Văn Thợ - Công nhân thi công",
+      "role": "WORKER",
+      "department": "Xưởng gỗ",
+      "active": true
+    },
+    {
+      "id": 5,
+      "username": "viewer",
+      "name": "Ban Giám Đốc (Xem)",
+      "role": "VIEWER",
+      "department": "Quản lý",
+      "active": true
+    },
+    {
+      "id": 6,
+      "username": "huy.dong",
+      "name": "ĐỒNG QUANG HUY",
+      "role": "ADMIN",
+      "department": "Quản lý",
+      "active": true
+    },
+    {
+      "id": 7,
+      "username": "duy.le",
+      "name": "LÊ TRUNG DUY",
+      "role": "MANAGER",
+      "department": "Lắp đặt",
+      "active": true
+    },
+    {
+      "id": 8,
+      "username": "tuan.ngo",
+      "name": "NGÔ ANH TUẤN",
+      "role": "MANAGER",
+      "department": "Sơn",
+      "active": true
+    },
+    {
+      "id": 9,
+      "username": "quan.mai",
+      "name": "MAI QUỐC QUÂN",
+      "role": "MANAGER",
+      "department": "Quản lý",
+      "active": true
+    },
+    {
+      "id": 11,
+      "username": "phuc.tran",
+      "name": "TRẦN THANH PHÚC",
+      "role": "WORKER",
+      "department": "Xưởng gỗ",
+      "active": true
+    },
+    {
+      "id": 12,
+      "username": "thuong.pham",
+      "name": "PHẠM MINH THƯƠNG",
+      "role": "WORKER",
+      "department": "Xưởng gỗ",
+      "active": true
+    },
+    {
+      "id": 13,
+      "username": "cuong.nguyen73",
+      "name": "NGUYỄN VĂN CƯỜNG (1973)",
+      "role": "WORKER",
+      "department": "Lắp đặt",
+      "active": true
+    },
+    {
+      "id": 14,
+      "username": "luy.tran",
+      "name": "TRẦN VĂN LŨY",
+      "role": "WORKER",
+      "department": "Xưởng gỗ",
+      "active": true
+    },
+    {
+      "id": 15,
+      "username": "vinh.huynh",
+      "name": "HUỲNH THÀNH VINH",
+      "role": "WORKER",
+      "department": "Lắp đặt",
+      "active": true
+    },
+    {
+      "id": 16,
+      "username": "hung.nguyen",
+      "name": "NGUYỄN VIẾT HÙNG",
+      "role": "WORKER",
+      "department": "Xưởng gỗ",
+      "active": true
+    },
+    {
+      "id": 17,
+      "username": "son.le",
+      "name": "LÊ VĂN SƠN",
+      "role": "WORKER",
+      "department": "Sơn",
+      "active": true
+    },
+    {
+      "id": 18,
+      "username": "cuong.nguyen70",
+      "name": "NGUYỄN VĂN CƯỜNG (1970)",
+      "role": "WORKER",
+      "department": "Xưởng gỗ",
+      "active": true
+    },
+    {
+      "id": 19,
+      "username": "tien.nguyen",
+      "name": "NGUYỄN QUỐC TIẾN",
+      "role": "WORKER",
+      "department": "Kho",
+      "active": true
+    },
+    {
+      "id": 20,
+      "username": "minhtran",
+      "name": "Trần Ngọc Minh",
+      "role": "WORKER",
+      "department": "Lắp đặt",
+      "active": true
+    },
+    {
+      "id": 21,
+      "username": "demo",
+      "name": "Tài khoản Demo",
+      "role": "STAFF",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 23,
+      "username": "letramkt",
+      "name": "LÊ DƯƠNG NGỌC TRÂM",
+      "role": "ACCOUNTANT",
+      "department": "Kế toán",
+      "active": true
+    },
+    {
+      "id": 24,
+      "username": "thanhhangkt",
+      "name": "thanh hằng",
+      "role": "ACCOUNTANT",
+      "department": "Kế toán",
+      "active": true
+    },
+    {
+      "id": 25,
+      "username": "managera",
+      "name": "Manager A",
+      "role": "MANAGER",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 26,
+      "username": "hra",
+      "name": "HR",
+      "role": "HR",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 27,
+      "username": "empa",
+      "name": "Emp A",
+      "role": "WORKER",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 28,
+      "username": "empb",
+      "name": "Emp B",
+      "role": "WORKER",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 45,
+      "username": "managera_9677",
+      "name": "Manager A",
+      "role": "MANAGER",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 46,
+      "username": "hra_9677",
+      "name": "HR",
+      "role": "HR",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 53,
+      "username": "managera_0542",
+      "name": "Manager A",
+      "role": "MANAGER",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 54,
+      "username": "hra_0542",
+      "name": "HR",
+      "role": "HR",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 55,
+      "username": "empa_0542",
+      "name": "Emp A",
+      "role": "WORKER",
+      "department": null,
+      "active": true
+    },
+    {
+      "id": 56,
+      "username": "empb_0542",
+      "name": "Emp B",
+      "role": "WORKER",
+      "department": null,
+      "active": true
+    }
+  ],
+  "roles": [
+    {
+      "code": "ADMIN",
+      "name": "Board of Directors",
+      "description": "Toàn quyền hệ thống"
+    },
+    {
+      "code": "HR",
+      "name": "Human Resources",
+      "description": "Quản trị nhân sự"
+    },
+    {
+      "code": "MANAGER",
+      "name": "Manager",
+      "description": "Quản lý phòng ban"
+    },
+    {
+      "code": "ACCOUNTANT",
+      "name": "Accountant",
+      "description": "Kế toán"
+    },
+    {
+      "code": "WORKER",
+      "name": "Worker",
+      "description": "Công nhân"
+    },
+    {
+      "code": "DESIGNER",
+      "name": "Designer",
+      "description": "Thiết kế"
+    },
+    {
+      "code": "STAFF",
+      "name": "Staff",
+      "description": "Nhân viên văn phòng"
+    },
+    {
+      "code": "VIEWER",
+      "name": "Viewer",
+      "description": "Ban Giám đốc"
+    }
+  ],
+  "roleToPerms": {
+    "STAFF": [
+      "employee.read.self",
+      "attendance.read.self",
+      "leave.read.self",
+      "payroll.read.self"
+    ],
+    "DESIGNER": [
+      "employee.read.self",
+      "attendance.read.self",
+      "leave.read.self",
+      "payroll.read.self"
+    ],
+    "WORKER": [
+      "employee.read.self",
+      "attendance.read.self",
+      "leave.read.self",
+      "payroll.read.self"
+    ],
+    "MANAGER": [
+      "employee.read.department",
+      "attendance.read.department",
+      "leave.read.department",
+      "leave.approve.department",
+      "payroll.read.department"
+    ],
+    "HR": [
+      "employee.read.all",
+      "employee.write.all",
+      "attendance.read.all",
+      "attendance.write.all",
+      "leave.read.all",
+      "leave.approve.all",
+      "payroll.read.all",
+      "payroll.calculate"
+    ],
+    "ADMIN": [
+      "employee.read.all",
+      "employee.write.all",
+      "attendance.read.all",
+      "attendance.write.all",
+      "leave.read.all",
+      "leave.approve.all",
+      "payroll.read.all",
+      "payroll.calculate",
+      "payroll.approve",
+      "payroll.publish",
+      "expense.read.all",
+      "expense.write.all",
+      "payroll.view",
+      "payroll.create",
+      "payroll.edit",
+      "payroll.lock",
+      "payroll.export"
+    ],
+    "ACCOUNTANT": [
+      "payroll.read.all",
+      "payroll.approve",
+      "expense.read.all",
+      "expense.write.all",
+      "payroll.view",
+      "payroll.create",
+      "payroll.edit",
+      "payroll.lock",
+      "payroll.export"
+    ],
+    "VIEWER": [
+      "payroll.approve",
+      "payroll.view",
+      "payroll.export"
+    ]
+  }
+}

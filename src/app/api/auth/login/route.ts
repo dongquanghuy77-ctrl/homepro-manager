@@ -7,6 +7,9 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { createSession } from '@/lib/session';
 import { checkLoginRateLimit, getIP } from '@/lib/ratelimit';
+import { getTodayVN } from '@/lib/hr';
+import { attendance } from '@/db/schema';
+import { and } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
   try {
@@ -164,6 +167,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Check today's attendance
+    const today = getTodayVN();
+    const [attRecord] = await db
+      .select()
+      .from(attendance)
+      .where(and(eq(attendance.employeeId, user.id), eq(attendance.workDate, today)));
+      
+    const lastAttendanceDate = (attRecord && attRecord.checkIn) ? today : null;
+
     const userPayload = {
       id:           user.id,
       username:     user.username,
@@ -171,6 +183,7 @@ export async function POST(req: NextRequest) {
       role:         user.role,
       departmentId: (user as { departmentId?: number | null }).departmentId ?? null,
       requirePasswordChange: (user as any).requirePasswordChange ?? false,
+      lastAttendanceDate,
     };
 
     // Tạo signed session JWT cookie

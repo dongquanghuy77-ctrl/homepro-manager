@@ -19,6 +19,7 @@ export interface SessionPayload {
   departmentId?: number | null;   // FK to departments.id — dùng cho RBAC filter
   originalRole?: string;          // Dùng cho switch-role (kiểm thử)
   requirePasswordChange?: boolean; // Bắt buộc đổi mật khẩu/PIN ở lần đăng nhập tiếp theo
+  lastAttendanceDate?: string | null;     // YYYY-MM-DD
 }
 
 // Create and set a signed JWT cookie
@@ -48,7 +49,8 @@ export async function getSession(): Promise<SessionPayload | null> {
     if (!token) return null;
     const { payload } = await jwtVerify(token, JWT_SECRET);
     return payload as unknown as SessionPayload;
-  } catch {
+  } catch (err) {
+    console.error("getSession ERROR:", err);
     return null;
   }
 }

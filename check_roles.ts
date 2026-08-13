@@ -1,1 +1,0 @@
-import { db } from './src/db'; import { users } from './src/db/schema'; async function run() { const all = await db.select({role: users.role}).from(users); console.log([...new Set(all.map(u =; process.exit(0); } run();  

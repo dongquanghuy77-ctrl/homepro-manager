@@ -11,6 +11,7 @@ export interface SessionPayload {
   departmentId?: number | null;
   originalRole?: string;
   requirePasswordChange?: boolean;
+  lastAttendanceDate?: string | null;
 }
 
 // Verify session from a raw NextRequest using native Web Crypto API

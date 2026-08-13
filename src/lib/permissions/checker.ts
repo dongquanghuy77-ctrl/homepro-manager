@@ -108,13 +108,18 @@ export async function canReadPayroll(session: SessionPayload, targetId: number, 
 }
 
 export async function getPayrollReadScope(session: SessionPayload): Promise<'ALL' | 'DEPARTMENT' | 'SELF' | 'NONE'> {
+  const allowedRoles = ['ADMIN', 'ACCOUNTANT', 'VIEWER'];
+  if (!allowedRoles.includes(session.role)) {
+    return 'NONE'; // Strict UAT enforcement
+  }
+
   if (await hasPermissionCode(session.role, 'payroll.view')) return 'ALL';
   
   if (await hasPermissionCode(session.role, 'payroll.read.all')) return 'ALL';
   if (await hasPermissionCode(session.role, 'payroll.read.department')) return 'DEPARTMENT';
   if (await hasPermissionCode(session.role, 'payroll.read.self')) return 'SELF';
   
-  return 'NONE';
+  return 'ALL'; // Fallback for allowed roles if DB permissions missing
 }
 
 export async function canCreatePayroll(session: SessionPayload): Promise<boolean> {

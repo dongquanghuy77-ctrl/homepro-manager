@@ -607,13 +607,13 @@ export async function GET(
   const buffer   = await wb.xlsx.writeBuffer();
   const empCode  = row.employeeCode ?? `EMP${row.employeeId}`;
   
-  await writeHrAuditLog(
-    session.id,
-    'PAYROLL_EXPORT',
-    'monthly_payroll',
-    row.id,
-    `Xuất file Excel phiếu lương cá nhân cho nhân viên ${empCode} tháng ${row.month}/${row.year}`
-  );
+  await writeHrAuditLog({
+    actorId: session.id,
+    action: 'PAYROLL_EXPORT',
+    entityType: 'monthly_payroll',
+    entityId: row.id,
+    newValue: { message: `Xuất file Excel phiếu lương cá nhân cho nhân viên ${empCode} tháng ${row.month}/${row.year}` }
+  });
   const filename = `phieu-luong-${empCode}-T${String(row.month).padStart(2,'0')}-${row.year}.xlsx`;
 
   return new NextResponse(new Uint8Array(buffer as ArrayBuffer), {
