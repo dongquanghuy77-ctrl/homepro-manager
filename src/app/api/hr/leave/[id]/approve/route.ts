@@ -41,14 +41,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const [targetUser] = await db.select({ departmentId: users.departmentId }).from(users).where(eq(users.id, request.employeeId));
     if (!targetUser) return NextResponse.json({ error: 'Không tìm thấy thông tin nhân viên của đơn' }, { status: 404 });
     
-    if (targetUser.departmentId === null) {
-      return NextResponse.json({ error: 'Nhân viên chưa được phân bổ phòng ban, không thể duyệt đơn' }, { status: 403 });
-    }
-
     let canApprove = false;
     if (approvalLevel === 2) {
       canApprove = true;
     } else if (approvalLevel === 1) {
+      if (targetUser.departmentId === null) {
+        return NextResponse.json({ error: 'Nhân viên chưa được phân bổ phòng ban, Manager không thể duyệt đơn' }, { status: 403 });
+      }
       if (targetUser.departmentId === session.departmentId) {
         canApprove = true;
       }
