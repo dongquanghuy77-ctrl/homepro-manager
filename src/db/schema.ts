@@ -362,6 +362,8 @@ export const leaveRequests = pgTable('leave_requests', {
   cancelledAt:  timestamp('cancelled_at'),
   cancelReason: text('cancel_reason'),
 
+  idempotencyKey: text('idempotency_key').unique(),
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -628,6 +630,8 @@ export const monthlyPayroll = pgTable('monthly_payroll', {
   publishedBy:  integer('published_by').references(() => users.id),
   publishedAt:  timestamp('published_at'),
   note:         text('note'),
+
+  idempotencyKey: text('idempotency_key').unique(),
 
   calculatedAt: timestamp('calculated_at').defaultNow(),
   createdAt:    timestamp('created_at').defaultNow(),
@@ -1013,6 +1017,35 @@ export const suppliers = pgTable('suppliers', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
+export const supplierContacts = pgTable('supplier_contacts', {
+  id: serial('id').primaryKey(),
+  supplierId: integer('supplier_id').notNull().references(() => suppliers.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  position: text('position'),
+  isPrimary: boolean('is_primary').default(false),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const supplierItems = pgTable('supplier_items', {
+  id: serial('id').primaryKey(),
+  supplierId: integer('supplier_id').notNull().references(() => suppliers.id, { onDelete: 'cascade' }),
+  materialId: integer('material_id').notNull().references(() => materials.id, { onDelete: 'cascade' }),
+  supplierItemCode: text('supplier_item_code'),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const supplierPrices = pgTable('supplier_prices', {
+  id: serial('id').primaryKey(),
+  supplierItemId: integer('supplier_item_id').notNull().references(() => supplierItems.id, { onDelete: 'cascade' }),
+  price: real('price').notNull(),
+  currency: text('currency').default('VND'),
+  effectiveDate: timestamp('effective_date').notNull(),
+  endDate: timestamp('end_date'),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
 export const purchaseRequests = pgTable('purchase_requests', {
   id: serial('id').primaryKey(),
   requestNumber: text('request_number').notNull().unique(),
@@ -1059,6 +1092,7 @@ export const purchaseOrders = pgTable('purchase_orders', {
   tax: real('tax').notNull().default(0),
   total: real('total').notNull().default(0),
   notes: text('notes'),
+  idempotencyKey: text('idempotency_key').unique(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
   createdBy: integer('created_by').references(() => users.id),
@@ -1154,24 +1188,24 @@ export const warehouses = pgTable('warehouses', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
-export const stockBalances = pgTable('stock_balances', {
+export const inventoryBalances = pgTable('inventory_balances', {
   id: serial('id').primaryKey(),
   materialId: integer('material_id').notNull().references(() => materials.id),
   warehouseId: integer('warehouse_id').notNull().references(() => warehouses.id),
   locationId: text('location_id'),
-  onHand: real('on_hand').notNull().default(0),
-  reserved: real('reserved').notNull().default(0),
-  available: real('available').notNull().default(0),
+  quantity: real('quantity').notNull().default(0),
+  reservedQuantity: real('reserved_quantity').notNull().default(0),
+  availableQuantity: real('available_quantity').notNull().default(0),
   unitCost: real('unit_cost').notNull().default(0), // Weighted Average Cost
   lastUpdated: timestamp('last_updated').defaultNow()
 }, (t) => ({
-  unq_bal: unique('stock_balances_mat_wh_loc_idx').on(t.materialId, t.warehouseId, t.locationId)
+  unq_bal: unique('inventory_balances_mat_wh_loc_idx').on(t.materialId, t.warehouseId, t.locationId)
 }));
 
-export const stockLedgers = pgTable('stock_ledgers', {
+export const inventoryTransactions = pgTable('inventory_transactions', {
   id: serial('id').primaryKey(),
   movementNumber: text('movement_number').notNull().unique(),
-  movementType: text('movement_type').notNull(), // RECEIPT, ISSUE, TRANSFER_IN, TRANSFER_OUT, RETURN, ADJUSTMENT_IN, ADJUSTMENT_OUT
+  movementType: text('movement_type').notNull(), // RECEIPT, ISSUE, TRANSFER, ADJUSTMENT, RESERVATION, RELEASE
   materialId: integer('material_id').notNull().references(() => materials.id),
   warehouseId: integer('warehouse_id').notNull().references(() => warehouses.id),
   locationId: text('location_id'),
@@ -1181,11 +1215,14 @@ export const stockLedgers = pgTable('stock_ledgers', {
   referenceType: text('reference_type'), // PO, PR, GR, ISSUE, TRANSFER, RETURN, PROD_ORDER
   referenceId: integer('reference_id'),
   projectId: integer('project_id').references(() => projects.id),
-  userId: integer('user_id').references(() => users.id),
+  createdBy: integer('created_by').references(() => users.id),
   movementDate: timestamp('movement_date').notNull().defaultNow(),
+  idempotencyKey: text('idempotency_key').unique(),
   createdAt: timestamp('created_at').defaultNow(),
   notes: text('notes')
 });
+
+
 
 
 // ============================================================================
@@ -1427,4 +1464,19 @@ export const deliveryNoteItems = pgTable('delivery_note_items', {
   materialId: integer('material_id').references(() => materials.id), // If delivering specific products
   description: text('description').notNull(),
   quantity: real('quantity').notNull()
+});
+
+// ============================================================================
+// EVENT / JOB ARCHITECTURE
+// ============================================================================
+
+export const domainEvents = pgTable('domain_events', {
+  id: serial('id').primaryKey(),
+  eventName: text('event_name').notNull(),
+  payload: jsonb('payload').notNull(),
+  status: text('status').notNull().default('PENDING'), // PENDING, PROCESSING, COMPLETED, FAILED
+  retryCount: integer('retry_count').notNull().default(0),
+  errorLog: text('error_log'),
+  createdAt: timestamp('created_at').defaultNow(),
+  processedAt: timestamp('processed_at')
 });

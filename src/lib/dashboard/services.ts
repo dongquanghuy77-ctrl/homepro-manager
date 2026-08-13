@@ -1,7 +1,7 @@
 import { db } from '@/db';
 import { 
   users, attendance, leaveRequests, overtimeRequests, projects, tasks, qcIssues, costs, 
-  hrAuditLogs, salesOrders, purchaseOrders, materials, stockBalances, productionOrders,
+  hrAuditLogs, salesOrders, purchaseOrders, materials, inventoryBalances, productionOrders,
   journalEntries
 } from '@/db/schema';
 import { eq, and, sql, inArray, desc } from 'drizzle-orm';
@@ -65,7 +65,7 @@ export class DashboardService {
     // 5. Operations
     const pendingPO = await db.select({ count: sql<number>`count(*)` }).from(purchaseOrders).where(eq(purchaseOrders.status, 'SUBMITTED'));
     const pendingProd = await db.select({ count: sql<number>`count(*)` }).from(productionOrders).where(eq(productionOrders.status, 'PLANNED'));
-    const lowStockMats = await db.select().from(materials).innerJoin(stockBalances, eq(materials.id, stockBalances.materialId));
+    const lowStockMats = await db.select().from(materials).innerJoin(inventoryBalances, eq(materials.id, inventoryBalances.materialId));
 
     // 6. Activities
     const activities = await db.select().from(hrAuditLogs).orderBy(desc(hrAuditLogs.createdAt)).limit(10);
@@ -95,7 +95,7 @@ export class DashboardService {
 
     let lowStockCount = 0;
     lowStockMats.forEach(r => {
-      if ((r.stock_balances?.onHand || 0) <= (r.materials?.minStock || 0)) {
+      if ((r.inventory_balances?.quantity || 0) <= (r.materials?.minStock || 0)) {
         lowStockCount++;
       }
     });

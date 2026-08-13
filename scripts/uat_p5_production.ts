@@ -12,7 +12,7 @@ import {
   materials,
   projects,
   users,
-  stockBalances
+  inventoryBalances
 } from '../src/db/schema';
 import { eq, sql, and } from 'drizzle-orm';
 import { ProductionService } from '../src/lib/production/services';
@@ -138,10 +138,10 @@ async function uat() {
   report('Production Progress', true);
 
   // Verify Warehouse received the Finished Goods (Integration P4 + P5)
-  const fgBal = await db.query.stockBalances.findFirst({
-    where: and(eq(stockBalances.materialId, fg.id), eq(stockBalances.warehouseId, wh.id))
+  const fgBal = await db.query.inventoryBalances.findFirst({
+    where: and(eq(inventoryBalances.materialId, fg.id), eq(inventoryBalances.warehouseId, wh.id))
   });
-  report('Warehouse Integration', fgBal?.onHand === 10);
+  report('Warehouse Integration', fgBal?.quantity === 10);
   
   // Attempt Over-production
   let overFail = false;

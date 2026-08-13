@@ -11,7 +11,7 @@ import {
   productionOutputs,
   scrapLogs,
   machines,
-  stockBalances,
+  inventoryBalances,
   materials,
   warehouses
 } from '@/db/schema';

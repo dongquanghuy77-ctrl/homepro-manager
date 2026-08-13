@@ -4,8 +4,8 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 import { db } from '../src/db';
 import {
   warehouses,
-  stockBalances,
-  stockLedgers,
+  inventoryBalances,
+  inventoryTransactions,
   materials,
   accounts,
   accountingPeriods,
@@ -67,8 +67,9 @@ async function uat() {
     unitCost: 10,
     userId: admin.id
   });
-  report('Receipt', rcpt.newBalance.onHand === 100);
-  report('Stock Balance', rcpt.newBalance.onHand === 100);
+  const balAfterReceipt = await db.query.inventoryBalances.findFirst({ where: eq(inventoryBalances.warehouseId, wh.id) });
+  report('Receipt', balAfterReceipt!.quantity === 100);
+  report('Stock Balance', rcpt.newBalance.quantity === 100);
   
   // 3. Issue
   const iss = await InventoryService.issueMaterial({
@@ -79,7 +80,8 @@ async function uat() {
     userId: admin.id,
     periodId: period.id // Trigger accounting integration
   });
-  report('Issue', iss.newBalance.onHand === 60);
+  const balAfterIssue = await db.query.inventoryBalances.findFirst({ where: eq(inventoryBalances.warehouseId, wh.id) });
+  report('Issue', balAfterIssue!.quantity === 60);
   
   // 4. Insufficient Stock
   let issFail = false;
@@ -104,9 +106,9 @@ async function uat() {
     quantity: 20,
     userId: admin.id
   });
-  const finalBal1 = await db.query.stockBalances.findFirst({ where: eq(stockBalances.warehouseId, wh.id) });
-  const finalBal2 = await db.query.stockBalances.findFirst({ where: eq(stockBalances.warehouseId, wh2.id) });
-  report('Transfer', finalBal1!.onHand === 40 && finalBal2!.onHand === 20);
+  const finalBal1 = await db.query.inventoryBalances.findFirst({ where: eq(inventoryBalances.warehouseId, wh.id) });
+  const finalBal2 = await db.query.inventoryBalances.findFirst({ where: eq(inventoryBalances.warehouseId, wh2.id) });
+  report('Transfer', finalBal1!.quantity === 40 && finalBal2!.quantity === 20);
 
   // 6. Reconciliation
   const rec = await InventoryService.reconcileStock({

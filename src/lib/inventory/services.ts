@@ -2,8 +2,8 @@ import { db } from '@/db';
 import { eq, and, sql } from 'drizzle-orm';
 import {
   warehouses,
-  stockBalances,
-  stockLedgers,
+  inventoryBalances,
+  inventoryTransactions,
   materials,
   accounts
 } from '@/db/schema';
@@ -37,7 +37,7 @@ export class InventoryService {
     costOverride?: number | null;
   }) {
     // 1. Idempotency Check
-    const existing = await tx.select().from(stockLedgers).where(eq(stockLedgers.movementNumber, data.movementNumber));
+    const existing = await tx.select().from(inventoryTransactions).where(eq(inventoryTransactions.movementNumber, data.movementNumber));
     if (existing.length > 0) throw new Error('Movement already exists');
 
     if (data.quantity === 0) throw new Error('Quantity cannot be zero');
@@ -49,31 +49,31 @@ export class InventoryService {
     // 2. Lock Balance row
     let balanceQuery;
     if (data.locationId) {
-      balanceQuery = await tx.execute(sql`SELECT * FROM stock_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} AND location_id = ${data.locationId} FOR UPDATE`);
+      balanceQuery = await tx.execute(sql`SELECT * FROM inventory_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} AND location_id = ${data.locationId} FOR UPDATE`);
     } else {
-      balanceQuery = await tx.execute(sql`SELECT * FROM stock_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} AND location_id IS NULL FOR UPDATE`);
+      balanceQuery = await tx.execute(sql`SELECT * FROM inventory_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} AND location_id IS NULL FOR UPDATE`);
     }
 
     let bal = balanceQuery.rows[0];
     if (!bal) {
       if (isOut) throw new Error('Insufficient stock for this movement');
-      const [newBal] = await tx.insert(stockBalances).values({
+      const [newBal] = await tx.insert(inventoryBalances).values({
         materialId: data.materialId,
         warehouseId: data.warehouseId,
         locationId: data.locationId || null,
-        onHand: 0,
-        reserved: 0,
-        available: 0,
+        quantity: 0,
+        reservedQuantity: 0,
+        availableQuantity: 0,
         unitCost: 0
       }).returning();
       bal = newBal as any;
       // Re-lock to ensure Atomicity
-      const rbQuery = await tx.execute(sql`SELECT * FROM stock_balances WHERE id = ${bal.id} FOR UPDATE`);
+      const rbQuery = await tx.execute(sql`SELECT * FROM inventory_balances WHERE id = ${bal.id} FOR UPDATE`);
       bal = rbQuery.rows[0];
     }
 
     // 3. Validation
-    if (isOut && (bal.on_hand + data.quantity < 0)) { // quantity is negative for OUT
+    if (isOut && ((bal.quantity || 0) + data.quantity < 0)) { // quantity is negative for OUT
       throw new Error('Insufficient stock for this movement');
     }
 
@@ -84,9 +84,9 @@ export class InventoryService {
     if (isIn) {
       // Input cost determines valuation
       const incomingCost = data.costOverride ?? bal.unit_cost; // Use override or existing
-      const currentTotalValue = bal.on_hand * bal.unit_cost;
+      const currentTotalValue = (bal.quantity || 0) * (bal.unit_cost || 0);
       const incomingValue = data.quantity * incomingCost;
-      const newQuantity = bal.on_hand + data.quantity;
+      const newQuantity = (bal.quantity || 0) + data.quantity;
       
       if (newQuantity > 0) {
         unitCost = (currentTotalValue + incomingValue) / newQuantity;
@@ -100,20 +100,20 @@ export class InventoryService {
     }
 
     // 5. Update Balance
-    const newOnHand = bal.on_hand + data.quantity;
-    const newAvailable = bal.available + data.quantity;
+    const newOnHand = (bal.quantity || 0) + data.quantity;
+    const newAvailable = (bal.available_quantity || 0) + data.quantity;
     
     await tx.execute(sql`
-      UPDATE stock_balances 
-      SET on_hand = ${newOnHand}, 
-          available = ${newAvailable}, 
+      UPDATE inventory_balances 
+      SET quantity = ${newOnHand}, 
+          available_quantity = ${newAvailable}, 
           unit_cost = ${unitCost},
           last_updated = NOW()
       WHERE id = ${bal.id}
     `);
 
     // 6. Create Ledger Entry
-    const [ledger] = await tx.insert(stockLedgers).values({
+    const [ledger] = await tx.insert(inventoryTransactions).values({
       movementNumber: data.movementNumber,
       movementType: data.movementType,
       materialId: data.materialId,
@@ -129,7 +129,7 @@ export class InventoryService {
       notes: data.notes
     }).returning();
 
-    return { ledger, newBalance: { onHand: newOnHand, available: newAvailable, unitCost } };
+    return { ledger, newBalance: { quantity: newOnHand, available: newAvailable, unitCost } };
   }
 
   // ==========================================
@@ -230,7 +230,7 @@ export class InventoryService {
   static async reconcileStock(data: any) {
     return await db.transaction(async (tx) => {
       // Find current stock
-      const balanceQuery = await tx.execute(sql`SELECT on_hand FROM stock_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} FOR UPDATE`);
+      const balanceQuery = await tx.execute(sql`SELECT quantity FROM inventory_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} FOR UPDATE`);
       const bal = balanceQuery.rows[0];
       const current = (bal ? bal.on_hand : 0) as number;
       
