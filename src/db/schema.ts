@@ -799,6 +799,50 @@ export const positions = pgTable('positions', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// ============================================================
+// P12 – DOCUMENT CENTER
+// ============================================================
+export const documents = pgTable('documents', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  folder: text('folder').notNull().default('COMPANY'), // COMPANY, EMPLOYEE, CONTRACT, PROJECT, etc.
+  
+  // Link to other entities (Polymorphic-like structure via separate ID fields or single entityType/entityId)
+  entityType: text('entity_type'), // user, project, customer, supplier, purchase_order, etc.
+  entityId: integer('entity_id'),
+
+  ownerId: integer('owner_id').references(() => users.id, { onDelete: 'set null' }),
+  departmentId: integer('department_id').references(() => departments.id, { onDelete: 'set null' }), // for department-level access
+  
+  // Quick access to latest version info
+  latestVersion: integer('latest_version').notNull().default(1),
+  status: text('status').notNull().default('ACTIVE'), // ACTIVE, ARCHIVED, DELETED
+  
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const documentVersions = pgTable('document_versions', {
+  id: serial('id').primaryKey(),
+  documentId: integer('document_id').notNull().references(() => documents.id, { onDelete: 'cascade' }),
+  versionNumber: integer('version_number').notNull(),
+  fileUrl: text('file_url').notNull(),
+  fileType: text('file_type'),
+  fileSize: integer('file_size'),
+  
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow(),
+  status: text('status').notNull().default('CURRENT'), // CURRENT, SUPERSEDED
+  changeNote: text('change_note'),
+});
+
+export type DocumentRow = typeof documents.$inferSelect;
+export type NewDocument = typeof documents.$inferInsert;
+export type DocumentVersion = typeof documentVersions.$inferSelect;
+export type NewDocumentVersion = typeof documentVersions.$inferInsert;
+
+
 export const employees = pgTable('employees', {
   id: serial('id').primaryKey(),
   employeeCode: text('employee_code').notNull().unique(),

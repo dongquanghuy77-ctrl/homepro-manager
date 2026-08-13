@@ -104,7 +104,7 @@ export class DashboardService {
     const pendingProductionCount = Number(pendingProd[0]?.count || 0);
 
     // --- ACTIONS / ALERTS ---
-    const actionItems = [];
+    const actionItems: { id: string; severity: "MEDIUM" | "CRITICAL" | "HIGH" | "LOW"; module: string; message: string; link: string; }[] = [];
     if (overdueProjects > 0 && (role === 'ADMIN' || role === 'MANAGER')) {
       actionItems.push({ id: 'act-proj', severity: 'HIGH', module: 'PROJECT', message: `${overdueProjects} dự án trễ hạn`, link: '/projects' });
     }
@@ -150,7 +150,10 @@ export class DashboardService {
       },
       actions: actionItems,
       activity: activities.map(a => ({
-        id: a.id, action: a.action, actorName: a.actorName, time: a.createdAt
+        id: a.id, 
+        action: a.action, 
+        actorName: a.actorName || 'System', 
+        time: (a.createdAt || new Date()).toISOString()
       }))
     };
   }
