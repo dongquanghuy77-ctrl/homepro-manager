@@ -8,25 +8,13 @@ import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { ChartCard } from '@/components/dashboard/ChartCard';
 import { headers } from 'next/headers';
 
+import { DashboardService } from '@/lib/dashboard/services';
+
 export const dynamic = 'force-dynamic';
 
-async function getDashboardData() {
-  const host = headers().get('host');
-  const protocol = host?.includes('localhost') || host?.includes('127.0.0.1') ? 'http' : (process?.env.NODE_ENV === 'development' ? 'http' : 'https');
-  
-  // In Next.js App Router server components, calling our own API routes directly via fetch 
-  // requires absolute URL.
+async function getDashboardData(session: any) {
   try {
-    // Alternatively, we can just call the server logic directly if we want to avoid HTTP overhead.
-    // But architecture instruction says: "Tạo: GET /api/dashboard/overview"
-    const res = await fetch(`${protocol}://${host}/api/dashboard/overview`, {
-      cache: 'no-store',
-      headers: {
-        cookie: headers().get('cookie') || ''
-      }
-    });
-    if (!res.ok) return null;
-    return await res.json();
+    return await DashboardService.getOverview(session);
   } catch (error) {
     console.error('Fetch dashboard data error', error);
     return null;
@@ -39,7 +27,7 @@ export default async function MasterDashboardPage() {
     redirect('/login');
   }
 
-  const data = await getDashboardData();
+  const data = await getDashboardData(session);
   
   if (!data) {
     return (
