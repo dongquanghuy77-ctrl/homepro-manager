@@ -1,55 +1,25 @@
-# HOMEPRO MODULE MATURITY AUDIT
+# MODULE MATURITY AUDIT
 
-Tài liệu này đánh giá mức độ hoàn thiện của từng module theo tiêu chuẩn:
-- **LEVEL 0** — Chưa có
-- **LEVEL 1** — UI/Demo
-- **LEVEL 2** — Có Database/API
-- **LEVEL 3** — Nghiệp vụ chạy (Core logic)
-- **LEVEL 4** — Có RBAC + Audit + Validation
-- **LEVEL 5** — Production-ready (Đã qua UAT, tích hợp đầy đủ)
+Tài liệu này đánh giá mức độ trưởng thành (Maturity) của các phân hệ trong hệ thống hiện tại.
+Chỉ đánh giá trạng thái COMPLETE khi module đáp ứng các tiêu chuẩn khắt khe về: UI, API, DB, RBAC, Validation, Workflow, Audit, Error Handling, Integration, UAT.
 
-## 1. CORE MODULES
-| Module | Current Level | Status | Missing / Risk | Recommended Next Step |
-|--------|---------------|--------|----------------|-----------------------|
-| Login & Auth | 5 | PASS | - | Freeze |
-| RBAC (Manager/Delegation) | 5 | PASS | - | Freeze |
-| Department/Company | 3 | IMPLEMENTING | Chưa có Company Master data | Xây dựng Company Identity Module |
-| System Settings | 2 | BASIC | Ít cấu hình | Mở rộng theo nhu cầu |
+## TÌNH TRẠNG HIỆN TẠI
 
-## 2. HR MODULES
-| Module | Current Level | Status | Missing / Risk | Recommended Next Step |
-|--------|---------------|--------|----------------|-----------------------|
-| Employee Profile | 4 | STABLE | Chưa có Document Center tích hợp | Thêm liên kết hồ sơ/hợp đồng (Document) |
-| Attendance (P0.14) | 5 | PASS | - | Freeze |
-| Leave (P0.18) | 5 | PASS | - | Freeze |
-| Overtime | 2 | DRAFT | Chưa lên UI hoàn chỉnh, chưa map Payroll | Triển khai UI và luồng duyệt như Leave |
-| Payroll (P0.19/Sprint 3) | 3 | IMPLEMENTING | Đang xây dựng cấu trúc API, chưa chạy UAT | Hoàn thiện UAT cho Payroll |
+| Module | Status | Lý do / Đánh giá chi tiết |
+|--------|--------|---------------------------|
+| **Login / Session / Auth** | `COMPLETE` | Đã ổn định, sử dụng JWT/Session, có RBAC. |
+| **RBAC / Delegation** | `COMPLETE` | Core permission và Data Scope đã chặt chẽ theo `manager_departments` và `role_permissions`. |
+| **HR: Employee / Dept** | `PARTIAL` | Bảng `users` còn ôm đồm nhiều thông tin. Chưa tách biệt Employee Profile hoàn chỉnh. |
+| **HR: Attendance (P0.14)** | `COMPLETE` | Có Audit Trail đầy đủ, Mobile Check-in (GPS), UAT PASS. |
+| **HR: Leave (P0.18)** | `COMPLETE` | Workflow duyệt đa cấp, trừ quỹ phép, chặn xem chéo phòng ban. UAT PASS. |
+| **HR: Payroll (Sprint 3)** | `COMPLETE` | Tính toán phức tạp, Payslip Disputes, DRAFT/PUBLISH states. |
+| **Project / BOQ / Cost** | `PARTIAL` | Mới có cơ sở dữ liệu (`projects`, `tasks`, `boq_items`, `costs`), chưa có UI hoặc API tích hợp chuẩn, chưa có workflow rành mạch. |
+| **Procurement / Inventory**| `BROKEN` / `MISSING` | Mới có danh sách `materials`. Thiếu PO, Nhập/Xuất kho, Báo giá NCC. |
+| **Production / BOM** | `PARTIAL` | Có `production_bom_lines`, `material_tracking_logs`. Thiếu Work Order và Kế hoạch SX. |
+| **QC** | `PARTIAL` | Có table `qc_issues`. UI/Workflow chưa đầy đủ. |
+| **Accounting** | `MISSING` | Thiếu hoàn toàn. Mọi dữ liệu chi phí (Payroll, Project Cost) đang trôi nổi, chưa hội tụ về sổ cái (General Ledger). |
+| **Document Center** | `MISSING` | Thiếu hoàn toàn. |
 
-## 3. PROJECT & PRODUCTION MODULES
-| Module | Current Level | Status | Missing / Risk | Recommended Next Step |
-|--------|---------------|--------|----------------|-----------------------|
-| Project Catalog | 4 | STABLE | Chưa tích hợp ngân sách/hạch toán kế toán | Link với Project Costs (Finance) |
-| Tasks / Work Logs | 3 | STABLE | Phụ thuộc cao vào manual input | - |
-| BOQ | 3 | STABLE | Chưa tích hợp hệ thống Kho (Inventory) thực sự | Xây dựng Inventory Module chuẩn |
-| Production BOM | 3 | STABLE | - | - |
-| Material Tracking | 3 | STABLE | Quy trình quét mã chưa có cơ chế kiểm tra gian lận (Anti-fraud) | Audit log & validate vị trí GPS |
-| QC Issues | 3 | STABLE | - | - |
-
-## 4. FINANCE & ACCOUNTING (MISSING)
-| Module | Current Level | Status | Missing / Risk | Recommended Next Step |
-|--------|---------------|--------|----------------|-----------------------|
-| Project Costs | 3 | STABLE | Chỉ là bảng ghi nhận thô, chưa hạch toán | Cần module Accounting làm nền |
-| Accounting / Ledger | 0 | MISSING | Không có chỗ ghi sổ kế toán (GL) | Xây dựng Accounting Foundation |
-| Cash & Bank | 0 | MISSING | Chưa quản lý dòng tiền | Build Cash/Bank Module |
-| Tax & Invoice | 0 | MISSING | - | Build Tax Module |
-
-## 5. DOCUMENT MANAGEMENT
-| Module | Current Level | Status | Missing / Risk | Recommended Next Step |
-|--------|---------------|--------|----------------|-----------------------|
-| Document Center | 0 | MISSING | Tài liệu hiện tải lên phân tán (attachment_url) | Xây dựng Document Center tập trung |
-
-## TỔNG KẾT (EXECUTIVE SUMMARY)
-- **P0.14 (Attendance):** PASS (Level 5)
-- **P0.18 (Leave):** PASS (Level 5)
-- **Architecture Foundation:** Đang thiết lập.
-- **Ready for Next Module?** YES, sau khi các kiến trúc chuẩn (Accounting, Company, Document) được thống nhất.
+## ĐÁNH GIÁ CHUNG
+Hệ thống hiện tại có khối HR & Time Tracking / Payroll được thiết kế rất tốt, kiến trúc SSOT mạnh mẽ. Tuy nhiên, khối Supply Chain (Purchasing, Warehouse) và Finance (Accounting) hoàn toàn vắng bóng hoặc chắp vá. Điều này dẫn đến rủi ro các phân hệ Project tự xây dựng "ví tiền" riêng.
+Mức độ rủi ro kiến trúc: **MEDIUM - HIGH** (Cần xây dựng Accounting Core sớm trước khi các module khác bùng nổ dữ liệu tài chính).

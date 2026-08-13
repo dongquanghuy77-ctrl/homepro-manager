@@ -1,42 +1,50 @@
-# HOMEPRO MASTER DATA MAP
+# MASTER DATA MAP
 
-Tài liệu này quy hoạch các nguồn dữ liệu tham chiếu gốc (Master Data) của hệ thống. Tất cả các giao dịch nghiệp vụ (Transactions) phải sử dụng FK tham chiếu tới Master Data, không được tạo bản ghi tạm thời hoặc copy tên để lưu trữ.
+Tài liệu này quy hoạch các nguồn dữ liệu tham chiếu gốc (Master Data) của hệ thống. 
+Mỗi Master Data chỉ có MỘT nguồn chính (Single Source of Truth).
+Các module khác chỉ được reference (Read-only / FK). Tuyệt đối không tạo lại bản copy của Master Data.
 
-## 1. USER & ORGANIZATION MASTER
-- **USERS (`users`)**: 
-  - Là Core Master Data định danh con người (Cả hệ thống chỉ dùng 1 bảng này cho Login, Nhân sự, Khách hàng nội bộ).
-  - Quản lý định danh (ID, mã nhân viên, username).
-- **DEPARTMENTS (`departments`)**:
-  - Quản lý sơ đồ tổ chức, cây phòng ban.
-  - Các module sử dụng: RBAC, Employee Profile.
-- **POSITIONS (`positions`)**:
-  - Danh mục chức danh, vị trí công việc.
+## 1. HỆ THỐNG / GLOBAL
+| Master Data | Table Name | Owner | Downstream Usage |
+|-------------|------------|-------|------------------|
+| **Company** | `companies` *(To build)* | System | Kế toán, Hợp đồng, Thuế, In ấn. |
+| **User** | `users` | System | Login, Auth. Mọi entity. |
+| **Role** | `roles` *(Ref)* | System | Phân quyền RBAC toàn hệ thống. |
+| **Document Type** | `document_types` *(To build)* | System | Quản lý File, Phân loại chứng từ. |
 
-## 2. PROJECT MASTER
-- **PROJECTS (`projects`)**:
-  - Định danh dự án (Mã dự án, Tên dự án, Ngân sách mục tiêu).
-  - Các module sử dụng: BOQ, Tasks, QC, Costs, Material Tracking.
-- **CUSTOMERS (`customers`)**:
-  - Khách hàng ngoại bộ (B2B/B2C).
+## 2. NHÂN SỰ (HR)
+| Master Data | Table Name | Owner | Downstream Usage |
+|-------------|------------|-------|------------------|
+| **Department** | `departments` | HR | Sơ đồ tổ chức, Phân quyền Manager, Chấm công. |
+| **Employee** | `users` | HR | Hợp đồng, Chấm công, Phép, Lương, Tài khoản, Dự án. |
+| **Position** | `positions` | HR | Phân quyền, Lương, Hợp đồng. |
+| **Leave Type** | `leave_types` | HR | Bảng chấm công, Lương (Deduct). |
+| **Payroll Policy** | `payroll_policies` *(To build)* | HR | Công thức tính lương tự động. |
+| **Salary Component**| `salary_components` *(To build)*| HR | Các khoản phụ cấp/khấu trừ linh động. |
 
-## 3. INVENTORY & PRODUCTION MASTER
-- **MATERIALS (`materials`)**:
-  - Từ điển Vật tư/Nguyên liệu (Mã vật tư, Tên, Đơn vị tính, Danh mục).
-  - Các module sử dụng: BOQ, Nhập/Xuất kho, Tính giá thành.
+## 3. DỰ ÁN & ĐỐI TÁC
+| Master Data | Table Name | Owner | Downstream Usage |
+|-------------|------------|-------|------------------|
+| **Customer** | `customers` | Sales | Hợp đồng dự án, Công nợ, Giao hàng. |
+| **Supplier** | `suppliers` *(To build)* | Purchasing | Đơn mua hàng (PO), Thanh toán, Kho. |
+| **Project** | `projects` | Project | Kế hoạch dự án, BOQ, Tracking, Kế toán giá thành. |
+| **Project Status** | `project_statuses` *(Ref)*| Project | Trạng thái vòng đời dự án. |
 
-## 4. HR MASTER
-- **LEAVE TYPES (`leave_types`)**:
-  - Danh mục cấu hình loại nghỉ phép (Số ngày tối đa, Quy tắc duyệt, Tác động lương).
-  - Các module sử dụng: Leave Requests, Leave Balances, Payroll.
+## 4. VẬT TƯ & KHO
+| Master Data | Table Name | Owner | Downstream Usage |
+|-------------|------------|-------|------------------|
+| **Material** | `materials` | Inventory | BOQ, BOM, PO, Phiếu xuất nhập kho. |
+| **Material Category**| `material_categories`*(To build)*| Inventory | Phân loại báo cáo vật tư. |
+| **Warehouse** | `warehouses` *(To build)* | Inventory | Địa điểm lưu trữ, Chuyển kho, Tồn kho. |
+| **Unit** | `units` *(Ref)* | Inventory | Đơn vị đo lường chuẩn hóa. |
 
-## 5. FINANCE & COMPANY MASTER (DỰ KIẾN - PENDING)
-Để hệ thống hoàn chỉnh ERP, cần tạo thêm các Master Data sau:
-- **COMPANY MASTER**: Cấu hình công ty, Mã số thuế.
-- **CHART OF ACCOUNTS**: Hệ thống tài khoản kế toán (Sổ cái).
-- **CURRENCIES**: Tiền tệ và tỷ giá.
-- **FISCAL YEARS/PERIODS**: Kỳ kế toán (tháng/năm).
-- **TAX RATES**: Các loại thuế và thuế suất.
+## 5. TÀI CHÍNH KẾ TOÁN
+| Master Data | Table Name | Owner | Downstream Usage |
+|-------------|------------|-------|------------------|
+| **Chart of Account**| `accounts` *(To build)* | Finance | Tài khoản kế toán tổng hợp. Ghi nhận giao dịch. |
+| **Tax Code** | `tax_codes` *(To build)* | Finance | Mức thuế suất (VAT, PIT, CIT). |
+| **Bank Account** | `bank_accounts` *(To build)* | Finance | Thông tin ngân hàng của nhân viên/đối tác. |
 
-## 6. QUY TẮC BẢO TRÌ MASTER DATA
+## QUY TẮC BẢO TRÌ MASTER DATA
 1. **NO HARD DELETE**: Dữ liệu Master Data khi đã được tham chiếu bởi bất kỳ Transaction nào thì tuyệt đối không được xóa (`DELETE`). Chỉ được phép chuyển trạng thái `isActive = false` hoặc `status = 'INACTIVE'`.
-2. **CENTRALIZED CREATION**: Master Data chỉ được tạo/sửa thông qua giao diện Admin riêng biệt, không được "Tạo nhanh" bừa bãi trong màn hình nghiệp vụ (trừ khi có quyền phân cấp).
+2. **CENTRALIZED CREATION**: Master Data chỉ được tạo/sửa thông qua giao diện Admin riêng biệt (hoặc Role được cấp quyền `MANAGE_MASTER_DATA`), không được "Tạo nhanh" vô tội vạ trong màn hình nghiệp vụ.

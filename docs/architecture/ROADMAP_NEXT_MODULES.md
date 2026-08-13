@@ -1,29 +1,33 @@
-# HOMEPRO ROADMAP & NEXT MODULES
+# ROADMAP NEXT MODULES
 
-Dựa trên kết quả System Audit, đây là Roadmap ưu tiên xây dựng các module tiếp theo đảm bảo kiến trúc vững chắc, không chồng chéo.
+Dựa vào `MODULE_MATURITY_AUDIT.md` và `DATA_DEPENDENCY_MAP.md`, đây là lộ trình kiến trúc và phát triển các module tiếp theo.
 
-## PHASE 1: FOUNDATION (Hiện tại)
-- **Mục tiêu:** Củng cố các Master Data còn thiếu để làm nền tảng cho Finance và Legal.
-- **Next Steps:**
-  1. Tạo `COMPANY MASTER` (Định danh công ty, Tài khoản ngân hàng, Mã số thuế).
-  2. Tạo `DOCUMENT CENTER` (Bảng `documents` để xử lý tập trung mọi file/ảnh/giấy tờ đính kèm thay vì URL rải rác).
-  3. Áp dụng chuẩn `MODULE_CONTRACT` cho toàn bộ mã nguồn hiện tại.
+## NGUYÊN TẮC QUYẾT ĐỊNH
+- Ưu tiên củng cố Foundation trước khi nhân rộng.
+- Không phát triển các Module ngọn (Cost, QC, BOQ) nếu Module gốc (Master Data, Accounting, Purchasing) chưa sẵn sàng.
 
-## PHASE 2: CORE FINANCE & ACCOUNTING
-- **Mục tiêu:** Nhận dữ liệu tài chính từ Project và HR.
-- **Next Steps:**
-  1. Tạo `ACCOUNTING LEDGER` (Hệ thống tài khoản GL, Bút toán kép Double-entry).
-  2. Tích hợp `Payroll` -> `Accounting` (Sinh chi phí lương tự động khi chốt lương).
-  3. Tích hợp `Project Costs` -> `Accounting` (Hạch toán chi phí công trình).
+## PHÂN HẠNG ƯU TIÊN (PRIORITY RANKING)
 
-## PHASE 3: SUPPLY CHAIN (INVENTORY & PROCUREMENT)
-- **Mục tiêu:** Chuẩn hóa quy trình Mua hàng và Nhập xuất kho.
-- **Next Steps:**
-  1. Module `PURCHASING` (Yêu cầu mua hàng PR -> Đơn hàng PO -> Hóa đơn).
-  2. Module `WAREHOUSE/INVENTORY` (Phiếu nhập, Phiếu xuất, Cân đối kho). Thay vì hiện tại `materials` chỉ có cột `stock_qty` tăng giảm thủ công, phải chuyển sang tính từ `Stock Ledger`.
+### P0 (CRITICAL - DO IMMEDIATELY)
+1. **Financial Core (Accounting Sổ cái)**
+   - *Lý do*: Cần thiết lập `Chart of Accounts` (Sổ cái) và Journal Entries ngay lập tức. Nếu trì hoãn, Payroll và Project Cost sẽ tự tạo ra dữ liệu tài chính rác, không liên thông, dẫn đến đập đi xây lại.
+   - *Rủi ro nếu không làm*: Khủng hoảng Data Consistency.
+2. **Document Center Foundation**
+   - *Lý do*: Hồ sơ nhân sự (HR), Hợp đồng dự án đang chuẩn bị cần nơi lưu trữ.
+   - *Rủi ro nếu không làm*: File bị upload vứt vào S3 không metadata, rò rỉ dữ liệu (Security Breach).
 
-## PHASE 4: ADVANCED PRODUCTION
-- **Mục tiêu:** Nâng cấp quy trình sản xuất hiện tại (BOM & Tracking).
-- **Next Steps:**
-  1. Liên kết `Warehouse` vào `Material Tracking` (Xuất kho vật tư mới được scan QR thi công).
-  2. Đo lường chi phí nhân công theo định mức `BOQ` vs thực tế từ `Work Logs`.
+### P1 (HIGH PRIORITY)
+1. **Employee Profile Migration (HR Core)**
+   - *Lý do*: Bảng `users` đang chứa quá nhiều trường của nhân viên (Ngày vào làm, Lương cứng...). Cần tách `users` (Chỉ lưu Account auth/login) và `employees` (Hồ sơ nhân sự chi tiết).
+2. **Master Data Management UI**
+   - *Lý do*: Quản lý danh mục Department, Position, Material, Bank Account... tập trung.
+
+### P2 (MEDIUM PRIORITY)
+1. **Purchasing & Warehouse (Supply Chain Core)**
+   - *Lý do*: Dự án cần mua vật tư. Cần chuẩn hóa Supplier → PO → Warehouse Receipt.
+2. **Project & BOQ Refactor**
+   - *Lý do*: Chuyển đổi dữ liệu thô sang luồng kết nối chặt với Supply Chain.
+
+## KẾT LUẬN MODULE TIẾP THEO
+**MODULE TIẾP THEO PHẢI XÂY DỰNG: ACCOUNTING CORE (FINANCIAL FOUNDATION).**
+*Lý do*: Đã hoàn thiện HR & Payroll, luồng tiền lương cần một nơi ghi nhận (Phải trả NLĐ, Chi phí lương). Nếu làm Project ngay mà không có Accounting, Project Cost sẽ bị thiết kế sai lệch.

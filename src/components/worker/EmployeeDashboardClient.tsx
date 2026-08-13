@@ -917,17 +917,18 @@ export default function EmployeeDashboardClient({
 
             <div className="form-group mb-4">
               <label className="form-label">Từ ngày *</label>
-              <input type="date" className="form-input" value={leaveStart} onChange={(e) => setLeaveStart(e.target.value)} required />
+              <input type="date" name="startDate" className="form-input" value={leaveStart} onChange={(e) => setLeaveStart(e.target.value)} required />
             </div>
 
             <div className="form-group mb-4">
               <label className="form-label">Đến ngày *</label>
-              <input type="date" className="form-input" value={leaveEnd} onChange={(e) => setLeaveEnd(e.target.value)} required />
+              <input type="date" name="endDate" className="form-input" value={leaveEnd} onChange={(e) => setLeaveEnd(e.target.value)} required />
             </div>
 
             <div className="form-group mb-6">
               <label className="form-label">Lý do xin nghỉ *</label>
               <textarea
+                name="reason"
                 className="form-input"
                 style={{ height: 70, resize: 'none', padding: 8 }}
                 placeholder="Nhập lý do cụ thể..."

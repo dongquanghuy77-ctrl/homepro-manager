@@ -5,13 +5,12 @@
 
 async function loginAs(page, username, password = 'password123') {
   await page.goto('http://localhost:3000/login');
+  
   await page.fill('input[placeholder="Nhập email, số điện thoại hoặc username"]', username);
   
   if (username === '0901234567') {
       // It's a PIN login
       await page.waitForSelector('text=Nhập mã PIN đăng nhập (6 số)');
-      // We need to type the PIN digit by digit or paste it.
-      // There are 6 inputs for PIN. We can select all and fill them.
       const pinInputs = await page.locator('input[inputmode="numeric"]').all();
       for (let i = 0; i < 6; i++) {
           await pinInputs[i].fill(password[i]); // password holds the pin in this case
@@ -75,6 +74,7 @@ async function uat_p018() {
   await managerPage.goto('http://localhost:3000/leave');
   
   // Manager should see the table
+  await managerPage.waitForTimeout(2000);
   const hasLeaveTable = await managerPage.isVisible('table');
   if (!hasLeaveTable) throw new Error('Manager cannot see leave table');
   
@@ -104,7 +104,7 @@ async function uat_p018() {
   
   // Verify Dashboard
   await hrPage.goto('http://localhost:3000/hr');
-  await hrPage.waitForSelector('text=BÁO CÁO TỔNG QUAN NHÂN SỰ');
+  await hrPage.waitForSelector('text=Dashboard tổng quan nhân sự');
   console.log('   ✅ HR Dashboard loaded');
   
   // Verify Leave
@@ -145,6 +145,7 @@ async function uat_p018() {
   // ==========================================
   console.log('>> 5. P0.14 Regression Test (Attendance Correction)');
   await hrPage.goto('http://localhost:3000/attendance');
+  await hrPage.waitForTimeout(2000);
   const hasAttendanceTable = await hrPage.isVisible('table');
   if (!hasAttendanceTable) throw new Error('Attendance table broke in P0.14 regression');
   console.log('   ✅ Attendance P0.14 UI intact');

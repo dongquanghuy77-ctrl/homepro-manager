@@ -1,77 +1,43 @@
-# HOMEPRO SYSTEM ARCHITECTURE
+# SYSTEM ARCHITECTURE
 
-## 1. TỔNG QUAN HỆ THỐNG
-HomePro là một hệ thống ERP/Quản trị Doanh nghiệp tùy chỉnh, kết hợp các khía cạnh của Nhân sự (HR), Quản lý Dự án (Project/Production) và Tài chính (Finance). Kiến trúc hệ thống được định hướng theo kiến trúc module lỏng (Loosely Coupled Modules) kết hợp với nguyên tắc Nguồn Sự Thật Duy Nhất (Single Source of Truth).
+## 1. TỔNG QUAN
+HomePro Manager được xây dựng theo kiến trúc **Modular ERP** (Enterprise Resource Planning), tập trung vào tính toàn vẹn dữ liệu (Data Integrity), nguồn dữ liệu duy nhất (Single Source of Truth), và luồng dữ liệu một chiều (Unidirectional Data Flow).
 
-Mô hình này lấy cảm hứng từ Frappe/ERPNext và Odoo nhưng được thu gọn và tối ưu hóa cho công nghệ hiện đại (Next.js, Drizzle ORM, Neon PostgreSQL).
+Hệ thống học hỏi nguyên lý từ ERPNext, Odoo và Dolibarr để chia cắt trách nhiệm rành mạch giữa các miền nghiệp vụ (Domain/Module).
 
-## 2. NGUYÊN TẮC THIẾT KẾ CỐT LÕI (CORE PRINCIPLES)
+## 2. NGUYÊN TẮC KIẾN TRÚC LÕI
 
-### 2.1. Nguồn dữ liệu duy nhất (Single Source of Truth)
-- Mỗi domain nghiệp vụ chỉ có một và chỉ một nơi lưu trữ dữ liệu gốc.
-- Các module khác muốn sử dụng dữ liệu phải **THAM CHIẾU (References/Foreign Keys)**, tuyệt đối **KHÔNG COPY/DUPLICATE**.
-- Ví dụ: Không tồn tại khái niệm "Tài khoản nhân sự" và "Tài khoản hệ thống" riêng rẽ. `users` là bảng duy nhất chứa hồ sơ định danh của một con người.
+1. **Single Source of Truth (SSOT)**: 
+   Mỗi Entity nghiệp vụ (Ví dụ: Employee, Project, Material) chỉ được định nghĩa tại một Module duy nhất, do Module đó sở hữu (Owner). Các Module khác chỉ được read-only và tham chiếu (Reference) tới.
+2. **Master Data First**: 
+   Dữ liệu Master Data phải được khởi tạo và quản lý độc lập. Các Transaction Data (Attendance, PO, Invoice) không được phép ghi đè hay tạo trực tiếp Master Data mới.
+3. **Financial Core (Accounting)**:
+   Mọi giao dịch tài chính từ Payroll, Project Cost, Inventory Valuation, Purchasing đều phải hội tụ về module Accounting. Accounting là SSOT duy nhất của tài chính doanh nghiệp. Không tạo "ví tiền" riêng cho từng module.
+4. **Config-Driven UI (Navigation & Layout)**:
+   Giao diện và menu (Sidebar) được sinh ra từ cấu hình (Config). Không hardcode các route. Layout AppShell tự thích ứng theo Workspace.
+5. **Role-Based Access Control (RBAC) Toàn diện**:
+   Kiểm soát quyền truy cập ở cả UI (Client-side) và API (Server-side). Chặn theo Action (VIEW, CREATE, EDIT, DELETE, APPROVE) và Data Scope (OWN, DEPARTMENT, ALL).
+6. **Immutable Audit Trail**:
+   Mọi thay đổi nhạy cảm (Duyệt phép, Chấm công bù, Lương, Xuất kho) đều phải ghi lại vết (Audit Log) không thể xóa.
 
-### 2.2. Không phụ thuộc vòng (No Circular Dependency)
-- Dòng chảy dữ liệu là một chiều (Unidirectional Data Flow).
-- Module cấp cao có quyền gọi Module cấp thấp (Ví dụ: `Payroll` gọi `Attendance`).
-- Module cấp thấp KHÔNG được gọi ngược Module cấp cao. Nếu cần tương tác, sử dụng mô hình Event-driven hoặc Pub/Sub (nếu hệ thống mở rộng) hoặc lưu ID một chiều linh hoạt.
+## 3. KIẾN TRÚC MODULE & WORKSPACE
 
-### 2.3. Lõi Phân Quyền (RBAC + Context-based)
-- Quyền truy cập không chỉ phụ thuộc vào `Role` tĩnh (VD: HR, Manager).
-- Quyền truy cập phụ thuộc vào Ngữ Cảnh (Context) qua bảng `manager_departments`. Một Manager chỉ thấy dữ liệu của phòng ban mình phụ trách.
+Hệ thống được chia thành các Workspace (không gian làm việc), mỗi Workspace chứa nhiều Module:
+- **Executive**: Dashboard tổng hợp dành cho BGĐ.
+- **HR**: Employee, Contract, Attendance, Leave, Overtime, Payroll.
+- **Finance**: Accounting, Tax, Bank, Billing.
+- **Project**: CRM, Project, BOQ, Task, QC.
+- **Procurement & Inventory**: Material, Warehouse, PO, Receipt.
+- **Production**: BOM, Work Order, Material Issue, Manufacturing, Tracking.
+- **System**: Users, Role, Settings, Audit Log, Document Center.
 
-### 2.4. Tính Bất Biến (Immutability) và Kiểm Toán (Audit)
-- Các tài liệu quan trọng (Phiếu lương, Đơn xin nghỉ đã duyệt) không được phép xóa (No hard-delete).
-- Mọi thay đổi trạng thái hoặc chỉnh sửa dữ liệu gốc phải ghi Log qua bảng `hr_audit_logs` hoặc các bảng audit tương ứng.
+## 4. UNIDIRECTIONAL DATA FLOW (HR & PROJECT)
 
-## 3. CÁC TẦNG KIẾN TRÚC (ARCHITECTURAL LAYERS)
+### HR Lifecycle Flow:
+`Employee → Contract → Attendance → Time Off (Leave) → Overtime → Payroll → Accounting`
 
-```mermaid
-graph TD
-    subgraph UI [Frontend Layer - Next.js App Router]
-        UI_HR[HR Dashboard]
-        UI_PROJ[Project Dashboard]
-        UI_FIN[Finance Dashboard]
-    end
+### Project & Production Flow:
+`Customer → Project → BOQ → Material Demand → Purchase Order → Warehouse Receipt → Production Issue → Manufacturing → QC → Project Cost → Accounting`
 
-    subgraph API [API Layer - Next.js Route Handlers]
-        API_AUTH[Auth & Session]
-        API_HR[HR APIs]
-        API_PROJ[Project APIs]
-    end
-
-    subgraph SERVICE [Business Logic Layer]
-        SRV_RBAC[RBAC / Permissions]
-        SRV_ATT[Attendance Engine]
-        SRV_PAY[Payroll Engine]
-        SRV_WF[Workflow / State Machine]
-    end
-
-    subgraph DATA [Data Access Layer - Drizzle ORM]
-        DB_CORE[Core Schema]
-        DB_HR[HR Schema]
-        DB_PROJ[Project Schema]
-    end
-
-    subgraph STORAGE [Storage Layer]
-        PG[(Neon Postgres)]
-        S3[(Document / S3)]
-    end
-
-    UI --> API
-    API --> SRV_RBAC
-    API --> SERVICE
-    SERVICE --> DATA
-    DATA --> STORAGE
-```
-
-## 4. QUẢN TRỊ CÔNG TY & KẾ TOÁN (COMPANY & ACCOUNTING FOUNDATION)
-Để mở rộng thành một ERP hoàn chỉnh, HomePro đang thiết lập nền tảng Pháp lý và Kế toán (Legal & Accounting):
-- **Company Master:** Không gộp chung mọi thông tin vào một bảng. Phân tách rõ `CompanyLegalProfile`, `CompanyTaxProfile`, `CompanyBankAccount`.
-- **Fiscal Periods:** Quản lý kỳ kế toán, kỳ khóa sổ. Bất kỳ chứng từ nào (Phiếu lương, Chi phí dự án) phát sinh trong kỳ khóa sổ đều không được sửa đổi.
-
-## 5. QUẢN LÝ TÀI LIỆU (DOCUMENT CENTER)
-Hệ thống lưu trữ file không nằm rải rác từng module mà được quản lý tập trung qua **Document Center**:
-- Metadata tài liệu: Loại (Hợp đồng, Quyết định, Bệnh án), Người upload, Ngày hết hạn.
-- Tính liên kết đa hình: Một tài liệu có thể liên kết với một `User`, một `Project`, hoặc một `Company`.
+## 5. DOCUMENT MANAGEMENT ARCHITECTURE
+Documents không phải là file lưu trữ đơn giản. Chúng là các thực thể gắn liền với Master Data (Ví dụ: Hợp đồng lao động gắn với Employee, Hóa đơn gắn với PO). Quản lý qua metadata và phân quyền tập trung.

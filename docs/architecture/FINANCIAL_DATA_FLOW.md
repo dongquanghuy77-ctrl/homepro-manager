@@ -1,49 +1,46 @@
-# HOMEPRO FINANCIAL DATA FLOW
+# FINANCIAL DATA FLOW (ACCOUNTING CORE)
 
-Tài liệu này quy định luồng hạch toán tài chính (Financial Data Flow) tự động giữa các module vận hành (Operation Modules) và Kế toán (Accounting). Mục tiêu tối thượng là: **Không nhập lại dữ liệu giữa các module nếu có thể tự động liên kết.**
+## MỤC TIÊU TỐI CAO
+Mọi luồng tiền trong HomePro Manager phải hội tụ về module **Accounting** (Sổ cái kế toán - General Ledger). KHÔNG một module nào được phép sở hữu hoặc vận hành một hệ thống tài chính riêng biệt (Ví dụ: Không có "Ví HR", "Ví Project", "Ví Warehouse").
 
-## 1. NGUYÊN TẮC HẠCH TOÁN (ACCOUNTING PRINCIPLES)
-- Mọi nghiệp vụ sinh ra biến động tài sản/nguồn vốn đều phải được ghi nhận thành Sổ cái (General Ledger - GL Entry).
-- Các module vận hành đóng vai trò là `Sub-ledger` (Sổ phụ). Khi hoàn tất quy trình, chúng sẽ bắn một Event (tạo bút toán) sang Module Accounting.
+## MÔ HÌNH LUỒNG DỮ LIỆU TÀI CHÍNH
 
-## 2. LUỒNG DỮ LIỆU TÀI CHÍNH CỤ THỂ
+Kế toán (Accounting) đóng vai trò là "Thùng rác thông minh" thu nhận mọi giao dịch phát sinh từ các Module nghiệp vụ. Kế toán không tự sinh ra nghiệp vụ (ngoại trừ các bút toán kết chuyển/phân bổ), mà tiếp nhận **Journal Entries** (Bút toán sổ cái) từ các Module khác đẩy sang qua API nội bộ.
 
-### 2.1. Chu trình Nhân sự & Tiền lương (HR to Payroll)
-**Nghiệp vụ:** Chấm công -> Tính lương -> Ghi nhận chi phí -> Thanh toán.
-- **Attendance / Leave / Overtime:** Không tạo ra bút toán kế toán, chỉ cung cấp dữ liệu định lượng.
-- **Payroll (Lương tháng):**
-  - Khi Phiếu lương chuyển trạng thái `PUBLISHED` (Chốt sổ).
-  - Tự động sinh `Salary Expense` (Chi phí lương) và `Salary Payable` (Phải trả người lao động).
-  - Bút toán:
-    - Nợ: Chi phí nhân công (TK 622 / 642)
-    - Có: Phải trả người lao động (TK 334)
-    - Có: Các khoản trích theo lương (BHXH, BHYT - TK 338)
+```text
+[ HR / PAYROLL ]
+- HR chốt bảng lương tháng
+  → Sinh ra Journal Entry:
+      Dr (Nợ): Chi phí lương (642/622)
+      Cr (Có): Phải trả NLĐ (334)
+      Cr (Có): Bảo hiểm Xã hội (338)
 
-### 2.2. Chu trình Mua hàng & Tồn kho (Procure to Pay)
-**Nghiệp vụ:** Yêu cầu mua -> Đơn hàng -> Nhập kho -> Hóa đơn -> Thanh toán.
-- **Purchase Order:** Không hạch toán.
-- **Warehouse (Nhập kho):**
-  - Khi chốt phiếu nhập, sinh GL Entry tăng giá trị kho.
-  - Bút toán:
-    - Nợ: Hàng tồn kho (TK 152)
-    - Có: Hàng hóa đang đi đường (TK 151) hoặc Phải trả NCC (TK 331)
-- **Payment (Thanh toán):**
-  - Nợ: Phải trả người bán (TK 331)
-  - Có: Tiền gửi ngân hàng (TK 112)
+[ PURCHASING / WAREHOUSE ]
+- Nhập kho vật tư theo PO
+  → Sinh ra Journal Entry:
+      Dr (Nợ): Kho nguyên vật liệu (152)
+      Cr (Có): Phải trả NCC (331)
 
-### 2.3. Chu trình Dự án & Sản xuất (Project Costing)
-**Nghiệp vụ:** Xuất vật tư -> Gia công -> Chi phí ngoại kiểm -> Bàn giao.
-- **Warehouse (Xuất kho cho Sản xuất):**
-  - Nợ: Chi phí SXKD dở dang (TK 154)
-  - Có: Hàng tồn kho (TK 152)
-- **Project Cost (Chi phí phát sinh):**
-  - Nợ: Chi phí SXKD dở dang (TK 154)
-  - Có: Phải trả / Tiền mặt.
-- Khi Project chuyển `COMPLETED`:
-  - Kết chuyển TK 154 sang Giá vốn hàng bán (TK 632).
+- Kế toán làm lệnh ủy nhiệm chi (Thanh toán NCC)
+  → Sinh ra Journal Entry:
+      Dr (Nợ): Phải trả NCC (331)
+      Cr (Có): Tiền gửi Ngân hàng (112)
 
-## 3. CHUẨN BỊ CHO TƯƠNG LAI (GAP ANALYSIS)
-**Hiện trạng:** Hệ thống đang thiếu toàn bộ cụm Accounting. Bảng `costs` hiện tại đang ghi nhận "Cost" nhưng chưa có đối ứng kế toán (Double-entry). 
-**Hành động:** 
-- Giai đoạn 1: Bổ sung bảng `accounting_ledgers` để nhận bút toán.
-- Giai đoạn 2: Tạo logic Auto-post GL từ `monthly_payroll` khi chốt lương.
+[ PROJECT / SALES ]
+- Nghiệm thu dự án (Xuất hóa đơn)
+  → Sinh ra Journal Entry:
+      Dr (Nợ): Phải thu Khách hàng (131)
+      Cr (Có): Doanh thu (511)
+      Cr (Có): Thuế GTGT đầu ra (3331)
+
+[ PRODUCTION ]
+- Xuất kho vật tư để sản xuất
+  → Sinh ra Journal Entry:
+      Dr (Nợ): Chi phí SXKD dở dang (154)
+      Cr (Có): Kho NVL (152)
+```
+
+## NGUYÊN TẮC THIẾT KẾ
+1. **Module Độc Lập nhưng Tích hợp Chặt chẽ**: Payroll chỉ lo tính toán giờ công, bảo hiểm thành ra con số Net/Gross. Khi nhấn "Chốt lương", module Payroll sẽ gọi internal hàm `createJournalEntry()` của module Accounting.
+2. **Chart of Account (Master Data)**: Mã tài khoản kế toán là Master Data do Accounting sở hữu. Các module khác không được phép hardcode mã tài khoản trong source code (Nên ánh xạ qua bảng Settings hoặc Default Account Rules).
+3. **Immutable Financial Data**: Một khi Journal Entry đã được Submit lên Accounting, các module Upstream (như Payroll) KHÔNG THỂ sửa hoặc xóa bản ghi cũ (không có nút Sửa/Xóa). Nếu phát hiện sai sót, phải tạo giao dịch đảo (Reversal Entry).

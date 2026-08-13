@@ -44,10 +44,10 @@ async function uat_p018() {
     
     await workerPage.click('button:has-text("Xin Nghỉ Phép")');
     
-    await workerPage.selectOption('select[name="leaveType"]', 'SICK');
-    await workerPage.fill('input[name="startDate"]', '2026-10-10');
-    await workerPage.fill('input[name="endDate"]', '2026-10-11');
-    await workerPage.fill('textarea[name="reason"]', 'Smoke test leave request');
+    await workerPage.selectOption('select.form-select', 'SICK');
+    await workerPage.locator('input[type="date"]').nth(0).fill('2026-10-10');
+    await workerPage.locator('input[type="date"]').nth(1).fill('2026-10-11');
+    await workerPage.locator('textarea').fill('Smoke test leave request');
     
     await workerPage.click('button[type="submit"]:has-text("Gửi đơn")');
     
@@ -61,6 +61,7 @@ async function uat_p018() {
     await loginAs(managerPage, 'quan.mai', '123456');
     await managerPage.goto('https://homepro-manager-psi.vercel.app/leave');
     
+    await managerPage.waitForSelector('table');
     const hasLeaveTable = await managerPage.isVisible('table');
     if (!hasLeaveTable) throw new Error('Manager cannot see leave table');
     
@@ -84,7 +85,7 @@ async function uat_p018() {
     await loginAs(hrPage, 'huy.dong', '123456');
     
     await hrPage.goto('https://homepro-manager-psi.vercel.app/hr');
-    await hrPage.waitForSelector('text=BÁO CÁO TỔNG QUAN NHÂN SỰ');
+    await hrPage.waitForSelector('text=Chờ duyệt nghỉ phép');
     console.log('   ✅ HR Dashboard loaded');
     
     await hrPage.goto('https://homepro-manager-psi.vercel.app/leave');
@@ -115,6 +116,7 @@ async function uat_p018() {
 
     console.log('>> 5. P0.14 Regression Test (Attendance Correction)');
     await hrPage.goto('https://homepro-manager-psi.vercel.app/attendance');
+    await hrPage.waitForSelector('table');
     const hasAttendanceTable = await hrPage.isVisible('table');
     if (!hasAttendanceTable) throw new Error('Attendance table broke in P0.14 regression');
     console.log('   ✅ Attendance P0.14 UI intact');
