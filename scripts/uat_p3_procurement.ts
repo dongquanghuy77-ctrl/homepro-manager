@@ -195,7 +195,7 @@ async function uat() {
   let invIdemPass = false;
   try {
     await ProcurementService.createSupplierInvoice({
-      invoiceNumber: inv.invoiceNumber,
+      invoiceNumber: inv!.invoiceNumber,
       supplierId: sup.id,
       poId: po.id,
       receiptId: gr.id,
