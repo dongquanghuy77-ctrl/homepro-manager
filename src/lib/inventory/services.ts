@@ -192,7 +192,7 @@ export class InventoryService {
             { accountId: accProjectMaterial, debit: res.ledger.totalCost, credit: 0, projectId: data.projectId },
             { accountId: accInventory, debit: 0, credit: res.ledger.totalCost }
           ]
-        }, tx);
+        });
       }
       return res;
     });
@@ -232,7 +232,7 @@ export class InventoryService {
       // Find current stock
       const balanceQuery = await tx.execute(sql`SELECT on_hand FROM stock_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} FOR UPDATE`);
       const bal = balanceQuery.rows[0];
-      const current = bal ? bal.on_hand : 0;
+      const current = (bal ? bal.on_hand : 0) as number;
       
       const difference = data.physicalQuantity - current;
       if (difference === 0) return { message: 'No difference' };

@@ -115,8 +115,8 @@ async function uat() {
     physicalQuantity: 45, // +5
     userId: admin.id,
     reason: 'Count'
-  });
-  report('Reconciliation', rec.newBalance.onHand === 45);
+  }) as any; // Cast to any to bypass union type for test
+  report('Reconciliation', rec.newBalance?.onHand === 45);
 
   // 7. Valuation
   // Receive more at different price
