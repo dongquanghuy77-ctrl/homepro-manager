@@ -10,13 +10,13 @@ async function runTest() {
 
     // 1. Admin Login
     console.log('Logging in as ADMIN (admin/123456)...');
-    await page.goto('http://localhost:3000/login');
+    await page.goto('https://homepro-manager-psi.vercel.app/login');
     await page.fill('input[placeholder="Nhập email, số điện thoại hoặc username"]', 'admin');
     await page.fill('input[placeholder="Nhập mật khẩu"]', '123456');
     await page.click('button[type="submit"]');
 
     // Wait for Dashboard to load
-    await page.waitForURL('http://localhost:3000/');
+    await page.waitForURL('https://homepro-manager-psi.vercel.app/');
     console.log('Login successful.');
 
     // 2. Check Dashboard Components
