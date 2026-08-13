@@ -90,6 +90,7 @@ interface EmployeeDashboardClientProps {
   leaveBalances: LeaveBalance[];
   attendanceHistory: AttendanceLog[];
   projects: Project[];
+  canEditAttendance?: boolean;
 }
 
 export default function EmployeeDashboardClient({
@@ -98,6 +99,7 @@ export default function EmployeeDashboardClient({
   leaveBalances,
   attendanceHistory,
   projects,
+  canEditAttendance = false,
 }: EmployeeDashboardClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'HOME' | 'REPORT' | 'REQUESTS'>('HOME');
@@ -131,6 +133,63 @@ export default function EmployeeDashboardClient({
   const [otReason, setOtReason] = useState('');
   const [otProjectId, setOtProjectId] = useState('');
   const [otLoading, setOtLoading] = useState(false);
+
+  // Edit Attendance Form State
+  const [showEditAttModal, setShowEditAttModal] = useState(false);
+  const [editCheckIn, setEditCheckIn] = useState('');
+  const [editCheckOut, setEditCheckOut] = useState('');
+  const [editReason, setEditReason] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+
+  // Helper to open edit modal
+  const openEditAttendance = () => {
+    if (!todayRecord?.id || todayRecord.id === -999) return;
+    const toLocalTimeStr = (dateStr: string | Date | null) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      // Format to YYYY-MM-DDTHH:mm
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    };
+    setEditCheckIn(toLocalTimeStr(todayRecord.checkIn));
+    setEditCheckOut(toLocalTimeStr(todayRecord.checkOut));
+    setEditReason('');
+    setShowEditAttModal(true);
+  };
+
+  async function handleEditAttendanceSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!todayRecord?.id || todayRecord.id === -999) return;
+    if (!editReason) {
+      alert('Vui lòng nhập lý do điều chỉnh');
+      return;
+    }
+    setEditLoading(true);
+    try {
+      const checkInISO = editCheckIn ? new Date(editCheckIn).toISOString() : null;
+      const checkOutISO = editCheckOut ? new Date(editCheckOut).toISOString() : null;
+
+      const res = await fetch(`/api/hr/attendance/${todayRecord.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          checkIn: checkInISO,
+          checkOut: checkOutISO,
+          correctionReason: editReason,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Cập nhật thất bại');
+      
+      setTodayRecord(data);
+      setShowEditAttModal(false);
+      setGpsSuccess('Đã cập nhật giờ công thành công.');
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }
 
   // Register PWA Manifest and Service Worker in client context
   useEffect(() => {
@@ -649,8 +708,31 @@ export default function EmployeeDashboardClient({
                 marginTop: 20,
                 borderTop: '1px solid rgba(255, 255, 255, 0.05)',
                 paddingTop: 16,
-                fontSize: 13
+                fontSize: 13,
+                position: 'relative'
               }}>
+                {canEditAttendance && todayRecord?.id && todayRecord.id !== -999 && (
+                  <button
+                    onClick={openEditAttendance}
+                    style={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 0,
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      color: '#3B82F6',
+                      border: '1px solid rgba(59, 130, 246, 0.2)',
+                      padding: '4px 8px',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    ✏️ Sửa
+                  </button>
+                )}
                 <div>
                   <div style={{ color: '#94A3B8', fontSize: 11 }}>Giờ vào ca:</div>
                   <div style={{ fontWeight: 700, color: '#F8FAFC', fontSize: 16, marginTop: 4 }}>
@@ -926,6 +1008,56 @@ export default function EmployeeDashboardClient({
               </button>
               <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={otLoading}>
                 {otLoading ? 'Đang gửi...' : 'Gửi đơn'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Edit Attendance Dialog */}
+      {showEditAttModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
+          zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+        }}>
+          <form onSubmit={handleEditAttendanceSubmit} style={{
+            background: '#0F172A', border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: 16, padding: 24, maxWidth: 380, width: '100%',
+          }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F8FAFC', marginBottom: 16, textAlign: 'center' }}>
+              Chỉnh Sửa Giờ Công
+            </h3>
+
+            <div className="grid-2 mb-4">
+              <div className="form-group">
+                <label className="form-label">Giờ vào ca</label>
+                <input type="datetime-local" className="form-input" value={editCheckIn} onChange={(e) => setEditCheckIn(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Giờ ra ca</label>
+                <input type="datetime-local" className="form-input" value={editCheckOut} onChange={(e) => setEditCheckOut(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="form-group mb-6">
+              <label className="form-label">Lý do điều chỉnh *</label>
+              <textarea
+                className="form-input"
+                style={{ height: 70, resize: 'none', padding: 8 }}
+                placeholder="Nhập lý do điều chỉnh bắt buộc..."
+                value={editReason}
+                onChange={(e) => setEditReason(e.target.value)}
+                required
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowEditAttModal(false)} disabled={editLoading}>
+                Hủy
+              </button>
+              <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={editLoading}>
+                {editLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </div>
           </form>

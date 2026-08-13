@@ -78,6 +78,9 @@ export default async function EmployeeDashboardPage() {
       .from(projects),
   ]);
 
+  const { canWriteAttendance } = await import('@/lib/permissions/checker');
+  const canEdit = await canWriteAttendance(session, session.id, session.departmentId ?? null);
+
   return (
     <EmployeeDashboardClient
       session={session}
@@ -85,6 +88,7 @@ export default async function EmployeeDashboardPage() {
       leaveBalances={balances}
       attendanceHistory={history}
       projects={allProjects}
+      canEditAttendance={canEdit}
     />
   );
 }

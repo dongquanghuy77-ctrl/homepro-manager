@@ -21,7 +21,7 @@ async function updateAttendanceRecord(
 
   try {
     const body = await req.json();
-    const { checkIn, checkOut, note, status, location } = body;
+    const { checkIn, checkOut, note, status, location, correctionReason } = body;
 
     const checkInDate  = checkIn  ? new Date(checkIn)  : null;
     const checkOutDate = checkOut ? new Date(checkOut) : null;
@@ -38,6 +38,7 @@ async function updateAttendanceRecord(
       lateMinutes: attendance.lateMinutes,
       earlyLeaveMinutes: attendance.earlyLeaveMinutes,
       totalHours: attendance.totalHours,
+      correctionReason: attendance.correctionReason,
       departmentId: users.departmentId
     }).from(attendance).innerJoin(users, eq(attendance.employeeId, users.id)).where(eq(attendance.id, id));
     if (!oldRecord) {
@@ -80,6 +81,7 @@ async function updateAttendanceRecord(
       checkOut:          checkOut !== undefined ? checkOutDate : oldRecord.checkOut,
       note:              note     !== undefined ? (note?.trim() || null) : oldRecord.note,
       location:          location !== undefined ? (location?.trim() || null) : oldRecord.location,
+      correctionReason:  correctionReason !== undefined ? (correctionReason?.trim() || null) : oldRecord.correctionReason,
       status:            computedStatus,
       lateMinutes:       computedLateMinutes,
       earlyLeaveMinutes: computedEarlyLeaveMinutes,
@@ -95,8 +97,8 @@ async function updateAttendanceRecord(
       entityId:   id,
       actorId:    session.id,
       actorName:  session.name,
-      oldValue:   { status: oldRecord.status, checkIn: oldRecord.checkIn, checkOut: oldRecord.checkOut },
-      newValue:   { status: computedStatus, checkIn: checkInDate, checkOut: checkOutDate },
+      oldValue:   { status: oldRecord.status, checkIn: oldRecord.checkIn, checkOut: oldRecord.checkOut, totalHours: oldRecord.totalHours, correctionReason: oldRecord.correctionReason },
+      newValue:   { status: computedStatus, checkIn: checkInDate, checkOut: checkOutDate, totalHours: computedTotalHours, correctionReason: correctionReason !== undefined ? (correctionReason?.trim() || null) : oldRecord.correctionReason },
       ipAddress:  req.headers.get('x-forwarded-for') || 'unknown',
     });
 
