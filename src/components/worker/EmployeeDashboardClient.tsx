@@ -120,7 +120,7 @@ export default function EmployeeDashboardClient({
   const [showOtModal, setShowOtModal] = useState(false);
 
   // Leave Form State
-  const [leaveType, setLeaveType] = useState('Nghỉ phép năm');
+  const [leaveType, setLeaveType] = useState('ANNUAL');
   const [leaveStart, setLeaveStart] = useState('');
   const [leaveEnd, setLeaveEnd] = useState('');
   const [leaveReason, setLeaveReason] = useState('');
@@ -908,10 +908,10 @@ export default function EmployeeDashboardClient({
 
             <div className="form-group mb-4">
               <label className="form-label">Loại nghỉ phép *</label>
-              <select className="form-select" value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
-                <option value="Nghỉ phép năm">Nghỉ phép năm</option>
-                <option value="Nghỉ ốm">Nghỉ ốm</option>
-                <option value="Nghỉ không lương">Nghỉ không lương</option>
+              <select className="form-select" name="leaveType" value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
+                <option value="ANNUAL">Nghỉ phép năm</option>
+                <option value="SICK">Nghỉ ốm</option>
+                <option value="UNPAID">Nghỉ không lương</option>
               </select>
             </div>
 
