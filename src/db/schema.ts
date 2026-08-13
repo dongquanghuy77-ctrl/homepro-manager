@@ -894,17 +894,25 @@ export const journalEntries = pgTable('journal_entries', {
   referenceId: integer('reference_id'),
   totalDebit: real('total_debit').notNull().default(0),
   totalCredit: real('total_credit').notNull().default(0),
-  status: text('status').notNull().default('DRAFT'), // DRAFT, POSTED, CANCELLED
+  status: text('status').notNull().default('DRAFT'), // DRAFT, POSTED, CANCELLED, REVERSED
   description: text('description'),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  postedBy: integer('posted_by').references(() => users.id, { onDelete: 'set null' }),
+  postedAt: timestamp('posted_at'),
+  reversedBy: integer('reversed_by').references(() => users.id, { onDelete: 'set null' }),
+  reversalOf: integer('reversal_of'), // points to another journalEntries.id
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-});
+}, (table) => ({
+  unqRef: unique().on(table.referenceType, table.referenceId)
+}));
 
 export const journalEntryLines = pgTable('journal_entry_lines', {
   id: serial('id').primaryKey(),
   journalEntryId: integer('journal_entry_id').notNull().references(() => journalEntries.id, { onDelete: 'cascade' }),
   accountId: integer('account_id').notNull().references(() => accounts.id, { onDelete: 'restrict' }),
   departmentId: integer('department_id').references(() => departments.id, { onDelete: 'set null' }), // Cost Center
+  projectId: integer('project_id').references(() => projects.id, { onDelete: 'set null' }), // Project Dimension
   partyType: text('party_type'), // EMPLOYEE, CUSTOMER, SUPPLIER
   partyId: integer('party_id'),
   debit: real('debit').notNull().default(0),
@@ -936,5 +944,9 @@ export const journalEntryLinesRelations = relations(journalEntryLines, ({ one })
   department: one(departments, {
     fields: [journalEntryLines.departmentId],
     references: [departments.id],
+  }),
+  project: one(projects, {
+    fields: [journalEntryLines.projectId],
+    references: [projects.id],
   })
 }));

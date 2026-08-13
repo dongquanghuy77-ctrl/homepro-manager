@@ -2,14 +2,25 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { db } from '../src/db';
-import { monthlyPayroll, journalEntries, accountingPeriods, journalEntryLines } from '../src/db/schema';
+import { monthlyPayroll, journalEntries, accountingPeriods, accounts } from '../src/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { AccountingService } from '../src/lib/accounting/services';
 
 async function runUat() {
   console.log('--- STARTING P2 ACCOUNTING UAT ---');
+  let passCount = 0;
+  let failCount = 0;
 
-  // 1. Fetch a period
+  function assert(condition: boolean, msg: string) {
+    if (condition) {
+      console.log(`✅ PASS: ${msg}`);
+      passCount++;
+    } else {
+      console.error(`❌ FAIL: ${msg}`);
+      failCount++;
+    }
+  }
+
   const period = await db.query.accountingPeriods.findFirst({
     where: eq(accountingPeriods.name, '08-2026')
   });
@@ -19,75 +30,92 @@ async function runUat() {
     process.exit(1);
   }
 
-  // 2. Mock a Payroll Publish by creating a Draft Journal Entry directly via Service
-  // This verifies the AccountingService logic independently of the HTTP API.
-  console.log('>> 1. Testing AccountingService.createJournalEntry (Double-Entry Logic)');
-  try {
-    const je = await AccountingService.createJournalEntry({
-      entryNo: `JV-UAT-${Date.now()}`,
-      postingDate: '2026-08-14',
-      periodId: period.id,
-      referenceType: 'PAYROLL',
-      description: 'UAT Test Payroll Journal',
-      lines: [
-        { accountId: 1, debit: 10000000, credit: 0 }, // Fake account ID 1 (642)
-        { accountId: 2, debit: 0, credit: 1050000 },  // Fake account ID 2 (3383)
-        { accountId: 3, debit: 0, credit: 8950000 },  // Fake account ID 3 (334)
-      ]
-    });
-    console.log(`✅ Successfully created JE: ${je.entryNo} (Debit = ${je.totalDebit}, Credit = ${je.totalCredit})`);
-  } catch (e: any) {
-    // If it fails due to FK on accountId, it's fine, we just want to test logic. 
-    // Wait, the account IDs 1, 2, 3 might not exist. Let's fetch real accounts.
-    const accs = await db.query.accounts.findMany({ limit: 3 });
-    if (accs.length >= 3) {
-      const je = await AccountingService.createJournalEntry({
-        entryNo: `JV-UAT-${Date.now()}`,
-        postingDate: '2026-08-14',
-        periodId: period.id,
-        referenceType: 'PAYROLL',
-        description: 'UAT Test Payroll Journal',
-        lines: [
-          { accountId: accs[0].id, debit: 10000000, credit: 0 }, 
-          { accountId: accs[1].id, debit: 0, credit: 1050000 },  
-          { accountId: accs[2].id, debit: 0, credit: 8950000 },  
-        ]
-      });
-      console.log(`✅ Successfully created JE with real accounts: ${je.entryNo}`);
-      
-      // Post it
-      await AccountingService.postJournalEntry(je.id);
-      console.log(`✅ Successfully posted JE: ${je.entryNo}`);
-    } else {
-      console.log('⚠️ Not enough accounts to test Service. Seed the DB first.');
-    }
+  const accs = await db.query.accounts.findMany({ limit: 2 });
+  if (accs.length < 2) {
+    console.error('Not enough accounts to test');
+    process.exit(1);
   }
 
-  console.log('>> 2. Testing Double-Entry Violation Rejection');
+  console.log('\n--- 1. Double Entry & Atomicity ---');
   try {
-    const accs = await db.query.accounts.findMany({ limit: 2 });
     await AccountingService.createJournalEntry({
       entryNo: `JV-ERR-${Date.now()}`,
       postingDate: '2026-08-14',
       periodId: period.id,
       lines: [
-        { accountId: accs[0].id, debit: 10000000, credit: 0 }, 
-        { accountId: accs[1].id, debit: 0, credit: 9000000 },  // Mismatch
+        { accountId: accs[0].id, debit: 100, credit: 0 }, 
+        { accountId: accs[1].id, debit: 0, credit: 90 }, 
       ]
     });
-    console.error('❌ Service allowed an unbalanced Journal Entry!');
-    process.exit(1);
+    assert(false, 'Allowed unbalanced journal');
   } catch (e: any) {
-    if (e.message.includes('Double-entry violation')) {
-      console.log('✅ Service correctly rejected unbalanced entry: ' + e.message);
+    assert(e.message.includes('Double-entry violation'), 'Rejected unbalanced entry correctly');
+  }
+
+  console.log('\n--- 2. Idempotency ---');
+  const refId = Math.floor(Math.random() * 1000000);
+  try {
+    const je1 = await AccountingService.createJournalEntry({
+      entryNo: `JV-IDEM-${Date.now()}-1`,
+      postingDate: '2026-08-14',
+      periodId: period.id,
+      referenceType: 'PAYROLL',
+      referenceId: refId,
+      lines: [
+        { accountId: accs[0].id, debit: 100, credit: 0 }, 
+        { accountId: accs[1].id, debit: 0, credit: 100 }, 
+      ]
+    });
+    assert(true, 'Created first JV successfully');
+
+    await AccountingService.createJournalEntry({
+      entryNo: `JV-IDEM-${Date.now()}-2`,
+      postingDate: '2026-08-14',
+      periodId: period.id,
+      referenceType: 'PAYROLL',
+      referenceId: refId,
+      lines: [
+        { accountId: accs[0].id, debit: 100, credit: 0 }, 
+        { accountId: accs[1].id, debit: 0, credit: 100 }, 
+      ]
+    });
+    assert(false, 'Allowed duplicate JV for same reference');
+  } catch (e: any) {
+    if (e.message.includes('IDEMPOTENCY_ERROR')) {
+      assert(true, 'Idempotency prevented duplicate JV');
     } else {
-      console.error('❌ Unexpected error: ' + e.message);
-      process.exit(1);
+      console.error(e);
+      assert(false, `Unexpected error during idempotency: ${e.message}`);
     }
   }
 
-  console.log('--- ALL ACCOUNTING UAT PASSED ---');
-  process.exit(0);
+  console.log('\n--- 3. Immutable Journal & Reversal ---');
+  try {
+    const je = await AccountingService.createJournalEntry({
+      entryNo: `JV-REV-${Date.now()}`,
+      postingDate: '2026-08-14',
+      periodId: period.id,
+      lines: [
+        { accountId: accs[0].id, debit: 500, credit: 0 }, 
+        { accountId: accs[1].id, debit: 0, credit: 500 }, 
+      ]
+    });
+    await AccountingService.postJournalEntry(je.id, 1);
+    
+    // Reverse it
+    const reversal = await AccountingService.reverseJournalEntry(je.id, 1, period.id, '2026-08-15', `JV-REVO-${Date.now()}`);
+    assert(reversal.reversalOf === je.id, 'Reversal created and linked correctly');
+    
+    const orig = await db.query.journalEntries.findFirst({ where: eq(journalEntries.id, je.id) });
+    assert(orig?.status === 'REVERSED', 'Original journal status changed to REVERSED');
+
+  } catch (e: any) {
+    console.error(e);
+    assert(false, 'Reversal workflow failed');
+  }
+
+  console.log(`\n=== UAT RESULTS: ${passCount} PASS | ${failCount} FAIL ===`);
+  process.exit(failCount === 0 ? 0 : 1);
 }
 
 runUat().catch(e => {

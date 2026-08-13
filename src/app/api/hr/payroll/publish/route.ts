@@ -88,30 +88,17 @@ export async function PATCH(req: NextRequest) {
     });
 
     // --- ACCOUNTING BRIDGE INTEGRATION ---
-    // Aggregate values for Journal Entry
+    // Create one Journal Entry per Payroll Record for Idempotency
     try {
       const { AccountingService } = await import('@/lib/accounting/services');
       const { accountingPeriods, accounts } = await import('@/db/schema');
       
-      // Get Period ID for the month/year
       const periodName = `${String(month).padStart(2, '0')}-${year}`;
       const period = await db.query.accountingPeriods.findFirst({
         where: eq(accountingPeriods.name, periodName)
       });
 
       if (period) {
-        let totalNet = 0;
-        let totalBHXH = 0; // employee deduction
-        let totalPIT = 0;
-        let totalGross = 0;
-        
-        for (const p of updated) {
-          totalNet += p.netSalary || 0;
-          totalBHXH += p.insuranceDeduction || 0; 
-          totalPIT += p.taxDeduction || 0;
-          totalGross += p.grossSalary || 0;
-        }
-
         // Get Account IDs
         const acc334 = await db.query.accounts.findFirst({ where: eq(accounts.code, '3341') });
         const acc3383 = await db.query.accounts.findFirst({ where: eq(accounts.code, '3383') });
@@ -119,32 +106,43 @@ export async function PATCH(req: NextRequest) {
         const acc642 = await db.query.accounts.findFirst({ where: eq(accounts.code, '6421') });
 
         if (acc334 && acc3383 && acc3335 && acc642) {
-          // Adjust gross to match debits/credits if they differ (Accounting requires exact match)
-          // Simple model: 
-          // Debit 642: Gross Salary
-          // Credit 3383: Insurance (Employee portion)
-          // Credit 3335: PIT
-          // Credit 3341: Net Salary
-          
-          await AccountingService.createJournalEntry({
-            entryNo: `JV-PR-${periodName}-${Date.now().toString().slice(-4)}`,
-            postingDate: new Date().toISOString().split('T')[0],
-            periodId: period.id,
-            referenceType: 'PAYROLL',
-            description: `Hạch toán lương tháng ${month}/${year}`,
-            lines: [
-              { accountId: acc642.id, debit: totalGross, credit: 0 },
-              { accountId: acc3383.id, debit: 0, credit: totalBHXH },
-              { accountId: acc3335.id, debit: 0, credit: totalPIT },
-              { accountId: acc334.id, debit: 0, credit: totalNet }
-            ]
-          });
+          for (const p of updated) {
+            const net = p.netSalary || 0;
+            const bhxh = p.insuranceDeduction || 0; 
+            const pit = p.taxDeduction || 0;
+            const gross = p.grossSalary || 0;
+
+            if (gross > 0) {
+              try {
+                const je = await AccountingService.createJournalEntry({
+                  entryNo: `JV-PR-${periodName}-${p.id}`, // e.g., JV-PR-08-2026-15
+                  postingDate: new Date().toISOString().split('T')[0],
+                  periodId: period.id,
+                  referenceType: 'PAYROLL',
+                  referenceId: p.id,
+                  createdBy: session.id,
+                  description: `Hạch toán lương tháng ${month}/${year} cho NV ${p.employeeId}`,
+                  lines: [
+                    { accountId: acc642.id, debit: gross, credit: 0 },
+                    { accountId: acc3383.id, debit: 0, credit: bhxh },
+                    { accountId: acc3335.id, debit: 0, credit: pit },
+                    { accountId: acc334.id, debit: 0, credit: net }
+                  ].filter(l => l.debit > 0 || l.credit > 0) // Remove 0 lines
+                });
+                // Auto-post it for Payroll
+                await AccountingService.postJournalEntry(je.id, session.id);
+              } catch (err: any) {
+                // If it's IDEMPOTENCY_ERROR, skip. Else log it.
+                if (!err.message.includes('IDEMPOTENCY_ERROR')) {
+                  console.error(`Accounting Error for Payroll ${p.id}:`, err);
+                }
+              }
+            }
+          }
         }
       }
     } catch (err: any) {
-      console.error('Failed to create Journal Entry for Payroll:', err);
-      // We don't block the API response if Accounting Bridge fails, 
-      // but in a strict system we might.
+      console.error('Failed to bridge Payroll to Accounting:', err);
     }
   }
 

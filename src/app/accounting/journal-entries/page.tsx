@@ -6,6 +6,8 @@ import { requirePermission } from '@/lib/rbac/requirePermission';
 import { redirect } from 'next/navigation';
 import { desc } from 'drizzle-orm';
 
+import { ReverseButton } from './ReverseButton';
+
 export default async function JournalEntriesPage() {
   const rbac = await requirePermission('SYSTEM_ADMIN');
   if (!rbac.allowed) {
@@ -20,6 +22,8 @@ export default async function JournalEntriesPage() {
       lines: {
         with: {
           account: true,
+          project: true,
+          department: true,
         }
       }
     }
@@ -47,13 +51,24 @@ export default async function JournalEntriesPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-bold text-blue-800">{je.entryNo}</h3>
-                  <div className="text-sm text-gray-600">Ngày: {je.postingDate} | Kỳ: {je.period?.name} | Reference: {je.referenceType}</div>
+                  <div className="text-sm text-gray-600">
+                    Ngày: {je.postingDate} | Kỳ: {je.period?.name} | Reference: {je.referenceType} #{je.referenceId}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Tạo bởi: ID {je.createdBy || 'System'} | Post bởi: ID {je.postedBy || 'System'} {je.postedAt ? `lúc ${new Date(je.postedAt).toLocaleString()}` : ''}
+                  </div>
                   {je.description && <div className="text-sm italic mt-1">{je.description}</div>}
                 </div>
-                <div>
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${je.status === 'POSTED' ? 'bg-green-100 text-green-800' : je.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${je.status === 'POSTED' ? 'bg-green-100 text-green-800' : je.status === 'DRAFT' ? 'bg-yellow-100 text-yellow-800' : je.status === 'REVERSED' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>
                     {je.status}
                   </span>
+                  {je.status === 'POSTED' && (
+                    <ReverseButton id={je.id} periodId={je.periodId} isReversed={false} />
+                  )}
+                  {je.status === 'REVERSED' && (
+                    <ReverseButton id={je.id} periodId={je.periodId} isReversed={true} />
+                  )}
                 </div>
               </div>
               

@@ -9,7 +9,7 @@ async function main() {
   await client.connect();
 
   console.log('Reading migration file...');
-  const migrationPath = path.join(process.cwd(), 'src/db/migrations/0002_broken_rick_jones.sql');
+  const migrationPath = path.join(process.cwd(), 'src/db/migrations/0003_married_infant_terrible.sql');
   const migrationSql = fs.readFileSync(migrationPath, 'utf8');
   
   const statements = migrationSql.split('--> statement-breakpoint').map(s => s.trim()).filter(s => s.length > 0);
