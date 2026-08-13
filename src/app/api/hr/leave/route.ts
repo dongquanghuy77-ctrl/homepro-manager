@@ -138,6 +138,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newRequest, { status: 201 });
   } catch (err: unknown) {
+    console.error("SQL ERROR LEAVE ROUTE:", err);
     const message = err instanceof Error ? err.message : 'Lỗi không xác định';
     return NextResponse.json({ error: message }, { status: 500 });
   }
