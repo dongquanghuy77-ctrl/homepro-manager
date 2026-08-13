@@ -2,7 +2,8 @@
 // P0.18 UAT Leave Approval & HR Dashboard
 
 async function loginAs(page, username, password = 'password123') {
-  await page.goto('https://homepro-manager-psi.vercel.app/login');
+  const BASE_URL = 'https://homepro-manager-psi.vercel.app';
+  await page.goto(`${BASE_URL}/login`);
   await page.fill('input[placeholder="Nhập email, số điện thoại hoặc username"]', username);
   
   if (username === '0901234567') {

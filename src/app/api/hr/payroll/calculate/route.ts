@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse }      from 'next/server';
 import { db }                             from '@/db';
-import { users, attendance, leaveRequests, monthlyPayroll } from '@/db/schema';
+import { users, attendance, leaveRequests, monthlyPayroll, salaryProfiles } from '@/db/schema';
 import { getSessionFromRequest }          from '@/lib/session';
 import { DefaultAuthorizationService }    from '@/lib/permissions/service';
 import { DbPermissionRepository }         from '@/lib/permissions/repository';
@@ -76,17 +76,18 @@ export async function POST(req: NextRequest) {
       id:                  users.id,
       name:                users.name,
       employeeCode:        users.employeeCode,
-      officialSalary:      users.officialSalary,
-      basicSalary:         users.basicSalary,
+      officialSalary:      sql<number>`COALESCE(${salaryProfiles.baseSalary}, ${users.officialSalary})`,
+      basicSalary:         sql<number>`COALESCE(${salaryProfiles.baseSalary}, ${users.basicSalary})`,
       // Phụ cấp chuyên cần: lấy từ settings hoặc default 500.000
       // TODO Sprint 3 N3: lấy từ salary_contracts; tạm dùng fixed 500.000
     })
     .from(users)
+    .leftJoin(salaryProfiles, and(eq(users.id, salaryProfiles.userId), eq(salaryProfiles.status, 'ACTIVE')))
     .where(
       and(
         eq(users.active, true),
         eq(users.employeeStatus, 'ACTIVE'),
-        sql`${users.officialSalary} > 0`,
+        sql`COALESCE(${salaryProfiles.baseSalary}, ${users.officialSalary}) > 0`,
       )
     );
 
