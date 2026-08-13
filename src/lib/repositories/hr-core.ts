@@ -1,7 +1,6 @@
 import { db } from '@/db';
-import { users, employees, departments, positions, employmentContracts, salaryProfiles } from '@/db/schema';
+import { users, departments, positions, employmentContracts, salaryProfiles } from '@/db/schema';
 import { eq, desc, and, or, ilike, SQL } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
 
 export interface LegacyEmployeeDTO {
   id: number;
@@ -24,31 +23,29 @@ export interface LegacyEmployeeDTO {
   updatedAt: Date | null;
 }
 
-const managerEmployees = alias(employees, 'manager_employees');
-
 /**
  * Maps the joined HR Core row into the Legacy API Contract.
  */
 function mapToLegacyDTO(row: any): LegacyEmployeeDTO {
   return {
-    id: row.userId, // Contract guarantee: System identity
-    username: row.users?.username || '',
-    name: row.employees.fullName,
-    position: row.positions?.name || null,
-    role: row.users?.role || 'WORKER',
-    phone: row.users?.phone || null,
-    email: row.users?.email || null,
-    active: row.users?.active ?? true,
-    employeeCode: row.employees.employeeCode,
-    department: row.departments?.name || null,
-    employmentType: row.contracts?.contractType || null,
-    joinDate: row.contracts?.startDate || null,
-    managerId: row.manager?.userId || null, // Contract guarantee: System identity
-    employeeStatus: row.employees.employmentStatus,
-    birthDate: row.users?.birthDate || null,
-    note: row.users?.note || null,
-    createdAt: row.employees.createdAt,
-    updatedAt: row.employees.updatedAt,
+    id: row.users.id,
+    username: row.users.username || '',
+    name: row.users.name,
+    position: row.users.position || null,
+    role: row.users.role || 'WORKER',
+    phone: row.users.phone || null,
+    email: row.users.email || null,
+    active: row.users.active ?? true,
+    employeeCode: row.users.employeeCode || null,
+    department: row.departments?.name || row.users.department || null,
+    employmentType: row.contracts?.contractType || row.users.employmentType || null,
+    joinDate: row.contracts?.startDate || row.users.joinDate || null,
+    managerId: row.users.managerId || null,
+    employeeStatus: row.users.employeeStatus || 'ACTIVE',
+    birthDate: row.users.birthDate || null,
+    note: row.users.note || null,
+    createdAt: row.users.createdAt,
+    updatedAt: row.users.updatedAt,
   };
 }
 
@@ -62,20 +59,22 @@ export async function getEmployeeList(filters?: {
 }): Promise<LegacyEmployeeDTO[]> {
   const conditions: SQL[] = [];
 
-  // MUST INNER JOIN users to guarantee we only list employees who have system accounts mapped
-  // and so we can fetch users fields (username, phone, etc).
+  // Exclude system accounts like admin, viewer if needed, but we keep all valid users for now
   
   if (filters?.allowedDepartmentId) {
-    conditions.push(eq(employees.departmentId, filters.allowedDepartmentId));
+    conditions.push(eq(users.departmentId, filters.allowedDepartmentId));
   } else if (filters?.allowedUserId) {
-    conditions.push(eq(employees.userId, filters.allowedUserId));
+    conditions.push(eq(users.id, filters.allowedUserId));
   }
 
   if (filters?.department) {
-    conditions.push(eq(departments.name, filters.department));
+    conditions.push(or(
+      eq(departments.name, filters.department),
+      eq(users.department, filters.department)
+    )!);
   }
   if (filters?.status) {
-    conditions.push(eq(employees.employmentStatus, filters.status));
+    conditions.push(eq(users.employeeStatus, filters.status));
   }
   if (filters?.role) {
     conditions.push(eq(users.role, filters.role));
@@ -83,8 +82,8 @@ export async function getEmployeeList(filters?: {
   if (filters?.search) {
     conditions.push(
       or(
-        ilike(employees.fullName, `%${filters.search}%`),
-        ilike(employees.employeeCode, `%${filters.search}%`),
+        ilike(users.name, `%${filters.search}%`),
+        ilike(users.employeeCode, `%${filters.search}%`),
         ilike(users.phone, `%${filters.search}%`)
       )!
     );
@@ -92,28 +91,21 @@ export async function getEmployeeList(filters?: {
 
   const rows = await db
     .select({
-      userId: employees.userId,
-      employees: employees,
       users: users,
       departments: departments,
-      positions: positions,
       contracts: employmentContracts,
-      manager: managerEmployees,
     })
-    .from(employees)
-    .innerJoin(users, eq(employees.userId, users.id))
-    .leftJoin(departments, eq(employees.departmentId, departments.id))
-    .leftJoin(positions, eq(employees.positionId, positions.id))
+    .from(users)
+    .leftJoin(departments, eq(users.departmentId, departments.id))
     .leftJoin(
       employmentContracts,
       and(
-        eq(employmentContracts.employeeId, employees.id),
+        eq(employmentContracts.userId, users.id),
         eq(employmentContracts.status, 'ACTIVE')
       )
     )
-    .leftJoin(managerEmployees, eq(employees.managerId, managerEmployees.id))
     .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(employees.createdAt));
+    .orderBy(desc(users.createdAt));
 
   return rows.map(mapToLegacyDTO).filter((dto) => dto.id !== null) as LegacyEmployeeDTO[];
 }
@@ -121,27 +113,20 @@ export async function getEmployeeList(filters?: {
 export async function getEmployeeProfile(userId: number): Promise<LegacyEmployeeDTO | null> {
   const rows = await db
     .select({
-      userId: employees.userId,
-      employees: employees,
       users: users,
       departments: departments,
-      positions: positions,
       contracts: employmentContracts,
-      manager: managerEmployees,
     })
-    .from(employees)
-    .innerJoin(users, eq(employees.userId, users.id))
-    .leftJoin(departments, eq(employees.departmentId, departments.id))
-    .leftJoin(positions, eq(employees.positionId, positions.id))
+    .from(users)
+    .leftJoin(departments, eq(users.departmentId, departments.id))
     .leftJoin(
       employmentContracts,
       and(
-        eq(employmentContracts.employeeId, employees.id),
+        eq(employmentContracts.userId, users.id),
         eq(employmentContracts.status, 'ACTIVE')
       )
     )
-    .leftJoin(managerEmployees, eq(employees.managerId, managerEmployees.id))
-    .where(eq(employees.userId, userId))
+    .where(eq(users.id, userId))
     .limit(1);
 
   if (!rows || rows.length === 0) return null;

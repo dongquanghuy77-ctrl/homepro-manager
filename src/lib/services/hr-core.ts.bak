@@ -1,6 +1,7 @@
 import { db } from '@/db';
 import { 
   users, 
+  employees, 
   employmentContracts, 
   salaryProfiles, 
   departments, 
@@ -51,6 +52,14 @@ export async function createEmployeeTransaction(payload: CreateEmployeePayload) 
       positionId = pos.id;
     }
 
+    let managerEmployeeId = null;
+    if (payload.managerId) {
+      const [mgr] = await tx.select({ id: employees.id }).from(employees).where(eq(employees.userId, payload.managerId));
+      if (mgr) {
+        managerEmployeeId = mgr.id;
+      }
+    }
+
     const [newUser] = await tx.insert(users).values({
       name: payload.name,
       username: payload.username,
@@ -72,16 +81,26 @@ export async function createEmployeeTransaction(payload: CreateEmployeePayload) 
       employeeStatus: 'ACTIVE',
     }).returning({ id: users.id });
 
+    const [newEmployee] = await tx.insert(employees).values({
+      employeeCode: payload.employeeCode,
+      userId: newUser.id,
+      fullName: payload.name,
+      departmentId: departmentId,
+      positionId: positionId,
+      managerId: managerEmployeeId,
+      employmentStatus: 'ACTIVE',
+    }).returning({ id: employees.id });
+
     const startDate = payload.joinDate || new Date().toISOString().split('T')[0];
     await tx.insert(employmentContracts).values({
-      userId: newUser.id,
+      employeeId: newEmployee.id,
       contractType: payload.employmentType || 'FULL_TIME',
       status: 'ACTIVE',
       startDate: startDate,
     });
 
     await tx.insert(salaryProfiles).values({
-      userId: newUser.id,
+      employeeId: newEmployee.id,
       baseSalary: payload.officialSalary || 0,
       effectiveFrom: startDate,
       status: 'ACTIVE',
@@ -131,8 +150,12 @@ export async function updateEmployeeTransaction(userId: number, payload: UpdateE
     const [oldUser] = await tx.select().from(users).where(eq(users.id, userId));
     if (!oldUser) throw new Error('Không tìm thấy nhân viên');
 
+    const [oldEmployee] = await tx.select().from(employees).where(eq(employees.userId, userId));
+    const isManualInput = !oldEmployee;
+
     // Build mapped fields
     const updateUsersData: any = { updatedAt: new Date() };
+    const updateEmployeesData: any = { updatedAt: new Date() };
 
     // Common resolutions
     let departmentId = undefined;
@@ -143,15 +166,38 @@ export async function updateEmployeeTransaction(userId: number, payload: UpdateE
       departmentId = dept.id;
       updateUsersData.department = payload.department;
       updateUsersData.departmentId = departmentId;
+      updateEmployeesData.departmentId = departmentId;
     }
 
+    let positionId = undefined;
     if (payload.position !== undefined) {
+      if (payload.position) {
+        const [pos] = await tx.select({ id: positions.id }).from(positions).where(eq(positions.name, payload.position));
+        if (!pos) throw new Error(`Chức vụ không tồn tại: ${payload.position}`);
+        positionId = pos.id;
+      } else {
+        positionId = null;
+      }
       updateUsersData.position = payload.position;
+      updateEmployeesData.positionId = positionId;
     }
+
+    let managerEmployeeId = undefined;
     if (payload.managerId !== undefined) {
+      if (payload.managerId) {
+        const [mgr] = await tx.select({ id: employees.id }).from(employees).where(eq(employees.userId, payload.managerId));
+        if (mgr) managerEmployeeId = mgr.id;
+      } else {
+        managerEmployeeId = null;
+      }
       updateUsersData.managerId = payload.managerId;
+      updateEmployeesData.managerId = managerEmployeeId;
     }
-    if (payload.name !== undefined) updateUsersData.name = payload.name;
+
+    if (payload.name !== undefined) {
+      updateUsersData.name = payload.name;
+      updateEmployeesData.fullName = payload.name;
+    }
     if (payload.phone !== undefined) updateUsersData.phone = payload.phone;
     if (payload.email !== undefined) updateUsersData.email = payload.email;
     if (payload.birthDate !== undefined) updateUsersData.birthDate = payload.birthDate;
@@ -160,48 +206,80 @@ export async function updateEmployeeTransaction(userId: number, payload: UpdateE
     if (payload.note !== undefined) updateUsersData.note = payload.note;
     if (payload.role !== undefined) updateUsersData.role = payload.role;
     if (payload.officialSalary !== undefined) updateUsersData.officialSalary = payload.officialSalary;
-    if (payload.employeeCode !== undefined) updateUsersData.employeeCode = payload.employeeCode;
 
     if (payload.password) {
       updateUsersData.password = await bcrypt.hash(payload.password, 10);
     }
 
-    // Is this a manual promotion?
-    const isManualInput = !oldUser.employeeCode && payload.employeeCode;
-    
     if (isManualInput) {
+      // MANUAL_INPUT PROMOTION FLOW
       const finalDepartment = payload.department ?? oldUser.department;
+      const finalPosition = payload.position ?? oldUser.position;
       const finalEmploymentType = payload.employmentType ?? oldUser.employmentType ?? 'FULL_TIME';
       const finalJoinDate = payload.joinDate ?? oldUser.joinDate ?? new Date().toISOString().split('T')[0];
       const finalSalary = payload.officialSalary ?? oldUser.officialSalary ?? 0;
       const finalEmployeeCode = payload.employeeCode ?? oldUser.employeeCode;
+      const finalName = payload.name ?? oldUser.name;
 
       if (!finalEmployeeCode || !finalDepartment || !finalEmploymentType) {
         throw new Error('Chưa đủ thông tin bắt buộc để kích hoạt tài khoản MANUAL_INPUT vào HR Core. Cần: mã nhân viên, phòng ban.');
       }
-      
+
+      // Department ID must have been resolved
       let finalDepartmentId = departmentId;
       if (!finalDepartmentId) {
         const [dept] = await tx.select({ id: departments.id }).from(departments).where(eq(departments.name, finalDepartment));
         if (!dept) throw new Error(`Phòng ban không tồn tại: ${finalDepartment}`);
         finalDepartmentId = dept.id;
       }
-      updateUsersData.departmentId = finalDepartmentId;
+      
+      let finalPositionId = positionId;
+      if (!finalPositionId && finalPosition) {
+        const [pos] = await tx.select({ id: positions.id }).from(positions).where(eq(positions.name, finalPosition));
+        if (pos) finalPositionId = pos.id;
+      }
+
+      updateUsersData.employeeCode = finalEmployeeCode;
+
+      // Update Users
+      if (Object.keys(updateUsersData).length > 1) {
+        await tx.update(users).set(updateUsersData).where(eq(users.id, userId));
+      }
+
+      // Insert HR Core Tables
+      const [newEmployee] = await tx.insert(employees).values({
+        employeeCode: finalEmployeeCode,
+        userId: userId,
+        fullName: finalName,
+        departmentId: finalDepartmentId,
+        positionId: finalPositionId || null,
+        managerId: managerEmployeeId || null, // Will be null if manager not found, which is ok
+        employmentStatus: oldUser.employeeStatus === 'TERMINATED' ? 'TERMINATED' : 'ACTIVE',
+      }).returning({ id: employees.id });
 
       await tx.insert(employmentContracts).values({
-        userId: userId,
+        employeeId: newEmployee.id,
         contractType: finalEmploymentType,
         status: 'ACTIVE',
         startDate: finalJoinDate,
       });
 
       await tx.insert(salaryProfiles).values({
-        userId: userId,
+        employeeId: newEmployee.id,
         baseSalary: finalSalary,
         effectiveFrom: finalJoinDate,
         status: 'ACTIVE',
       });
+
     } else {
+      // STANDARD UPDATE FLOW
+      if (Object.keys(updateUsersData).length > 1) {
+        await tx.update(users).set(updateUsersData).where(eq(users.id, userId));
+      }
+      if (Object.keys(updateEmployeesData).length > 1) {
+        await tx.update(employees).set(updateEmployeesData).where(eq(employees.id, oldEmployee.id));
+      }
+
       // Salary Check
       if (payload.officialSalary !== undefined && payload.officialSalary !== oldUser.officialSalary) {
         const today = new Date().toISOString().split('T')[0];
@@ -209,21 +287,17 @@ export async function updateEmployeeTransaction(userId: number, payload: UpdateE
         await tx.update(salaryProfiles)
           .set({ effectiveTo: today, status: 'ARCHIVED' })
           .where(and(
-            eq(salaryProfiles.userId, userId),
+            eq(salaryProfiles.employeeId, oldEmployee.id),
             eq(salaryProfiles.status, 'ACTIVE')
           ));
         
         await tx.insert(salaryProfiles).values({
-          userId: userId,
+          employeeId: oldEmployee.id,
           baseSalary: payload.officialSalary,
           effectiveFrom: today,
           status: 'ACTIVE'
         });
       }
-    }
-
-    if (Object.keys(updateUsersData).length > 1) {
-      await tx.update(users).set(updateUsersData).where(eq(users.id, userId));
     }
 
     try {
@@ -257,6 +331,8 @@ export async function changeEmployeeStatusTransaction(userId: number, payload: S
   return await db.transaction(async (tx) => {
     const [oldUser] = await tx.select().from(users).where(eq(users.id, userId));
     if (!oldUser) throw new Error('Không tìm thấy nhân viên');
+
+    const [oldEmployee] = await tx.select().from(employees).where(eq(employees.userId, userId));
     
     await tx.update(users).set({ 
       active: payload.active, 
@@ -264,21 +340,28 @@ export async function changeEmployeeStatusTransaction(userId: number, payload: S
       updatedAt: new Date()
     }).where(eq(users.id, userId));
 
-    if (payload.employeeStatus === 'TERMINATED') {
-      const today = new Date().toISOString().split('T')[0];
-      await tx.update(employmentContracts)
-        .set({ endDate: today })
-        .where(and(
-          eq(employmentContracts.userId, userId),
-          eq(employmentContracts.status, 'ACTIVE')
-        ));
-      
-      await tx.update(salaryProfiles)
-        .set({ effectiveTo: today, status: 'ARCHIVED' })
-        .where(and(
-          eq(salaryProfiles.userId, userId),
-          eq(salaryProfiles.status, 'ACTIVE')
-        ));
+    if (oldEmployee) {
+      await tx.update(employees).set({ 
+        employmentStatus: payload.employeeStatus === 'TERMINATED' ? 'TERMINATED' : 'ACTIVE',
+        updatedAt: new Date()
+      }).where(eq(employees.id, oldEmployee.id));
+
+      if (payload.employeeStatus === 'TERMINATED') {
+        const today = new Date().toISOString().split('T')[0];
+        await tx.update(employmentContracts)
+          .set({ endDate: today })
+          .where(and(
+            eq(employmentContracts.employeeId, oldEmployee.id),
+            eq(employmentContracts.status, 'ACTIVE')
+          ));
+        
+        await tx.update(salaryProfiles)
+          .set({ effectiveTo: today, status: 'ARCHIVED' })
+          .where(and(
+            eq(salaryProfiles.employeeId, oldEmployee.id),
+            eq(salaryProfiles.status, 'ACTIVE')
+          ));
+      }
     }
 
     try {
