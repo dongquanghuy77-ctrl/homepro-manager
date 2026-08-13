@@ -858,3 +858,83 @@ export const employeeSalaryComponents = pgTable('employee_salary_components', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// ============================================================
+// P2 ACCOUNTING CORE (FINANCIAL FOUNDATION)
+// ============================================================
+
+export const accounts = pgTable('accounts', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(), // 111, 112, 334, 642...
+  name: text('name').notNull(),
+  type: text('type').notNull(), // ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE
+  parentId: integer('parent_id'), // recursive FK (can't reference self inside definition easily without AnyPgColumn, will handle via query or implicit)
+  isGroup: boolean('is_group').notNull().default(false),
+  currency: text('currency').notNull().default('VND'),
+  status: text('status').notNull().default('ACTIVE'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const accountingPeriods = pgTable('accounting_periods', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull().unique(), // e.g., "08-2026"
+  startDate: text('start_date').notNull(), // YYYY-MM-DD
+  endDate: text('end_date').notNull(), // YYYY-MM-DD
+  status: text('status').notNull().default('OPEN'), // OPEN, LOCKED, CLOSED
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const journalEntries = pgTable('journal_entries', {
+  id: serial('id').primaryKey(),
+  entryNo: text('entry_no').notNull().unique(), // JV-202608-0001
+  postingDate: text('posting_date').notNull(),
+  periodId: integer('period_id').notNull().references(() => accountingPeriods.id, { onDelete: 'restrict' }),
+  referenceType: text('reference_type'), // PAYROLL, INVENTORY, MANUAL
+  referenceId: integer('reference_id'),
+  totalDebit: real('total_debit').notNull().default(0),
+  totalCredit: real('total_credit').notNull().default(0),
+  status: text('status').notNull().default('DRAFT'), // DRAFT, POSTED, CANCELLED
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const journalEntryLines = pgTable('journal_entry_lines', {
+  id: serial('id').primaryKey(),
+  journalEntryId: integer('journal_entry_id').notNull().references(() => journalEntries.id, { onDelete: 'cascade' }),
+  accountId: integer('account_id').notNull().references(() => accounts.id, { onDelete: 'restrict' }),
+  departmentId: integer('department_id').references(() => departments.id, { onDelete: 'set null' }), // Cost Center
+  partyType: text('party_type'), // EMPLOYEE, CUSTOMER, SUPPLIER
+  partyId: integer('party_id'),
+  debit: real('debit').notNull().default(0),
+  credit: real('credit').notNull().default(0),
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+import { relations } from 'drizzle-orm';
+
+export const journalEntriesRelations = relations(journalEntries, ({ one, many }) => ({
+  period: one(accountingPeriods, {
+    fields: [journalEntries.periodId],
+    references: [accountingPeriods.id],
+  }),
+  lines: many(journalEntryLines),
+}));
+
+export const journalEntryLinesRelations = relations(journalEntryLines, ({ one }) => ({
+  journalEntry: one(journalEntries, {
+    fields: [journalEntryLines.journalEntryId],
+    references: [journalEntries.id],
+  }),
+  account: one(accounts, {
+    fields: [journalEntryLines.accountId],
+    references: [accounts.id],
+  }),
+  department: one(departments, {
+    fields: [journalEntryLines.departmentId],
+    references: [departments.id],
+  })
+}));

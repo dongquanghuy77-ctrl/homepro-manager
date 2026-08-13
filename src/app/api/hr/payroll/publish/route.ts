@@ -41,18 +41,19 @@ export async function PATCH(req: NextRequest) {
   }
 
   // ── Chỉ publish các bản ghi đang DRAFT ────────────────────────────────────
-  let updated: { id: number }[];
+  let updated: any[]; // fetch full records needed for accounting
+
+  const publishQuery = db
+    .update(monthlyPayroll)
+    .set({
+      status:      'PUBLISHED',
+      publishedBy: session.id,
+      publishedAt: new Date(),
+      updatedAt:   new Date(),
+    });
 
   if (ids === 'all') {
-    // Publish TẤT CẢ DRAFT của tháng
-    updated = await db
-      .update(monthlyPayroll)
-      .set({
-        status:      'PUBLISHED',
-        publishedBy: session.id,
-        publishedAt: new Date(),
-        updatedAt:   new Date(),
-      })
+    updated = await publishQuery
       .where(
         and(
           eq(monthlyPayroll.month,  month),
@@ -60,30 +61,21 @@ export async function PATCH(req: NextRequest) {
           eq(monthlyPayroll.status, 'DRAFT'),
         )
       )
-      .returning({ id: monthlyPayroll.id });
+      .returning();
   } else {
-    // Publish từng ID được chọn (chỉ DRAFT)
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: 'ids phải là mảng ID hoặc "all"' }, { status: 400 });
     }
-
-    updated = await db
-      .update(monthlyPayroll)
-      .set({
-        status:      'PUBLISHED',
-        publishedBy: session.id,
-        publishedAt: new Date(),
-        updatedAt:   new Date(),
-      })
+    updated = await publishQuery
       .where(
         and(
           inArray(monthlyPayroll.id, ids),
           eq(monthlyPayroll.month,   month),
           eq(monthlyPayroll.year,    year),
-          eq(monthlyPayroll.status,  'DRAFT'), // Bảo vệ: chỉ update DRAFT
+          eq(monthlyPayroll.status,  'DRAFT'),
         )
       )
-      .returning({ id: monthlyPayroll.id });
+      .returning();
   }
 
   if (updated.length > 0) {
@@ -94,6 +86,66 @@ export async function PATCH(req: NextRequest) {
       entityId: -1,
       newValue: { message: `Công bố ${updated.length} bảng lương tháng ${month}/${year}` }
     });
+
+    // --- ACCOUNTING BRIDGE INTEGRATION ---
+    // Aggregate values for Journal Entry
+    try {
+      const { AccountingService } = await import('@/lib/accounting/services');
+      const { accountingPeriods, accounts } = await import('@/db/schema');
+      
+      // Get Period ID for the month/year
+      const periodName = `${String(month).padStart(2, '0')}-${year}`;
+      const period = await db.query.accountingPeriods.findFirst({
+        where: eq(accountingPeriods.name, periodName)
+      });
+
+      if (period) {
+        let totalNet = 0;
+        let totalBHXH = 0; // employee deduction
+        let totalPIT = 0;
+        let totalGross = 0;
+        
+        for (const p of updated) {
+          totalNet += p.netSalary || 0;
+          totalBHXH += p.insuranceDeduction || 0; 
+          totalPIT += p.taxDeduction || 0;
+          totalGross += p.grossSalary || 0;
+        }
+
+        // Get Account IDs
+        const acc334 = await db.query.accounts.findFirst({ where: eq(accounts.code, '3341') });
+        const acc3383 = await db.query.accounts.findFirst({ where: eq(accounts.code, '3383') });
+        const acc3335 = await db.query.accounts.findFirst({ where: eq(accounts.code, '3335') });
+        const acc642 = await db.query.accounts.findFirst({ where: eq(accounts.code, '6421') });
+
+        if (acc334 && acc3383 && acc3335 && acc642) {
+          // Adjust gross to match debits/credits if they differ (Accounting requires exact match)
+          // Simple model: 
+          // Debit 642: Gross Salary
+          // Credit 3383: Insurance (Employee portion)
+          // Credit 3335: PIT
+          // Credit 3341: Net Salary
+          
+          await AccountingService.createJournalEntry({
+            entryNo: `JV-PR-${periodName}-${Date.now().toString().slice(-4)}`,
+            postingDate: new Date().toISOString().split('T')[0],
+            periodId: period.id,
+            referenceType: 'PAYROLL',
+            description: `Hạch toán lương tháng ${month}/${year}`,
+            lines: [
+              { accountId: acc642.id, debit: totalGross, credit: 0 },
+              { accountId: acc3383.id, debit: 0, credit: totalBHXH },
+              { accountId: acc3335.id, debit: 0, credit: totalPIT },
+              { accountId: acc334.id, debit: 0, credit: totalNet }
+            ]
+          });
+        }
+      }
+    } catch (err: any) {
+      console.error('Failed to create Journal Entry for Payroll:', err);
+      // We don't block the API response if Accounting Bridge fails, 
+      // but in a strict system we might.
+    }
   }
 
   return NextResponse.json({
