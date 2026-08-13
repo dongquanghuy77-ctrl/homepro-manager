@@ -15,7 +15,7 @@ export default function PayrollPage() {
   useEffect(() => {
     if (!data || isLoading) return;
     const role = data?.role as string | undefined;
-    if (!role || !['ADMIN', 'MANAGER', 'SUPERVISOR'].includes(role)) {
+    if (!role || !['ADMIN', 'MANAGER', 'SUPERVISOR', 'ACCOUNTANT', 'HR'].includes(role)) {
       router.replace('/dashboard');
     }
   }, [data, isLoading, router]);
