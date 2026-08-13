@@ -1,6 +1,8 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
+const BASE_URL = 'https://homepro-manager-psi.vercel.app';
+
 const accounts = [
   'demo',       // STAFF
   'phuc.tran',  // WORKER
@@ -42,7 +44,7 @@ async function run() {
 
     try {
       // 1. LOGIN
-      await page.goto('http://localhost:3000/login');
+      await page.goto(`${BASE_URL}/login`);
       await page.waitForLoadState('networkidle');
       
       await page.fill('input[type="text"], input[type="email"]', account);
@@ -67,7 +69,7 @@ async function run() {
       try {
         const cookies = await context.cookies();
         const sessionCookie = cookies.find(c => c.name === 'homepro_session')?.value || '';
-        const apiRes = await context.request.get('http://localhost:3000/api/auth/me', {
+        const apiRes = await context.request.get(`${BASE_URL}/api/auth/me`, {
            headers: { 'Cookie': `homepro_session=${sessionCookie}` }
         });
         if (apiRes.ok()) {
@@ -115,7 +117,7 @@ async function run() {
       try {
         const cookies = await context.cookies();
         const sessionCookie = cookies.find(c => c.name === 'homepro_session')?.value || '';
-        const apiRes = await context.request.get('http://localhost:3000/api/hr/payroll', {
+        const apiRes = await context.request.get(`${BASE_URL}/api/hr/payroll`, {
            headers: { 'Cookie': `homepro_session=${sessionCookie}` }
         });
         payrollRes = apiRes.status();

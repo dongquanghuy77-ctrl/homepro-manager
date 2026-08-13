@@ -17,7 +17,7 @@ if (REDIS_URL && REDIS_TOKEN) {
 
   loginRatelimitInstance = new Ratelimit({
     redis,
-    limiter:   Ratelimit.slidingWindow(5, '60 s'),
+    limiter:   Ratelimit.slidingWindow(100, '60 s'),
     analytics: true,
     prefix:    'homepro:login',
   });
