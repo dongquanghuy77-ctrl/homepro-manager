@@ -231,7 +231,7 @@ export default function EmployeeDashboardClient({
   }
 
   // GPS Attendance Flow
-  async function handleGpsAttendance() {
+  async function handleGpsAttendance(type: 'IN' | 'OUT') {
     setGpsLoading(true);
     setGpsError('');
     setGpsSuccess('');
@@ -249,8 +249,8 @@ export default function EmployeeDashboardClient({
         const locationString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         setCoordsStr(locationString);
 
-        const isCheckOut = todayRecord?.checkIn && !todayRecord?.checkOut;
-        const clockType = isCheckOut ? 'OUT' : 'IN';
+        const clockType = type;
+        const isCheckOut = clockType === 'OUT';
         const endpoint = isCheckOut 
           ? '/api/hr/attendance/checkout' 
           : '/api/hr/attendance/checkin';
@@ -560,56 +560,77 @@ export default function EmployeeDashboardClient({
                 <MapPin size={12} className="text-primary" />
                 <span>Trạng thái: </span>
                 <strong style={{
-                  color: todayRecord?.checkOut ? '#EF4444' : todayRecord?.checkIn ? '#10B981' : '#F59E0B'
+                  color: todayRecord?.checkOut ? '#10B981' : todayRecord?.checkIn ? '#3B82F6' : '#F59E0B'
                 }}>
-                  {todayRecord?.checkOut ? 'Đã ra ca' : todayRecord?.checkIn ? 'Đang làm việc' : 'Chưa vào ca'}
+                  {todayRecord?.checkOut ? 'Đã hoàn thành ca' : todayRecord?.checkIn ? 'Đang làm việc' : 'Chưa vào ca'}
                 </strong>
               </div>
 
-              {/* Big Circular GPS Attendance Button */}
-              <div style={{ position: 'relative', display: 'inline-block', margin: '0 auto 16px auto' }}>
+              {/* 2 Buttons for Explicit State Separation */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                {/* NÚT VÀO CA */}
                 <button
-                  onClick={handleGpsAttendance}
-                  disabled={gpsLoading || !!todayRecord?.checkOut}
+                  onClick={() => handleGpsAttendance('IN')}
+                  disabled={gpsLoading || !!todayRecord?.checkIn}
                   style={{
-                    width: 140,
-                    height: 140,
-                    borderRadius: '50%',
-                    background: todayRecord?.checkOut
-                      ? '#475569'
-                      : todayRecord?.checkIn
-                        ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
-                        : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    border: '8px solid rgba(255, 255, 255, 0.05)',
-                    boxShadow: todayRecord?.checkOut
-                      ? 'none'
-                      : todayRecord?.checkIn
-                        ? '0 0 20px rgba(245, 158, 11, 0.4)'
-                        : '0 0 20px rgba(16, 185, 129, 0.4)',
-                    color: '#fff',
+                    padding: '20px 10px',
+                    borderRadius: 16,
+                    background: todayRecord?.checkIn
+                      ? '#334155'
+                      : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: todayRecord?.checkIn ? 'none' : '0 8px 20px rgba(16, 185, 129, 0.3)',
+                    color: todayRecord?.checkIn ? '#94A3B8' : '#fff',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    cursor: gpsLoading || !!todayRecord?.checkOut ? 'default' : 'pointer',
+                    cursor: gpsLoading || !!todayRecord?.checkIn ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  <MapPin size={32} style={{ marginBottom: 4 }} />
-                  <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '0.02em' }}>
-                    {gpsLoading ? 'ĐANG LẤY VỊ TRÍ' : todayRecord?.checkOut ? 'ĐÃ RA CA' : todayRecord?.checkIn ? 'RA CA GPS' : 'VÀO CA GPS'}
+                  <MapPin size={28} style={{ marginBottom: 8, opacity: todayRecord?.checkIn ? 0.5 : 1 }} />
+                  <span style={{ fontSize: 14, fontWeight: 800, letterSpacing: '0.02em' }}>
+                    VÀO CA GPS
+                  </span>
+                </button>
+
+                {/* NÚT RA CA */}
+                <button
+                  onClick={() => handleGpsAttendance('OUT')}
+                  disabled={gpsLoading || !todayRecord?.checkIn || !!todayRecord?.checkOut}
+                  style={{
+                    padding: '20px 10px',
+                    borderRadius: 16,
+                    background: !todayRecord?.checkIn || !!todayRecord?.checkOut
+                      ? '#334155'
+                      : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: !todayRecord?.checkIn || !!todayRecord?.checkOut ? 'none' : '0 8px 20px rgba(245, 158, 11, 0.3)',
+                    color: !todayRecord?.checkIn || !!todayRecord?.checkOut ? '#94A3B8' : '#fff',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: gpsLoading || !todayRecord?.checkIn || !!todayRecord?.checkOut ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <MapPin size={28} style={{ marginBottom: 8, opacity: !todayRecord?.checkIn || !!todayRecord?.checkOut ? 0.5 : 1 }} />
+                  <span style={{ fontSize: 14, fontWeight: 800, letterSpacing: '0.02em' }}>
+                    RA CA GPS
                   </span>
                 </button>
               </div>
 
               {gpsError && (
-                <div className="alert alert-danger" style={{ fontSize: 12, marginTop: 12, padding: '8px 12px' }}>
+                <div className="alert alert-danger" style={{ fontSize: 12, marginTop: 12, padding: '8px 12px', textAlign: 'left' }}>
                   ⚠️ {gpsError}
                 </div>
               )}
 
               {gpsSuccess && (
-                <div className="alert alert-success" style={{ fontSize: 12, marginTop: 12, padding: '8px 12px' }}>
+                <div className="alert alert-success" style={{ fontSize: 12, marginTop: 12, padding: '8px 12px', textAlign: 'left' }}>
                   ✅ {gpsSuccess}
                 </div>
               )}
@@ -620,31 +641,29 @@ export default function EmployeeDashboardClient({
                 </div>
               )}
 
-              {/* Shift info display */}
-              {todayRecord?.checkIn && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 12,
-                  marginTop: 20,
-                  borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                  paddingTop: 16,
-                  fontSize: 13
-                }}>
-                  <div>
-                    <div style={{ color: '#64748B', fontSize: 11 }}>GIỜ VÀO CA</div>
-                    <div style={{ fontWeight: 700, color: '#F8FAFC', fontSize: 15, marginTop: 2 }}>
-                      {formatTime(todayRecord.checkIn)}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ color: '#64748B', fontSize: 11 }}>GIỜ RA CA</div>
-                    <div style={{ fontWeight: 700, color: '#F8FAFC', fontSize: 15, marginTop: 2 }}>
-                      {formatTime(todayRecord.checkOut)}
-                    </div>
+              {/* ALWAYS SHOW Shift info display */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 12,
+                marginTop: 20,
+                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                paddingTop: 16,
+                fontSize: 13
+              }}>
+                <div>
+                  <div style={{ color: '#94A3B8', fontSize: 11 }}>Giờ vào ca:</div>
+                  <div style={{ fontWeight: 700, color: '#F8FAFC', fontSize: 16, marginTop: 4 }}>
+                    {formatTime(todayRecord?.checkIn ?? null)}
                   </div>
                 </div>
-              )}
+                <div>
+                  <div style={{ color: '#94A3B8', fontSize: 11 }}>Giờ ra ca:</div>
+                  <div style={{ fontWeight: 700, color: '#F8FAFC', fontSize: 16, marginTop: 4 }}>
+                    {formatTime(todayRecord?.checkOut ?? null)}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* QUICK ACTIONS BUTTONS */}
