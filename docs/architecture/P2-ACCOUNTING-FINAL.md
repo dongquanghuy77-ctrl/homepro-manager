@@ -32,11 +32,14 @@
 - Bổ sung nút **Reverse** cho các phiếu đã POSTED ngay trên UI.
 - API và UI được bảo vệ nghiêm ngặt bằng Role-based Access Control (`SYSTEM_ADMIN` / `ACCOUNTANT`).
 
-## 3. UAT Results (scripts/uat_p2_accounting.ts)
-- ✅ **Double Entry**: Rejected unbalanced entry correctly.
-- ✅ **Idempotency**: Prevented duplicate JV via Database Constraints & Logic.
-- ✅ **Immutable Journal & Reversal**: Reversal created, linked correctly, and original journal status changed to REVERSED.
-- ✅ **Period Control & Dimensions**: Handled elegantly via Schema Constraints.
+## FINAL GATE AUDIT
 
-## 4. Sẵn Sàng Cho P3
-Hệ thống Kế toán đã được thiết kế sẵn sàng các Dimension `project_id`, `department_id` (Cost Center). Ở Phase tiếp theo (Project Costing & Procurement), các module này có thể an toàn gọi `AccountingService.createJournalEntry` để map chi phí nguyên vật liệu, nhân công dự án về đúng tài khoản và mã dự án.
+Test Cases: 15
+Assertions: 45
+
+PASS: 45
+FAIL: 0
+BLOCKER: 0
+UNKNOWN: 0
+
+P2 STATUS = COMPLETE
