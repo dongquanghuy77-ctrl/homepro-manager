@@ -100,17 +100,14 @@ export class InventoryService {
     }
 
     // 5. Update Balance
-    const newOnHand = (bal.quantity || 0) + data.quantity;
-    const newAvailable = (bal.available_quantity || 0) + data.quantity;
-    
-    await tx.execute(sql`
-      UPDATE inventory_balances 
-      SET quantity = ${newOnHand}, 
-          available_quantity = ${newAvailable}, 
-          unit_cost = ${unitCost},
-          last_updated = NOW()
-      WHERE id = ${bal.id}
-    `);
+    const [updated] = await tx.update(inventoryBalances)
+      .set({
+        quantity: Number(bal.quantity || 0) + Number(data.quantity),
+        availableQuantity: Number(bal.available_quantity || 0) + Number(data.quantity),
+        unitCost: unitCost
+      })
+      .where(eq(inventoryBalances.id, bal.id))
+      .returning();
 
     // 6. Create Ledger Entry
     const [ledger] = await tx.insert(inventoryTransactions).values({
@@ -129,7 +126,7 @@ export class InventoryService {
       notes: data.notes
     }).returning();
 
-    return { ledger, newBalance: { quantity: newOnHand, available: newAvailable, unitCost } };
+    return { ledger, newBalance: { quantity: Number(updated.quantity), available: Number(updated.availableQuantity), unitCost } };
   }
 
   // ==========================================

@@ -1,0 +1,74 @@
+const fs = require('fs');
+const path = require('path');
+let content = fs.readFileSync(path.join(__dirname, '../src/db/schema.ts'), 'utf-8');
+
+// 1. Add boqs and boq_sections before boqItems
+if (!content.includes("export const boqs = pgTable('boqs'")) {
+  const boqTables = `
+// ============================================================
+// BOQ (Bill of Quantities)
+// ============================================================
+export const boqs = pgTable('boqs', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  version: text('version').notNull().default('1.0'),
+  status: text('status').notNull().default('DRAFT'), // DRAFT, SUBMITTED, APPROVED, LOCKED
+  revisionReason: text('revision_reason'),
+  totalAmount: numeric('total_amount', { precision: 20, scale: 2, mode: 'number' }).default(0),
+  createdBy: integer('created_by').references(() => users.id),
+  approvedBy: integer('approved_by').references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const boqSections = pgTable('boq_sections', {
+  id: serial('id').primaryKey(),
+  boqId: integer('boq_id').notNull().references(() => boqs.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  parentSectionId: integer('parent_section_id'), // For nested sections
+  sequence: integer('sequence').notNull().default(0),
+});
+`;
+
+  content = content.replace(/\/\/ ============================================================\n\/\/ BOQ ITEMS/, boqTables + '\n// ============================================================\n// BOQ ITEMS');
+}
+
+// 2. Modify boqItems
+if (!content.includes("boqId: integer('boq_id')")) {
+  content = content.replace(/(export const boqItems = pgTable\('boq_items', \{)/, "$1\n  boqId: integer('boq_id').references(() => boqs.id, { onDelete: 'cascade' }),\n  sectionId: integer('section_id').references(() => boqSections.id),\n  productId: integer('product_id').references(() => materials.id),");
+}
+
+// 3. Add type to materials
+if (!content.includes("type: text('type')")) {
+    content = content.replace(/(export const materials = pgTable\('materials', \{[\s\S]+?)(category: text)/, "$1type: text('type').default('MATERIAL'), // FINISHED_GOOD, SUB_ASSEMBLY, RAW_MATERIAL, HARDWARE\n  $2");
+}
+
+// 4. Modify boms
+if (!content.includes("status: text('status')") && content.includes("export const boms = pgTable('boms'")) {
+    content = content.replace(/(export const boms = pgTable\('boms', \{[\s\S]+?)(isActive: boolean\('is_active'\)\.default\(true\)),/, "$1status: text('status').notNull().default('ACTIVE'), // DRAFT, ACTIVE, OBSOLETE\n  revisionReason: text('revision_reason'),\n  createdBy: integer('created_by').references(() => users.id),\n  approvedBy: integer('approved_by').references(() => users.id),");
+}
+
+// 5. Modify bomItems
+if (!content.includes("scrapPercentage: numeric") && content.includes("export const bomItems = pgTable('bom_items'")) {
+    content = content.replace(/(export const bomItems = pgTable\('bom_items', \{[\s\S]+?)(wastePercentage: numeric)/, "$1scrapPercentage: numeric('scrap_percentage', { precision: 18, scale: 4, mode: 'number' }).default(0),\n  isRequired: boolean('is_required').default(true),\n  position: text('position'),\n  notes: text('notes'),\n  $2");
+}
+
+// 6. Add materialConversions
+if (!content.includes("export const materialConversions = pgTable('material_conversions'")) {
+  const conversionsTable = `
+export const materialConversions = pgTable('material_conversions', {
+  id: serial('id').primaryKey(),
+  materialId: integer('material_id').notNull().references(() => materials.id, { onDelete: 'cascade' }),
+  fromUnit: text('from_unit').notNull(),
+  toUnit: text('to_unit').notNull(),
+  conversionFactor: numeric('conversion_factor', { precision: 18, scale: 4, mode: 'number' }).notNull(),
+});
+`;
+
+  content = content.replace(/\/\/ ============================================================================\n\/\/ P8 QUALITY CONTROL/, conversionsTable + '\n// ============================================================================\n// P8 QUALITY CONTROL');
+}
+
+fs.writeFileSync(path.join(__dirname, '../src/db/schema.ts'), content);
+console.log('BOQ/BOM Schema refactoring complete.');

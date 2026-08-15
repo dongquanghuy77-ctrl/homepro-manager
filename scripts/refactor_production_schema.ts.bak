@@ -1,0 +1,113 @@
+const fs = require('fs');
+const path = require('path');
+
+const schemaPath = path.join(__dirname, '../src/db/schema.ts');
+let content = fs.readFileSync(schemaPath, 'utf-8');
+
+// 1. Add workCenters before machines (machines is at ~1232)
+if (!content.includes("export const workCenters = pgTable('work_centers'")) {
+    const workCentersCode = `
+export const workCenters = pgTable('work_centers', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(),
+  name: text('name').notNull(),
+  departmentId: integer('department_id').references(() => departments.id),
+  managerId: integer('manager_id').references(() => users.id),
+  standardHourlyCost: numeric('standard_hourly_cost', { precision: 20, scale: 2, mode: 'number' }).default(0),
+  dailyCapacityHours: numeric('daily_capacity_hours', { precision: 18, scale: 4, mode: 'number' }).default(8),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow()
+});
+`;
+    content = content.replace(/export const machines = pgTable/, workCentersCode + '\nexport const machines = pgTable');
+}
+
+// 2. Modify machines
+if (!content.includes("workCenterId: integer('work_center_id')")) {
+    content = content.replace(/(export const machines = pgTable\('machines', \{[^}]+)(createdAt: timestamp)/, "$1workCenterId: integer('work_center_id').references(() => workCenters.id),\n  $2");
+}
+
+// 3. Modify bomItems
+if (!content.includes("wastePercentage: numeric('waste_percentage'")) {
+    content = content.replace(/(export const bomItems = pgTable\('bom_items', \{[^}]+)(unit: text\('unit'\)\.notNull\(\))/, "$1$2,\n  wastePercentage: numeric('waste_percentage', { precision: 18, scale: 4, mode: 'number' }).default(0),\n  workCenterId: integer('work_center_id').references(() => workCenters.id)");
+}
+
+// 4. Modify routingSteps
+if (!content.includes("workCenterId: integer('work_center_id')") && content.includes('export const routingSteps')) {
+    content = content.replace(/(export const routingSteps = pgTable\('routing_steps', \{[^}]+)(estimatedMinutes: doublePrecision)/, "$1workCenterId: integer('work_center_id').references(() => workCenters.id),\n  $2");
+}
+
+// 5. Modify productionOrders
+if (!content.includes("priority: text('priority')") && content.includes('export const productionOrders')) {
+    content = content.replace(/(export const productionOrders = pgTable\('production_orders', \{[^}]+)(status: text\('status'\))/, "$1priority: text('priority').notNull().default('NORMAL'),\n  departmentId: integer('department_id').references(() => departments.id),\n  assignedManagerId: integer('assigned_manager_id').references(() => users.id),\n  requiresQc: boolean('requires_qc').default(true),\n  qcStatus: text('qc_status').notNull().default('PENDING'),\n  $2");
+}
+
+// Fix doublePrecision to numeric for production orders & work orders
+content = content.replace(/plannedQuantity: doublePrecision\('planned_quantity'\)/g, "plannedQuantity: numeric('planned_quantity', { precision: 18, scale: 4, mode: 'number' })");
+content = content.replace(/completedQuantity: doublePrecision\('completed_quantity'\)/g, "completedQuantity: numeric('completed_quantity', { precision: 18, scale: 4, mode: 'number' })");
+
+// 6. Modify workOrders
+if (!content.includes("requiresQc: boolean('requires_qc')") && content.includes('export const workOrders')) {
+    content = content.replace(/(export const workOrders = pgTable\('work_orders', \{[^}]+)(status: text\('status'\))/, "$1workCenterId: integer('work_center_id').references(() => workCenters.id),\n  requiresQc: boolean('requires_qc').default(false),\n  qcStatus: text('qc_status').default('PENDING'),\n  rejectedQuantity: numeric('rejected_quantity', { precision: 18, scale: 4, mode: 'number' }).notNull().default(0),\n  scrapQuantity: numeric('scrap_quantity', { precision: 18, scale: 4, mode: 'number' }).notNull().default(0),\n  $2");
+}
+
+// Fix material consumptions double precision
+content = content.replace(/actualQuantity: doublePrecision\('actual_quantity'\)/g, "actualQuantity: numeric('actual_quantity', { precision: 18, scale: 4, mode: 'number' })");
+content = content.replace(/scrapQuantity: doublePrecision\('scrap_quantity'\)/g, "scrapQuantity: numeric('scrap_quantity', { precision: 18, scale: 4, mode: 'number' })");
+content = content.replace(/wasteQuantity: doublePrecision\('waste_quantity'\)/g, "wasteQuantity: numeric('waste_quantity', { precision: 18, scale: 4, mode: 'number' })");
+
+// 7. Add jobCards, scrapLogs, productionCostings at the end
+if (!content.includes("export const jobCards = pgTable('job_cards'")) {
+    const additionalTables = `
+// ============================================================================
+// P5 SHOP FLOOR & JOB CARDS
+// ============================================================================
+
+export const jobCards = pgTable('job_cards', {
+  id: serial('id').primaryKey(),
+  workOrderId: integer('work_order_id').notNull().references(() => workOrders.id, { onDelete: 'cascade' }),
+  employeeId: integer('employee_id').notNull().references(() => users.id),
+  startTime: timestamp('start_time').notNull(),
+  endTime: timestamp('end_time'),
+  durationMinutes: numeric('duration_minutes', { precision: 18, scale: 4, mode: 'number' }),
+  completedQuantity: numeric('completed_quantity', { precision: 18, scale: 4, mode: 'number' }).notNull().default(0),
+  rejectedQuantity: numeric('rejected_quantity', { precision: 18, scale: 4, mode: 'number' }).notNull().default(0),
+  status: text('status').notNull().default('IN_PROGRESS'), // IN_PROGRESS, PAUSED, COMPLETED, CANCELLED
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const scrapLogs = pgTable('scrap_logs', {
+  id: serial('id').primaryKey(),
+  workOrderId: integer('work_order_id').notNull().references(() => workOrders.id),
+  materialId: integer('material_id').references(() => materials.id), // If raw material
+  productId: integer('product_id').references(() => materials.id), // If finished good scrap
+  quantity: numeric('quantity', { precision: 18, scale: 4, mode: 'number' }).notNull(),
+  reason: text('reason').notNull(), // Phế liệu, Hỏng, Lỗi CNC, Sai kích thước, Lệch vân, v.v.
+  employeeId: integer('employee_id').references(() => users.id),
+  photoUrl: text('photo_url'),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const productionCostings = pgTable('production_costings', {
+  id: serial('id').primaryKey(),
+  productionOrderId: integer('production_order_id').notNull().references(() => productionOrders.id, { onDelete: 'cascade' }),
+  materialCostStandard: numeric('material_cost_standard', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  materialCostActual: numeric('material_cost_actual', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  laborCostStandard: numeric('labor_cost_standard', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  laborCostActual: numeric('labor_cost_actual', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  machineCostStandard: numeric('machine_cost_standard', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  machineCostActual: numeric('machine_cost_actual', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  overheadCostStandard: numeric('overhead_cost_standard', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  overheadCostActual: numeric('overhead_cost_actual', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  totalCostStandard: numeric('total_cost_standard', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  totalCostActual: numeric('total_cost_actual', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
+  calculatedAt: timestamp('calculated_at').defaultNow()
+});
+
+`;
+    content = content.replace(/\/\/ ============================================================================\n\/\/ P8 QUALITY CONTROL & ACCEPTANCE/, additionalTables + '\n// ============================================================================\n// P8 QUALITY CONTROL & ACCEPTANCE');
+}
+
+fs.writeFileSync(schemaPath, content);
+console.log('Production schema refactoring complete.');
