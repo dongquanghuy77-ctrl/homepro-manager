@@ -92,9 +92,15 @@ export const WORKSPACES: WorkspaceConfig[] = [
     id: 'inventory',
     label: 'Vật tư - Kho',
     icon: 'Package',
-    routes: ['/vat-tu'],
+    routes: ['/inventory'],
     navItems: [
-      { id: 'materials', label: 'Danh mục Vật tư', icon: 'Package', href: '/vat-tu', sprint: 4 },
+      { id: 'inv-dash', label: 'Tổng quan Kho', icon: 'LayoutDashboard', href: '/inventory/dashboard', sprint: 4 },
+      { id: 'materials', label: 'Danh mục Vật tư', icon: 'Package', href: '/inventory/materials', sprint: 4 },
+      { id: 'suppliers', label: 'Nhà cung cấp', icon: 'Users', href: '/inventory/suppliers', sprint: 6 },
+      { id: 'warehouses', label: 'Kho & Kệ', icon: 'Grid', href: '/inventory/warehouses', sprint: 4 },
+      { id: 'transactions', label: 'Nhập/Xuất/Chuyển', icon: 'Activity', href: '/inventory/transactions', sprint: 4 },
+      { id: 'reservations', label: 'Giữ hàng Dự án', icon: 'Briefcase', href: '/inventory/reservations', sprint: 4 },
+      { id: 'stock-counts', label: 'Kiểm kê', icon: 'ClipboardList', href: '/inventory/counts', sprint: 4 },
     ],
   },
   {

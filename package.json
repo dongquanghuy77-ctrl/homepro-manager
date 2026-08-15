@@ -10,7 +10,8 @@
     "db:push": "drizzle-kit push",
     "db:seed": "node scripts/seed.mjs",
     "migrate": "node scripts/migrate_sprint3.mjs",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "seed:golden": "tsx scripts/seed-golden.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

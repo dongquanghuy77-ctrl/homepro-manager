@@ -7,6 +7,7 @@ const nextConfig = {
     serverComponentsExternalPackages: ['better-sqlite3'],
     instrumentationHook: true,
   },
+  transpilePackages: ['@sentry/nextjs', '@sentry/node', '@sentry/server-utils'],
 
   async headers() {
     return [

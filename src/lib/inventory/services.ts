@@ -4,20 +4,18 @@ import {
   warehouses,
   inventoryBalances,
   inventoryTransactions,
+  inventoryReservations,
   materials,
-  accounts
+  accounts,
+  inventoryCounts,
+  inventoryCountItems,
+  suppliers
 } from '@/db/schema';
 import { AccountingService } from '@/lib/accounting/services';
 
 export class InventoryService {
   
-  // ==========================================
-  // WAREHOUSE
-  // ==========================================
-  static async createWarehouse(data: any) {
-    const [wh] = await db.insert(warehouses).values(data).returning();
-    return wh;
-  }
+
 
   // ==========================================
   // CORE MOVEMENT ENGINE
@@ -106,7 +104,7 @@ export class InventoryService {
         availableQuantity: Number(bal.available_quantity || 0) + Number(data.quantity),
         unitCost: unitCost
       })
-      .where(eq(inventoryBalances.id, bal.id))
+      .where(eq(inventoryBalances.id, Number(bal.id)))
       .returning();
 
     // 6. Create Ledger Entry
@@ -154,6 +152,33 @@ export class InventoryService {
 
   static async issueMaterial(data: any) {
     return await db.transaction(async (tx) => {
+      // If issuing from a reservation, handle reservation updates first
+      if (data.reservationId) {
+        const reservations = await tx.select().from(inventoryReservations).where(eq(inventoryReservations.id, data.reservationId));
+        const resv = reservations[0];
+        if (!resv || resv.status !== 'RESERVED') {
+          throw new Error('Invalid or already processed reservation');
+        }
+
+        // Release reservation quantity
+        const balanceQuery = await tx.execute(sql`SELECT * FROM inventory_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} FOR UPDATE`);
+        const bal = balanceQuery.rows[0];
+        if (bal) {
+          // Re-add to available quantity since processMovement will subtract it again
+          await tx.update(inventoryBalances)
+            .set({
+              reservedQuantity: Number(bal.reserved_quantity || 0) - Number(data.quantity),
+              availableQuantity: Number(bal.available_quantity || 0) + Number(data.quantity)
+            })
+            .where(eq(inventoryBalances.id, Number(bal.id)));
+        }
+
+        // Mark reservation as ISSUED or partially update it (assuming full issue for simplicity here)
+        await tx.update(inventoryReservations)
+          .set({ status: 'ISSUED' })
+          .where(eq(inventoryReservations.id, data.reservationId));
+      }
+
       const res = await this.processMovement(tx, {
         movementNumber: `ISS-${Date.now()}-${data.materialId}`,
         movementType: 'ISSUE',
@@ -195,6 +220,80 @@ export class InventoryService {
     });
   }
 
+  // ==========================================
+  // RESERVATIONS
+  // ==========================================
+  static async createReservation(data: {
+    materialId: number;
+    warehouseId: number;
+    referenceType: string;
+    referenceId: string;
+    quantity: number;
+    notes?: string;
+  }) {
+    return await db.transaction(async (tx) => {
+      // Lock balance
+      const balanceQuery = await tx.execute(sql`SELECT * FROM inventory_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} AND location_id IS NULL FOR UPDATE`);
+      const bal = balanceQuery.rows[0];
+
+      if (!bal || Number(bal.available_quantity || 0) < data.quantity) {
+        throw new Error('Insufficient available stock for reservation');
+      }
+
+      // Update balances
+      await tx.update(inventoryBalances)
+        .set({
+          availableQuantity: Number(bal.available_quantity || 0) - data.quantity,
+          reservedQuantity: Number(bal.reserved_quantity || 0) + data.quantity
+        })
+        .where(eq(inventoryBalances.id, Number(bal.id)));
+
+      // Create reservation record
+      const [resv] = await tx.insert(inventoryReservations).values({
+        materialId: data.materialId,
+        warehouseId: data.warehouseId,
+        referenceType: data.referenceType,
+        referenceId: data.referenceId,
+        quantity: data.quantity,
+        status: 'ACTIVE',
+        notes: data.notes
+      }).returning();
+
+      return resv;
+    });
+  }
+
+  static async cancelReservation(reservationId: number) {
+    return await db.transaction(async (tx) => {
+      const reservations = await tx.select().from(inventoryReservations).where(eq(inventoryReservations.id, reservationId));
+      const resv = reservations[0];
+
+      if (!resv || resv.status !== 'ACTIVE') {
+        throw new Error('Invalid or already processed reservation');
+      }
+
+      // Lock balance
+      const balanceQuery = await tx.execute(sql`SELECT * FROM inventory_balances WHERE material_id = ${resv.materialId} AND warehouse_id = ${resv.warehouseId} AND location_id IS NULL FOR UPDATE`);
+      const bal = balanceQuery.rows[0];
+
+      if (bal) {
+        await tx.update(inventoryBalances)
+          .set({
+            availableQuantity: Number(bal.available_quantity || 0) + Number(resv.quantity),
+            reservedQuantity: Math.max(0, Number(bal.reserved_quantity || 0) - Number(resv.quantity))
+          })
+          .where(eq(inventoryBalances.id, Number(bal.id)));
+      }
+
+      const [updated] = await tx.update(inventoryReservations)
+        .set({ status: 'CANCELLED', notes: (resv.notes ? resv.notes + ' | ' : '') + 'Cancelled' })
+        .where(eq(inventoryReservations.id, reservationId))
+        .returning();
+
+      return updated;
+    });
+  }
+
   static async transferStock(data: any) {
     return await db.transaction(async (tx) => {
       const movementId = `TRF-${Date.now()}`;
@@ -229,7 +328,7 @@ export class InventoryService {
       // Find current stock
       const balanceQuery = await tx.execute(sql`SELECT quantity FROM inventory_balances WHERE material_id = ${data.materialId} AND warehouse_id = ${data.warehouseId} FOR UPDATE`);
       const bal = balanceQuery.rows[0];
-      const current = (bal ? bal.on_hand : 0) as number;
+      const current = (bal ? Number(bal.quantity) : 0);
       
       const difference = data.physicalQuantity - current;
       if (difference === 0) return { message: 'No difference' };
@@ -247,5 +346,101 @@ export class InventoryService {
         notes: data.reason
       });
     });
+  }
+}
+
+export class InventoryCountService {
+  static async createStocktake(data: any) {
+    return await db.transaction(async (tx) => {
+      const code = `ST-${Date.now()}`;
+      const [count] = await tx.insert(inventoryCounts).values({
+        code,
+        warehouseId: data.warehouseId,
+        assignedTo: data.userId,
+        scheduledDate: data.scheduledDate ? new Date(data.scheduledDate) : new Date(),
+        notes: data.notes
+      }).returning();
+
+      // Get current balances for this warehouse
+      const balances = await tx.execute(sql`SELECT material_id, location_id, quantity FROM inventory_balances WHERE warehouse_id = ${data.warehouseId}`);
+      
+      for (const bal of balances.rows) {
+        await tx.insert(inventoryCountItems).values({
+          countId: count.id,
+          materialId: Number(bal.material_id),
+          locationId: bal.location_id ? String(bal.location_id) : null,
+          systemQuantity: bal.quantity ? bal.quantity.toString() : "0"
+        } as any);
+      }
+
+      return count;
+    });
+  }
+
+  static async updateCountItem(itemId: number, countedQty: number, notes?: string) {
+    const items = await db.select().from(require('@/db/schema').inventoryCountItems).where(eq(require('@/db/schema').inventoryCountItems.id, itemId));
+    if (!items[0]) throw new Error('Item not found');
+    const systemQty = Number(items[0].systemQuantity);
+    const variance = countedQty - systemQty;
+
+    await db.update(require('@/db/schema').inventoryCountItems)
+      .set({ countedQuantity: countedQty, variance, status: 'COUNTED', notes })
+      .where(eq(require('@/db/schema').inventoryCountItems.id, itemId));
+  }
+
+  static async completeStocktake(countId: number, userId: number) {
+    return await db.transaction(async (tx) => {
+      const countItems = await tx.select().from(require('@/db/schema').inventoryCountItems).where(eq(require('@/db/schema').inventoryCountItems.countId, countId));
+      const counts = await tx.select().from(require('@/db/schema').inventoryCounts).where(eq(require('@/db/schema').inventoryCounts.id, countId));
+      const count = counts[0];
+      if (!count || count.status !== 'DRAFT') throw new Error('Invalid count');
+
+      for (const item of countItems) {
+        if (item.status === 'COUNTED' && item.variance !== null && Number(item.variance) !== 0) {
+          const diff = Number(item.variance);
+          const movType = diff > 0 ? 'ADJUSTMENT_IN' : 'ADJUSTMENT_OUT';
+          
+          await InventoryService.processMovement(tx, {
+            movementNumber: `ADJ-${count.code}-${item.id}`,
+            movementType: movType,
+            materialId: item.materialId,
+            warehouseId: count.warehouseId,
+            locationId: item.locationId ? item.locationId.toString() : null,
+            quantity: Math.abs(diff),
+            userId: userId,
+            notes: `Kiểm kê kho ${count.code}`
+          });
+          
+          await tx.update(require('@/db/schema').inventoryCountItems)
+            .set({ status: 'ADJUSTED' })
+            .where(eq(require('@/db/schema').inventoryCountItems.id, item.id));
+        }
+      }
+
+      await tx.update(require('@/db/schema').inventoryCounts)
+        .set({ status: 'COMPLETED', completedDate: new Date() })
+        .where(eq(require('@/db/schema').inventoryCounts.id, countId));
+      
+      return count;
+    });
+  }
+}
+
+export class SupplierService {
+  static async getSuppliers() {
+    return await db.select().from(require('@/db/schema').suppliers);
+  }
+
+  static async createSupplier(data: any) {
+    const [supplier] = await db.insert(suppliers).values(data).returning();
+    return supplier;
+  }
+
+  static async updateSupplier(id: number, data: any) {
+    const [supplier] = await db.update(require('@/db/schema').suppliers)
+      .set(data)
+      .where(eq(require('@/db/schema').suppliers.id, id))
+      .returning();
+    return supplier;
   }
 }
