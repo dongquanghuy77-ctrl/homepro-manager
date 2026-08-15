@@ -127,7 +127,7 @@ async function runAcceptanceTest() {
 
     // 10. KIỂM TRA CHẤT LƯỢNG (QC & Hard Gate)
     const inspection = await QcService.createInspection({
-        productionOrderId: po.id, result: 'FAIL', inspectorId: 1, notes: 'Lỗi sơn', standardId: 1
+        productionOrderId: po.id, result: 'FAIL', inspectorId: 1, notes: 'Lỗi sơn'
     });
     const issue = await QcService.logDefect(inspection.id, {
         title: 'Tróc sơn', description: 'Tróc sơn mặt ngoài', severity: 'HIGH'
