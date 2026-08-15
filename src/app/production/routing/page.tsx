@@ -16,7 +16,7 @@ export default async function RoutingPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên Quy Trình</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phiên bản</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số công đoạn</th>
             </tr>
           </thead>
@@ -24,7 +24,7 @@ export default async function RoutingPage() {
             {list.map((r) => (
               <tr key={r.id}>
                 <td className="px-6 py-4 whitespace-nowrap font-medium">{r.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">{r.code}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-500">v{r.version}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-500">{steps.filter(s => s.routingId === r.id).length}</td>
               </tr>
             ))}

@@ -22,7 +22,9 @@ export default async function ProductionReceiptsPage() {
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
-      <h1 className="text-2xl font-bold mb-6">Nhập Kho Thành Phẩm (Production Output)</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Nhập thành phẩm (Production Output)</h1>
+      </div>
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">

@@ -199,7 +199,7 @@ export class QcService {
 
       // We just map the rework cost as an actual cost against the project with a special QC note/category if needed.
       // Assuming BudgetService handles it correctly.
-      await BudgetService.recordActualCost(issue.projectId, type, amount, tx);
+      await BudgetService.recordActualCost(issue.projectId, type, amount, 'QC_ISSUE', issue.id, tx);
       
       // Update issue logic to show it's being reworked
       await tx.update(qcIssues).set({ status: 'REWORK' }).where(eq(qcIssues.id, issueId));

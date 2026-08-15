@@ -17,7 +17,7 @@ export default async function ScrapPage() {
   }).from(scrapLogs)
     .leftJoin(productionOrders, eq(scrapLogs.productionOrderId, productionOrders.id))
     .leftJoin(materials, eq(scrapLogs.materialId, materials.id))
-    .leftJoin(users, eq(scrapLogs.reportedBy, users.id))
+    .leftJoin(users, eq(scrapLogs.employeeId, users.id))
     .orderBy(desc(scrapLogs.createdAt));
 
   return (

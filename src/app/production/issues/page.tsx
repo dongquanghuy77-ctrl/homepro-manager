@@ -10,7 +10,7 @@ export default async function MaterialIssuesPage() {
       id: materialConsumptions.id,
       poCode: productionOrders.code,
       material: materials.name,
-      quantity: materialConsumptions.quantity,
+      quantity: materialConsumptions.actualQuantity,
       createdAt: materialConsumptions.createdAt
   }).from(materialConsumptions)
     .leftJoin(productionOrders, eq(materialConsumptions.productionOrderId, productionOrders.id))

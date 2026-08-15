@@ -61,7 +61,7 @@ export class ProductionService {
   // ==========================================
   static async createProductionPlan(data: any) {
     return await db.transaction(async (tx) => {
-      const [plan] = await tx.insert(require('@/db/schema').productionPlans).values({
+      const insertedPlans = await tx.insert(require('@/db/schema').productionPlans).values({
         code: data.code,
         projectId: data.projectId,
         name: data.name,
@@ -69,7 +69,7 @@ export class ProductionService {
         endDate: data.endDate,
         createdBy: data.userId
       }).returning();
-
+      const plan = (insertedPlans as any[])[0];
       if (data.items && data.items.length > 0) {
         const items = data.items.map((i: any) => ({ ...i, planId: plan.id }));
         await tx.insert(require('@/db/schema').productionPlanItems).values(items);
@@ -188,7 +188,7 @@ export class ProductionService {
   }) {
     return await db.transaction(async (tx) => {
       // 1. Insert Job Card
-      const [jobCard] = await tx.insert(require('@/db/schema').jobCards).values({
+      const insertedJobCards = await tx.insert(require('@/db/schema').jobCards).values({
         workOrderId: data.workOrderId,
         employeeId: data.employeeId,
         startTime: data.startTime,
@@ -199,14 +199,15 @@ export class ProductionService {
         status: data.status,
         notes: data.notes
       }).returning();
+      const jobCard = (insertedJobCards as any[])[0];
 
       // 2. Update Work Order quantities if completed
       if (data.status === 'COMPLETED') {
         const [wo] = await tx.select().from(workOrders).where(eq(workOrders.id, data.workOrderId));
         if (wo) {
-          const newCompleted = Number(wo.completed_quantity || 0) + Number(data.completedQuantity);
+          const newCompleted = Number(wo.completedQuantity || 0) + Number(data.completedQuantity);
           let newStatus = wo.status;
-          if (newCompleted >= Number(wo.planned_quantity)) {
+          if (newCompleted >= Number(wo.plannedQuantity)) {
             newStatus = 'COMPLETED';
           } else {
             newStatus = 'IN_PROGRESS';
@@ -291,7 +292,7 @@ export class ProductionService {
       if (issue && issue.ledger && issue.ledger.totalCost) {
         // Find project ID from PO
         const cost = Math.abs(Number(issue.ledger.totalCost));
-        await BudgetService.recordActualCost(po.projectId, 'MATERIAL', cost, tx);
+        await BudgetService.recordActualCost(po.projectId, 'MATERIAL', cost, 'PRODUCTION_ORDER', po.id, tx);
       }
 
       // Ensure PO is IN_PROGRESS

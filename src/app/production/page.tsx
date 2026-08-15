@@ -10,13 +10,16 @@ export default async function ProductionDashboard() {
   const stats = await db.select({
     totalPlans: sql`count(distinct ${productionPlans.id})`,
     totalOrders: sql`count(distinct ${productionOrders.id})`,
-    activeOrders: sql`count(distinct case when ${productionOrders.status} = 'IN_PROGRESS' then ${productionOrders.id} end)`,
-    totalJobCards: sql`count(distinct ${jobCards.id})`
+    activeOrders: sql`count(distinct case when ${productionOrders.status} = 'IN_PROGRESS' then ${productionOrders.id} end)`
   }).from(productionPlans)
-    .leftJoin(productionOrders, eq(productionOrders.planId, productionPlans.id))
-    .leftJoin(jobCards, eq(jobCards.productionOrderId, productionOrders.id));
+    .leftJoin(productionOrders, eq(productionOrders.planId, productionPlans.id));
 
-  const s = stats[0] as any;
+  const jobCardsResult = await db.select({ count: sql`count(${jobCards.id})` }).from(jobCards);
+
+  const s = {
+    ...stats[0] as any,
+    totalJobCards: jobCardsResult[0].count
+  };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -61,7 +64,7 @@ export default async function ProductionDashboard() {
               <Package className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 uppercase font-semibold">Job Cards</p>
+              <p className="text-sm text-gray-500 uppercase font-semibold">Thẻ công việc</p>
               <h3 className="text-2xl font-bold text-gray-900">{s.totalJobCards}</h3>
             </div>
           </div>
@@ -72,7 +75,7 @@ export default async function ProductionDashboard() {
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link href="/production/plans" className="p-4 border rounded hover:bg-gray-50 font-medium text-center">Kế hoạch Sản xuất</Link>
             <Link href="/production/orders" className="p-4 border rounded hover:bg-gray-50 font-medium text-center">Lệnh Sản xuất</Link>
-            <Link href="/production/job-cards" className="p-4 border rounded hover:bg-gray-50 font-medium text-center">Job Cards</Link>
+            <Link href="/production/job-cards" className="p-4 border rounded hover:bg-gray-50 font-medium text-center">Thẻ công việc</Link>
             <Link href="/production/receipts" className="p-4 border rounded hover:bg-gray-50 font-medium text-center">Nhập Thành phẩm</Link>
          </div>
       </div>

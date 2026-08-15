@@ -10,34 +10,34 @@ async function main() {
   console.log('=== STARTING QC/LỖI E2E TEST ===');
 
   // 1. Setup Dummy Project & Production Orders
-  const [testProj] = await db.insert(projects).values({
+  const testProj = await db.insert(projects).values({
     name: 'E2E QC Test Project',
     code: `PRJ-E2E-QC-${Date.now()}`,
     status: 'ACTIVE'
-  }).returning();
+  }).returning().then(r => (r as any[])[0]);
 
-  const [testProduct] = await db.insert(require('@/db/schema').materials).values({
+  const testProduct = await db.insert(require('@/db/schema').materials).values({
     code: `MAT-QC-${Date.now()}`,
     name: 'Dummy QC Product',
     unit: 'cái',
     type: 'FINISHED_GOOD'
-  }).returning();
+  }).returning().then(r => (r as any[])[0]);
 
-  const [po1] = await db.insert(productionOrders).values({
+  const po1 = await db.insert(productionOrders).values({
     projectId: testProj.id,
     productId: testProduct.id,
     code: `PO-PASS-${Date.now()}`,
     status: 'IN_PROGRESS',
     plannedQuantity: 10
-  }).returning();
+  }).returning().then(r => (r as any[])[0]);
 
-  const [po2] = await db.insert(productionOrders).values({
+  const po2 = await db.insert(productionOrders).values({
     projectId: testProj.id,
     productId: testProduct.id,
     code: `PO-FAIL-${Date.now()}`,
     status: 'IN_PROGRESS',
     plannedQuantity: 5
-  }).returning();
+  }).returning().then(r => (r as any[])[0]);
 
   console.log(`✅ Setup complete. PO1 (Happy Path) & PO2 (Defect Path) created.`);
 

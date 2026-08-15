@@ -1,7 +1,7 @@
 'use server';
 
 import { ProductionService } from '@/lib/production/services';
-import { QcService } from '@/lib/qc/services';
+import { QcService } from '@/lib/quality/qc_service';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/session';
 
@@ -29,7 +29,7 @@ export async function generateOrdersAction(planId: number) {
 export async function releaseOrderAction(poId: number) {
     const user = await getUser();
     if (user.role !== 'ADMIN' && user.role !== 'MANAGER') throw new Error('Forbidden');
-    await ProductionService.releaseProductionOrder(poId, user.id);
+    await ProductionService.releaseProductionOrder(poId);
     revalidatePath('/production/orders');
 }
 
