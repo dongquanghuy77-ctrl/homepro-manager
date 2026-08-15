@@ -26,7 +26,7 @@ async function runAcceptanceTest() {
         name: 'Bệnh viện Huế - Golden Project',
         code: projectCode,
         status: 'ACTIVE',
-        totalBudget: 15000000000
+        contractValue: 15000000000
     }).returning().then(r => (r as any[])[0]);
     await logResult('Project Creation', !!project.id);
 
