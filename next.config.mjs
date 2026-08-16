@@ -1,13 +1,12 @@
 // @ts-check
-import { withSentryConfig } from '@sentry/nextjs';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3'],
-    instrumentationHook: true,
+    // instrumentationHook: true,
   },
-  transpilePackages: ['@sentry/nextjs', '@sentry/node', '@sentry/server-utils'],
+  // transpilePackages: ['@sentry/nextjs', '@sentry/node', '@sentry/server-utils'],
 
   async headers() {
     return [
@@ -37,11 +36,4 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: 'donghuy',
-  project: 'homepro-manager',
-  silent: !process.env.CI,
-  sourcemaps: {
-    disable: !process.env.SENTRY_AUTH_TOKEN,
-  },
-});
+export default nextConfig;

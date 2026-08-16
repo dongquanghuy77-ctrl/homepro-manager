@@ -8,7 +8,8 @@ import {
   Command, Menu, X, MoreHorizontal, LogOut, UserCheck, Key,
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
   Factory, ScanLine, ClipboardList, BarChart2,
-  Inbox, Banknote, Activity, PieChart, Grid
+  Inbox, Banknote, Activity, PieChart, Grid,
+  UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
@@ -20,7 +21,8 @@ const iconMap = {
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings, UserCheck,
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
   Factory, ScanLine, ClipboardList, BarChart2,
-  Inbox, Banknote, Activity, PieChart, Grid
+  Inbox, Banknote, Activity, PieChart, Grid,
+  UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck
 };
 
 interface UserState {
@@ -175,6 +177,14 @@ export default function Sidebar() {
           <span className="sidebar-section-label">Module / Tính năng</span>
 
           {activeItems.map(item => {
+            if (item.isGroupHeader) {
+              return (
+                <div key={item.id} style={{ padding: '16px 12px 6px 16px', fontSize: '11px', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {item.label}
+                </div>
+              );
+            }
+
             const Icon = iconMap[item.icon as keyof typeof iconMap] || LayoutDashboard;
             const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             

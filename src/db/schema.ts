@@ -66,7 +66,8 @@ export const projects = pgTable('projects', {
   id: serial('id').primaryKey(),
   code: text('code').notNull().unique(),
   name: text('name').notNull(),
-  customer: text('customer'),
+  customer: text('customer'), // Legacy text field
+  customerId: integer('customer_id').references(() => customers.id),
   manager: text('manager'),
   location: text('location'),
   contractValue:      numeric('contract_value', { precision: 20, scale: 2, mode: 'number' }).default(0),
@@ -1561,21 +1562,39 @@ export const leads = pgTable('leads', {
   name: text('name').notNull(),
   phone: text('phone'),
   email: text('email'),
+  company: text('company'),
   source: text('source'),
   status: text('status').notNull().default('NEW'), // NEW, CONTACTED, QUALIFIED, LOST, CONVERTED
   assignedTo: integer('assigned_to').references(() => users.id),
-  createdAt: timestamp('created_at').defaultNow()
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const opportunities = pgTable('opportunities', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  customerId: integer('customer_id').notNull().references(() => customers.id),
+  leadId: integer('lead_id').references(() => leads.id),
+  estimatedValue: doublePrecision('estimated_value').default(0),
+  probability: integer('probability').default(0), // 0-100%
+  status: text('status').notNull().default('NEW'), // NEW, PROPOSAL, NEGOTIATION, WON, LOST
+  expectedCloseDate: timestamp('expected_close_date'),
+  assignedTo: integer('assigned_to').references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
 });
 
 export const quotes = pgTable('quotes', {
   id: serial('id').primaryKey(),
   quoteNumber: text('quote_number').notNull().unique(),
   customerId: integer('customer_id').notNull().references(() => customers.id),
+  opportunityId: integer('opportunity_id').references(() => opportunities.id),
   leadId: integer('lead_id').references(() => leads.id),
   totalAmount: doublePrecision('total_amount').notNull().default(0),
   status: text('status').notNull().default('DRAFT'), // DRAFT, SENT, ACCEPTED, REJECTED
   validUntil: timestamp('valid_until'),
-  createdAt: timestamp('created_at').defaultNow()
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
 });
 
 export const quoteItems = pgTable('quote_items', {
@@ -1587,18 +1606,82 @@ export const quoteItems = pgTable('quote_items', {
   totalPrice: doublePrecision('total_price').notNull()
 });
 
-export const salesOrders = pgTable('sales_orders', {
+export const contracts = pgTable('contracts', {
   id: serial('id').primaryKey(),
-  orderNumber: text('order_number').notNull().unique(),
+  contractNumber: text('contract_number').notNull().unique(),
   quoteId: integer('quote_id').references(() => quotes.id),
   customerId: integer('customer_id').notNull().references(() => customers.id),
   projectId: integer('project_id').references(() => projects.id),
   totalAmount: doublePrecision('total_amount').notNull().default(0),
+  status: text('status').notNull().default('DRAFT'), // DRAFT, SIGNED, IN_PROGRESS, COMPLETED, CANCELLED
+  signDate: timestamp('sign_date'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const salesOrders = pgTable('sales_orders', {
+  id: serial('id').primaryKey(),
+  orderNumber: text('order_number').notNull().unique(),
+  quoteId: integer('quote_id').references(() => quotes.id),
+  contractId: integer('contract_id').references(() => contracts.id),
+  customerId: integer('customer_id').notNull().references(() => customers.id),
+  projectId: integer('project_id').references(() => projects.id),
+  totalAmount: doublePrecision('total_amount').notNull().default(0),
   status: text('status').notNull().default('NEW'), // NEW, PROCESSING, DELIVERED, INVOICED, CANCELLED
-  createdAt: timestamp('created_at').defaultNow()
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
 });
 
 
+
+// ============================================================================
+// P2 THIẾT KẾ & KỸ THUẬT (ENGINEERING)
+// ============================================================================
+
+export const surveys = pgTable('surveys', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  surveyDate: timestamp('survey_date'),
+  status: text('status').notNull().default('PENDING'), // PENDING, IN_PROGRESS, COMPLETED
+  notes: text('notes'),
+  documents: jsonb('documents'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const designs = pgTable('designs', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  version: text('version').notNull(),
+  status: text('status').notNull().default('DRAFT'), // DRAFT, IN_REVIEW, APPROVED, REJECTED
+  notes: text('notes'),
+  files: jsonb('files'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const approvals = pgTable('approvals', {
+  id: serial('id').primaryKey(),
+  designId: integer('design_id').notNull().references(() => designs.id, { onDelete: 'cascade' }),
+  customerId: integer('customer_id').references(() => customers.id),
+  approvedBy: integer('approved_by').references(() => users.id),
+  status: text('status').notNull().default('PENDING'), // PENDING, APPROVED, REJECTED
+  comments: text('comments'),
+  approvalDate: timestamp('approval_date'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const productionReleases = pgTable('production_releases', {
+  id: serial('id').primaryKey(),
+  designId: integer('design_id').notNull().references(() => designs.id),
+  projectId: integer('project_id').notNull().references(() => projects.id),
+  status: text('status').notNull().default('PENDING'), // PENDING, RELEASED
+  releasedBy: integer('released_by').references(() => users.id),
+  releaseDate: timestamp('release_date'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
 
 // ============================================================================
 // P5 SHOP FLOOR & JOB CARDS
@@ -1707,6 +1790,89 @@ export const deliveryNoteItems = pgTable('delivery_note_items', {
   materialId: integer('material_id').references(() => materials.id), // If delivering specific products
   description: text('description').notNull(),
   quantity: numeric('quantity', { precision: 18, scale: 4, mode: 'number' }).notNull()
+});
+
+// ============================================================================
+// PHASE 8: INSTALLATION & HANDOVER (Lắp đặt & Bàn giao)
+// ============================================================================
+
+export const installations = pgTable('installations', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(),
+  projectId: integer('project_id').notNull().references(() => projects.id),
+  deliveryNoteId: integer('delivery_note_id').references(() => deliveryNotes.id),
+  teamLeaderId: integer('team_leader_id').references(() => users.id),
+  plannedStartDate: timestamp('planned_start_date'),
+  plannedEndDate: timestamp('planned_end_date'),
+  actualStartDate: timestamp('actual_start_date'),
+  actualEndDate: timestamp('actual_end_date'),
+  status: text('status').notNull().default('PLANNED'), // PLANNED, IN_PROGRESS, COMPLETED, DELAYED, CANCELLED
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const installationChecklists = pgTable('installation_checklists', {
+  id: serial('id').primaryKey(),
+  installationId: integer('installation_id').notNull().references(() => installations.id, { onDelete: 'cascade' }),
+  itemTask: text('item_task').notNull(), // VD: "Kiểm tra bản lề", "Vệ sinh mặt kính"
+  isCompleted: boolean('is_completed').default(false),
+  checkedBy: integer('checked_by').references(() => users.id),
+  checkedAt: timestamp('checked_at'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const kcsRecords = pgTable('kcs_records', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(),
+  projectId: integer('project_id').notNull().references(() => projects.id),
+  installationId: integer('installation_id').references(() => installations.id),
+  inspectorId: integer('inspector_id').references(() => users.id),
+  inspectionDate: timestamp('inspection_date').defaultNow(),
+  status: text('status').notNull().default('PENDING'), // PENDING, PASS, FAIL, CONDITIONAL_PASS
+  customerRepresentative: text('customer_representative'),
+  customerSignatureUrl: text('customer_signature_url'),
+  remarks: text('remarks'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+// ============================================================================
+// PHASE 9: FINANCE & ACCOUNTING (Tài chính & Kế toán)
+// ============================================================================
+
+export const paymentVouchers = pgTable('payment_vouchers', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(),
+  type: text('type').notNull(), // RECEIPT (Thu), PAYMENT (Chi)
+  amount: numeric('amount', { precision: 18, scale: 4, mode: 'number' }).notNull(),
+  currency: text('currency').notNull().default('VND'),
+  date: timestamp('date').notNull().defaultNow(),
+  referenceId: integer('reference_id'), // Could be PO, SO, Project, etc.
+  referenceType: text('reference_type'), // 'PO', 'SO', 'PROJECT', 'OTHER'
+  payerPayeeName: text('payer_payee_name').notNull(),
+  description: text('description'),
+  status: text('status').notNull().default('COMPLETED'), // DRAFT, PENDING, COMPLETED, CANCELLED
+  createdBy: integer('created_by').references(() => users.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const debts = pgTable('debts', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(),
+  type: text('type').notNull(), // RECEIVABLE (Phải thu), PAYABLE (Phải trả)
+  partnerId: integer('partner_id'), // customer_id or supplier_id
+  partnerType: text('partner_type').notNull(), // 'CUSTOMER', 'SUPPLIER', 'OTHER'
+  totalAmount: numeric('total_amount', { precision: 18, scale: 4, mode: 'number' }).notNull(),
+  paidAmount: numeric('paid_amount', { precision: 18, scale: 4, mode: 'number' }).notNull().default(0),
+  remainingAmount: numeric('remaining_amount', { precision: 18, scale: 4, mode: 'number' }).notNull(),
+  dueDate: timestamp('due_date'),
+  status: text('status').notNull().default('UNPAID'), // UNPAID, PARTIAL, PAID, OVERDUE
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
 });
 
 // ============================================================================
