@@ -67,11 +67,11 @@ export default function ProjectListClient({ projects }: ProjectListClientProps) 
             const statusConfig = PROJECT_STATUS[project.status as keyof typeof PROJECT_STATUS] ?? PROJECT_STATUS['ACTIVE'];
 
             return (
+              <div key={project.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <Link
-                key={project.id}
                 href={`/projects/${project.id}`}
                 id={`project-card-${project.id}`}
-                style={{ textDecoration: 'none' }}
+                style={{ textDecoration: 'none', flex: 1 }}
               >
                 <div className="card" style={{ cursor: 'pointer' }}>
                   {/* Header */}
@@ -145,6 +145,16 @@ export default function ProjectListClient({ projects }: ProjectListClientProps) 
                   </div>
                 </div>
               </Link>
+                {project.code === 'BAO-MINH-CMT8' && (
+                  <Link
+                    href={`/projects/bao-minh`}
+                    className="btn btn-primary"
+                    style={{ width: '100%', justifyContent: 'center' }}
+                  >
+                    Bảo Minh Dashboard (Dành riêng)
+                  </Link>
+                )}
+              </div>
             );
           })}
         </div>

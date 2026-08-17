@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
 
 // ============================================================
@@ -2083,3 +2083,159 @@ export const inventoryReservations = pgTable('inventory_reservations', {
   expiresAt: timestamp('expires_at'),
   notes: text('notes')
 });
+
+// ============================================================
+// SOURCE DATA CENTER — LAYER 1
+// Kiến trúc 4 tầng: SOURCE → STAGING → MASTER → TRANSACTION
+// ============================================================
+
+// TABLE 1: source_documents — registry bất biến của mọi file nguồn
+export const sourceDocuments = pgTable('source_documents', {
+  id:                      serial('id').primaryKey(),
+  sourceId:                text('source_id').notNull().unique(),
+  sourceName:              text('source_name').notNull(),
+  sourceType:              text('source_type').notNull(), // XLSX, PDF, JPG, PNG, SKP, ZIP, MANUAL
+  fileName:                text('file_name').notNull(),
+  originalPath:            text('original_path'),
+  storagePath:             text('storage_path'),
+  fileSize:                integer('file_size'),
+  checksum:                text('checksum'),
+  mimeType:                text('mime_type'),
+  version:                 integer('version').notNull().default(1),
+  parentSourceId:          integer('parent_source_id'), // FK self-ref for versioning
+  uploadedBy:              integer('uploaded_by').references(() => users.id),
+  uploadedAt:              timestamp('uploaded_at').notNull().defaultNow(),
+  projectId:               integer('project_id').references(() => projects.id),
+  documentCategory:        text('document_category').notNull(),
+  // BOQ_EXCEL|BOQ_PDF|DESIGN_PDF|DESIGN_SKETCHUP|SURVEY_IMAGE|MATERIAL_IMAGE
+  // PROCUREMENT_DOCUMENT|PRODUCTION_EVIDENCE|QC_EVIDENCE|DELIVERY_DOCUMENT
+  // INSTALLATION_DOCUMENT|FINANCIAL_DOCUMENT|CONTRACT|MANUAL_ENTRY|OTHER
+  sourceStatus:            text('source_status').notNull().default('RAW'),
+  // RAW|INGESTING|PARSED|CLASSIFIED|NORMALIZED|STAGED|MATCHED|APPROVED|REJECTED|ARCHIVED
+  autoRoutedTo:            text('auto_routed_to'),
+  classificationConfidence: numeric('classification_confidence', { precision: 5, scale: 4 }),
+  extractedAt:             timestamp('extracted_at'),
+  stagedAt:                timestamp('staged_at'),
+  approvedAt:              timestamp('approved_at'),
+  approvedBy:              integer('approved_by').references(() => users.id),
+  rejectionReason:         text('rejection_reason'),
+  notes:                   text('notes'),
+  tags:                    text('tags').array(),
+  metadata:                jsonb('metadata'),
+  createdAt:               timestamp('created_at').notNull().defaultNow(),
+  updatedAt:               timestamp('updated_at').notNull().defaultNow(),
+});
+
+// TABLE 2: source_document_lines — dòng dữ liệu phân tích từ source doc
+export const sourceDocumentLines = pgTable('source_document_lines', {
+  id:                serial('id').primaryKey(),
+  lineId:            text('line_id').notNull().unique(),
+  sourceDocId:       integer('source_doc_id').notNull().references(() => sourceDocuments.id, { onDelete: 'cascade' }),
+  lineNumber:        integer('line_number').notNull(),
+  rawValue:          text('raw_value'),
+  parsedValue:       text('parsed_value'),
+  normalizedValue:   text('normalized_value'),
+  fieldType:         text('field_type'), // MATERIAL|QUANTITY|PRICE|SUPPLIER|DATE|CUSTOMER|PROJECT
+  confidence:        text('confidence').notNull().default('LOW'), // HIGH|MEDIUM|LOW|NONE
+  needsReview:       boolean('needs_review').notNull().default(false),
+  reviewNote:        text('review_note'),
+  linkedMaterialId:  integer('linked_material_id').references(() => materials.id),
+  linkedSupplierId:  integer('linked_supplier_id').references(() => suppliers.id),
+  linkedBoqItemId:   integer('linked_boq_item_id').references(() => boqItems.id),
+  stagedRecordType:  text('staged_record_type'),
+  stagedRecordId:    text('staged_record_id'),
+  erpRecordType:     text('erp_record_type'),
+  erpRecordId:       text('erp_record_id'),
+  metadata:          jsonb('metadata'),
+  createdAt:         timestamp('created_at').notNull().defaultNow(),
+});
+
+// TABLE 3: source_versions — lịch sử phiên bản khi source thay đổi
+export const sourceVersions = pgTable('source_versions', {
+  id:            serial('id').primaryKey(),
+  sourceDocId:   integer('source_doc_id').notNull().references(() => sourceDocuments.id),
+  version:       integer('version').notNull(),
+  changeType:    text('change_type').notNull(), // INITIAL|UPDATED|CORRECTED|REPLACED
+  changedBy:     integer('changed_by').references(() => users.id),
+  changedAt:     timestamp('changed_at').notNull().defaultNow(),
+  changeSummary: text('change_summary'),
+  diffData:      jsonb('diff_data'), // { added: [], removed: [], changed: [], conflicts: [] }
+  snapshotPath:  text('snapshot_path'),
+});
+
+// TABLE 4: staging_records — vùng kiểm duyệt trước khi vào ERP
+export const stagingRecords = pgTable('staging_records', {
+  id:               serial('id').primaryKey(),
+  stagingId:        text('staging_id').notNull().unique(),
+  sourceDocId:      integer('source_doc_id').notNull().references(() => sourceDocuments.id),
+  sourceLineId:     integer('source_line_id').references(() => sourceDocumentLines.id),
+  targetModule:     text('target_module').notNull(),
+  // CRM|PROJECT|BOQ|PROCUREMENT|INVENTORY|PRODUCTION|QC|DELIVERY|INSTALLATION|FINANCE
+  targetEntityType: text('target_entity_type').notNull(),
+  // CUSTOMER|SUPPLIER|MATERIAL|BOQ_ITEM|PURCHASE_REQUEST|PURCHASE_ORDER|GRN|etc.
+  stagingStatus:    text('staging_status').notNull().default('PENDING'),
+  // PENDING|REVIEW|APPROVED|REJECTED|POSTED|CONFLICT|DUPLICATE
+  rawData:          jsonb('raw_data').notNull().default('{}'),
+  normalizedData:   jsonb('normalized_data'),
+  finalData:        jsonb('final_data'),
+  validationErrors: jsonb('validation_errors'),
+  matchResult:      jsonb('match_result'),
+  confidence:       text('confidence').notNull().default('LOW'),
+  reviewedBy:       integer('reviewed_by').references(() => users.id),
+  reviewedAt:       timestamp('reviewed_at'),
+  reviewNote:       text('review_note'),
+  postedBy:         integer('posted_by').references(() => users.id),
+  postedAt:         timestamp('posted_at'),
+  erpRecordType:    text('erp_record_type'),
+  erpRecordId:      text('erp_record_id'),
+  createdAt:        timestamp('created_at').notNull().defaultNow(),
+  updatedAt:        timestamp('updated_at').notNull().defaultNow(),
+});
+
+// TABLE 5: data_lineage — truy ngược ERP record về file nguồn gốc
+export const dataLineage = pgTable('data_lineage', {
+  id:            serial('id').primaryKey(),
+  lineageId:     text('lineage_id').notNull().unique(),
+  erpRecordType: text('erp_record_type').notNull(),
+  erpRecordId:   text('erp_record_id').notNull(),
+  stagingId:     text('staging_id'),
+  sourceDocId:   integer('source_doc_id').references(() => sourceDocuments.id),
+  sourceLineId:  integer('source_line_id').references(() => sourceDocumentLines.id),
+  sourceFile:    text('source_file'),
+  lineageChain:  jsonb('lineage_chain'), // [{type:'SOURCE',id,...},{type:'STAGING',...},{type:'ERP',...}]
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+});
+
+// TABLE 6: source_audit_log — log bất biến mọi thao tác trên source
+export const sourceAuditLog = pgTable('source_audit_log', {
+  id:          serial('id').primaryKey(),
+  action:      text('action').notNull(),
+  // UPLOAD|PARSE|CLASSIFY|STAGE|APPROVE|REJECT|POST|VERSION|UPDATE|DELETE
+  userId:      integer('user_id').references(() => users.id),
+  sourceDocId: integer('source_doc_id').references(() => sourceDocuments.id),
+  stagingId:   text('staging_id'),
+  erpRecordId: text('erp_record_id'),
+  module:      text('module'),
+  beforeData:  jsonb('before_data'),
+  afterData:   jsonb('after_data'),
+  ipAddress:   text('ip_address'),
+  userAgent:   text('user_agent'),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+});
+
+// ============================================================
+// TYPE EXPORTS — Source Data Center
+// ============================================================
+export type SourceDocumentRow    = typeof sourceDocuments.$inferSelect;
+export type NewSourceDocumentRow = typeof sourceDocuments.$inferInsert;
+export type SourceDocumentLineRow    = typeof sourceDocumentLines.$inferSelect;
+export type NewSourceDocumentLineRow = typeof sourceDocumentLines.$inferInsert;
+export type SourceVersionRow    = typeof sourceVersions.$inferSelect;
+export type NewSourceVersionRow = typeof sourceVersions.$inferInsert;
+export type StagingRecordRow    = typeof stagingRecords.$inferSelect;
+export type NewStagingRecordRow = typeof stagingRecords.$inferInsert;
+export type DataLineageRow    = typeof dataLineage.$inferSelect;
+export type NewDataLineageRow = typeof dataLineage.$inferInsert;
+export type SourceAuditLogRow    = typeof sourceAuditLog.$inferSelect;
+export type NewSourceAuditLogRow = typeof sourceAuditLog.$inferInsert;
+
