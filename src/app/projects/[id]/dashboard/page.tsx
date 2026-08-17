@@ -3,8 +3,9 @@
 import { db } from '@/db';
 import { projects, tasks, boqs, boqSections, boqItems, materials, suppliers,
          sourceDocuments, dataLineage, purchaseRequests, purchaseRequestItems,
-         customers } from '@/db/schema';
+         customers, businessDecisions } from '@/db/schema';
 import { eq, like, inArray } from 'drizzle-orm';
+
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -17,16 +18,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `Dự án Dashboard #${params.id} — HomePro Manager` };
 }
 
-const BD_ITEMS = [
-  { id:'BD-01', title:'BANG MÃ VÁN scope T9 vs T15', severity:'HIGH', status:'BLOCKED', module:'SCOPE' },
-  { id:'BD-02', title:'NT-23 Quầy Tiếp Tân R-01', severity:'MEDIUM', status:'PENDING', module:'DRAWING' },
-  { id:'BD-03', title:'14 KL items thiếu thông tin', severity:'MEDIUM', status:'PENDING', module:'BOQ' },
-  { id:'BD-04', title:'SketchUp 4 HIGH → PRODUCTION LOCKED', severity:'HIGH', status:'BLOCKED', module:'STRUCTURAL' },
-  { id:'BD-05', title:'GỖ GHÉP THANH 30mm No PO', severity:'MEDIUM', status:'PENDING', module:'PROCUREMENT' },
-  { id:'BD-06', title:'Xác nhận 4 phiếu nhập vật tư', severity:'MEDIUM', status:'PENDING', module:'PROCUREMENT' },
-  { id:'BD-07', title:'32 Drawing pages visual class', severity:'LOW', status:'PENDING', module:'DRAWING' },
-];
-
 const PIPELINE = [
   { step:'SOURCE', status:'PASS', detail:'8 files / SHA-256 clean' },
   { step:'EXTRACT', status:'PASS', detail:'Excel+PDF+Image parsed' },
@@ -37,6 +28,7 @@ const PIPELINE = [
   { step:'ERP', status:'PARTIAL', detail:'PRs in DRAFT (pending BD-06)' },
   { step:'PRODUCTION', status:'LOCKED', detail:'BD-04: 4 HIGH SKP issues' },
 ];
+
 
 function Chip({ label, color }: { label: string; color: string }) {
   const colors: Record<string, string> = {
@@ -88,6 +80,24 @@ export default async function ProjectDashboardPage({ params }: Props) {
     ? Math.round(completedTasks.length / allTasks.length * 100)
     : 0;
   const matLinked = boqItemRows.filter(i => i.materialId != null).length;
+
+  // Fetch real business decisions from DB
+  const bdRows = await db.select().from(businessDecisions).where(eq(businessDecisions.projectId, projectId));
+  const BD_ITEMS = bdRows.map(b => ({
+    id: b.decisionId,
+    title: b.title,
+    severity: b.riskLevel,
+    status: b.status,
+    module: b.category,
+  }));
+  const isProductionLocked = bdRows.find(b => b.decisionId === 'BD-04')?.status === 'BLOCKED';
+  const updatedPipeline = PIPELINE.map(p => p.step === 'PRODUCTION'
+    ? { ...p, status: isProductionLocked ? 'LOCKED' : 'AVAILABLE' }
+    : p.step === 'APPROVE'
+    ? { ...p, detail: `BD pending: ${bdRows.filter(b=>b.status==='PENDING').length}, blocked: ${bdRows.filter(b=>b.status==='BLOCKED').length}` }
+    : p
+  );
+
 
   return (
     <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'1.5rem', fontFamily:'system-ui,sans-serif' }}>
@@ -169,7 +179,7 @@ export default async function ProjectDashboardPage({ params }: Props) {
         {/* ── PIPELINE ─────────────────────────────────────────── */}
         <div style={{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:'8px', padding:'1.25rem' }}>
           <h3 style={{ margin:'0 0 1rem', fontSize:'14px', fontWeight:700 }}>🔄 Data Pipeline</h3>
-          {PIPELINE.map((p, i) => (
+          {updatedPipeline.map((p, i) => (
             <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'0.4rem 0', borderBottom:'1px solid #f3f4f6' }}>
               <div style={{ fontSize:'12px' }}>
                 <span style={{ fontWeight:700, color:'#374151' }}>{p.step}</span>

@@ -253,33 +253,67 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
   const [filterSeverity, setFilterSeverity] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [searchQ, setSearchQ] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleDecision = useCallback((decision: DecisionType, reason: string, note: string) => {
+
+  const handleDecision = useCallback(async (decision: DecisionType, reason: string, note: string) => {
     if (!overrideItem) return;
     const now = new Date().toISOString();
-    setItems(prev => prev.map(it => {
-      if (it.id !== overrideItem.id) return it;
-      const newHistory = [...(it.history || []), {
-        action: decision || 'DECISION',
-        by: 'Huy',
-        at: now,
-        note: `${reason}${note ? ` | Override: ${note}` : ''}`
+    const bdId = overrideItem.id;
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      const newStatus = decision === 'APPROVED' ? 'APPROVED'
+        : decision === 'REJECTED' ? 'REJECTED'
+        : 'PENDING';
+
+      const res = await fetch(`/api/approval-center/${bdId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          reviewedAt: now,
+          resolutionNote: `${reason}${note ? ` | ${note}` : ''}`,
+          rejectionReason: decision === 'REJECTED' ? reason : undefined,
+          auditTrailAppend: { action: decision || 'DECISION', by: 'Huy', reason, note },
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(err.error || `Failed: HTTP ${res.status}`);
+      }
+
+      const newHistory = [...(overrideItem.history || []), {
+        action: decision || 'DECISION', by: 'Huy', at: now,
+        note: `${reason}${note ? ` | Override: ${note}` : ''}`,
       }];
-      return {
-        ...it,
-        decision,
-        decided_by: 'Huy',
-        decided_at: now,
-        override_reason: reason,
-        current_status: decision === 'APPROVED' ? 'APPROVED' : decision === 'REJECTED' ? 'REJECTED' : 'CORRECTION_REQUIRED',
-        history: newHistory,
-      };
-    }));
-    setOverrideItem(null);
-    if (selected?.id === overrideItem.id) {
-      setSelected(prev => prev ? { ...prev, decision, decided_by: 'Huy', decided_at: now, override_reason: reason } : null);
+
+      setItems(prev => prev.map(it => {
+        if (it.id !== bdId) return it;
+        return {
+          ...it, decision, decided_by: 'Huy', decided_at: now,
+          override_reason: reason,
+          current_status: decision === 'APPROVED' ? 'APPROVED' : decision === 'REJECTED' ? 'REJECTED' : 'CORRECTION_REQUIRED',
+          history: newHistory,
+        };
+      }));
+      setOverrideItem(null);
+      if (selected?.id === bdId) {
+        setSelected(prev => prev ? { ...prev, decision, decided_by: 'Huy', decided_at: now, override_reason: reason } : null);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setSaveError(`Lỗi lưu quyết định: ${msg}`);
+      console.error('[ApprovalCenter] PATCH failed:', msg);
+    } finally {
+      setSaving(false);
     }
   }, [overrideItem, selected]);
+
 
   const filtered = items.filter(it => {
     if (filterSeverity && it.severity !== filterSeverity) return false;
@@ -323,6 +357,18 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
           </div>
         </div>
       </div>
+
+      {/* Save error banner */}
+      {saveError && (
+        <div style={{
+          background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8,
+          padding: '10px 16px', marginBottom: 16, color: '#dc2626', fontSize: 13,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span>⚠️ {saveError}</span>
+          <button onClick={() => setSaveError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontWeight: 700 }}>✕</button>
+        </div>
+      )}
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>

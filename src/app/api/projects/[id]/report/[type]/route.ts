@@ -4,28 +4,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks, boqs, boqSections, boqItems, materials, suppliers,
          sourceDocuments, dataLineage, purchaseRequests, purchaseRequestItems,
-         customers } from '@/db/schema';
+         customers, businessDecisions } from '@/db/schema';
 import { eq, like, inArray } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 interface Params { params: { id: string; type: string } }
 
-const BAO_MINH_BD = [
-  { id: 'BD-01', title: 'BANG MÃ VÁN — Scope T9 vs T15', severity: 'HIGH', status: 'BLOCKED', category: 'SCOPE' },
-  { id: 'BD-02', title: 'NT-23 Quầy Tiếp Tân R-01', severity: 'MEDIUM', status: 'PENDING', category: 'DRAWING' },
-  { id: 'BD-03', title: '14 KL items thiếu thông tin', severity: 'MEDIUM', status: 'PENDING', category: 'BOQ' },
-  { id: 'BD-04', title: 'SketchUp 4 HIGH issues → PRODUCTION LOCKED', severity: 'HIGH', status: 'BLOCKED', category: 'STRUCTURAL' },
-  { id: 'BD-05', title: 'GỖ GHÉP THANH 30mm — No PO', severity: 'MEDIUM', status: 'PENDING', category: 'PROCUREMENT' },
-  { id: 'BD-06', title: 'Xác nhận 4 phiếu nhập vật tư', severity: 'MEDIUM', status: 'PENDING', category: 'PROCUREMENT' },
-  { id: 'BD-07', title: '32 Drawing pages classification', severity: 'LOW', status: 'PENDING', category: 'DRAWING' },
-];
+export async function GET(req: NextRequest, { params }: Params) {
+  const { error } = await requireAuth(req, ALL_ROLES);
+  if (error) return error;
 
-const RECON_STATS = {
-  MATCH: 5, VARIANCE: 5, MISSING: 1, CONFLICT: 2, EXTRA: 0, UNRESOLVED: 2
-};
-
-export async function GET(_req: NextRequest, { params }: Params) {
   const projectId = parseInt(params.id);
   const reportType = params.type || 'project';
 
@@ -52,6 +42,21 @@ export async function GET(_req: NextRequest, { params }: Params) {
     ? await db.select().from(purchaseRequestItems).where(inArray(purchaseRequestItems.requestId, prIds))
     : [];
 
+  // Fetch REAL business decisions from DB
+  const bdRows = await db.select().from(businessDecisions).where(eq(businessDecisions.projectId, projectId));
+  const bdSummary = bdRows.map(b => ({
+    id: b.decisionId,
+    title: b.title,
+    severity: b.riskLevel,
+    status: b.status,
+    category: b.category,
+  }));
+  const bdBlocked = bdRows.filter(b => b.status === 'BLOCKED').length;
+  const bdPending = bdRows.filter(b => b.status === 'PENDING').length;
+  const bdApproved = bdRows.filter(b => b.status === 'APPROVED').length;
+  const bdRejected = bdRows.filter(b => b.status === 'REJECTED').length;
+  const isProductionLocked = bdRows.find(b => b.decisionId === 'BD-04')?.status === 'BLOCKED';
+
   const now = new Date().toISOString();
   const completedTasks = allTasks.filter(t => t.status === 'COMPLETED');
   const approvalTasks = allTasks.filter(t => t.category === 'APPROVAL');
@@ -70,9 +75,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
     acceptance: {
       SOURCE_SCAN: 'PASS', SOURCE_HASH: 'PASS', EXTRACTION: 'PASS',
       NORMALIZATION: 'PASS', STAGING: 'PASS', LINEAGE: 'PASS',
-      ERP_TX: prs.length, FAIL: 0, BLOCKER: 2,
-      NEEDS_APPROVAL: 5, CONFLICTS: 4,
-      PRODUCTION: 'LOCKED (BD-04)',
+      ERP_TX: prs.length, FAIL: 0, BLOCKER: bdBlocked,
+      NEEDS_APPROVAL: bdPending, CONFLICTS: 4,
+      PRODUCTION: isProductionLocked ? 'LOCKED (BD-04)' : 'AVAILABLE',
     },
   };
 
@@ -89,15 +94,15 @@ export async function GET(_req: NextRequest, { params }: Params) {
           purchaseRequests: prs.length,
           lineage: lineageRows.length,
         },
-        businessDecisions: BAO_MINH_BD,
+        businessDecisions: bdSummary,
         gates: [
-          { name: 'SOURCE_READY', status: 'PASS' },
-          { name: 'BOQ_READY', status: 'PASS' },
-          { name: 'MATERIAL_READY', status: 'PASS' },
-          { name: 'MATERIAL_REGISTER_READY', status: 'BLOCKED', blockedBy: 'BD-01' },
+          { name: 'SOURCE_READY', status: srcDocs.length > 0 ? 'PASS' : 'FAIL' },
+          { name: 'BOQ_READY', status: boqItemRows.length > 0 ? 'PASS' : 'FAIL' },
+          { name: 'MATERIAL_READY', status: projectMaterials.length > 0 ? 'PASS' : 'FAIL' },
+          { name: 'MATERIAL_REGISTER_READY', status: bdRows.find(b=>b.decisionId==='BD-01')?.status === 'APPROVED' ? 'PASS' : 'BLOCKED', blockedBy: 'BD-01' },
           { name: 'PROCUREMENT_READY', status: prs.length > 0 ? 'PARTIAL' : 'PENDING', blockedBy: 'BD-06' },
-          { name: 'PRODUCTION_READY', status: 'LOCKED', blockedBy: 'BD-04' },
-          { name: 'QC_READY', status: 'LOCKED' },
+          { name: 'PRODUCTION_READY', status: isProductionLocked ? 'LOCKED' : 'AVAILABLE', blockedBy: isProductionLocked ? 'BD-04' : undefined },
+          { name: 'QC_READY', status: isProductionLocked ? 'LOCKED' : 'PENDING' },
         ],
       });
 
@@ -151,20 +156,20 @@ export async function GET(_req: NextRequest, { params }: Params) {
           }, {}),
         },
         notes: prs.length === 0
-          ? 'No PRs created yet. BD-06 (phiếu nhập confirmation) pending. PRs will be created as DRAFT once BD-06 is processed.'
-          : `${prs.length} PRs created as DRAFT (BD-06 pending confirmation)`,
+          ? 'No PRs created yet. BD-06 (phiếu nhập confirmation) pending.'
+          : `${prs.length} PRs created as DRAFT (BD-06 status: ${bdRows.find(b=>b.decisionId==='BD-06')?.status})`,
       });
 
     case 'approval':
       return NextResponse.json({
         ...baseData,
-        businessDecisions: BAO_MINH_BD,
+        businessDecisions: bdSummary,
         summary: {
-          total: BAO_MINH_BD.length,
-          BLOCKED: BAO_MINH_BD.filter(b => b.status === 'BLOCKED').length,
-          PENDING: BAO_MINH_BD.filter(b => b.status === 'PENDING').length,
-          APPROVED: BAO_MINH_BD.filter(b => b.status === 'APPROVED').length,
-          REJECTED: BAO_MINH_BD.filter(b => b.status === 'REJECTED').length,
+          total: bdRows.length,
+          BLOCKED: bdBlocked,
+          PENDING: bdPending,
+          APPROVED: bdApproved,
+          REJECTED: bdRejected,
         },
         instructions: 'Open /approval-center to review and approve each business decision.',
       });
@@ -186,7 +191,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({
         ...baseData,
         validation: {
-          FAIL: 0, BLOCKER: 2, ORPHAN: 0, DUPLICATE: 0, LINEAGE_LOST: 0,
+          FAIL: 0,
+          BLOCKER: bdBlocked,
+          ORPHAN: boqItemRows.filter(i => !i.sectionId).length,
+          DUPLICATE: 0, LINEAGE_LOST: 0,
           checks: [
             { check: 'PROJECT_EXISTS', status: 'PASS', detail: `Project ${project.code} found` },
             { check: 'CUSTOMER_LINKED', status: project.customerId ? 'PASS' : 'WARN', detail: project.customerId ? `Customer ID=${project.customerId}` : 'No customer' },
@@ -196,15 +204,16 @@ export async function GET(_req: NextRequest, { params }: Params) {
             { check: 'TASKS', status: allTasks.length > 0 ? 'PASS' : 'WARN', detail: `${allTasks.length} tasks` },
             { check: 'MATERIALS', status: projectMaterials.length > 0 ? 'PASS' : 'WARN', detail: `${projectMaterials.length} materials` },
             { check: 'LINEAGE', status: lineageRows.length > 0 ? 'PASS' : 'WARN', detail: `${lineageRows.length} lineage records` },
-            { check: 'BD_01_SCOPE', status: 'BLOCKED', detail: 'BANG MÃ VAN T15.xlsx = T9 data' },
-            { check: 'PRODUCTION_GATE', status: 'LOCKED', detail: 'BD-04: 4 HIGH SketchUp issues' },
+            { check: 'BD_SCOPE', status: bdBlocked > 0 ? 'BLOCKED' : 'PASS', detail: `${bdBlocked} blocked BDs` },
+            { check: 'PRODUCTION_GATE', status: isProductionLocked ? 'LOCKED' : 'AVAILABLE', detail: isProductionLocked ? 'BD-04: 4 HIGH SketchUp issues' : 'Production ready' },
           ],
         },
-        reconciliation: RECON_STATS,
+        reconciliation: {
+          MATCH: 5, VARIANCE: 5, MISSING: 1, CONFLICT: 2, EXTRA: 0, UNRESOLVED: 2,
+        },
       });
 
     case 'full':
-      // Full report — all data combined
       return NextResponse.json({
         ...baseData,
         tasks: allTasks,
@@ -214,9 +223,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
         sourceDocs: srcDocs,
         lineage: lineageRows,
         purchaseRequests: prs.map(pr => ({ ...pr, items: prItems.filter(i => i.requestId === pr.id) })),
-        businessDecisions: BAO_MINH_BD,
-        reconciliation: RECON_STATS,
-        validation: { FAIL: 0, BLOCKER: 2, ORPHAN: 0, DUPLICATE: 0 },
+        businessDecisions: bdSummary,
+        bdSummary: { total: bdRows.length, BLOCKED: bdBlocked, PENDING: bdPending, APPROVED: bdApproved },
+        validation: { FAIL: 0, BLOCKER: bdBlocked, ORPHAN: 0, DUPLICATE: 0 },
       });
 
     default:

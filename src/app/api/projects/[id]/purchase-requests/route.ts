@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { purchaseRequests, purchaseRequestItems } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const { error } = await requireAuth(request as any, ALL_ROLES);
+  if (error) return error;
+
   try {
     const projectId = parseInt(params.id);
     if (isNaN(projectId)) {
@@ -18,25 +24,23 @@ export async function GET(
       .where(eq(purchaseRequests.projectId, projectId));
 
     const prIds = prs.map(pr => pr.id);
-    let items: any[] = [];
+    let items: typeof purchaseRequestItems.$inferSelect[] = [];
     
     if (prIds.length > 0) {
       items = await db.select()
         .from(purchaseRequestItems)
-        .where(eq(purchaseRequestItems.projectId, projectId)); // Alternatively 'inArray(purchaseRequestItems.requestId, prIds)' but this works too if schema matches
+        .where(inArray(purchaseRequestItems.requestId, prIds));
     }
 
-    // Attach items to their respective PRs
-    const result = prs.map(pr => {
-      return {
-        ...pr,
-        items: items.filter(item => item.requestId === pr.id)
-      };
-    });
+    const result = prs.map(pr => ({
+      ...pr,
+      items: items.filter(item => item.requestId === pr.id),
+    }));
 
     return NextResponse.json(result);
-  } catch (error) {
-    console.error('Failed to fetch purchase requests:', error);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('Failed to fetch purchase requests:', msg);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
