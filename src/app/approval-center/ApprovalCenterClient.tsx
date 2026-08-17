@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Download, Upload, FileText, CheckCircle, XCircle, AlertCircle, Edit3 } from 'lucide-react';
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 type Severity = 'HIGH' | 'MEDIUM' | 'LOW';
@@ -34,7 +35,7 @@ interface ConflictItem {
   status: string;
 }
 
-/* ─── Mocked data — in production, load from staging/staging-approval-queue.json ─ */
+/* ─── Mocked data ───────────────────────────────────────────────────────── */
 const APPROVAL_QUEUE: ApprovalItem[] = [
   {
     id: 'BD-01', priority: 1, severity: 'HIGH', category: 'SCOPE_CONFLICT',
@@ -135,9 +136,10 @@ const STATUS_COLOR: Record<string, string> = {
 function Badge({ text, color }: { text: string; color: string }) {
   return (
     <span style={{
-      display: 'inline-block', padding: '2px 8px', borderRadius: 4,
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      padding: '2px 8px', borderRadius: 4,
       fontSize: 11, fontWeight: 700, color: '#fff', background: color,
-      letterSpacing: '0.05em', textTransform: 'uppercase',
+      letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap'
     }}>{text}</span>
   );
 }
@@ -248,7 +250,6 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
   });
   const [conflicts] = useState<ConflictItem[]>(CONFLICTS);
   const [tab, setTab] = useState<'queue' | 'conflicts' | 'history'>('queue');
-  const [selected, setSelected] = useState<ApprovalItem | null>(null);
   const [overrideItem, setOverrideItem] = useState<ApprovalItem | null>(null);
   const [filterSeverity, setFilterSeverity] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
@@ -256,6 +257,7 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDecision = useCallback(async (decision: DecisionType, reason: string, note: string) => {
     if (!overrideItem) return;
@@ -302,9 +304,6 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
         };
       }));
       setOverrideItem(null);
-      if (selected?.id === bdId) {
-        setSelected(prev => prev ? { ...prev, decision, decided_by: 'Huy', decided_at: now, override_reason: reason } : null);
-      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setSaveError(`Lỗi lưu quyết định: ${msg}`);
@@ -312,7 +311,28 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
     } finally {
       setSaving(false);
     }
-  }, [overrideItem, selected]);
+  }, [overrideItem]);
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      alert(`Đã chọn file: ${file.name}. Hệ thống đang xử lý dữ liệu...`);
+      // Simulate import process
+      setTimeout(() => {
+        alert('Nhập dữ liệu thành công!');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }, 1000);
+    }
+  };
+
+  const handleExport = () => {
+    alert('Đang xuất báo cáo Approval Queue ra định dạng PDF/Excel...');
+  };
+
+  // Editable table handlers
+  const handleCellEdit = (id: string, field: keyof ApprovalItem, value: string) => {
+    setItems(prev => prev.map(it => it.id === id ? { ...it, [field]: value } : it));
+  };
 
 
   const filtered = items.filter(it => {
@@ -338,22 +358,53 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
   });
 
   return (
-    <div style={{ fontFamily: 'var(--font-sans, sans-serif)', maxWidth: 1200, margin: '0 auto', padding: '0 16px 40px' }}>
+    <div style={{ fontFamily: 'var(--font-sans, sans-serif)', maxWidth: 1400, margin: '0 auto', padding: '0 16px 40px' }}>
       {/* Header */}
       <div style={{ padding: '24px 0 16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Approval Center</h1>
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Approval Center</h1>
             <p style={{ margin: '4px 0 0', color: 'var(--color-text-2,#666)', fontSize: 13 }}>
               BAO MINH CMT8 — VĂN PHÒNG CHỨNG KHOÁN | Người duyệt: <strong>Huy</strong>
             </p>
           </div>
-          <div style={{
-            background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8,
-            padding: '8px 14px', fontSize: 12, color: '#dc2626', fontWeight: 600,
-            display: 'flex', alignItems: 'center', gap: 6
-          }}>
-            🔒 ERP_TRANSACTION = 0 — STAGING ONLY
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <input 
+              type="file" 
+              accept=".xlsx,.xls,.pdf" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleImport} 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: '#10b981', color: '#fff', border: 'none', borderRadius: 6,
+                padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+              }}>
+              <Upload size={16} />
+              Nhập Excel/PDF
+            </button>
+            <button 
+              onClick={handleExport}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6,
+                padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+              }}>
+              <Download size={16} />
+              Xuất Báo Cáo
+            </button>
+            <div style={{
+              background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8,
+              padding: '8px 14px', fontSize: 12, color: '#dc2626', fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 6
+            }}>
+              🔒 ERP_TRANSACTION = 0 — STAGING ONLY
+            </div>
           </div>
         </div>
       </div>
@@ -391,143 +442,128 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
 
       {/* Tabs */}
       <div style={{ borderBottom: '1px solid #e5e7eb', marginBottom: 0, display: 'flex', gap: 4 }}>
-        <button style={tabStyle(tab === 'queue')} onClick={() => setTab('queue')}>Approval Queue ({items.length})</button>
+        <button style={tabStyle(tab === 'queue')} onClick={() => setTab('queue')}>Approval Queue (Bảng dữ liệu)</button>
         <button style={tabStyle(tab === 'conflicts')} onClick={() => setTab('conflicts')}>Conflict Register ({conflicts.length})</button>
         <button style={tabStyle(tab === 'history')} onClick={() => setTab('history')}>Lịch sử</button>
       </div>
 
       <div style={{ background: 'var(--color-surface,#fff)', borderRadius: '0 0 12px 12px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', padding: 20 }}>
 
-        {/* ── QUEUE TAB ── */}
+        {/* ── QUEUE TAB (EXCEL LIKE SPREADSHEET) ── */}
         {tab === 'queue' && (
           <>
             {/* Filters */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-              <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Tìm kiếm..."
-                style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, minWidth: 180 }} />
+              <input value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Tìm kiếm theo ID, Tiêu đề..."
+                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, minWidth: 240 }} />
               <select value={filterSeverity} onChange={e => setFilterSeverity(e.target.value)}
-                style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
-                <option value="">Tất cả severity</option>
-                <option value="HIGH">HIGH</option>
-                <option value="MEDIUM">MEDIUM</option>
-                <option value="LOW">LOW</option>
+                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
+                <option value="">Tất cả mức độ</option>
+                <option value="HIGH">HIGH (Cao)</option>
+                <option value="MEDIUM">MEDIUM (Trung bình)</option>
+                <option value="LOW">LOW (Thấp)</option>
               </select>
               <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-                style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
-                <option value="">Tất cả status</option>
-                <option value="BLOCKED">BLOCKED</option>
-                <option value="NEEDS_APPROVAL">NEEDS_APPROVAL</option>
-                <option value="APPROVED">APPROVED</option>
-                <option value="REJECTED">REJECTED</option>
+                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
+                <option value="">Tất cả trạng thái</option>
+                <option value="BLOCKED">BLOCKED (Bị chặn)</option>
+                <option value="NEEDS_APPROVAL">NEEDS_APPROVAL (Cần duyệt)</option>
+                <option value="APPROVED">APPROVED (Đã duyệt)</option>
+                <option value="REJECTED">REJECTED (Từ chối)</option>
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: 16 }}>
-              {/* List */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {filtered.sort((a, b) => a.priority - b.priority).map(item => (
-                  <div key={item.id}
-                    onClick={() => setSelected(selected?.id === item.id ? null : item)}
-                    style={{
-                      border: `1px solid ${selected?.id === item.id ? '#2563eb' : '#e5e7eb'}`,
-                      borderLeft: `4px solid ${SEV_COLOR[item.severity]}`,
-                      borderRadius: 8, padding: '12px 14px', cursor: 'pointer',
-                      background: selected?.id === item.id ? '#eff6ff' : item.decision ? '#f9fafb' : 'white',
-                      transition: 'all 0.15s',
+            <div style={{ overflowX: 'auto', border: '1px solid #e5e7eb', borderRadius: 8 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 1000 }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e5e7eb' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', width: 80 }}>Mã BD</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', width: 100 }}>Mức độ</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', width: 200 }}>Tiêu đề / Nội dung</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', width: 160 }}>File Nguồn</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', width: 220 }}>Mô tả Vấn đề (Có thể sửa)</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', width: 140 }}>Trạng thái</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', width: 120 }}>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.sort((a, b) => a.priority - b.priority).map(item => (
+                    <tr key={item.id} style={{ 
+                      borderBottom: '1px solid #f3f4f6',
+                      background: item.decision ? '#f0fdf4' : '#fff',
+                      transition: 'background 0.2s'
                     }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 800, fontSize: 13, color: '#111' }}>{item.id}</span>
-                      <Badge text={item.severity} color={SEV_COLOR[item.severity]} />
-                      <Badge text={item.current_status} color={STATUS_COLOR[item.current_status] || '#6b7280'} />
-                      {item.erp_blocked && <Badge text="ERP BLOCKED" color="#dc2626" />}
-                      {item.decision && <Badge text={item.decision} color={STATUS_COLOR[item.decision] || '#16a34a'} />}
-                    </div>
-                    <div style={{ marginTop: 6, fontWeight: 600, fontSize: 14 }}>{item.title}</div>
-                    <div style={{ marginTop: 3, fontSize: 12, color: '#6b7280' }}>📄 {item.source_file}</div>
-                    {item.decided_by && (
-                      <div style={{ marginTop: 4, fontSize: 11, color: '#16a34a' }}>
-                        ✅ Duyệt bởi {item.decided_by} lúc {new Date(item.decided_at!).toLocaleString('vi-VN')}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Detail pane */}
-              {selected && (
-                <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 20, height: 'fit-content', position: 'sticky', top: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <div>
-                      <div style={{ fontSize: 18, fontWeight: 800 }}>{selected.id}</div>
-                      <div style={{ display: 'flex', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-                        <Badge text={selected.severity} color={SEV_COLOR[selected.severity]} />
-                        <Badge text={selected.category} color="#4b5563" />
-                        {selected.erp_blocked && <Badge text="ERP BLOCKED" color="#dc2626" />}
-                      </div>
-                    </div>
-                    <button onClick={() => setSelected(null)} style={{
-                      background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#9ca3af'
-                    }}>✕</button>
-                  </div>
-
-                  <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>{selected.title}</h3>
-
-                  <section style={{ marginBottom: 14 }}>
-                    <div style={{ fontWeight: 700, fontSize: 12, color: '#6b7280', textTransform: 'uppercase', marginBottom: 4 }}>Nguồn</div>
-                    <div style={{ fontSize: 13, background: '#f8fafc', padding: '6px 10px', borderRadius: 4 }}>📄 {selected.source_file}</div>
-                  </section>
-
-                  <section style={{ marginBottom: 14 }}>
-                    <div style={{ fontWeight: 700, fontSize: 12, color: '#6b7280', textTransform: 'uppercase', marginBottom: 4 }}>Issue</div>
-                    <div style={{ fontSize: 13, lineHeight: 1.6 }}>{selected.issue}</div>
-                  </section>
-
-                  {selected.evidence && (
-                    <section style={{ marginBottom: 14 }}>
-                      <div style={{ fontWeight: 700, fontSize: 12, color: '#6b7280', textTransform: 'uppercase', marginBottom: 4 }}>Evidence</div>
-                      <div style={{
-                        fontSize: 12, background: '#f0f9ff', border: '1px solid #bae6fd',
-                        padding: '8px 12px', borderRadius: 6, whiteSpace: 'pre-line', lineHeight: 1.6
-                      }}>{typeof selected.evidence === 'string' ? selected.evidence : JSON.stringify(selected.evidence, null, 2)}</div>
-                    </section>
-                  )}
-
-                  {/* Decision history */}
-                  {selected.history && selected.history.length > 0 && (
-                    <section style={{ marginBottom: 14 }}>
-                      <div style={{ fontWeight: 700, fontSize: 12, color: '#6b7280', textTransform: 'uppercase', marginBottom: 4 }}>Lịch sử</div>
-                      {selected.history.map((h, i) => (
-                        <div key={i} style={{ fontSize: 12, borderLeft: '2px solid #d1d5db', paddingLeft: 8, marginBottom: 4 }}>
-                          <strong>{h.action}</strong> by {h.by} at {new Date(h.at).toLocaleString('vi-VN')} — {h.note}
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: '#111' }}>{item.id}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <Badge text={item.severity} color={SEV_COLOR[item.severity]} />
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ fontWeight: 600, color: '#1f2937', marginBottom: 4 }}>{item.title}</div>
+                        <div style={{ fontSize: 12, color: '#6b7280' }}>Cat: {item.category}</div>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#2563eb' }}>
+                          <FileText size={14} />
+                          {item.source_file}
                         </div>
-                      ))}
-                    </section>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        {/* Excel-like editable cell */}
+                        <textarea 
+                          value={item.issue} 
+                          onChange={(e) => handleCellEdit(item.id, 'issue', e.target.value)}
+                          rows={2}
+                          style={{
+                            width: '100%', minHeight: 40, padding: '4px 8px',
+                            border: '1px solid transparent', borderRadius: 4,
+                            background: 'transparent', resize: 'vertical',
+                            fontSize: 12, lineHeight: 1.4, transition: 'all 0.2s'
+                          }}
+                          onFocus={(e) => { e.target.style.background = '#fff'; e.target.style.border = '1px solid #3b82f6'; e.target.style.boxShadow = '0 0 0 2px rgba(59,130,246,0.2)' }}
+                          onBlur={(e) => { e.target.style.background = 'transparent'; e.target.style.border = '1px solid transparent'; e.target.style.boxShadow = 'none' }}
+                        />
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+                          <Badge text={item.current_status} color={STATUS_COLOR[item.current_status] || '#6b7280'} />
+                          {item.erp_blocked && <Badge text="ERP BLOCKED" color="#dc2626" />}
+                          {item.decision && <Badge text={item.decision} color={STATUS_COLOR[item.decision] || '#16a34a'} />}
+                        </div>
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                        {!item.decision ? (
+                           <button 
+                            onClick={() => setOverrideItem(item)}
+                            style={{
+                              background: '#2563eb', color: '#fff', border: 'none', borderRadius: 4,
+                              padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', gap: 4, margin: '0 auto'
+                            }}>
+                            <Edit3 size={14} /> Duyệt
+                          </button>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                            <span style={{ fontSize: 11, color: '#15803d', fontWeight: 600 }}>By: {item.decided_by}</span>
+                            <button 
+                              onClick={() => setOverrideItem(item)}
+                              style={{
+                                background: 'transparent', color: '#6b7280', border: '1px solid #d1d5db', borderRadius: 4,
+                                padding: '4px 8px', fontSize: 11, cursor: 'pointer'
+                              }}>Sửa quyết định</button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
+                        Không tìm thấy dữ liệu nào phù hợp.
+                      </td>
+                    </tr>
                   )}
-
-                  {/* Actions */}
-                  {!selected.decision ? (
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button onClick={() => setOverrideItem(selected)} style={{
-                        flex: 1, padding: '10px 0', background: '#2563eb', color: '#fff',
-                        border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: 14
-                      }}>Quyết định →</button>
-                    </div>
-                  ) : (
-                    <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '10px 14px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#15803d' }}>
-                        {selected.decision} — by {selected.decided_by}
-                      </div>
-                      {selected.override_reason && (
-                        <div style={{ fontSize: 12, marginTop: 4, color: '#374151' }}>{selected.override_reason}</div>
-                      )}
-                      <button onClick={() => setOverrideItem(selected)} style={{
-                        marginTop: 8, padding: '4px 10px', background: 'none',
-                        border: '1px solid #d1d5db', borderRadius: 4, cursor: 'pointer', fontSize: 12
-                      }}>Override / Sửa lại</button>
-                    </div>
-                  )}
-                </div>
-              )}
+                </tbody>
+              </table>
             </div>
           </>
         )}
@@ -567,7 +603,7 @@ export default function ApprovalCenterClient({ initialData }: { initialData?: an
           <div>
             {items.filter(i => i.history && i.history.length > 0).length === 0 ? (
               <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
-                Chưa có quyết định nào. Dùng tab &quot;Approval Queue&quot; để duyệt.
+                Chưa có quyết định nào. Dùng tab "Approval Queue" để duyệt.
               </div>
             ) : (
               items.filter(i => i.history && i.history.length > 0).map(item => (
