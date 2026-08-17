@@ -1,10 +1,10 @@
 # PROJECT-STATE — BAO MINH CMT8
 ## VĂN PHÒNG CHỨNG KHOÁN BẢO MINH CHI NHÁNH CMT8 - TP HỒ CHÍ MINH
 
-**Cập nhật lần cuối:** 2026-08-17T20:20:00+07:00  
-**Người cập nhật:** Antigravity (Phase C complete)  
-**Người duyệt dữ liệu:** Huy (owner)
-**Commit mới nhất:** `6aeecfd` (Phase C — Master Data Staging + Approval Center UI)
+**Cập nhật lần cuối:** 2026-08-17T20:42:00+07:00  
+**Người cập nhật:** Antigravity (Phase C → DB Seed → Production Deploy)  
+**Người duyệt dữ liệu:** Huy (owner)  
+**Commit mới nhất:** `9757b87` (ProjectListClient + Source Center UI + schema)
 
 
 ---
