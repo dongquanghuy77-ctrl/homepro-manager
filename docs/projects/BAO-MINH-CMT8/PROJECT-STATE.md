@@ -1,11 +1,25 @@
 # PROJECT-STATE — BAO MINH CMT8
 ## VĂN PHÒNG CHỨNG KHOÁN BẢO MINH CHI NHÁNH CMT8 - TP HỒ CHÍ MINH
 
-**Cập nhật lần cuối:** 2026-08-17T20:42:00+07:00  
-**Người cập nhật:** Antigravity (Phase C → DB Seed → Production Deploy)  
+**Cập nhật lần cuối:** 2026-08-17T21:13:00+07:00  
+**Người cập nhật:** Antigravity (Go-Live Execution Phase 2-13)  
 **Người duyệt dữ liệu:** Huy (owner)  
-**Commit mới nhất:** `9757b87` (ProjectListClient + Source Center UI + schema)
+**Commit mới nhất:** `9dcb885` (Go-Live Phase 2-13 + acceptance report)
 
+---
+
+## GO-LIVE SESSION RESULTS
+
+```
+E2E:     43 PASS / 0 FAIL / 2 WARN
+TSC:     PASS (0 errors)
+BUILD:   PASS (exit 0)
+DEPLOY:  9dcb885 → Vercel (deploying)
+
+business_decisions: 7 seeded (BD-01..07)
+purchase_requests:  3 DRAFT (PR-BM-HN/BT/AC)
+production_orders:  0 (LOCKED — BD-04)
+```
 
 ---
 
