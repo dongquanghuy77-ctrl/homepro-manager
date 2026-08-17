@@ -1,0 +1,553 @@
+{
+  "staging_id": "STAG-CL-001",
+  "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+  "source_sheet": "Cut List",
+  "total_parts": 1557,
+  "total_assemblies": 37,
+  "materials": [
+    "HN - 111G",
+    "BT - 200T",
+    "BT - SC 010 MW",
+    "THAN TRE",
+    "AC - 9205 S",
+    "GO GHEP THANH"
+  ],
+  "material_counts": {
+    "HN - 111G": {
+      "count": 854,
+      "thicknesses": [
+        17.5,
+        10
+      ]
+    },
+    "BT - 200T": {
+      "count": 63,
+      "thicknesses": [
+        17.5
+      ]
+    },
+    "BT - SC 010 MW": {
+      "count": 580,
+      "thicknesses": [
+        17.5,
+        10
+      ]
+    },
+    "THAN TRE": {
+      "count": 22,
+      "thicknesses": [
+        8
+      ]
+    },
+    "AC - 9205 S": {
+      "count": 26,
+      "thicknesses": [
+        17.5
+      ]
+    },
+    "GO GHEP THANH": {
+      "count": 12,
+      "thicknesses": [
+        30
+      ]
+    }
+  },
+  "assemblies": [
+    {
+      "assembly_id": "124",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "647",
+      "height": "632.7",
+      "sub_part_count": 23,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "122",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "730",
+      "height": "577.8",
+      "sub_part_count": 5,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "114",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "730",
+      "height": "577.8",
+      "sub_part_count": 11,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "120",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "647",
+      "height": "632.7",
+      "sub_part_count": 25,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "125",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "632.7",
+      "height": "80",
+      "sub_part_count": 23,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "121",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "632.7",
+      "height": "80",
+      "sub_part_count": 110,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "116",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "647",
+      "height": "632.7",
+      "sub_part_count": 9,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "118",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "730",
+      "height": "577.8",
+      "sub_part_count": 90,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "115",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "632.7",
+      "height": "80",
+      "sub_part_count": 169,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "133",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "1709.7",
+      "height": "841.9",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "128",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "647",
+      "height": "632.7",
+      "sub_part_count": 15,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "126",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "730",
+      "height": "577.8",
+      "sub_part_count": 40,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "129",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "17.5",
+      "width": "632.7",
+      "height": "80",
+      "sub_part_count": 241,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "109",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "293.2",
+      "height": "70",
+      "sub_part_count": 24,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "113",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "442.1",
+      "height": "70",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "106",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "442.1",
+      "height": "70",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "107",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "442.1",
+      "height": "70",
+      "sub_part_count": 4,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "132",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "1826.8",
+      "height": "100",
+      "sub_part_count": 15,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "119",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "577.8",
+      "height": "100",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "117",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "577.8",
+      "height": "100",
+      "sub_part_count": 1,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "127",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "577.8",
+      "height": "100",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "123",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - 200T",
+      "thickness": "17.5",
+      "width": "577.8",
+      "height": "100",
+      "sub_part_count": 46,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "131",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "10",
+      "width": "1892.8",
+      "height": "741.9",
+      "sub_part_count": 22,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "98",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "10",
+      "width": "1690",
+      "height": "565.9",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "100",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "10",
+      "width": "1690",
+      "height": "565.9",
+      "sub_part_count": 16,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "99",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "10",
+      "width": "830",
+      "height": "565.9",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "101",
+      "assembly_name": "BEND_PANEL",
+      "material": "HN - 111G",
+      "thickness": "10",
+      "width": "830",
+      "height": "565.9",
+      "sub_part_count": 20,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "105",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "1765",
+      "height": "474.6",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "102",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "685",
+      "height": "474.6",
+      "sub_part_count": 9,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "112",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "1765",
+      "height": "474.6",
+      "sub_part_count": 0,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "103",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "685",
+      "height": "474.6",
+      "sub_part_count": 19,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "111",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "685",
+      "height": "474.6",
+      "sub_part_count": 2,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "104",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "1765",
+      "height": "474.6",
+      "sub_part_count": 323,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "110",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "1765",
+      "height": "324.6",
+      "sub_part_count": 79,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "108",
+      "assembly_name": "BEND_PANEL",
+      "material": "BT - SC 010 MW",
+      "thickness": "17.5",
+      "width": "685",
+      "height": "324.6",
+      "sub_part_count": 130,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "134",
+      "assembly_name": "BEND_PANEL",
+      "material": "THAN TRE",
+      "thickness": "8",
+      "width": "1682.6",
+      "height": "849.9",
+      "sub_part_count": 1,
+      "has_go_ghep": false
+    },
+    {
+      "assembly_id": "130",
+      "assembly_name": "BEND_PANEL",
+      "material": "THAN TRE",
+      "thickness": "8",
+      "width": "1905",
+      "height": "749.9",
+      "sub_part_count": 47,
+      "has_go_ghep": true
+    }
+  ],
+  "go_ghep_thanh_exception": {
+    "exception_id": "MAT-EXC-001",
+    "material_code": "GO GHEP THANH",
+    "thickness_mm": 30,
+    "parts": [
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "2128.3",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "2128.3",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "2128.3",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "2128.3",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      },
+      {
+        "assembly_id": "130",
+        "part_name": "hồi",
+        "material": "GO GHEP THANH",
+        "thickness": "30",
+        "width": "483.8",
+        "height": "100",
+        "type": "part"
+      }
+    ],
+    "part_count": 12,
+    "in_purchase_docs": false,
+    "in_vat_tu_hn": false,
+    "in_boq": "UNKNOWN — no explicit BOQ item found",
+    "in_sketchup": "YES (as material in SKP model)",
+    "part_type": "HỒI (back structural panels)",
+    "status": "NEEDS_APPROVAL",
+    "approval_required": true,
+    "proposed_resolution": "Huy xác nhận: (1) đây là khung/chân gỗ cho hạng mục nào? (2) supplier? (3) đã mua chưa?"
+  },
+  "status": "STAGED",
+  "erp_ready": false
+}

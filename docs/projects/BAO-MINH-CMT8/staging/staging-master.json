@@ -1,0 +1,1976 @@
+{
+  "generated_at": "2026-08-17T13:16:14.283Z",
+  "commit": "4350467",
+  "qc": {
+    "SOURCE_HASH_MISMATCH": 0,
+    "DUPLICATE_SOURCE": 0,
+    "ORPHAN": 0,
+    "LINEAGE_LOST": 0,
+    "UNSUPPORTED_INFERENCE": 0,
+    "UNAPPROVED_TRANSACTION": 0,
+    "ERP_TRANSACTION_CREATED": 0,
+    "NEEDS_APPROVAL": 7,
+    "CONFLICT": 8,
+    "NEW_FILES": 0,
+    "PASS": true
+  },
+  "project": {
+    "staging_id": "STAG-PRJ-001",
+    "project_code": "BAO-MINH-CMT8",
+    "project_name": "VĂN PHÒNG CHỨNG KHOÁN BẢO MINH CHI NHÁNH CMT8",
+    "customer": "CÔNG TY CỔ PHẦN CHỨNG KHOÁN BẢO MINH",
+    "location": "201-203 CMT8, Phường 4, Quận 3, TP.HCM",
+    "floors": [
+      "T15"
+    ],
+    "total_area_m2": "UNCONFIRMED",
+    "project_type": "NỘI THẤT VĂN PHÒNG",
+    "contractor": "HOMEPRO SG",
+    "status": "STAGING",
+    "erp_ready": false,
+    "approval_status": "PENDING",
+    "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+    "source_hash": "09dbba042536992e2ed11e75ec8c544d9117bf2d107236b9dede753136c851ae",
+    "lineage_id": "LIN-0001",
+    "generated_at": "2026-08-17T13:16:14.283Z",
+    "commit": "4350467"
+  },
+  "zones": [
+    {
+      "staging_id": "STAG-ZONE-001",
+      "zone_code": "ZONE-CT",
+      "zone_name": "Phòng Chủ Tịch",
+      "floor": "T15",
+      "area_m2": 94,
+      "boq_items_count": 16,
+      "status": "PARTIAL",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0002",
+      "note": "Area from BOQ phase 1"
+    },
+    {
+      "staging_id": "STAG-ZONE-002",
+      "zone_code": "ZONE-GD",
+      "zone_name": "Phòng GĐ Chi Nhánh",
+      "floor": "T15",
+      "area_m2": 26.3,
+      "boq_items_count": 11,
+      "status": "PARTIAL",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0003",
+      "note": "Area from BOQ"
+    },
+    {
+      "staging_id": "STAG-ZONE-003",
+      "zone_code": "ZONE-HP",
+      "zone_name": "Phòng Họp",
+      "floor": "T15",
+      "area_m2": 23,
+      "boq_items_count": 7,
+      "status": "PARTIAL",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0004",
+      "note": "Area from BOQ"
+    },
+    {
+      "staging_id": "STAG-ZONE-004",
+      "zone_code": "ZONE-LV",
+      "zone_name": "Phòng Làm Việc",
+      "floor": "T15",
+      "area_m2": 112,
+      "boq_items_count": 33,
+      "status": "PARTIAL",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0005",
+      "note": "NT-23 R-01 confirmed; 32 pages unresolved"
+    },
+    {
+      "staging_id": "STAG-ZONE-005",
+      "zone_code": "ZONE-SH",
+      "zone_name": "Sảnh Tiếp Tân",
+      "floor": "T15",
+      "area_m2": null,
+      "boq_items_count": 0,
+      "status": "NEEDS_REVIEW",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0006",
+      "note": "Area unknown"
+    },
+    {
+      "staging_id": "STAG-ZONE-006",
+      "zone_code": "ZONE-PT",
+      "zone_name": "Pantry",
+      "floor": "T15",
+      "area_m2": null,
+      "boq_items_count": 12,
+      "status": "NEEDS_REVIEW",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0007",
+      "note": "Area unknown"
+    },
+    {
+      "staging_id": "STAG-ZONE-007",
+      "zone_code": "ZONE-KH",
+      "zone_name": "Kho",
+      "floor": "T15",
+      "area_m2": null,
+      "boq_items_count": 0,
+      "status": "NEEDS_REVIEW",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0008",
+      "note": "Grouped with D"
+    },
+    {
+      "staging_id": "STAG-ZONE-008",
+      "zone_code": "ZONE-HL",
+      "zone_name": "Hành Lang",
+      "floor": "T15",
+      "area_m2": null,
+      "boq_items_count": 2,
+      "status": "NEEDS_REVIEW",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "lineage_id": "LIN-0009",
+      "note": "Area unknown"
+    }
+  ],
+  "materials": [
+    {
+      "staging_id": "STAG-MAT-001",
+      "material_code": "HN-111G-17.5",
+      "material_name": "Ván MDF phủ Melamine Hồng Nghi",
+      "supplier_code": "HN",
+      "color_code": "111G",
+      "thickness_mm": 17.5,
+      "unit": "Tấm",
+      "bom_qty": 62,
+      "po_qty": 65,
+      "po_source": "SOURCE-02",
+      "variance": 3,
+      "variance_note": "buffer/waste",
+      "conflict": null,
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0010",
+      "sketchup_match": "HN-111G"
+    },
+    {
+      "staging_id": "STAG-MAT-002",
+      "material_code": "HN-111G-10",
+      "material_name": "Ván MDF phủ Melamine Hồng Nghi",
+      "supplier_code": "HN",
+      "color_code": "111G",
+      "thickness_mm": 10,
+      "unit": "Tấm",
+      "bom_qty": 25,
+      "po_qty": 26,
+      "po_source": "SOURCE-02",
+      "variance": 1,
+      "variance_note": "buffer/waste",
+      "conflict": null,
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0011",
+      "sketchup_match": "HN-111G"
+    },
+    {
+      "staging_id": "STAG-MAT-003",
+      "material_code": "BT-SC010MW-17.5",
+      "material_name": "Ván MFC Cái Bảng SC 010 MW",
+      "supplier_code": "BT",
+      "color_code": "SC010MW",
+      "thickness_mm": 17.5,
+      "unit": "Tấm",
+      "bom_qty": 65,
+      "po_qty": 67,
+      "po_source": "SOURCE-04",
+      "variance": 2,
+      "variance_note": "buffer/waste",
+      "conflict": null,
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0012",
+      "sketchup_match": "BT-SC010MW"
+    },
+    {
+      "staging_id": "STAG-MAT-004",
+      "material_code": "BT-SC010MW-10",
+      "material_name": "Ván MFC Cái Bảng SC 010 MW",
+      "supplier_code": "BT",
+      "color_code": "SC010MW",
+      "thickness_mm": 10,
+      "unit": "Tấm",
+      "bom_qty": 20,
+      "po_qty": 21,
+      "po_source": "SOURCE-04",
+      "variance": 1,
+      "variance_note": "buffer/waste",
+      "conflict": null,
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0013",
+      "sketchup_match": "BT-SC010MW"
+    },
+    {
+      "staging_id": "STAG-MAT-005",
+      "material_code": "BT-200T-17.5",
+      "material_name": "Ván MFC Cái Bảng 200T",
+      "supplier_code": "BT",
+      "color_code": "200T",
+      "thickness_mm": 17.5,
+      "unit": "Tấm",
+      "bom_qty": 6,
+      "po_qty": 6,
+      "po_source": "SOURCE-04",
+      "variance": 0,
+      "variance_note": null,
+      "conflict": null,
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0014",
+      "sketchup_match": "BT-200T"
+    },
+    {
+      "staging_id": "STAG-MAT-006",
+      "material_code": "AC-9205S-17.5",
+      "material_name": "Ván An Cường 9205S",
+      "supplier_code": "AC",
+      "color_code": "9205S",
+      "thickness_mm": 17.5,
+      "unit": "Tấm",
+      "bom_qty": 4,
+      "po_qty": 4,
+      "po_source": "SOURCE-03",
+      "variance": 0,
+      "variance_note": null,
+      "conflict": "SKP-APRV-05 (survey shows MS-608EV)",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0015",
+      "sketchup_match": "AC-9205S"
+    },
+    {
+      "staging_id": "STAG-MAT-007",
+      "material_code": "THAN-TRE-8",
+      "material_name": "Thanh Tre 8mm",
+      "supplier_code": "UNKNOWN",
+      "color_code": null,
+      "thickness_mm": 8,
+      "unit": "Tấm",
+      "bom_qty": 10,
+      "po_qty": 10,
+      "po_source": "SOURCE-01",
+      "variance": 0,
+      "variance_note": null,
+      "conflict": "CONFLICT-004 (no BOQ item)",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0016",
+      "sketchup_match": "THAN-TRE"
+    },
+    {
+      "staging_id": "STAG-MAT-008",
+      "material_code": "GO-GHEP-THANH-30",
+      "material_name": "Gỗ Ghép Thanh 30mm",
+      "supplier_code": "UNKNOWN",
+      "color_code": null,
+      "thickness_mm": 30,
+      "unit": "Tấm",
+      "bom_qty": 1,
+      "po_qty": "N/A",
+      "po_source": null,
+      "variance": "N/A",
+      "variance_note": null,
+      "conflict": "BD-05: not in PO, 12 parts in CL (hồi panels)",
+      "status": "NEEDS_APPROVAL",
+      "erp_ready": false,
+      "approval_status": "NEEDS_APPROVAL",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "lineage_id": "LIN-0017",
+      "sketchup_match": "GO-GHEP-THANH"
+    }
+  ],
+  "suppliers": [
+    {
+      "staging_id": "STAG-SUP-001",
+      "code": "HN",
+      "name": "Ván Hồng Nghi",
+      "short": "HN",
+      "material_codes": [
+        "HN-111G-17.5",
+        "HN-111G-10"
+      ],
+      "po_source": [
+        "SOURCE-02"
+      ],
+      "evidence": "Invoice/phiếu nhập SOURCE-02, VẬT TƯ HỒNG NGHI.xlsx col HN",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING"
+    },
+    {
+      "staging_id": "STAG-SUP-002",
+      "code": "BT",
+      "name": "Ván Cái Bảng (Bình Tiên?)",
+      "short": "BT",
+      "material_codes": [
+        "BT-SC010MW-17.5",
+        "BT-SC010MW-10",
+        "BT-200T-17.5"
+      ],
+      "po_source": [
+        "SOURCE-04"
+      ],
+      "evidence": "VẬT TƯ HỒNG NGHI.xlsx col BT, Invoice SOURCE-04",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "note": "Supplier full name needs confirmation"
+    },
+    {
+      "staging_id": "STAG-SUP-003",
+      "code": "AC",
+      "name": "An Cường (An Cuong)",
+      "short": "AC",
+      "material_codes": [
+        "AC-9205S-17.5"
+      ],
+      "po_source": [
+        "SOURCE-03"
+      ],
+      "evidence": "VẬT TƯ HỒNG NGHI.xlsx col AC, Invoice SOURCE-03",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "conflict": "SKP-APRV-05: MS-608EV vs 9205S mismatch"
+    }
+  ],
+  "bom": {
+    "van": [
+      {
+        "staging_id": "STAG-BOM-001",
+        "material_code": "HN - 111G-17.5",
+        "supplier": "HN",
+        "material_name": "111G",
+        "thickness_mm": 17.5,
+        "qty": 62,
+        "unit": "Tấm",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 2,
+        "lineage_id": "LIN-0018"
+      },
+      {
+        "staging_id": "STAG-BOM-002",
+        "material_code": "BT - 200T-17.5",
+        "supplier": "BT",
+        "material_name": "200T",
+        "thickness_mm": 17.5,
+        "qty": 6,
+        "unit": "Tấm",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 3,
+        "lineage_id": "LIN-0019"
+      },
+      {
+        "staging_id": "STAG-BOM-003",
+        "material_code": "HN - 111G-10",
+        "supplier": "HN",
+        "material_name": "111G",
+        "thickness_mm": 10,
+        "qty": 25,
+        "unit": "Tấm",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 4,
+        "lineage_id": "LIN-0020"
+      },
+      {
+        "staging_id": "STAG-BOM-004",
+        "material_code": "BT - SC 010 MW-17.5",
+        "supplier": "BT",
+        "material_name": "SC 010 MW",
+        "thickness_mm": 17.5,
+        "qty": 65,
+        "unit": "Tấm",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 5,
+        "lineage_id": "LIN-0021"
+      },
+      {
+        "staging_id": "STAG-BOM-005",
+        "material_code": "BT - SC 010 MW-10",
+        "supplier": "BT",
+        "material_name": "SC 010 MW",
+        "thickness_mm": 10,
+        "qty": 20,
+        "unit": "Tấm",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 6,
+        "lineage_id": "LIN-0022"
+      },
+      {
+        "staging_id": "STAG-BOM-006",
+        "material_code": "THAN TRE-8",
+        "supplier": "THAN TRE",
+        "material_name": "",
+        "thickness_mm": 8,
+        "qty": 10,
+        "unit": "Tấm",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 7,
+        "lineage_id": "LIN-0023"
+      },
+      {
+        "staging_id": "STAG-BOM-007",
+        "material_code": "AC - 9205 S-17.5",
+        "supplier": "AC",
+        "material_name": "9205 S",
+        "thickness_mm": 17.5,
+        "qty": 4,
+        "unit": "Tấm",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 8,
+        "lineage_id": "LIN-0024"
+      },
+      {
+        "staging_id": "STAG-BOM-008",
+        "material_code": "GO GHEP THANH-30",
+        "supplier": "GO GHEP THANH",
+        "material_name": "",
+        "thickness_mm": 30,
+        "qty": 1,
+        "unit": "Tấm",
+        "status": "NEEDS_APPROVAL",
+        "erp_ready": false,
+        "approval_status": "NEEDS_APPROVAL",
+        "source_row": 9,
+        "lineage_id": "LIN-0025"
+      }
+    ],
+    "nep": [
+      {
+        "staging_id": "STAG-NEP-001",
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 2P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 2P",
+        "qty": 749.93,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 10,
+        "lineage_id": "LIN-0026"
+      },
+      {
+        "staging_id": "STAG-NEP-002",
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 45",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 45",
+        "qty": 6.27,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 11,
+        "lineage_id": "LIN-0027"
+      },
+      {
+        "staging_id": "STAG-NEP-003",
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 4P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 4P",
+        "qty": 58.7,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 12,
+        "lineage_id": "LIN-0028"
+      },
+      {
+        "staging_id": "STAG-NEP-004",
+        "material_code": "Nẹp dán cạnh~BT   200T 17.5~Chỉ 2P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   200T 17.5",
+        "edge_size": "Chỉ 2P",
+        "qty": 51.25,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 13,
+        "lineage_id": "LIN-0029"
+      },
+      {
+        "staging_id": "STAG-NEP-005",
+        "material_code": "Nẹp dán cạnh~BT   200T 17.5~Chỉ 4P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   200T 17.5",
+        "edge_size": "Chỉ 4P",
+        "qty": 3.4,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 14,
+        "lineage_id": "LIN-0030"
+      },
+      {
+        "staging_id": "STAG-NEP-006",
+        "material_code": "Nẹp dán cạnh~HN   111G 10~Chỉ 2P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 10",
+        "edge_size": "Chỉ 2P",
+        "qty": 4.99,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 15,
+        "lineage_id": "LIN-0031"
+      },
+      {
+        "staging_id": "STAG-NEP-007",
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 2P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 2P",
+        "qty": 522.25,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 16,
+        "lineage_id": "LIN-0032"
+      },
+      {
+        "staging_id": "STAG-NEP-008",
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 4P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 4P",
+        "qty": 32.56,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 17,
+        "lineage_id": "LIN-0033"
+      },
+      {
+        "staging_id": "STAG-NEP-009",
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 45",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 45",
+        "qty": 4.75,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 18,
+        "lineage_id": "LIN-0034"
+      },
+      {
+        "staging_id": "STAG-NEP-010",
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 2P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 10",
+        "edge_size": "Chỉ 2P",
+        "qty": 12.2,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 19,
+        "lineage_id": "LIN-0035"
+      },
+      {
+        "staging_id": "STAG-NEP-011",
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 4P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 10",
+        "edge_size": "Chỉ 4P",
+        "qty": 22.47,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 20,
+        "lineage_id": "LIN-0036"
+      },
+      {
+        "staging_id": "STAG-NEP-012",
+        "material_code": "Nẹp dán cạnh~AC   9205 S 17.5~Chỉ 4P",
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "AC   9205 S 17.5",
+        "edge_size": "Chỉ 4P",
+        "qty": 16.59,
+        "unit": "m",
+        "status": "STAGED",
+        "erp_ready": false,
+        "approval_status": "PENDING",
+        "source_row": 21,
+        "lineage_id": "LIN-0037"
+      }
+    ]
+  },
+  "cutlist": {
+    "staging_id": "STAG-CL-001",
+    "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+    "source_sheet": "Cut List",
+    "total_parts": 1557,
+    "total_assemblies": 37,
+    "materials": [
+      "HN - 111G",
+      "BT - 200T",
+      "BT - SC 010 MW",
+      "THAN TRE",
+      "AC - 9205 S",
+      "GO GHEP THANH"
+    ],
+    "material_counts": {
+      "HN - 111G": {
+        "count": 854,
+        "thicknesses": [
+          17.5,
+          10
+        ]
+      },
+      "BT - 200T": {
+        "count": 63,
+        "thicknesses": [
+          17.5
+        ]
+      },
+      "BT - SC 010 MW": {
+        "count": 580,
+        "thicknesses": [
+          17.5,
+          10
+        ]
+      },
+      "THAN TRE": {
+        "count": 22,
+        "thicknesses": [
+          8
+        ]
+      },
+      "AC - 9205 S": {
+        "count": 26,
+        "thicknesses": [
+          17.5
+        ]
+      },
+      "GO GHEP THANH": {
+        "count": 12,
+        "thicknesses": [
+          30
+        ]
+      }
+    },
+    "assemblies": [
+      {
+        "assembly_id": "124",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "647",
+        "height": "632.7",
+        "sub_part_count": 23,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "122",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "730",
+        "height": "577.8",
+        "sub_part_count": 5,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "114",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "730",
+        "height": "577.8",
+        "sub_part_count": 11,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "120",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "647",
+        "height": "632.7",
+        "sub_part_count": 25,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "125",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "632.7",
+        "height": "80",
+        "sub_part_count": 23,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "121",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "632.7",
+        "height": "80",
+        "sub_part_count": 110,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "116",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "647",
+        "height": "632.7",
+        "sub_part_count": 9,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "118",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "730",
+        "height": "577.8",
+        "sub_part_count": 90,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "115",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "632.7",
+        "height": "80",
+        "sub_part_count": 169,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "133",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "1709.7",
+        "height": "841.9",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "128",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "647",
+        "height": "632.7",
+        "sub_part_count": 15,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "126",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "730",
+        "height": "577.8",
+        "sub_part_count": 40,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "129",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "17.5",
+        "width": "632.7",
+        "height": "80",
+        "sub_part_count": 241,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "109",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "293.2",
+        "height": "70",
+        "sub_part_count": 24,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "113",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "442.1",
+        "height": "70",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "106",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "442.1",
+        "height": "70",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "107",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "442.1",
+        "height": "70",
+        "sub_part_count": 4,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "132",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "1826.8",
+        "height": "100",
+        "sub_part_count": 15,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "119",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "577.8",
+        "height": "100",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "117",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "577.8",
+        "height": "100",
+        "sub_part_count": 1,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "127",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "577.8",
+        "height": "100",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "123",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "thickness": "17.5",
+        "width": "577.8",
+        "height": "100",
+        "sub_part_count": 46,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "131",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "10",
+        "width": "1892.8",
+        "height": "741.9",
+        "sub_part_count": 22,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "98",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "10",
+        "width": "1690",
+        "height": "565.9",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "100",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "10",
+        "width": "1690",
+        "height": "565.9",
+        "sub_part_count": 16,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "99",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "10",
+        "width": "830",
+        "height": "565.9",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "101",
+        "assembly_name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "thickness": "10",
+        "width": "830",
+        "height": "565.9",
+        "sub_part_count": 20,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "105",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "1765",
+        "height": "474.6",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "102",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "685",
+        "height": "474.6",
+        "sub_part_count": 9,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "112",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "1765",
+        "height": "474.6",
+        "sub_part_count": 0,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "103",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "685",
+        "height": "474.6",
+        "sub_part_count": 19,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "111",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "685",
+        "height": "474.6",
+        "sub_part_count": 2,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "104",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "1765",
+        "height": "474.6",
+        "sub_part_count": 323,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "110",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "1765",
+        "height": "324.6",
+        "sub_part_count": 79,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "108",
+        "assembly_name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "thickness": "17.5",
+        "width": "685",
+        "height": "324.6",
+        "sub_part_count": 130,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "134",
+        "assembly_name": "BEND_PANEL",
+        "material": "THAN TRE",
+        "thickness": "8",
+        "width": "1682.6",
+        "height": "849.9",
+        "sub_part_count": 1,
+        "has_go_ghep": false
+      },
+      {
+        "assembly_id": "130",
+        "assembly_name": "BEND_PANEL",
+        "material": "THAN TRE",
+        "thickness": "8",
+        "width": "1905",
+        "height": "749.9",
+        "sub_part_count": 47,
+        "has_go_ghep": true
+      }
+    ],
+    "go_ghep_thanh_exception": {
+      "exception_id": "MAT-EXC-001",
+      "material_code": "GO GHEP THANH",
+      "thickness_mm": 30,
+      "parts": [
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "2128.3",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "2128.3",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "2128.3",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "2128.3",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        },
+        {
+          "assembly_id": "130",
+          "part_name": "hồi",
+          "material": "GO GHEP THANH",
+          "thickness": "30",
+          "width": "483.8",
+          "height": "100",
+          "type": "part"
+        }
+      ],
+      "part_count": 12,
+      "in_purchase_docs": false,
+      "in_vat_tu_hn": false,
+      "in_boq": "UNKNOWN — no explicit BOQ item found",
+      "in_sketchup": "YES (as material in SKP model)",
+      "part_type": "HỒI (back structural panels)",
+      "status": "NEEDS_APPROVAL",
+      "approval_required": true,
+      "proposed_resolution": "Huy xác nhận: (1) đây là khung/chân gỗ cho hạng mục nào? (2) supplier? (3) đã mua chưa?"
+    },
+    "status": "STAGED",
+    "erp_ready": false
+  },
+  "purchase": [
+    {
+      "staging_id": "STAG-PO-001",
+      "doc_id": "SOURCE-01",
+      "filename": "PHIẾU NHẬP VẬT TƯ - SOURCE-01 (THAN TRE)",
+      "supplier": "UNKNOWN",
+      "material": "THAN TRE",
+      "qty": 10,
+      "unit": "Tấm",
+      "unit_price": "UNKNOWN",
+      "total": "UNKNOWN",
+      "bom_match": "THAN-TRE-8 qty=10 ✅",
+      "boq_match": "NO DIRECT BOQ ITEM — CONFLICT-004",
+      "evidence": "Image: PHIẾU NHẬP VẬT TƯ folder SOURCE-01.jpg",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "lineage_id": "LIN-0038"
+    },
+    {
+      "staging_id": "STAG-PO-002",
+      "doc_id": "SOURCE-02",
+      "filename": "PHIẾU NHẬP VẬT TƯ - SOURCE-02 (HN-111G)",
+      "supplier": "Hồng Nghi (HN)",
+      "material": "HN-111G 17LY + 9LY",
+      "qty_17ly": 65,
+      "qty_9ly": 26,
+      "unit": "Tấm",
+      "unit_price": "PARSED: 27,318,980đ/batch",
+      "bom_match": "HN-111G-17.5 qty=65 (BOM=62 +3 buffer) ✅",
+      "boq_match": "Bàn LV NV, Tủ di động (B.II.16, B.II.19)",
+      "evidence": "Image SOURCE-02.jpg + VẬT TƯ HỒNG NGHI.xlsx HN column",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "lineage_id": "LIN-0039"
+    },
+    {
+      "staging_id": "STAG-PO-003",
+      "doc_id": "SOURCE-03",
+      "filename": "PHIẾU NHẬP VẬT TƯ - SOURCE-03 (AC-9205S)",
+      "supplier": "An Cường (AC)",
+      "material": "AC-9205S",
+      "qty": 4,
+      "unit": "Tấm",
+      "bom_match": "AC-9205S-17.5 qty=4 ✅",
+      "boq_match": "UNRESOLVED — conflict with MS-608EV survey material",
+      "evidence": "Image SOURCE-03.jpg + VẬT TƯ HỒNG NGHI.xlsx AC column",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "conflict": "SKP-APRV-05: AC-9205S vs survey MS-608EV",
+      "lineage_id": "LIN-0040"
+    },
+    {
+      "staging_id": "STAG-PO-004",
+      "doc_id": "SOURCE-04",
+      "filename": "PHIẾU NHẬP VẬT TƯ - SOURCE-04 (BT-SC010MW + BT-200T)",
+      "supplier": "BT (Cái Bảng)",
+      "material": "BT-SC010MW + BT-200T",
+      "qty_sc010mw_17": 67,
+      "qty_sc010mw_10": 21,
+      "qty_200t": 6,
+      "unit": "Tấm",
+      "bom_match": "BT-SC010MW-17.5 qty=67 (BOM=65 +2 buffer) ✅; BT-200T qty=6 ✅",
+      "boq_match": "Tủ hồ sơ, Bàn PP, Bàn TP, Quầy LT",
+      "evidence": "Image SOURCE-04.jpg + VẬT TƯ HỒNG NGHI.xlsx BT column",
+      "status": "STAGED",
+      "erp_ready": false,
+      "approval_status": "PENDING",
+      "lineage_id": "LIN-0041"
+    }
+  ],
+  "approval_queue": [
+    {
+      "id": "BD-01",
+      "priority": 1,
+      "severity": "HIGH",
+      "category": "SCOPE_CONFLICT",
+      "title": "BANG MÃ VÁN BMS T15.xlsx — Tầng 9 hay Tầng 15?",
+      "source_file": "BANG MÃ VAN BMS T15.xlsx",
+      "issue": "Filename = T15 nhưng content text ghi \"TẦNG 9\". Số lượng (24 bàn) không khớp BOQ T15 (6 bàn).",
+      "evidence": "Text extracted: \"BẢNG FINAL MÃ VÁN VĂN PHÒNG BMS TẦNG 9\"; Qty mismatch 4×",
+      "options": [
+        "A: File này cho Tầng 9 (sai scope) — cung cấp file T15 mới",
+        "B: File này cho T15 nhưng text sai — cung cấp qty/mã đúng",
+        "C: Văn phòng có T9 lẫn T15 trong cùng dự án"
+      ],
+      "current_status": "BLOCKED",
+      "erp_blocked": true,
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "BD-02",
+      "priority": 2,
+      "severity": "MEDIUM",
+      "category": "DRAWING_CLASSIFICATION",
+      "title": "NT-23 — Xác nhận QUẦY TIẾP TÂN R-01",
+      "source_file": "NT-23.pdf",
+      "issue": "Directive mapping cũ ghi SAI là \"rèm/rãnh\". Text layer PDF xác nhận: CHI TIẾT QUẦY TIẾP TÂN R-01.",
+      "evidence": "pdfjs text layer 1486 chars: \"CHI TIẾT QUẦY TIẾP TÂN R-01 PHÒNG LÀM VIỆC NT-23 1/30 REV0 05/08/2026\"",
+      "current_classification": "RECEPTION_COUNTER / QUẦY TIẾP TÂN R-01",
+      "materials_confirmed": [
+        "MDF+Laminate vân đá",
+        "MFC MS 204 SH",
+        "MFC HN-111G",
+        "Mica xanh",
+        "LED CT-01"
+      ],
+      "proposed_boq_links": [
+        "B.II.4 (Quầy lễ tân 3.6md)",
+        "B.II.6 (Hệ quầy giao dịch)"
+      ],
+      "current_status": "NEEDS_APPROVAL",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "BD-03",
+      "priority": 3,
+      "severity": "MEDIUM",
+      "category": "BOQ_CLARIFICATION",
+      "title": "14 KL Clarification Items — BOQ không đủ thông tin",
+      "source_file": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+      "issue": "14 BOQ items thiếu: dimension, material, drawing reference, hoặc description mơ hồ",
+      "items": [
+        {
+          "item": "A.I.4",
+          "issue": "Thiếu dimension, mô tả không rõ ràng"
+        },
+        {
+          "item": "B.I.5",
+          "issue": "Quantity unit mơ hồ (md vs m2)"
+        },
+        {
+          "item": "B.II.7",
+          "issue": "Không có drawing reference"
+        },
+        {
+          "item": "B.II.14",
+          "issue": "Material không xác định"
+        },
+        {
+          "item": "C.I.4",
+          "issue": "Dimension không phù hợp zone"
+        },
+        {
+          "item": "C.II.1",
+          "issue": "Không có drawing reference"
+        },
+        {
+          "item": "D.I.4",
+          "issue": "Description chưa rõ scope"
+        },
+        {
+          "item": "D.I.9",
+          "issue": "Thiếu material specification"
+        },
+        {
+          "item": "D.II.3",
+          "issue": "Quantity mismatch vs SketchUp"
+        },
+        {
+          "item": "E.I.6",
+          "issue": "Zone không xác định"
+        },
+        {
+          "item": "E.I.7",
+          "issue": "Zone không xác định"
+        },
+        {
+          "item": "E.II.4",
+          "issue": "Drawing page unresolved"
+        },
+        {
+          "item": "F.I.2",
+          "issue": "Mô tả không đủ để sản xuất"
+        },
+        {
+          "item": "G.I.1",
+          "issue": "BOQ có nhưng SketchUp không có"
+        }
+      ],
+      "current_status": "NEEDS_APPROVAL",
+      "erp_blocked": false,
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "BD-04",
+      "priority": 1,
+      "severity": "HIGH",
+      "category": "SKETCHUP_PRODUCTION_LOCK",
+      "title": "4 SketchUp HIGH Issues — Production Locked",
+      "source_file": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skp",
+      "issue": "Production LOCKED until 4 HIGH issues resolved",
+      "issues": [
+        {
+          "issue_id": "SKP-APRV-01",
+          "type": "Trần treo clearance",
+          "current": "H=2540mm",
+          "needs": "MEP clearance measurement"
+        },
+        {
+          "issue_id": "SKP-APRV-02",
+          "type": "Total furniture run",
+          "current": "10,470mm",
+          "needs": "Actual room measurement"
+        },
+        {
+          "issue_id": "SKP-APRV-03",
+          "type": "MEP coordination",
+          "current": "No MEP in SKP",
+          "needs": "M&E meeting before vách"
+        },
+        {
+          "issue_id": "SKP-APRV-04",
+          "type": "NT-23 directive error",
+          "current": "Was CURTAIN_RAIL",
+          "needs": "Confirm RECEPTION_COUNTER"
+        }
+      ],
+      "current_status": "BLOCKED",
+      "erp_blocked": true,
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "BD-05",
+      "priority": 2,
+      "severity": "MEDIUM",
+      "category": "MATERIAL_EXCEPTION",
+      "title": "GỖ GHÉP THANH 30mm — Material không có trong PO",
+      "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+      "issue": "1 tấm GỖ GHÉP THANH 30mm có trong BOM và Cut List nhưng KHÔNG trong purchase docs",
+      "evidence": {
+        "bom_sheet": "Row 9: GỖ GHÉP THANH-30 = 1 tấm",
+        "cut_list": "12 \"hồi\" parts, thickness=30mm, sizes: 2128.3×100 (×4) và 483.8×100 (×8)",
+        "assemblies_using": [
+          "Assembly 130: hồi 30×2128.3×100",
+          "Assembly 130: hồi 30×2128.3×100",
+          "Assembly 130: hồi 30×2128.3×100",
+          "Assembly 130: hồi 30×2128.3×100",
+          "Assembly 130: hồi 30×483.8×100",
+          "Assembly 130: hồi 30×483.8×100",
+          "Assembly 130: hồi 30×483.8×100",
+          "Assembly 130: hồi 30×483.8×100",
+          "Assembly 130: hồi 30×483.8×100",
+          "Assembly 130: hồi 30×483.8×100",
+          "Assembly 130: hồi 30×483.8×100",
+          "Assembly 130: hồi 30×483.8×100"
+        ],
+        "in_purchase_docs": false,
+        "in_vat_tu_hn": false,
+        "in_boq": "NOT FOUND",
+        "in_sketchup": "YES — material \"GO GHEP THANH\"",
+        "in_warehouse": "UNKNOWN"
+      },
+      "current_status": "NEEDS_APPROVAL",
+      "erp_blocked": false,
+      "exception_type": "MATERIAL_EXCEPTION",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "BD-06",
+      "priority": 2,
+      "severity": "MEDIUM",
+      "category": "PURCHASE_CONFIRMATION",
+      "title": "4 Purchase Documents — Cần xác nhận supplier/warehouse",
+      "source_file": "PHIẾU NHẬP VẬT TƯ.zip",
+      "issue": "4 phiếu nhập vật tư chụp ảnh. Cần xác nhận: supplier ID trong hệ thống, warehouse đầu vào, unit price",
+      "docs": [
+        {
+          "doc_id": "SOURCE-01",
+          "supplier": "UNKNOWN",
+          "material": "THAN TRE",
+          "status": "STAGED"
+        },
+        {
+          "doc_id": "SOURCE-02",
+          "supplier": "Hồng Nghi (HN)",
+          "material": "HN-111G 17LY + 9LY",
+          "status": "STAGED"
+        },
+        {
+          "doc_id": "SOURCE-03",
+          "supplier": "An Cường (AC)",
+          "material": "AC-9205S",
+          "status": "STAGED"
+        },
+        {
+          "doc_id": "SOURCE-04",
+          "supplier": "BT (Cái Bảng)",
+          "material": "BT-SC010MW + BT-200T",
+          "status": "STAGED"
+        }
+      ],
+      "current_status": "NEEDS_APPROVAL",
+      "erp_blocked": false,
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "id": "BD-07",
+      "priority": 3,
+      "severity": "LOW",
+      "category": "ZONE_VISUAL_REVIEW",
+      "title": "32 Design Drawing Pages — Visual Inspection Required",
+      "source_file": "060826_TKNT_VP BAO MINH.pdf",
+      "issue": "Pages 4-35 are image-based technical drawings. Zone/material/dimension cannot be auto-extracted.",
+      "pages": [
+        {
+          "page": 4,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 5,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 6,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 7,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 8,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 9,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 10,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 11,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 12,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 13,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 14,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 15,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 16,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 17,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 18,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 19,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 20,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 21,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 22,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 23,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 24,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 25,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 26,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 27,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 28,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 29,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 30,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 31,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 32,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 33,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 34,
+          "status": "PENDING_VISUAL_INSPECTION"
+        },
+        {
+          "page": 35,
+          "status": "PENDING_VISUAL_INSPECTION"
+        }
+      ],
+      "current_status": "NEEDS_APPROVAL",
+      "erp_blocked": false,
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "CONF-001",
+      "type": "SCOPE_MISMATCH",
+      "severity": "HIGH",
+      "source": "BANG MÃ VAN BMS T15.xlsx",
+      "description": "Filename=T15, content=T9, qty mismatch 4×",
+      "bd_ref": "BD-01",
+      "status": "UNRESOLVED"
+    },
+    {
+      "id": "CONF-002",
+      "type": "DIRECTIVE_ERROR",
+      "severity": "MEDIUM",
+      "source": "NT-23.pdf",
+      "description": "Old directive: CURTAIN_RAIL. Actual: RECEPTION_COUNTER",
+      "bd_ref": "BD-02",
+      "status": "DOCUMENTED_PENDING_APPROVAL"
+    },
+    {
+      "id": "CONF-003",
+      "type": "MATERIAL_MISMATCH",
+      "severity": "MEDIUM",
+      "source": "SketchUp vs Survey",
+      "description": "SKP: AC-9205S; Survey photos M05/M06: MS-608EV (An Cuong)",
+      "bd_ref": "BD-04 SKP-APRV-05",
+      "status": "UNRESOLVED"
+    },
+    {
+      "id": "CONF-004",
+      "type": "MATERIAL_NO_BOQ",
+      "severity": "MEDIUM",
+      "source": "THAN TRE × 10 tấm",
+      "description": "Material purchased, in BOM+CL, but no explicit BOQ item",
+      "bd_ref": "CONFLICT-004",
+      "status": "UNRESOLVED"
+    },
+    {
+      "id": "CONF-005",
+      "type": "MATERIAL_NOT_PURCHASED",
+      "severity": "MEDIUM",
+      "source": "BOM sheet GO GHEP THANH",
+      "description": "1 tấm in BOM, 12 parts in CL, but NOT in any purchase doc",
+      "bd_ref": "BD-05",
+      "status": "NEEDS_APPROVAL"
+    },
+    {
+      "id": "CONF-006",
+      "type": "QTY_VARIANCE",
+      "severity": "LOW",
+      "source": "BOM vs Purchase docs",
+      "description": "HN-111G +3, BT-SC010MW +2, HN-9LY +1, BT-SC010MW-10 +1 (purchase > BOM)",
+      "bd_ref": "BD-06",
+      "status": "DOCUMENTED_MAY_BE_BUFFER"
+    },
+    {
+      "id": "CONF-007",
+      "type": "SUPPLIER_NAME_UNCONFIRMED",
+      "severity": "LOW",
+      "source": "VẬT TƯ HỒNG NGHI.xlsx col BT",
+      "description": "BT supplier code used but full legal name not confirmed in system",
+      "bd_ref": "BD-06",
+      "status": "NEEDS_APPROVAL"
+    },
+    {
+      "id": "CONF-008",
+      "type": "MATERIAL_CODE_MISSING",
+      "severity": "MEDIUM",
+      "source": "NT-23.pdf — MS 204 SH",
+      "description": "MS 204 SH referenced in drawing but not found in any supplier register",
+      "bd_ref": null,
+      "status": "NEW_CONFLICT"
+    }
+  ],
+  "domain_readiness": [
+    {
+      "domain": "PROJECT",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "✅",
+      "crossref": "✅",
+      "validated": "⚠️",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "Formal project record not created in ERP"
+    },
+    {
+      "domain": "CUSTOMER",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "⚠️",
+      "crossref": "⚠️",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "Customer account not confirmed in ERP master"
+    },
+    {
+      "domain": "ZONE",
+      "ready": "NEEDS_REVIEW",
+      "source": "✅",
+      "analyzed": "⚠️",
+      "normalized": "⚠️",
+      "crossref": "⚠️",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "32 drawing pages unresolved; actual areas unmeasured"
+    },
+    {
+      "domain": "BOQ",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "⚠️",
+      "crossref": "⚠️",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "14 clarification items; no pricing; BD-03 pending"
+    },
+    {
+      "domain": "MATERIAL",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "✅",
+      "crossref": "⚠️",
+      "validated": "⚠️",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "GO GHEP THANH not in PO; AC-9205S conflict; MS204SH missing supplier"
+    },
+    {
+      "domain": "MATERIAL_SPEC",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "⚠️",
+      "normalized": "❌",
+      "crossref": "⚠️",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "Color codes not fully mapped to supplier catalog numbers"
+    },
+    {
+      "domain": "SUPPLIER",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "⚠️",
+      "crossref": "⚠️",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "BT full name unconfirmed; GO GHEP THANH supplier unknown"
+    },
+    {
+      "domain": "BOM",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "✅",
+      "crossref": "✅",
+      "validated": "⚠️",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "GO GHEP THANH exception; variance vs PO undecided"
+    },
+    {
+      "domain": "CUT_LIST",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "✅",
+      "crossref": "⚠️",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "Assembly-to-BOQ links not established; BD-04 production lock"
+    },
+    {
+      "domain": "PURCHASE",
+      "ready": "NEEDS_REVIEW",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "⚠️",
+      "crossref": "⚠️",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "Supplier IDs not in ERP; warehouse not confirmed; unit prices unknown"
+    },
+    {
+      "domain": "WAREHOUSE",
+      "ready": "BLOCKED",
+      "source": "⚠️",
+      "analyzed": "❌",
+      "normalized": "❌",
+      "crossref": "❌",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "No warehouse receipt data; purchase status unknown"
+    },
+    {
+      "domain": "PRODUCTION",
+      "ready": "BLOCKED",
+      "source": "⚠️",
+      "analyzed": "⚠️",
+      "normalized": "❌",
+      "crossref": "❌",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "4 SKP HIGH issues; production LOCKED"
+    },
+    {
+      "domain": "QC",
+      "ready": "BLOCKED",
+      "source": "⚠️",
+      "analyzed": "⚠️",
+      "normalized": "❌",
+      "crossref": "❌",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "No QC spec; depends on production"
+    },
+    {
+      "domain": "INSTALLATION",
+      "ready": "BLOCKED",
+      "source": "❌",
+      "analyzed": "❌",
+      "normalized": "❌",
+      "crossref": "❌",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "No installation plan; depends on production"
+    },
+    {
+      "domain": "COST",
+      "ready": "BLOCKED",
+      "source": "❌",
+      "analyzed": "❌",
+      "normalized": "❌",
+      "crossref": "❌",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "No pricing; 50 items NEED_QUOTATION"
+    },
+    {
+      "domain": "PROGRESS",
+      "ready": "BLOCKED",
+      "source": "❌",
+      "analyzed": "❌",
+      "normalized": "❌",
+      "crossref": "❌",
+      "validated": "❌",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "No schedule; production blocked"
+    },
+    {
+      "domain": "DOCUMENT",
+      "ready": "READY",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "✅",
+      "crossref": "✅",
+      "validated": "✅",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "Document records ready; ERP requires project creation first"
+    },
+    {
+      "domain": "APPROVAL",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "✅",
+      "crossref": "✅",
+      "validated": "✅",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "7 BD items pending Huy"
+    },
+    {
+      "domain": "LINEAGE",
+      "ready": "PARTIAL",
+      "source": "✅",
+      "analyzed": "✅",
+      "normalized": "✅",
+      "crossref": "⚠️",
+      "validated": "⚠️",
+      "approved": "❌",
+      "erp_ready": false,
+      "blockers": "Lineage complete for analyzed data; blocked data has no lineage yet"
+    }
+  ],
+  "lineage_count": 36
+}

@@ -1,0 +1,55 @@
+[
+  {
+    "staging_id": "STAG-SUP-001",
+    "code": "HN",
+    "name": "Ván Hồng Nghi",
+    "short": "HN",
+    "material_codes": [
+      "HN-111G-17.5",
+      "HN-111G-10"
+    ],
+    "po_source": [
+      "SOURCE-02"
+    ],
+    "evidence": "Invoice/phiếu nhập SOURCE-02, VẬT TƯ HỒNG NGHI.xlsx col HN",
+    "status": "STAGED",
+    "erp_ready": false,
+    "approval_status": "PENDING"
+  },
+  {
+    "staging_id": "STAG-SUP-002",
+    "code": "BT",
+    "name": "Ván Cái Bảng (Bình Tiên?)",
+    "short": "BT",
+    "material_codes": [
+      "BT-SC010MW-17.5",
+      "BT-SC010MW-10",
+      "BT-200T-17.5"
+    ],
+    "po_source": [
+      "SOURCE-04"
+    ],
+    "evidence": "VẬT TƯ HỒNG NGHI.xlsx col BT, Invoice SOURCE-04",
+    "status": "STAGED",
+    "erp_ready": false,
+    "approval_status": "PENDING",
+    "note": "Supplier full name needs confirmation"
+  },
+  {
+    "staging_id": "STAG-SUP-003",
+    "code": "AC",
+    "name": "An Cường (An Cuong)",
+    "short": "AC",
+    "material_codes": [
+      "AC-9205S-17.5"
+    ],
+    "po_source": [
+      "SOURCE-03"
+    ],
+    "evidence": "VẬT TƯ HỒNG NGHI.xlsx col AC, Invoice SOURCE-03",
+    "status": "STAGED",
+    "erp_ready": false,
+    "approval_status": "PENDING",
+    "conflict": "SKP-APRV-05: MS-608EV vs 9205S mismatch"
+  }
+]

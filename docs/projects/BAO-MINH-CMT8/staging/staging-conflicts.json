@@ -1,0 +1,74 @@
+[
+  {
+    "id": "CONF-001",
+    "type": "SCOPE_MISMATCH",
+    "severity": "HIGH",
+    "source": "BANG MÃ VAN BMS T15.xlsx",
+    "description": "Filename=T15, content=T9, qty mismatch 4×",
+    "bd_ref": "BD-01",
+    "status": "UNRESOLVED"
+  },
+  {
+    "id": "CONF-002",
+    "type": "DIRECTIVE_ERROR",
+    "severity": "MEDIUM",
+    "source": "NT-23.pdf",
+    "description": "Old directive: CURTAIN_RAIL. Actual: RECEPTION_COUNTER",
+    "bd_ref": "BD-02",
+    "status": "DOCUMENTED_PENDING_APPROVAL"
+  },
+  {
+    "id": "CONF-003",
+    "type": "MATERIAL_MISMATCH",
+    "severity": "MEDIUM",
+    "source": "SketchUp vs Survey",
+    "description": "SKP: AC-9205S; Survey photos M05/M06: MS-608EV (An Cuong)",
+    "bd_ref": "BD-04 SKP-APRV-05",
+    "status": "UNRESOLVED"
+  },
+  {
+    "id": "CONF-004",
+    "type": "MATERIAL_NO_BOQ",
+    "severity": "MEDIUM",
+    "source": "THAN TRE × 10 tấm",
+    "description": "Material purchased, in BOM+CL, but no explicit BOQ item",
+    "bd_ref": "CONFLICT-004",
+    "status": "UNRESOLVED"
+  },
+  {
+    "id": "CONF-005",
+    "type": "MATERIAL_NOT_PURCHASED",
+    "severity": "MEDIUM",
+    "source": "BOM sheet GO GHEP THANH",
+    "description": "1 tấm in BOM, 12 parts in CL, but NOT in any purchase doc",
+    "bd_ref": "BD-05",
+    "status": "NEEDS_APPROVAL"
+  },
+  {
+    "id": "CONF-006",
+    "type": "QTY_VARIANCE",
+    "severity": "LOW",
+    "source": "BOM vs Purchase docs",
+    "description": "HN-111G +3, BT-SC010MW +2, HN-9LY +1, BT-SC010MW-10 +1 (purchase > BOM)",
+    "bd_ref": "BD-06",
+    "status": "DOCUMENTED_MAY_BE_BUFFER"
+  },
+  {
+    "id": "CONF-007",
+    "type": "SUPPLIER_NAME_UNCONFIRMED",
+    "severity": "LOW",
+    "source": "VẬT TƯ HỒNG NGHI.xlsx col BT",
+    "description": "BT supplier code used but full legal name not confirmed in system",
+    "bd_ref": "BD-06",
+    "status": "NEEDS_APPROVAL"
+  },
+  {
+    "id": "CONF-008",
+    "type": "MATERIAL_CODE_MISSING",
+    "severity": "MEDIUM",
+    "source": "NT-23.pdf — MS 204 SH",
+    "description": "MS 204 SH referenced in drawing but not found in any supplier register",
+    "bd_ref": null,
+    "status": "NEW_CONFLICT"
+  }
+]

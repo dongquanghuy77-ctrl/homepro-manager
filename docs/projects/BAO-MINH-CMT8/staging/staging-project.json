@@ -1,0 +1,21 @@
+{
+  "staging_id": "STAG-PRJ-001",
+  "project_code": "BAO-MINH-CMT8",
+  "project_name": "VĂN PHÒNG CHỨNG KHOÁN BẢO MINH CHI NHÁNH CMT8",
+  "customer": "CÔNG TY CỔ PHẦN CHỨNG KHOÁN BẢO MINH",
+  "location": "201-203 CMT8, Phường 4, Quận 3, TP.HCM",
+  "floors": [
+    "T15"
+  ],
+  "total_area_m2": "UNCONFIRMED",
+  "project_type": "NỘI THẤT VĂN PHÒNG",
+  "contractor": "HOMEPRO SG",
+  "status": "STAGING",
+  "erp_ready": false,
+  "approval_status": "PENDING",
+  "source_document": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+  "source_hash": "09dbba042536992e2ed11e75ec8c544d9117bf2d107236b9dede753136c851ae",
+  "lineage_id": "LIN-0001",
+  "generated_at": "2026-08-17T13:16:14.283Z",
+  "commit": "4350467"
+}

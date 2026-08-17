@@ -1,0 +1,382 @@
+[
+  {
+    "id": "BD-01",
+    "priority": 1,
+    "severity": "HIGH",
+    "category": "SCOPE_CONFLICT",
+    "title": "BANG MÃ VÁN BMS T15.xlsx — Tầng 9 hay Tầng 15?",
+    "source_file": "BANG MÃ VAN BMS T15.xlsx",
+    "issue": "Filename = T15 nhưng content text ghi \"TẦNG 9\". Số lượng (24 bàn) không khớp BOQ T15 (6 bàn).",
+    "evidence": "Text extracted: \"BẢNG FINAL MÃ VÁN VĂN PHÒNG BMS TẦNG 9\"; Qty mismatch 4×",
+    "options": [
+      "A: File này cho Tầng 9 (sai scope) — cung cấp file T15 mới",
+      "B: File này cho T15 nhưng text sai — cung cấp qty/mã đúng",
+      "C: Văn phòng có T9 lẫn T15 trong cùng dự án"
+    ],
+    "current_status": "BLOCKED",
+    "erp_blocked": true,
+    "decision": null,
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "BD-02",
+    "priority": 2,
+    "severity": "MEDIUM",
+    "category": "DRAWING_CLASSIFICATION",
+    "title": "NT-23 — Xác nhận QUẦY TIẾP TÂN R-01",
+    "source_file": "NT-23.pdf",
+    "issue": "Directive mapping cũ ghi SAI là \"rèm/rãnh\". Text layer PDF xác nhận: CHI TIẾT QUẦY TIẾP TÂN R-01.",
+    "evidence": "pdfjs text layer 1486 chars: \"CHI TIẾT QUẦY TIẾP TÂN R-01 PHÒNG LÀM VIỆC NT-23 1/30 REV0 05/08/2026\"",
+    "current_classification": "RECEPTION_COUNTER / QUẦY TIẾP TÂN R-01",
+    "materials_confirmed": [
+      "MDF+Laminate vân đá",
+      "MFC MS 204 SH",
+      "MFC HN-111G",
+      "Mica xanh",
+      "LED CT-01"
+    ],
+    "proposed_boq_links": [
+      "B.II.4 (Quầy lễ tân 3.6md)",
+      "B.II.6 (Hệ quầy giao dịch)"
+    ],
+    "current_status": "NEEDS_APPROVAL",
+    "decision": null,
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "BD-03",
+    "priority": 3,
+    "severity": "MEDIUM",
+    "category": "BOQ_CLARIFICATION",
+    "title": "14 KL Clarification Items — BOQ không đủ thông tin",
+    "source_file": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+    "issue": "14 BOQ items thiếu: dimension, material, drawing reference, hoặc description mơ hồ",
+    "items": [
+      {
+        "item": "A.I.4",
+        "issue": "Thiếu dimension, mô tả không rõ ràng"
+      },
+      {
+        "item": "B.I.5",
+        "issue": "Quantity unit mơ hồ (md vs m2)"
+      },
+      {
+        "item": "B.II.7",
+        "issue": "Không có drawing reference"
+      },
+      {
+        "item": "B.II.14",
+        "issue": "Material không xác định"
+      },
+      {
+        "item": "C.I.4",
+        "issue": "Dimension không phù hợp zone"
+      },
+      {
+        "item": "C.II.1",
+        "issue": "Không có drawing reference"
+      },
+      {
+        "item": "D.I.4",
+        "issue": "Description chưa rõ scope"
+      },
+      {
+        "item": "D.I.9",
+        "issue": "Thiếu material specification"
+      },
+      {
+        "item": "D.II.3",
+        "issue": "Quantity mismatch vs SketchUp"
+      },
+      {
+        "item": "E.I.6",
+        "issue": "Zone không xác định"
+      },
+      {
+        "item": "E.I.7",
+        "issue": "Zone không xác định"
+      },
+      {
+        "item": "E.II.4",
+        "issue": "Drawing page unresolved"
+      },
+      {
+        "item": "F.I.2",
+        "issue": "Mô tả không đủ để sản xuất"
+      },
+      {
+        "item": "G.I.1",
+        "issue": "BOQ có nhưng SketchUp không có"
+      }
+    ],
+    "current_status": "NEEDS_APPROVAL",
+    "erp_blocked": false,
+    "decision": null,
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "BD-04",
+    "priority": 1,
+    "severity": "HIGH",
+    "category": "SKETCHUP_PRODUCTION_LOCK",
+    "title": "4 SketchUp HIGH Issues — Production Locked",
+    "source_file": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skp",
+    "issue": "Production LOCKED until 4 HIGH issues resolved",
+    "issues": [
+      {
+        "issue_id": "SKP-APRV-01",
+        "type": "Trần treo clearance",
+        "current": "H=2540mm",
+        "needs": "MEP clearance measurement"
+      },
+      {
+        "issue_id": "SKP-APRV-02",
+        "type": "Total furniture run",
+        "current": "10,470mm",
+        "needs": "Actual room measurement"
+      },
+      {
+        "issue_id": "SKP-APRV-03",
+        "type": "MEP coordination",
+        "current": "No MEP in SKP",
+        "needs": "M&E meeting before vách"
+      },
+      {
+        "issue_id": "SKP-APRV-04",
+        "type": "NT-23 directive error",
+        "current": "Was CURTAIN_RAIL",
+        "needs": "Confirm RECEPTION_COUNTER"
+      }
+    ],
+    "current_status": "BLOCKED",
+    "erp_blocked": true,
+    "decision": null,
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "BD-05",
+    "priority": 2,
+    "severity": "MEDIUM",
+    "category": "MATERIAL_EXCEPTION",
+    "title": "GỖ GHÉP THANH 30mm — Material không có trong PO",
+    "source_file": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+    "issue": "1 tấm GỖ GHÉP THANH 30mm có trong BOM và Cut List nhưng KHÔNG trong purchase docs",
+    "evidence": {
+      "bom_sheet": "Row 9: GỖ GHÉP THANH-30 = 1 tấm",
+      "cut_list": "12 \"hồi\" parts, thickness=30mm, sizes: 2128.3×100 (×4) và 483.8×100 (×8)",
+      "assemblies_using": [
+        "Assembly 130: hồi 30×2128.3×100",
+        "Assembly 130: hồi 30×2128.3×100",
+        "Assembly 130: hồi 30×2128.3×100",
+        "Assembly 130: hồi 30×2128.3×100",
+        "Assembly 130: hồi 30×483.8×100",
+        "Assembly 130: hồi 30×483.8×100",
+        "Assembly 130: hồi 30×483.8×100",
+        "Assembly 130: hồi 30×483.8×100",
+        "Assembly 130: hồi 30×483.8×100",
+        "Assembly 130: hồi 30×483.8×100",
+        "Assembly 130: hồi 30×483.8×100",
+        "Assembly 130: hồi 30×483.8×100"
+      ],
+      "in_purchase_docs": false,
+      "in_vat_tu_hn": false,
+      "in_boq": "NOT FOUND",
+      "in_sketchup": "YES — material \"GO GHEP THANH\"",
+      "in_warehouse": "UNKNOWN"
+    },
+    "current_status": "NEEDS_APPROVAL",
+    "erp_blocked": false,
+    "exception_type": "MATERIAL_EXCEPTION",
+    "decision": null,
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "BD-06",
+    "priority": 2,
+    "severity": "MEDIUM",
+    "category": "PURCHASE_CONFIRMATION",
+    "title": "4 Purchase Documents — Cần xác nhận supplier/warehouse",
+    "source_file": "PHIẾU NHẬP VẬT TƯ.zip",
+    "issue": "4 phiếu nhập vật tư chụp ảnh. Cần xác nhận: supplier ID trong hệ thống, warehouse đầu vào, unit price",
+    "docs": [
+      {
+        "doc_id": "SOURCE-01",
+        "supplier": "UNKNOWN",
+        "material": "THAN TRE",
+        "status": "STAGED"
+      },
+      {
+        "doc_id": "SOURCE-02",
+        "supplier": "Hồng Nghi (HN)",
+        "material": "HN-111G 17LY + 9LY",
+        "status": "STAGED"
+      },
+      {
+        "doc_id": "SOURCE-03",
+        "supplier": "An Cường (AC)",
+        "material": "AC-9205S",
+        "status": "STAGED"
+      },
+      {
+        "doc_id": "SOURCE-04",
+        "supplier": "BT (Cái Bảng)",
+        "material": "BT-SC010MW + BT-200T",
+        "status": "STAGED"
+      }
+    ],
+    "current_status": "NEEDS_APPROVAL",
+    "erp_blocked": false,
+    "decision": null,
+    "decided_by": null,
+    "decided_at": null
+  },
+  {
+    "id": "BD-07",
+    "priority": 3,
+    "severity": "LOW",
+    "category": "ZONE_VISUAL_REVIEW",
+    "title": "32 Design Drawing Pages — Visual Inspection Required",
+    "source_file": "060826_TKNT_VP BAO MINH.pdf",
+    "issue": "Pages 4-35 are image-based technical drawings. Zone/material/dimension cannot be auto-extracted.",
+    "pages": [
+      {
+        "page": 4,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 5,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 6,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 7,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 8,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 9,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 10,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 11,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 12,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 13,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 14,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 15,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 16,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 17,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 18,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 19,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 20,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 21,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 22,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 23,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 24,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 25,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 26,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 27,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 28,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 29,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 30,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 31,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 32,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 33,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 34,
+        "status": "PENDING_VISUAL_INSPECTION"
+      },
+      {
+        "page": 35,
+        "status": "PENDING_VISUAL_INSPECTION"
+      }
+    ],
+    "current_status": "NEEDS_APPROVAL",
+    "erp_blocked": false,
+    "decision": null,
+    "decided_by": null,
+    "decided_at": null
+  }
+]
