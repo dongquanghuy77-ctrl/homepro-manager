@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { Upload, Download, Search, AlertCircle, Plus, Trash2, FileText, CheckCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, Download, Search, AlertCircle, Plus, Trash2, FileText, CheckCircle, Eye, FileImage, FileBarChart, Zap } from 'lucide-react';
 
 type Document = {
   id: number;
@@ -18,6 +18,14 @@ type Document = {
   mapped_data?: string;
 };
 
+type ExtractedItem = {
+  item_code: string;
+  description: string;
+  qty: number;
+  unit: string;
+  price: number;
+};
+
 type Props = {
   initialData: {
     stats: { category: string; count: string }[];
@@ -30,7 +38,20 @@ export default function SourceCenterClient({ initialData }: Props) {
   const [docs, setDocs] = useState<Document[]>(initialData.documents);
   const [filterCat, setFilterCat] = useState('');
   const [searchQ, setSearchQ] = useState('');
+  
+  // Global file input for Top bar Import
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Row specific file import
+  const rowFileInputRef = useRef<HTMLInputElement>(null);
+  const [activeRowId, setActiveRowId] = useState<number | null>(null);
+
+  // Preview Modal State
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [extractedData, setExtractedData] = useState<ExtractedItem[] | null>(null);
 
   const formatSize = (bytes: number) => {
     if (!bytes) return '0 B';
@@ -40,7 +61,7 @@ export default function SourceCenterClient({ initialData }: Props) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
-  const processImportedData = (importedRows: any[]) => {
+  const processGlobalImportedData = (importedRows: any[]) => {
     setDocs(prevDocs => {
       const updatedDocs = [...prevDocs];
       let matchCount = 0;
@@ -77,21 +98,20 @@ export default function SourceCenterClient({ initialData }: Props) {
         }
       });
 
-      alert(`Thuật toán ánh xạ đã xử lý xong: ${matchCount} dòng khớp dữ liệu cũ, ${importedRows.length - matchCount} dòng được chèn mới thành công!`);
+      alert(`Thuật toán ánh xạ đã xử lý xong: ${matchCount} dòng khớp, ${importedRows.length - matchCount} dòng mới!`);
       return updatedDocs;
     });
   };
 
-  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGlobalImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       alert(`Đang phân tích file ${file.name} bằng thuật toán ánh xạ...`);
       setTimeout(() => {
-        const mockImportedExcelData = [
-          { source_id: docs[0]?.source_id, category: 'CONFIRMED_BOQ', status: 'APPROVED', mapped_data: 'Mapped via Excel Auto-Sync' },
-          { file_name: 'ban_ve_moi.pdf', project_name: 'DỰ ÁN BẢO MINH', category: 'DRAWING', status: 'STAGED', mapped_data: 'Inserted Row' }
+        const mockData = [
+          { source_id: docs[0]?.source_id, category: 'CONFIRMED_BOQ', status: 'APPROVED', mapped_data: 'Mapped Auto-Sync' }
         ];
-        processImportedData(mockImportedExcelData);
+        processGlobalImportedData(mockData);
         if (fileInputRef.current) fileInputRef.current.value = '';
       }, 1500);
     }
@@ -119,14 +139,75 @@ export default function SourceCenterClient({ initialData }: Props) {
       source_type: 'Manual',
       file_name: 'Dữ liệu nhập tay',
       file_size: 0,
-      project_name: 'DỰ ÁN BẢO MINH',
+      project_name: 'VĂN PHÒNG CHỨNG KHOÁN',
       document_category: 'UNCATEGORIZED',
       source_status: 'RAW',
       created_at: new Date().toISOString(),
       classification_confidence: 1,
-      mapped_data: 'Sẵn sàng nhập'
+      mapped_data: ''
     };
     setDocs([newRow, ...docs]);
+  };
+
+  // --- Row Specific Upload Logic ---
+  const triggerRowUpload = (id: number) => {
+    setActiveRowId(id);
+    if (rowFileInputRef.current) rowFileInputRef.current.click();
+  };
+
+  const handleRowFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && activeRowId) {
+      setPreviewFile(file);
+      const objUrl = URL.createObjectURL(file);
+      setPreviewUrl(objUrl);
+      setPreviewModalOpen(true);
+      setExtractedData(null);
+      setIsProcessing(true);
+
+      // Simulate AI Vision/OCR processing
+      setTimeout(() => {
+        setIsProcessing(false);
+        // Mock extraction logic based on file type
+        const mockExtracted: ExtractedItem[] = [
+          { item_code: 'VT-001', description: 'Gỗ MDF chống ẩm 17mm', qty: 50, unit: 'Tấm', price: 450000 },
+          { item_code: 'VT-002', description: 'Keo dán gỗ chuyên dụng', qty: 5, unit: 'Thùng', price: 1200000 },
+          { item_code: 'VT-003', description: 'Bản lề giảm chấn inox', qty: 200, unit: 'Cái', price: 25000 }
+        ];
+        setExtractedData(mockExtracted);
+      }, 2500);
+    }
+    // Reset input
+    if (rowFileInputRef.current) rowFileInputRef.current.value = '';
+  };
+
+  const handleConfirmExtraction = () => {
+    if (activeRowId && extractedData) {
+      const summary = `Đã phân tích: ${extractedData.length} items. Tổng trị giá: ${(extractedData.reduce((acc, curr) => acc + (curr.qty * curr.price), 0)).toLocaleString()} đ`;
+      setDocs(prev => prev.map(d => {
+        if (d.id === activeRowId) {
+          return {
+            ...d,
+            file_name: previewFile?.name || d.file_name,
+            file_size: previewFile?.size || d.file_size,
+            mapped_data: summary,
+            source_status: 'STAGED',
+            document_category: previewFile?.type.includes('image') ? 'MATERIAL_IMAGE' : 'BOQ_EXCEL'
+          };
+        }
+        return d;
+      }));
+      closePreviewModal();
+    }
+  };
+
+  const closePreviewModal = () => {
+    setPreviewModalOpen(false);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewFile(null);
+    setExtractedData(null);
+    setActiveRowId(null);
   };
 
   const filteredDocs = docs.filter(d => {
@@ -137,8 +218,6 @@ export default function SourceCenterClient({ initialData }: Props) {
 
   return (
     <div style={{ fontFamily: 'var(--font-sans, sans-serif)', color: '#e2e8f0', minHeight: '100vh', padding: '0 0 40px', width: '100%' }}>
-      {/* Remove duplicated title since the layout handles it, just provide actions */}
-      
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         
         {/* Top Actions Bar */}
@@ -153,13 +232,9 @@ export default function SourceCenterClient({ initialData }: Props) {
           </div>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <input 
-              type="file" 
-              accept=".xlsx,.xls,.pdf,.csv" 
-              ref={fileInputRef} 
-              style={{ display: 'none' }} 
-              onChange={handleImportFile} 
-            />
+            <input type="file" accept=".xlsx,.xls,.pdf,.csv" ref={fileInputRef} style={{ display: 'none' }} onChange={handleGlobalImport} />
+            <input type="file" accept="image/*,.pdf,.xlsx" ref={rowFileInputRef} style={{ display: 'none' }} onChange={handleRowFileChange} />
+            
             <button onClick={handleAddRow} style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px',
               background: '#334155', color: '#f8fafc', border: '1px solid #475569', fontWeight: 600,
@@ -172,7 +247,7 @@ export default function SourceCenterClient({ initialData }: Props) {
               background: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)', color: '#fff', border: 'none', 
               fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 15px rgba(5, 150, 105, 0.3)', fontSize: '14px'
             }}>
-              <Upload size={18} /> Nhập Data (Excel/PDF)
+              <Upload size={18} /> Nhập Tổng (Auto-map)
             </button>
             <button onClick={handleExport} style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px',
@@ -227,9 +302,10 @@ export default function SourceCenterClient({ initialData }: Props) {
         {/* Excel-like Data Grid */}
         <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.4)' }}>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', minWidth: '1200px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+            <table style={{ width: '100%', minWidth: '1300px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
                 <tr style={{ background: '#1e293b', borderBottom: '2px solid #334155' }}>
+                  <th style={{ padding: '16px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nhập File</th>
                   <th style={{ padding: '16px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>ID Nguồn</th>
                   <th style={{ padding: '16px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tên File</th>
                   <th style={{ padding: '16px', fontWeight: 800, color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.5px', background: 'rgba(59,130,246,0.1)' }}>Dự án (✏️)</th>
@@ -246,6 +322,23 @@ export default function SourceCenterClient({ initialData }: Props) {
                     background: doc.source_status === 'APPROVED' ? 'rgba(16,185,129,0.05)' : idx % 2 === 0 ? '#0f172a' : '#141e30',
                     transition: 'background 0.2s'
                   }}>
+                    {/* NEW ROW UPLOAD BUTTON */}
+                    <td style={{ padding: '12px 16px', borderRight: '1px solid #1e293b', textAlign: 'center' }}>
+                      <button 
+                        onClick={() => triggerRowUpload(doc.id)}
+                        style={{ 
+                          background: 'linear-gradient(135deg, #0f766e 0%, #064e3b 100%)', 
+                          border: '1px solid #115e59', color: '#ccfbf1', 
+                          cursor: 'pointer', padding: '8px', borderRadius: '8px', 
+                          transition: 'all 0.2s', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' 
+                        }}
+                        title="Upload File vào dòng này để phân tích"
+                        onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                      >
+                        <Upload size={16} />
+                      </button>
+                    </td>
                     <td style={{ padding: '12px 16px', borderRight: '1px solid #1e293b' }}>
                       <span style={{ background: '#334155', color: '#cbd5e1', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, fontSize: '11px' }}>
                         {doc.source_id.split('-').pop()}
@@ -273,8 +366,10 @@ export default function SourceCenterClient({ initialData }: Props) {
                         <option value="UNCATEGORIZED" style={{background:'#1e293b'}}>UNCATEGORIZED</option>
                         <option value="DRAWING" style={{background:'#1e293b'}}>DRAWING</option>
                         <option value="BOQ" style={{background:'#1e293b'}}>BOQ</option>
+                        <option value="MATERIAL_IMAGE" style={{background:'#1e293b'}}>MATERIAL_IMAGE</option>
                         <option value="MATERIAL_LIST" style={{background:'#1e293b'}}>MATERIAL_LIST</option>
                         <option value="CONFIRMED_BOQ" style={{background:'#1e293b'}}>CONFIRMED_BOQ</option>
+                        <option value="BOQ_EXCEL" style={{background:'#1e293b'}}>BOQ_EXCEL</option>
                       </select>
                     </td>
                     <td style={{ padding: '0', borderRight: '1px solid #1e293b' }}>
@@ -309,22 +404,125 @@ export default function SourceCenterClient({ initialData }: Props) {
                     </td>
                   </tr>
                 ))}
-                {filteredDocs.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ padding: '60px 20px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b' }}>
-                        <AlertCircle size={48} style={{ opacity: 0.5, marginBottom: '16px' }} />
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc' }}>Không có dữ liệu</h3>
-                        <p style={{ marginTop: '8px' }}>Bấm "Thêm Dòng" hoặc "Nhập Excel/PDF" để bắt đầu nạp dữ liệu vào hệ thống.</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {/* ── PREVIEW & AI ALGORITHM MODAL ── */}
+      {previewModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '24px', width: '100%', maxWidth: '1400px', height: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+            
+            {/* Modal Header */}
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#141e30' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ background: '#2563eb', padding: '8px', borderRadius: '8px' }}><Zap size={20} color="#fff" /></div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#f8fafc' }}>AI Vision & Mapping Algorithm</h3>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>Phân tích tài liệu: {previewFile?.name}</p>
+                </div>
+              </div>
+              <button onClick={closePreviewModal} style={{ background: '#334155', border: 'none', color: '#f8fafc', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Đóng</button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+              
+              {/* Left Panel: Document Preview */}
+              <div style={{ flex: 1, borderRight: '1px solid #1e293b', display: 'flex', flexDirection: 'column', background: '#0f172a' }}>
+                <div style={{ padding: '12px 20px', borderBottom: '1px solid #1e293b', fontWeight: 600, color: '#94a3b8', fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <Eye size={16} /> Document Preview
+                </div>
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: '#020617' }}>
+                  {previewFile?.type.includes('image') ? (
+                    // Image Preview
+                    <img src={previewUrl!} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', border: '1px solid #334155' }} />
+                  ) : previewFile?.type === 'application/pdf' ? (
+                    // PDF Preview
+                    <iframe src={previewUrl!} style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }} title="PDF Preview" />
+                  ) : (
+                    // Other file generic preview
+                    <div style={{ color: '#64748b', textAlign: 'center' }}>
+                      <FileBarChart size={64} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
+                      <p>Không thể Preview trực tiếp định dạng này.</p>
+                      <p style={{ fontSize: '13px' }}>Nhưng thuật toán vẫn có thể đọc mã nhị phân và parse Excel nội bộ.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Panel: Extraction Results */}
+              <div style={{ width: '500px', display: 'flex', flexDirection: 'column', background: '#1e293b' }}>
+                <div style={{ padding: '12px 20px', borderBottom: '1px solid #334155', fontWeight: 600, color: '#f8fafc', fontSize: '14px', background: '#2563eb', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <CheckCircle size={16} /> Kết quả bóc tách Dữ liệu
+                </div>
+                
+                <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
+                  {isProcessing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#93c5fd' }}>
+                      <div className="animate-spin mb-4"><Zap size={32} /></div>
+                      <h4 style={{ fontSize: '16px', fontWeight: 700 }}>Đang chạy AI OCR & Layout Parser...</h4>
+                      <p style={{ fontSize: '13px', opacity: 0.8, marginTop: '8px' }}>Quét hình ảnh phiếu mua hàng / Bảng tính Excel...</p>
+                    </div>
+                  ) : extractedData ? (
+                    <div>
+                      <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #059669', borderRadius: '8px', color: '#6ee7b7', fontSize: '13px' }}>
+                        ✅ <strong>Success!</strong> Tìm thấy {extractedData.length} items hợp lệ trong tài liệu. Đã map thành công vào cột tương ứng.
+                      </div>
+
+                      <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ background: '#0f172a', color: '#94a3b8' }}>
+                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mã Vật Tư</th>
+                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mô tả</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #334155' }}>SL</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #334155' }}>Đơn Giá</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {extractedData.map((item, i) => (
+                            <tr key={i} style={{ borderBottom: '1px solid #334155' }}>
+                              <td style={{ padding: '10px', color: '#93c5fd', fontWeight: 600 }}>{item.item_code}</td>
+                              <td style={{ padding: '10px', color: '#f8fafc' }}>{item.description}</td>
+                              <td style={{ padding: '10px', color: '#f8fafc', textAlign: 'right' }}>{item.qty} <span style={{color:'#64748b'}}>{item.unit}</span></td>
+                              <td style={{ padding: '10px', color: '#f8fafc', textAlign: 'right' }}>{item.price.toLocaleString()}đ</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                            <td colSpan={3} style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 800, color: '#f8fafc' }}>Tổng cộng:</td>
+                            <td style={{ padding: '12px 10px', textAlign: 'right', fontWeight: 800, color: '#34d399' }}>
+                              {(extractedData.reduce((acc, curr) => acc + (curr.qty * curr.price), 0)).toLocaleString()} đ
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* Modal Footer */}
+                <div style={{ padding: '20px', borderTop: '1px solid #334155', background: '#0f172a', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                  <button onClick={closePreviewModal} style={{ background: 'transparent', border: '1px solid #475569', color: '#cbd5e1', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Hủy</button>
+                  <button onClick={handleConfirmExtraction} disabled={isProcessing || !extractedData} style={{
+                    background: isProcessing || !extractedData ? '#334155' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                    color: isProcessing || !extractedData ? '#94a3b8' : '#fff', 
+                    border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: isProcessing || !extractedData ? 'not-allowed' : 'pointer', fontWeight: 700,
+                    boxShadow: isProcessing || !extractedData ? 'none' : '0 4px 15px rgba(16, 185, 129, 0.4)'
+                  }}>
+                    Xác nhận & Cập nhật Row
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
