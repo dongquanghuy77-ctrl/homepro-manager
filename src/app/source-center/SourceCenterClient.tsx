@@ -170,7 +170,9 @@ export default function SourceCenterClient({ initialData }: Props) {
       try {
         let extracted: ExtractedItem[] = [];
 
-        if (file.type === 'application/pdf') {
+        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+        if (isPdf) {
           setExtractionLogs(prev => [...prev, 'Đang load lõi PDF.js (Client-side)...', 'Tiến hành bóc tách lớp Text Layer...']);
           
           // Dynamically load pdfjs to avoid SSR issues
@@ -493,9 +495,12 @@ export default function SourceCenterClient({ initialData }: Props) {
                   {previewFile?.type.includes('image') ? (
                     // Image Preview
                     <img src={previewUrl!} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', border: '1px solid #334155' }} />
-                  ) : previewFile?.type === 'application/pdf' ? (
-                    // PDF Preview
-                    <iframe src={previewUrl!} style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }} title="PDF Preview" />
+                  ) : (previewFile?.type === 'application/pdf' || previewFile?.name.toLowerCase().endsWith('.pdf')) ? (
+                    // PDF Preview - using object instead of iframe for better browser compatibility with blob URLs
+                    <object data={previewUrl!} type="application/pdf" style={{ width: '100%', height: '100%', borderRadius: '8px' }}>
+                      <embed src={previewUrl!} type="application/pdf" width="100%" height="100%" />
+                      <p style={{ color: '#94a3b8' }}>Trình duyệt của bạn không hỗ trợ xem PDF trực tiếp. <a href={previewUrl!} target="_blank" rel="noreferrer" style={{ color: '#3b82f6' }}>Tải xuống / Mở PDF</a></p>
+                    </object>
                   ) : (
                     // Other file generic preview
                     <div style={{ color: '#64748b', textAlign: 'center' }}>
