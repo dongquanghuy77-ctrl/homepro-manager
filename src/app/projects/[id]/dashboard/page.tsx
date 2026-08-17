@@ -8,6 +8,7 @@ import { eq, like, inArray } from 'drizzle-orm';
 
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -100,7 +101,7 @@ export default async function ProjectDashboardPage({ params }: Props) {
 
 
   return (
-    <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'1.5rem', fontFamily:'system-ui,sans-serif' }}>
+    <div id="dashboard-content" style={{ maxWidth:'1280px', margin:'0 auto', padding:'1.5rem', fontFamily:'system-ui,sans-serif' }}>
 
       {/* ── BREADCRUMB ─────────────────────────────────────────── */}
       <div style={{ fontSize:'12px', color:'#6b7280', marginBottom:'1rem' }}>
@@ -121,9 +122,10 @@ export default async function ProjectDashboardPage({ params }: Props) {
               📍 {project.location} | 📅 {project.startDate?.toString().substring(0,10)} → {project.deadline?.toString().substring(0,10)}
             </div>
           </div>
-          <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap' }}>
+          <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap', alignItems: 'center' }}>
             <Chip label={project.status} color={project.status === 'ACTIVE' ? 'green' : 'gray'} />
             <Chip label={`ID: ${projectId}`} color="blue" />
+            <PdfExportButton targetId="dashboard-content" filename={`${project.code}-Dashboard`} />
           </div>
         </div>
 

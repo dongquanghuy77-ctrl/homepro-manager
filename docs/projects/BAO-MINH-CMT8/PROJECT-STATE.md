@@ -15,9 +15,9 @@ TSC:                  PASS (0 errors)
 BUILD:                PASS (exit 0, 123 routes)
 SECURITY AUDIT:       4 critical issues FIXED
 DB AUDIT:             PASS — 0 duplicates, 0 orphans
-API AUDIT:            All routes 200/401 as expected
-Commit:               bf1337e (Vercel deploying)
-Timestamp:            2026-08-17T21:44+07:00
+API AUDIT:            All routes 200/401 as expected. Added missing auth to /api/projects/[id] and /api/purchasing/purchase_requests.
+Commit:               fc4591d (Vercel deploying)
+Timestamp:            2026-08-17T21:52+07:00
 
 business_decisions:   7 seeded (BD-01..07) — real DB
 purchase_requests:    3 DRAFT (PR-BM-HN/BT/AC)
