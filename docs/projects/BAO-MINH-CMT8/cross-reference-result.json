@@ -1,0 +1,81 @@
+{
+  "project_id": "BAO-MINH-CMT8",
+  "generated_at": "2026-08-17T12:54:33.303Z",
+  "nt23_correction": {
+    "source_file": "NT-23.pdf",
+    "pages": 1,
+    "file_size_bytes": 538092,
+    "text_chars": 1486,
+    "text_items": 86,
+    "extraction_method": "pdfjs-dist@3.11 text layer",
+    "has_text_layer": true,
+    "drawing_code_found": "R-01",
+    "drawing_code_directive": "R-01",
+    "title_in_directive": "Chi tiết rèm/rãnh R-01",
+    "title_actual_from_text": "CHI TIẾT QUẦY TIẾP TÂN",
+    "item_type_directive": "CURTAIN_RAIL",
+    "item_type_actual": "RECEPTION_COUNTER",
+    "room_from_text": "PHÒNG LÀM VIỆC",
+    "revision": "REV 0",
+    "date": "August 05, 2026",
+    "scale": "1/30",
+    "drawing_page_code": "NT-23",
+    "designer": "KTS TRẦN HOÀNG LÂN",
+    "owner": "CÔNG TY CỔ PHẦN CHỨNG KHOÁN BẢO MINH BMSC",
+    "contractor": "CÔNG TY CỔ PHẦN ĐẦU TƯ VÀ PHÁT TRIỂN HOMEPRO",
+    "materials_extracted": [
+      {
+        "name": "TẤM MICA XANH THEO PHỐI CẢNH",
+        "type": "MICA_ACRYLIC",
+        "code": null,
+        "confidence": "HIGH"
+      },
+      {
+        "name": "MDF PHỦ LAMINATE VÂN ĐÁ",
+        "type": "BOARD_LAMINATE",
+        "code": null,
+        "confidence": "HIGH"
+      },
+      {
+        "name": "MFC PHỦ MELAMIN MÀU ĐEN MS 204 SH",
+        "type": "BOARD_MFC",
+        "code": "MS 204 SH",
+        "confidence": "HIGH"
+      },
+      {
+        "name": "MFC PHỦ MELAMIN HỒNG NGHI HN-111G",
+        "type": "BOARD_MFC",
+        "code": "HN-111G",
+        "confidence": "HIGH"
+      },
+      {
+        "name": "HẮT LED",
+        "type": "LED_STRIP",
+        "code": "CT-01",
+        "confidence": "MEDIUM"
+      }
+    ],
+    "structural_details": [
+      "MẶT ĐỨNG A",
+      "MẶT CẮT 1",
+      "MẶT ĐỨNG B",
+      "MẶT BẰNG",
+      "MẶT CẮT 2",
+      "HẮT LED CHI TIẾT 1"
+    ],
+    "directive_mapping_error": true,
+    "directive_error_detail": "NT-23 was classified as CURTAIN_RAIL (rèm/rãnh) but actual text confirms it is RECEPTION_COUNTER (Quầy Tiếp Tân) for Phòng Làm Việc"
+  },
+  "boq_items_count": 82,
+  "zones": 8,
+  "klClarification": 14,
+  "skpIssues": 7,
+  "purchaseDocs": 4,
+  "materialFlags": 3,
+  "findings": {
+    "nt23_directive_error": true,
+    "bang_ma_scope_mismatch": true,
+    "vat_tu_hong_nghi_is_material_req": true,
+    "bom_cut_list_1000_rows": true
+  }
+}

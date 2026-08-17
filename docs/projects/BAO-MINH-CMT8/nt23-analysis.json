@@ -1,0 +1,1615 @@
+{
+  "project_id": "BAO-MINH-CMT8",
+  "generated_at": "2026-08-17T12:47:39.504Z",
+  "extraction_method": "pdfjs-dist@3.11 text layer",
+  "source_file": "NT-23.pdf",
+  "source_path": "D:\\XƯỞNG HOMEPRO SG\\9. THÁNG 08.2026\\3. VĂN PHÒNG BẢO MINH\\NT-23.pdf",
+  "nt23": {
+    "numPages": 1,
+    "fileSize": 538092,
+    "pages": [
+      {
+        "page": 1,
+        "dimensions_px": "1191×842",
+        "textItemCount": 86,
+        "textChars": 1486,
+        "fullText": "TẤM MICA XANH THEO PHỐI CẢNH TẤM MICA XANH THEO PHỐI CẢNH HOÀN THIỆN MDF PHỦ LAMINATE VÂN ĐÁ MFC PHỦ MELEMIN MÀU ĐEN MS 204 SH HOÀN THIỆN MDF PHỦ LAMINATE VÂN ĐÁ MFC PHỦ MELAMIN MÀU ĐEN MS 204 SH MFC PHỦ MELAMIN HỒNG NGHI HN - 111G MFC PHỦ MELAMIN HỒNG NGHI HN - 111G A MẶT ĐỨNG A MẶT ĐỨNG B MẶT CẮT 2 B MẶT BẰNG MẶT CẮT 1 HẮT LED CHI TIẾT 1 CT-01 FIX FIX GHI CHÚ (Note): DỰ ÁN (PROJECT): CÔNG TY CỔ PHẦN ĐẦU TƯ VÀ PHÁT TRIỂN HOMEPRO Email: www.homeprodtpt@gmail.com MST: 0317248874 Giám Đốc (Director): VŨ THÁI BÌNH Ngày hoàn thành (Completion date): All design are copyright by HOMEPRO T&C design and cannot be used without their permission do not scale drawing measurement must be checked at site by the contractor Address: 137 Nguyễn Thị Nhung, phường Hiệp Bình, TP.Hồ Chí Minh VĂN PHÒNG BẢO MINH CUNG CẤP VÀ LẮP ĐẶT NỘI THẤT BV N ỘI THẤT August 05,2026 L ần hiệu chỉnh (Number Revision) REV 0 Mã dự án: Website: https://homeprotc.vn/ Address/Địa chỉ: 201-203 Cách Mạng Tháng Tám, Phường Võ Thị Sáu, TP.Hồ Chí Minh CHỦ ĐẦU TƯ (Owner): ĐƠN VỊ THI CÔNG (Construction unit): Chủ Trì (Presided By): Thiết Kế (Designer By): Thể Hiện (Drawing By): Kiểm Tra (Checked By): Hạng mục (work): Tên bản vẽ (Drawing title): Giai đoạn thực hiện (Pharse) Tỷ lệ (Scale) Ký hiệu bv (Drawing code) CÔNG TY CỔ PHẦN CHỨNG KHOÁN BẢO MINH BMSC Address/Địa chỉ: 34A Phạm Ngọc Thạch, Phường Xuân Hòa, TP.Hồ Chí Minh KTS TRẦN HOÀNG LÂN KTS TRẦN HOÀNG LÂN CHI TIẾT QUẦY TIẾP TÂN R-01 PHÒNG LÀM VIỆC NT-23 1/30",
+        "dimensions": [],
+        "materials": [
+          {
+            "text": "MDF PHỦ LAMINATE VÂN ĐÁ MFC PHỦ MELEMIN MÀU ĐEN MS 204 SH HOÀN",
+            "type": "BOARD",
+            "source": "TEXT_EXTRACTED"
+          },
+          {
+            "text": "MDF PHỦ LAMINATE VÂN ĐÁ MFC PHỦ MELAMIN MÀU ĐEN MS 204 SH MFC P",
+            "type": "BOARD",
+            "source": "TEXT_EXTRACTED"
+          },
+          {
+            "text": "MFC PHỦ MELEMIN MÀU ĐEN MS 204 SH HOÀN THIỆN MDF PHỦ LAMINATE V",
+            "type": "BOARD",
+            "source": "TEXT_EXTRACTED"
+          },
+          {
+            "text": "MFC PHỦ MELAMIN MÀU ĐEN MS 204 SH MFC PHỦ MELAMIN HỒNG NGHI HN",
+            "type": "BOARD",
+            "source": "TEXT_EXTRACTED"
+          },
+          {
+            "text": "MFC PHỦ MELAMIN HỒNG NGHI HN - 111G A MẶT ĐỨNG A MẶT ĐỨNG B MẶT",
+            "type": "BOARD",
+            "source": "TEXT_EXTRACTED"
+          },
+          {
+            "text": "MS 204",
+            "type": "MATERIAL_CODE",
+            "source": "TEXT_EXTRACTED"
+          },
+          {
+            "text": "MS 204",
+            "type": "MATERIAL_CODE",
+            "source": "TEXT_EXTRACTED"
+          }
+        ],
+        "drawingCodes": [
+          "CT-01",
+          "R-01",
+          "NT-23"
+        ],
+        "revision": "REV 0",
+        "dates": []
+      }
+    ]
+  },
+  "bangMaVan": {
+    "status": "PARSED",
+    "sheets": [
+      {
+        "name": "Tang 9",
+        "rowCount": 31,
+        "headers": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "sampleRows": [
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "BẢNG FINAL MÃ VÁN VĂN PHÒNG BMS TẦNG 9 ",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "Khách hàng: Công Ty Cổ Phần Xây Dựng Aqcons",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "Dự án:",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "Hạng mục: Cung cấp và lắp đặt nội thất",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "Địa điểm: ",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "STT",
+            "HẠNG MỤC",
+            "HÌNH ẢNH",
+            "KÍCH THƯỚC\r\n( mm )",
+            "DIỄN GIẢI",
+            "ĐVT",
+            "KL",
+            "MÃ VÁN ",
+            "HÌNH ẢNH ",
+            "GHI CHÚ",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "A",
+            " Nội thất liền tường",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            1,
+            "Tủ hồ sơ cao",
+            "",
+            "R400* C2700",
+            "* Ván MDF chống ẩm phủ melamine theo màu được duyệt\r\n* Phụ kiện bản lề, tay nắm, led hắt sáng,..",
+            "m2",
+            28.35,
+            "BT66MM",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            2,
+            "Tủ hồ sơ thấp",
+            "",
+            "D1800* R400* C550",
+            "* Ván MDF chống ẩm phủ melamine theo màu được duyệt\r\n* Phụ kiện bản lề, tay nắm, led hắt sáng,..",
+            "cái",
+            4,
+            "BT66MM",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            3,
+            "Tủ bếp dưới",
+            "",
+            "D2420* R500* C750",
+            "* Ván MDF chống ẩm phủ melamine theo màu được duyệt\r\n* Vị trí chậu rửa ván nhựa chống nước \r\n* Không bao gồm bồn rửa và các thiết bị bếp khác",
+            "md",
+            2.42,
+            "BT66MM",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            4,
+            "Đá mặt bếp",
+            "",
+            "",
+            "* Đá kim sa trung khổ 500mm\r\n* Ghép cạnh 40mm ",
+            "md",
+            2.42,
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "B",
+            "Nội thất rời",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            5,
+            "Bàn làm việc nhân viên",
+            "",
+            "1200*600*750",
+            "* Chân sắt sơn tĩnh điện,\r\n* Mặt bàn MDF chống ẩm phủ melamine theo màu được duyệt\r\n* Hộp điện âm bàn",
+            "cái",
+            24,
+            "111G",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            6,
+            "Vách ngăn bàn bằng mica",
+            "",
+            "D1000*C350",
+            "* Mica ",
+            "cái",
+            12,
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            7,
+            "Tủ di động 3 ngăn kéo",
+            "",
+            "470*510*670",
+            "* Ván MDF chống ẩm phủ melamine theo màu được duyệt",
+            "cái",
+            24,
+            "111G",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            8,
+            "Bàn làm việc phó phòng",
+            "",
+            "1400*600*750",
+            "* Ván MDF chống ẩm phủ melamine theo màu được duyệt\r\n* Hộp điện âm bàn",
+            "cái",
+            3,
+            "BT66MM",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            9,
+            "Bàn làm việc trưởng phòng\r\n",
+            "",
+            "1600*700*750",
+            "* Ván MDF chống ẩm phủ melamine theo màu được duyệt\r\n* Hộp điện âm bàn",
+            "cái",
+            7,
+            "BT66MM",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  "vatTuHongNghi": {
+    "status": "PARSED",
+    "sheets": [
+      {
+        "name": "Sheet3",
+        "rowCount": 32,
+        "headers": [
+          "KHỐI LƯỢNG VÁN VÀ CHỈ DÁN CẠNH VP BẢO MINH",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "HN - KHỐI LƯỢNG VÁN VÀ CHỈ DÁN CẠNH VP BẢO MINH",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "allRows": [
+          [
+            "STT",
+            "TÊN MÃ SẢN PHẨM",
+            "ĐVT",
+            "SỐ LƯỢNG",
+            "GHI CHÚ",
+            "",
+            "STT",
+            "TÊN MÃ SẢN PHẨM",
+            "ĐVT",
+            "SỐ LƯỢNG",
+            "GHI CHÚ",
+            ""
+          ],
+          [
+            "VÁN",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "VÁN",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            1,
+            "VÁN MDF 17LY 111G",
+            "TẤM",
+            50,
+            "",
+            "",
+            1,
+            "VÁN MDF 17LY 111G",
+            "TẤM",
+            65,
+            "",
+            ""
+          ],
+          [
+            2,
+            "VÁN MDF 9LY 111G",
+            "TẤM",
+            15,
+            "",
+            "",
+            2,
+            "VÁN MDF 9LY 111G",
+            "TẤM",
+            26,
+            "",
+            ""
+          ],
+          [
+            "CHỈ DÁN CẠNH",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "CHỈ DÁN CẠNH",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            1,
+            "CHỈ 2F 111G",
+            "MÉT",
+            200,
+            "",
+            "",
+            1,
+            "CHỈ 2F 111G",
+            "MÉT",
+            200,
+            "",
+            ""
+          ],
+          [
+            2,
+            "CHỈ 4F 111G",
+            "MÉT",
+            400,
+            "",
+            "",
+            2,
+            "CHỈ 4F 111G",
+            "MÉT",
+            800,
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "KHỐI LƯỢNG VÁN VÀ CHỈ DÁN CẠNH VP BẢO MINH",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "BT - KHỐI LƯỢNG VÁN VÀ CHỈ DÁN CẠNH VP BẢO MINH",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "STT",
+            "TÊN MÃ SẢN PHẨM",
+            "ĐVT",
+            "SỐ LƯỢNG",
+            "GHI CHÚ",
+            "",
+            "STT",
+            "TÊN MÃ SẢN PHẨM",
+            "ĐVT",
+            "SỐ LƯỢNG",
+            "GHI CHÚ",
+            " "
+          ],
+          [
+            "VÁN",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "VÁN",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            1,
+            "VÁN MDF 17LY SC 010 MW",
+            "TẤM",
+            50,
+            "",
+            "",
+            1,
+            "VÁN MDF 17LY SC 010 MW",
+            "TẤM",
+            67,
+            "",
+            ""
+          ],
+          [
+            2,
+            "VÁN MDF 9LY SC 010 MW",
+            "TẤM",
+            15,
+            "",
+            "",
+            2,
+            "VÁN MDF 9LY SC 010 MW",
+            "TẤM",
+            21,
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            3,
+            "VÁN MDF 17LY 200T",
+            "TẤM",
+            6,
+            "",
+            ""
+          ],
+          [
+            "CHỈ DÁN CẠNH",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "CHỈ DÁN CẠNH",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            1,
+            "CHỈ 2F SC 010 MW",
+            "MÉT",
+            200,
+            "",
+            "",
+            1,
+            "CHỈ 2F SC 010 MW",
+            "MÉT",
+            200,
+            "",
+            ""
+          ],
+          [
+            2,
+            "CHỈ 4F SC 010 MW",
+            "MÉT",
+            400,
+            "",
+            "",
+            2,
+            "CHỈ 4F SC 010 MW",
+            "MÉT",
+            600,
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            3,
+            "CHỈ 2F SC 200T",
+            "MÉT",
+            50,
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            4,
+            "CHỈ 4F SC 200T",
+            "MÉT",
+            50,
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "AC - KHỐI LƯỢNG VÁN VÀ CHỈ DÁN CẠNH VP BẢO MINH",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "STT",
+            "TÊN MÃ SẢN PHẨM",
+            "ĐVT",
+            "SỐ LƯỢNG",
+            "GHI CHÚ",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "VÁN",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            1,
+            "VÁN MDF 17LY 9205 S",
+            "TẤM",
+            4,
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "CHỈ DÁN CẠNH",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            1,
+            "CHỈ 4F 9205 S",
+            "MÉT",
+            30,
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "THAN TRE - KHỐI LƯỢNG VÁN VÀ CHỈ DÁN CẠNH VP BẢO MINH",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "STT",
+            "TÊN MÃ SẢN PHẨM",
+            "ĐVT",
+            "SỐ LƯỢNG",
+            "GHI CHÚ",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "VÁN",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            1,
+            "THAN TRE (KT: 1220 x 2440 x 8)mm",
+            "TẤM",
+            10,
+            "",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  "bomDraft": {
+    "status": "PARSED",
+    "sheets": [
+      {
+        "name": "BOM",
+        "rowCount": 21,
+        "headers": [
+          "Hạng mục",
+          "Số lượng",
+          "Đơn vị"
+        ],
+        "sampleRows": [
+          [
+            "HN - 111G-17.5",
+            62,
+            "Tấm"
+          ],
+          [
+            "BT - 200T-17.5",
+            6,
+            "Tấm"
+          ],
+          [
+            "HN - 111G-10",
+            25,
+            "Tấm"
+          ],
+          [
+            "BT - SC 010 MW-17.5",
+            65,
+            "Tấm"
+          ],
+          [
+            "BT - SC 010 MW-10",
+            20,
+            "Tấm"
+          ],
+          [
+            "THAN TRE-8",
+            10,
+            "Tấm"
+          ],
+          [
+            "AC - 9205 S-17.5",
+            4,
+            "Tấm"
+          ],
+          [
+            "GO GHEP THANH-30",
+            1,
+            "Tấm"
+          ],
+          [
+            "Nẹp dán cạnh~HN   111G 17.5~Chỉ 2P",
+            749.93,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~HN   111G 17.5~Chỉ 45",
+            6.27,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~HN   111G 17.5~Chỉ 4P",
+            58.7,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~BT   200T 17.5~Chỉ 2P",
+            51.25,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~BT   200T 17.5~Chỉ 4P",
+            3.4,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~HN   111G 10~Chỉ 2P",
+            4.99,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 2P",
+            522.25,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 4P",
+            32.56,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 45",
+            4.75,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 2P",
+            12.2,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 4P",
+            22.47,
+            "m"
+          ],
+          [
+            "Nẹp dán cạnh~AC   9205 S 17.5~Chỉ 4P",
+            16.59,
+            "m"
+          ]
+        ]
+      },
+      {
+        "name": "Cut List",
+        "rowCount": 1000,
+        "headers": [
+          "ID",
+          "Tên chi tiết",
+          "Tên nhóm",
+          "Vật liệu",
+          "Độ dày",
+          "Chiều rộng",
+          "Chiều cao"
+        ],
+        "sampleRows": [
+          [
+            "null",
+            "   hồi",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1710",
+            "995"
+          ],
+          [
+            "124",
+            "   BEND_PANEL",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "647",
+            "632.7"
+          ],
+          [
+            "null",
+            "   Hông Phải",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "610",
+            "512.5"
+          ],
+          [
+            "null",
+            "   Nóc",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1408.5",
+            "100"
+          ],
+          [
+            "null",
+            "   Nóc",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1408.5",
+            "100"
+          ],
+          [
+            "null",
+            "   ",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "280",
+            "145"
+          ],
+          [
+            "null",
+            "   hồi",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "582.5",
+            "50"
+          ],
+          [
+            "null",
+            "   Thành NK",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "253",
+            "50"
+          ],
+          [
+            "null",
+            "   ",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1950",
+            "750"
+          ],
+          [
+            "null",
+            "   Đáy",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1015",
+            "412.5"
+          ],
+          [
+            "null",
+            "   Nóc",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1015",
+            "395"
+          ],
+          [
+            "null",
+            "   MNK",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "350",
+            "282.5"
+          ],
+          [
+            "null",
+            "   Thành NK",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "450",
+            "200"
+          ],
+          [
+            "null",
+            "   Len Chân Trước",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1465",
+            "30"
+          ],
+          [
+            "null",
+            "   ",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "280",
+            "145"
+          ],
+          [
+            "null",
+            "   Thành NK",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "450",
+            "90"
+          ],
+          [
+            "null",
+            "   Difference",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "280",
+            "127.5"
+          ],
+          [
+            "null",
+            "   Difference",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "280",
+            "127.5"
+          ],
+          [
+            "null",
+            "   Difference",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "280",
+            "127.5"
+          ],
+          [
+            "null",
+            "   Len Chân Trước",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "350",
+            "45"
+          ],
+          [
+            "null",
+            "   Thành NK",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "253",
+            "30"
+          ],
+          [
+            "null",
+            "   Đáy",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "215",
+            "35"
+          ],
+          [
+            "null",
+            "   Hông Phải",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1667",
+            "580"
+          ],
+          [
+            "null",
+            "   Nóc",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1385",
+            "600"
+          ],
+          [
+            "null",
+            "   Nóc",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "900",
+            "580"
+          ],
+          [
+            "122",
+            "   BEND_PANEL",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "730",
+            "577.8"
+          ],
+          [
+            "null",
+            "   Nóc",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1385",
+            "20"
+          ],
+          [
+            "null",
+            "   Đáy",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "215",
+            "35"
+          ],
+          [
+            "null",
+            "   Hông Trái",
+            "-",
+            "HN - 111G",
+            "17.5",
+            "1667",
+            "580"
+          ]
+        ]
+      }
+    ]
+  },
+  "sourceInventory": {
+    "currentFiles": [
+      {
+        "name": "060826_TKNT_VP BAO MINH.pdf",
+        "relativePath": "060826_TKNT_VP BAO MINH.pdf",
+        "size": 11741905,
+        "modified": "2026-08-10T02:11:16.526Z",
+        "ext": ".pdf"
+      },
+      {
+        "name": "26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+        "relativePath": "26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+        "size": 10301961,
+        "modified": "2026-08-11T08:04:23.336Z",
+        "ext": ".pdf"
+      },
+      {
+        "name": "BANG MÃ VAN BMS T15.xlsx",
+        "relativePath": "BANG MÃ VAN BMS T15.xlsx",
+        "size": 13527303,
+        "modified": "2026-08-13T09:21:43.948Z",
+        "ext": ".xlsx"
+      },
+      {
+        "name": "BANG MÃ VAN BMS T15.xlsx",
+        "relativePath": "FILE BOQ/BANG MÃ VAN BMS T15.xlsx",
+        "size": 10599788,
+        "modified": "2026-08-13T07:12:26.876Z",
+        "ext": ".xlsx"
+      },
+      {
+        "name": "bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+        "relativePath": "FILE BOQ/bom-KHAI TRIỂN VĂN PHÒNG BẢO MINH.xlsx",
+        "size": 392755,
+        "modified": "2026-08-14T16:44:28.516Z",
+        "ext": ".xlsx"
+      },
+      {
+        "name": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.pdf",
+        "relativePath": "FILE BOQ/KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.pdf",
+        "size": 464036,
+        "modified": "2026-08-10T01:53:12.128Z",
+        "ext": ".pdf"
+      },
+      {
+        "name": "KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+        "relativePath": "FILE BOQ/KL NỘI THẤT VP BẢO MINH- CN SÀI GÒN- homepro.xlsx",
+        "size": 9469757,
+        "modified": "2026-08-09T07:28:14.837Z",
+        "ext": ".xlsx"
+      },
+      {
+        "name": "1785748576095_507678686420564335_g3012541106012426922_0a3cfa1c96ca58f04b66e25ae5a10f46.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748576095_507678686420564335_g3012541106012426922_0a3cfa1c96ca58f04b66e25ae5a10f46.jpg",
+        "size": 302970,
+        "modified": "2026-08-10T08:55:54.938Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748576222_507678686420564335_g3012541106012426922_87bf731a35dd3ab5fe29927704346aa4.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748576222_507678686420564335_g3012541106012426922_87bf731a35dd3ab5fe29927704346aa4.jpg",
+        "size": 272306,
+        "modified": "2026-08-10T08:55:55.167Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748576362_507678686420564335_g3012541106012426922_fcbccccad2e6a0e8422bf166cd02376a.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748576362_507678686420564335_g3012541106012426922_fcbccccad2e6a0e8422bf166cd02376a.jpg",
+        "size": 266713,
+        "modified": "2026-08-10T08:55:55.099Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748576476_507678686420564335_g3012541106012426922_7e5f27242567ebb68682e0e84657357a.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748576476_507678686420564335_g3012541106012426922_7e5f27242567ebb68682e0e84657357a.jpg",
+        "size": 255938,
+        "modified": "2026-08-10T08:55:55.023Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748590663_507678686420564335_g3012541106012426922_efec352eba87468796b4b7a8687791d9.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748590663_507678686420564335_g3012541106012426922_efec352eba87468796b4b7a8687791d9.jpg",
+        "size": 357274,
+        "modified": "2026-08-10T08:56:01.160Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748590781_507678686420564335_g3012541106012426922_117f36630be3497cbe9b447a29e15964.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748590781_507678686420564335_g3012541106012426922_117f36630be3497cbe9b447a29e15964.jpg",
+        "size": 363454,
+        "modified": "2026-08-10T08:56:02.013Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748590910_507678686420564335_g3012541106012426922_8ba95b0aa1086a04e38da2909a36b835.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748590910_507678686420564335_g3012541106012426922_8ba95b0aa1086a04e38da2909a36b835.jpg",
+        "size": 289295,
+        "modified": "2026-08-10T08:56:01.928Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748591046_507678686420564335_g3012541106012426922_da15b1c7a2cbcdc6c4024aef20a11cfd.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748591046_507678686420564335_g3012541106012426922_da15b1c7a2cbcdc6c4024aef20a11cfd.jpg",
+        "size": 270930,
+        "modified": "2026-08-10T08:56:01.821Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748591178_507678686420564335_g3012541106012426922_6d3570639dd2826b039f97a011f33563.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748591178_507678686420564335_g3012541106012426922_6d3570639dd2826b039f97a011f33563.jpg",
+        "size": 431974,
+        "modified": "2026-08-10T08:56:01.579Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748591295_507678686420564335_g3012541106012426922_55f1931ae36243eebc92513a81b1057f.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748591295_507678686420564335_g3012541106012426922_55f1931ae36243eebc92513a81b1057f.jpg",
+        "size": 392637,
+        "modified": "2026-08-10T08:56:01.747Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748591406_507678686420564335_g3012541106012426922_52910042c06cb9fb297ac836d48dce88.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748591406_507678686420564335_g3012541106012426922_52910042c06cb9fb297ac836d48dce88.jpg",
+        "size": 309211,
+        "modified": "2026-08-10T08:56:01.665Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748591571_507678686420564335_g3012541106012426922_a252156be3944ab59d9ce1b5b4b158c0.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748591571_507678686420564335_g3012541106012426922_a252156be3944ab59d9ce1b5b4b158c0.jpg",
+        "size": 234857,
+        "modified": "2026-08-10T08:56:01.489Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748591714_507678686420564335_g3012541106012426922_a981e80b7fd0a3626bd0cd76426b7033.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748591714_507678686420564335_g3012541106012426922_a981e80b7fd0a3626bd0cd76426b7033.jpg",
+        "size": 302426,
+        "modified": "2026-08-10T08:56:01.417Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748591822_507678686420564335_g3012541106012426922_bb8e5439a090e53a262188c49a7f3821.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748591822_507678686420564335_g3012541106012426922_bb8e5439a090e53a262188c49a7f3821.jpg",
+        "size": 284700,
+        "modified": "2026-08-10T08:56:01.324Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1785748592009_507678686420564335_g3012541106012426922_36909638541fc517102e5c30adfd1986.jpg",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ/1785748592009_507678686420564335_g3012541106012426922_36909638541fc517102e5c30adfd1986.jpg",
+        "size": 310730,
+        "modified": "2026-08-10T08:56:01.250Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ.zip",
+        "relativePath": "HÌNH ẢNH KÍCH THƯỚC THỰC TẾ.zip",
+        "size": 4629389,
+        "modified": "2026-08-17T08:31:59.528Z",
+        "ext": ".zip"
+      },
+      {
+        "name": "1786250810087_3340437000508801087_g3012541106012426922_84d5d1e143d5ab218fa8495e52280e9b.jpg",
+        "relativePath": "HÌNH ẢNH VẬT LIỆU/1786250810087_3340437000508801087_g3012541106012426922_84d5d1e143d5ab218fa8495e52280e9b.jpg",
+        "size": 160455,
+        "modified": "2026-08-10T02:11:22.548Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786250810092_3340437000508801087_g3012541106012426922_e5062cb814a95a0d5f09d7f49f12245d.jpg",
+        "relativePath": "HÌNH ẢNH VẬT LIỆU/1786250810092_3340437000508801087_g3012541106012426922_e5062cb814a95a0d5f09d7f49f12245d.jpg",
+        "size": 52677,
+        "modified": "2026-08-10T02:11:23.128Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786250810096_3340437000508801087_g3012541106012426922_526f4f65a111f98b168027a57475d140.jpg",
+        "relativePath": "HÌNH ẢNH VẬT LIỆU/1786250810096_3340437000508801087_g3012541106012426922_526f4f65a111f98b168027a57475d140.jpg",
+        "size": 48146,
+        "modified": "2026-08-10T02:11:23.365Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786250810100_3340437000508801087_g3012541106012426922_b9d2c73b381d8fb625d68498026127d0.jpg",
+        "relativePath": "HÌNH ẢNH VẬT LIỆU/1786250810100_3340437000508801087_g3012541106012426922_b9d2c73b381d8fb625d68498026127d0.jpg",
+        "size": 362897,
+        "modified": "2026-08-10T02:11:23.339Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786250810103_3340437000508801087_g3012541106012426922_3509322a90bea6cd16e7077e0f76412a.jpg",
+        "relativePath": "HÌNH ẢNH VẬT LIỆU/1786250810103_3340437000508801087_g3012541106012426922_3509322a90bea6cd16e7077e0f76412a.jpg",
+        "size": 941540,
+        "modified": "2026-08-10T02:11:23.090Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786250810106_3340437000508801087_g3012541106012426922_d98012d4795dacea52da8e0091bfb289.jpg",
+        "relativePath": "HÌNH ẢNH VẬT LIỆU/1786250810106_3340437000508801087_g3012541106012426922_d98012d4795dacea52da8e0091bfb289.jpg",
+        "size": 927110,
+        "modified": "2026-08-10T02:11:22.814Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786250818770_3340437000508801087_g3012541106012426922_570000e5a40f9fbc3f0256f83edf3bf3.jpg",
+        "relativePath": "HÌNH ẢNH VẬT LIỆU/1786250818770_3340437000508801087_g3012541106012426922_570000e5a40f9fbc3f0256f83edf3bf3.jpg",
+        "size": 339506,
+        "modified": "2026-08-10T02:11:30.655Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skb",
+        "relativePath": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skb",
+        "size": 8666738,
+        "modified": "2026-08-14T16:45:56.748Z",
+        "ext": ".skb"
+      },
+      {
+        "name": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skp",
+        "relativePath": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skp",
+        "size": 8733830,
+        "modified": "2026-08-15T08:41:33.722Z",
+        "ext": ".skp"
+      },
+      {
+        "name": "NT-23.pdf",
+        "relativePath": "NT-23.pdf",
+        "size": 538092,
+        "modified": "2026-08-14T08:57:32.643Z",
+        "ext": ".pdf"
+      },
+      {
+        "name": "1786726627657_1791217085357045439_g3012541106012426922_e4755e8fa6569051e856c28d06013beb.jpg",
+        "relativePath": "PHIẾU NHẬP VẬT TƯ/1786726627657_1791217085357045439_g3012541106012426922_e4755e8fa6569051e856c28d06013beb.jpg",
+        "size": 33327,
+        "modified": "2026-08-17T08:54:34.648Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786756872391_1379853987600875586_g5812822616793222863_c8a560649f682cbfe246f0671b9e3186.jpg",
+        "relativePath": "PHIẾU NHẬP VẬT TƯ/1786756872391_1379853987600875586_g5812822616793222863_c8a560649f682cbfe246f0671b9e3186.jpg",
+        "size": 159705,
+        "modified": "2026-08-17T08:52:57.918Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786756934695_8137523709257542538_g4656990525555217860_a3dde3d13c3d830d2f4b8a5f988de892.jpg",
+        "relativePath": "PHIẾU NHẬP VẬT TƯ/1786756934695_8137523709257542538_g4656990525555217860_a3dde3d13c3d830d2f4b8a5f988de892.jpg",
+        "size": 99873,
+        "modified": "2026-08-17T08:52:25.891Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "1786759210828_2001472300353136802_g3081737217842092960_b55026a92fe9b1e21dba2b7397dbd36d.jpg",
+        "relativePath": "PHIẾU NHẬP VẬT TƯ/1786759210828_2001472300353136802_g3081737217842092960_b55026a92fe9b1e21dba2b7397dbd36d.jpg",
+        "size": 251190,
+        "modified": "2026-08-17T08:53:58.627Z",
+        "ext": ".jpg"
+      },
+      {
+        "name": "PHIẾU NHẬP VẬT TƯ.zip",
+        "relativePath": "PHIẾU NHẬP VẬT TƯ.zip",
+        "size": 430869,
+        "modified": "2026-08-17T08:55:49.160Z",
+        "ext": ".zip"
+      },
+      {
+        "name": "Untitled.skb",
+        "relativePath": "Untitled.skb",
+        "size": 144281,
+        "modified": "2026-08-12T09:48:56.330Z",
+        "ext": ".skb"
+      },
+      {
+        "name": "VẬT TƯ HỒNG NGHI.xlsx",
+        "relativePath": "VẬT TƯ HỒNG NGHI.xlsx",
+        "size": 10598,
+        "modified": "2026-08-14T16:57:15.536Z",
+        "ext": ".xlsx"
+      }
+    ],
+    "totalFiles": 40
+  },
+  "crossRef": {
+    "nt23_to_boq": [
+      {
+        "boq_item": "A.I.3",
+        "description": "Rèm che nắng",
+        "zone": "ZONE-HP",
+        "qty": 5.8,
+        "unit": "m2",
+        "drawing_reference": "R-01 (NT-23)",
+        "linkage_status": "CANDIDATE",
+        "linkage_note": "NT-23 is drawing R-01 (curtain rail detail). All rèm BOQ items reference this drawing.",
+        "needs_human_confirmation": true
+      },
+      {
+        "boq_item": "B.I.3",
+        "description": "Rèm che nắng",
+        "zone": "ZONE-LV",
+        "qty": 45,
+        "unit": "m2",
+        "drawing_reference": "R-01 (NT-23)",
+        "linkage_status": "CANDIDATE",
+        "linkage_note": "NT-23 is drawing R-01 (curtain rail detail). All rèm BOQ items reference this drawing.",
+        "needs_human_confirmation": true
+      },
+      {
+        "boq_item": "C.I.3",
+        "description": "Rèm che nắng",
+        "zone": "ZONE-GD",
+        "qty": 12.291,
+        "unit": "m2",
+        "drawing_reference": "R-01 (NT-23)",
+        "linkage_status": "CANDIDATE",
+        "linkage_note": "NT-23 is drawing R-01 (curtain rail detail). All rèm BOQ items reference this drawing.",
+        "needs_human_confirmation": true
+      },
+      {
+        "boq_item": "D.I.3",
+        "description": "Rèm che nắng",
+        "zone": "ZONE-PT",
+        "qty": 15.555,
+        "unit": "m2",
+        "drawing_reference": "R-01 (NT-23)",
+        "linkage_status": "CANDIDATE",
+        "linkage_note": "NT-23 is drawing R-01 (curtain rail detail). All rèm BOQ items reference this drawing.",
+        "needs_human_confirmation": true
+      },
+      {
+        "boq_item": "E.I.3",
+        "description": "Rèm che nắng",
+        "zone": "ZONE-CT",
+        "qty": 48.96,
+        "unit": "m2",
+        "drawing_reference": "R-01 (NT-23)",
+        "linkage_status": "CANDIDATE",
+        "linkage_note": "NT-23 is drawing R-01 (curtain rail detail). All rèm BOQ items reference this drawing.",
+        "needs_human_confirmation": true
+      }
+    ],
+    "total_curtain_qty": 127.606,
+    "dimensions_found_in_drawing": [],
+    "materials_found_in_drawing": [
+      {
+        "text": "MDF PHỦ LAMINATE VÂN ĐÁ MFC PHỦ MELEMIN MÀU ĐEN MS 204 SH HOÀN",
+        "type": "BOARD",
+        "source": "TEXT_EXTRACTED"
+      },
+      {
+        "text": "MDF PHỦ LAMINATE VÂN ĐÁ MFC PHỦ MELAMIN MÀU ĐEN MS 204 SH MFC P",
+        "type": "BOARD",
+        "source": "TEXT_EXTRACTED"
+      },
+      {
+        "text": "MFC PHỦ MELEMIN MÀU ĐEN MS 204 SH HOÀN THIỆN MDF PHỦ LAMINATE V",
+        "type": "BOARD",
+        "source": "TEXT_EXTRACTED"
+      },
+      {
+        "text": "MFC PHỦ MELAMIN MÀU ĐEN MS 204 SH MFC PHỦ MELAMIN HỒNG NGHI HN",
+        "type": "BOARD",
+        "source": "TEXT_EXTRACTED"
+      },
+      {
+        "text": "MFC PHỦ MELAMIN HỒNG NGHI HN - 111G A MẶT ĐỨNG A MẶT ĐỨNG B MẶT",
+        "type": "BOARD",
+        "source": "TEXT_EXTRACTED"
+      },
+      {
+        "text": "MS 204",
+        "type": "MATERIAL_CODE",
+        "source": "TEXT_EXTRACTED"
+      },
+      {
+        "text": "MS 204",
+        "type": "MATERIAL_CODE",
+        "source": "TEXT_EXTRACTED"
+      }
+    ],
+    "drawing_codes_found": [
+      "CT-01",
+      "R-01",
+      "NT-23"
+    ]
+  }
+}
