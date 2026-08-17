@@ -21,6 +21,8 @@ type Document = {
 
 type ExtractedItem = {
   item_code: string;
+  category: string;
+  target: string;
   description: string;
   qty: number;
   unit: string;
@@ -195,49 +197,59 @@ export default function SourceCenterClient({ initialData }: Props) {
           const lines = (pdfData.text || '').split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 5);
           
           if (lines.length === 0) {
-            extracted.push({ item_code: 'ERR', description: 'PDF_NEEDS_OCR - MANUAL_REVIEW_REQUIRED', qty: 0, unit: '-', price: 0 });
+            extracted.push({ item_code: 'ERR', category: 'N/A', target: 'N/A', description: 'PDF_NEEDS_OCR - MANUAL_REVIEW_REQUIRED', qty: 0, unit: '-', price: 0 });
           } else {
             let idCounter = 1;
             for (let i = 0; i < lines.length; i++) {
                const line = lines[i];
-               // Detect lines that look like valid items (contains letters, not too short, not too long)
-               if (line.length > 8 && line.length < 150 && /[a-zA-Záàãảạăắằẵẳặâấầẫẩậéèẽẻẹêếềễểệíìĩỉịóòõỏọôốồỗổộơớờỡởợúùũủụưứừữửựýỳỹỷỵđ]/i.test(line)) {
-                  
-                  // Heuristic for Qty and Price
-                  const numbers = line.match(/\d+/g);
-                  let qty = 0;
-                  let price = 0;
-                  
-                  if (numbers && numbers.length > 0) {
-                     const firstNum = parseInt(numbers[0]);
-                     qty = firstNum;
-                     if (numbers.length > 1) {
-                        price = parseInt(numbers[numbers.length - 1]);
-                     }
-                  }
+               if (line.length > 5 && line.length < 150 && /[a-zA-Záàãảạăắằẵẳặâấầẫẩậéèẽẻẹêếềễểệíìĩỉịóòõỏọôốồỗổộơớờỡởợúùũủụưứừữửựýỳỹỷỵđ]/i.test(line)) {
                   
                   const lowerLine = line.toLowerCase();
-                  // Filter out common header/footer junk
+                  let category = '1. Thông tin tài liệu';
+                  let target = 'Source Document';
+                  
+                  if (lowerLine.includes('dự án') || lowerLine.includes('địa điểm') || lowerLine.includes('công trình')) {
+                     category = '2. Dự án'; target = 'Project';
+                  } else if (lowerLine.includes('cđt') || lowerLine.includes('khách hàng') || lowerLine.includes('đơn vị')) {
+                     category = '3. Khách hàng'; target = 'Customer';
+                  } else if (lowerLine.includes('bản vẽ') || lowerLine.includes('tầng') || lowerLine.includes('khu vực') || lowerLine.includes('căn hộ')) {
+                     category = '4. Bản vẽ'; target = 'Drawing';
+                  } else if (lowerLine.match(/dài|rộng|cao|đường kính|khoảng cách|phi|\d+\s*x\s*\d+/)) {
+                     category = '5. Kích thước'; target = 'Dimensions';
+                  } else if (lowerLine.includes('tủ') || lowerLine.includes('bàn') || lowerLine.includes('vách') || lowerLine.includes('cánh') || lowerLine.includes('hộc') || lowerLine.includes('đợt') || lowerLine.includes('giường')) {
+                     category = '6. Cấu kiện'; target = 'Component';
+                  } else if (lowerLine.includes('mdf') || lowerLine.includes('plywood') || lowerLine.includes('laminate') || lowerLine.includes('kính') || lowerLine.includes('gỗ') || lowerLine.includes('sắt') || lowerLine.includes('thép') || lowerLine.includes('sơn')) {
+                     category = '7. Vật liệu'; target = 'Material';
+                  } else if (lowerLine.includes('bản lề') || lowerLine.includes('ray') || lowerLine.includes('tay nắm') || lowerLine.includes('vít') || lowerLine.includes('ổ khóa') || lowerLine.includes('phụ kiện')) {
+                     category = '8. Hardware'; target = 'Hardware';
+                  } else if (lowerLine.match(/stt|mã|đvt|sl|số lượng/)) {
+                     category = '9. BOQ'; target = 'BOQ';
+                  } else if (lowerLine.includes('chi tiết') && (lowerLine.includes('cấu kiện') || lowerLine.includes('vật liệu'))) {
+                     category = '10. BOM'; target = 'BOM';
+                  } else if (lowerLine.includes('đơn giá') || lowerLine.includes('thành tiền') || lowerLine.match(/m2|md|kg|vnđ/)) {
+                     category = '11. Giá/khối lượng'; target = 'Cost / BOQ';
+                  } else if (lowerLine.includes('ghi chú') || lowerLine.includes('yêu cầu kỹ thuật') || lowerLine.includes('lắp đặt') || lowerLine.includes('hoàn thiện')) {
+                     category = '12. Ghi chú'; target = 'Technical Notes';
+                  }
+                  
                   if (!lowerLine.includes('tổng cộng') && !lowerLine.includes('công ty') && !lowerLine.includes('trang ') && !lowerLine.includes('page ') && !lowerLine.includes('http')) {
-                     let desc = line.substring(0, 100) + (line.length > 100 ? '...' : '');
-                     if (qty === 0 || price === 0) {
-                        desc += ' [PENDING VERIFICATION]';
-                     }
                      extracted.push({
                         item_code: `AI-${idCounter.toString().padStart(3, '0')}`,
-                        description: desc,
-                        qty: qty,
-                        unit: 'Đơn vị',
-                        price: price
+                        category: category,
+                        target: target,
+                        description: line.substring(0, 100) + (line.length > 100 ? '...' : ''),
+                        qty: 0,
+                        unit: 'N/A',
+                        price: 0
                      });
                      idCounter++;
                   }
                }
-               if (extracted.length >= 15) break; // Limit payload
+               if (extracted.length >= 25) break; 
             }
             
             if (extracted.length === 0) {
-               extracted.push({ item_code: 'ERR', description: 'EXTRACTION_FAILED', qty: 0, unit: '-', price: 0 });
+               extracted.push({ item_code: 'ERR', category: 'N/A', target: 'N/A', description: 'EXTRACTION_FAILED', qty: 0, unit: '-', price: 0 });
             }
           }
         } else {
@@ -525,21 +537,21 @@ export default function SourceCenterClient({ initialData }: Props) {
                             <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
                               <thead>
                                 <tr style={{ background: '#0f172a', color: '#94a3b8' }}>
-                                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mã Vật Tư</th>
-                                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mô tả</th>
-                                  <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #334155' }}>SL</th>
-                                  <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #334155' }}>Đơn Giá</th>
-                                  <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #334155' }}>Thành Tiền</th>
+                                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #334155', width: '25%' }}>Nhóm Dữ Liệu</th>
+                                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Nội dung trích xuất (Ví dụ trong PDF)</th>
+                                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #334155', width: '25%' }}>Nên đưa vào (Ánh xạ)</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {doc.extracted_items.map((item, i) => (
                                   <tr key={i} style={{ borderBottom: '1px solid #334155' }}>
-                                    <td style={{ padding: '12px', color: '#93c5fd', fontWeight: 600 }}>{item.item_code}</td>
+                                    <td style={{ padding: '12px', color: '#38bdf8', fontWeight: 600 }}>{item.category}</td>
                                     <td style={{ padding: '12px', color: '#f8fafc' }}>{item.description}</td>
-                                    <td style={{ padding: '12px', color: '#f8fafc', textAlign: 'right' }}>{item.qty} <span style={{color:'#64748b'}}>{item.unit}</span></td>
-                                    <td style={{ padding: '12px', color: '#f8fafc', textAlign: 'right' }}>{item.price.toLocaleString()}đ</td>
-                                    <td style={{ padding: '12px', color: '#34d399', textAlign: 'right', fontWeight: 600 }}>{(item.qty * item.price).toLocaleString()}đ</td>
+                                    <td style={{ padding: '12px' }}>
+                                      <span style={{ background: '#1e293b', color: '#cbd5e1', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', border: '1px solid #475569' }}>
+                                        {item.target}
+                                      </span>
+                                    </td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -654,19 +666,21 @@ export default function SourceCenterClient({ initialData }: Props) {
                       <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
                         <thead>
                           <tr style={{ background: '#0f172a', color: '#94a3b8' }}>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mã Vật Tư</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mô tả</th>
-                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #334155' }}>SL</th>
-                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #334155' }}>Đơn Giá</th>
+                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #334155', width: '30%' }}>Nhóm Dữ Liệu</th>
+                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Nội dung trích xuất</th>
+                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #334155', width: '25%' }}>Ánh xạ</th>
                           </tr>
                         </thead>
                         <tbody>
                           {extractedData.map((item, i) => (
                             <tr key={i} style={{ borderBottom: '1px solid #334155' }}>
-                              <td style={{ padding: '10px', color: '#93c5fd', fontWeight: 600 }}>{item.item_code}</td>
+                              <td style={{ padding: '10px', color: '#38bdf8', fontWeight: 600 }}>{item.category}</td>
                               <td style={{ padding: '10px', color: '#f8fafc' }}>{item.description}</td>
-                              <td style={{ padding: '10px', color: '#f8fafc', textAlign: 'right' }}>{item.qty} <span style={{color:'#64748b'}}>{item.unit}</span></td>
-                              <td style={{ padding: '10px', color: '#f8fafc', textAlign: 'right' }}>{item.price.toLocaleString()}đ</td>
+                              <td style={{ padding: '10px' }}>
+                                 <span style={{ background: '#1e293b', color: '#cbd5e1', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', border: '1px solid #475569' }}>
+                                   {item.target}
+                                 </span>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
