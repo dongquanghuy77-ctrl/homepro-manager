@@ -8,17 +8,28 @@
 
 ---
 
-## GO-LIVE SESSION RESULTS
+## FULL PRODUCTION ACCEPTANCE AUDIT RESULTS
 
 ```
-E2E:     43 PASS / 0 FAIL / 2 WARN
-TSC:     PASS (0 errors)
-BUILD:   PASS (exit 0)
-DEPLOY:  9dcb885 → Vercel (deploying)
+TSC:                  PASS (0 errors)
+BUILD:                PASS (exit 0, 123 routes)
+SECURITY AUDIT:       4 critical issues FIXED
+DB AUDIT:             PASS — 0 duplicates, 0 orphans
+API AUDIT:            All routes 200/401 as expected
+Commit:               bf1337e (Vercel deploying)
+Timestamp:            2026-08-17T21:44+07:00
 
-business_decisions: 7 seeded (BD-01..07)
-purchase_requests:  3 DRAFT (PR-BM-HN/BT/AC)
-production_orders:  0 (LOCKED — BD-04)
+business_decisions:   7 seeded (BD-01..07) — real DB
+purchase_requests:    3 DRAFT (PR-BM-HN/BT/AC)
+production_orders:    0 (LOCKED — BD-04 business rule)
+purchase_orders:      0 (pending BD-06 approval)
+
+CRITICAL FIXES:
+- Approval now persists to DB via PATCH (was state-only before)
+- All Bao Minh API routes now require authentication
+- PATCH endpoint uses server session for reviewer identity
+- BD statuses read from DB (not hardcoded)
+- Reconciliation gate uses real BD-06 status (not bypassed)
 ```
 
 ---
