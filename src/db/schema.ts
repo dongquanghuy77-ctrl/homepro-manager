@@ -2239,3 +2239,32 @@ export type NewDataLineageRow = typeof dataLineage.$inferInsert;
 export type SourceAuditLogRow    = typeof sourceAuditLog.$inferSelect;
 export type NewSourceAuditLogRow = typeof sourceAuditLog.$inferInsert;
 
+// ============================================================
+// BUSINESS DECISIONS — Per-project approval gate
+// ============================================================
+export const businessDecisions = pgTable('business_decisions', {
+  id:               serial('id').primaryKey(),
+  decisionId:       text('decision_id').notNull().unique(), // 'BD-01', 'BD-02'...
+  projectId:        integer('project_id').notNull().references(() => projects.id),
+  title:            text('title').notNull(),
+  category:         text('category').notNull(), // SCOPE|MATERIAL|DRAWING|STRUCTURAL|PROCUREMENT|PRODUCTION
+  sourceDocument:   text('source_document'),
+  evidence:         text('evidence'),
+  currentValue:     text('current_value'),
+  proposedValue:    text('proposed_value'),
+  riskLevel:        text('risk_level').notNull().default('MEDIUM'), // HIGH|MEDIUM|LOW
+  status:           text('status').notNull().default('PENDING'), // PENDING|APPROVED|REJECTED|SUPERSEDED|BLOCKED
+  impactDescription: text('impact_description'),
+  blockedModules:   text('blocked_modules').array(), // ['PRODUCTION','PROCUREMENT']
+  reviewedBy:       integer('reviewed_by').references(() => users.id),
+  reviewedAt:       timestamp('reviewed_at'),
+  rejectionReason:  text('rejection_reason'),
+  resolutionNote:   text('resolution_note'),
+  auditTrail:       jsonb('audit_trail').default('[]'),
+  createdAt:        timestamp('created_at').notNull().defaultNow(),
+  updatedAt:        timestamp('updated_at').notNull().defaultNow(),
+});
+
+export type BusinessDecisionRow    = typeof businessDecisions.$inferSelect;
+export type NewBusinessDecisionRow = typeof businessDecisions.$inferInsert;
+

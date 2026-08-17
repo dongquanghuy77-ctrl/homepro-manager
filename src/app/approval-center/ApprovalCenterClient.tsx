@@ -223,8 +223,29 @@ function OverrideModal({
 }
 
 /* ─── Main Component ─────────────────────────────────────────────────────── */
-export default function ApprovalCenterClient() {
-  const [items, setItems] = useState<ApprovalItem[]>(APPROVAL_QUEUE);
+export default function ApprovalCenterClient({ initialData }: { initialData?: any[] }) {
+  const [items, setItems] = useState<ApprovalItem[]>(() => {
+    if (initialData && initialData.length > 0) {
+      return initialData.map(d => ({
+        id: d.decisionId,
+        priority: d.riskLevel === 'HIGH' ? 1 : d.riskLevel === 'MEDIUM' ? 2 : 3,
+        severity: d.riskLevel as Severity,
+        category: d.category,
+        title: d.title,
+        source_file: d.sourceDocument || '',
+        issue: d.impactDescription || d.currentValue || '',
+        evidence: d.evidence || '',
+        current_status: d.status,
+        erp_blocked: d.status === 'BLOCKED' || (d.blockedModules && d.blockedModules.length > 0),
+        decision: (d.status === 'APPROVED' || d.status === 'REJECTED') ? d.status : null,
+        decided_by: d.reviewedBy ? String(d.reviewedBy) : null,
+        decided_at: d.reviewedAt ? new Date(d.reviewedAt).toISOString() : null,
+        override_reason: d.resolutionNote || d.rejectionReason || '',
+        history: d.auditTrail || [],
+      }));
+    }
+    return APPROVAL_QUEUE;
+  });
   const [conflicts] = useState<ConflictItem[]>(CONFLICTS);
   const [tab, setTab] = useState<'queue' | 'conflicts' | 'history'>('queue');
   const [selected, setSelected] = useState<ApprovalItem | null>(null);
