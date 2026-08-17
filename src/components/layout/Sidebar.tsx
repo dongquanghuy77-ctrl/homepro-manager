@@ -7,9 +7,10 @@ import {
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings,
   Command, Menu, X, MoreHorizontal, LogOut, UserCheck, Key,
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
-  Factory, ScanLine, ClipboardList, BarChart2,
+  Factory, ScanLine, ClipboardList, BarChart2, BarChart3,
   Inbox, Banknote, Activity, PieChart, Grid,
-  UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck
+  UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck,
+  MapPin, Heart, Edit3, Book
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
@@ -20,9 +21,10 @@ const iconMap = {
   LayoutDashboard, Briefcase, CheckSquare, TrendingUp,
   ShieldAlert, BookOpen, Package, DollarSign, Users, Settings, UserCheck,
   Clock, CalendarDays, UserCog, FileBarChart2, Timer,
-  Factory, ScanLine, ClipboardList, BarChart2,
+  Factory, ScanLine, ClipboardList, BarChart2, BarChart3,
   Inbox, Banknote, Activity, PieChart, Grid,
-  UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck
+  UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck,
+  MapPin, Heart, Edit3, Book
 };
 
 interface UserState {

@@ -1,31 +1,31 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { quotes } from '@/db/schema';
+import { customers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    const item = await db.query.quotes.findFirst({
-      where: eq(quotes.id, Number(params.id))
+    const customer = await db.query.customers.findFirst({
+      where: eq(customers.id, Number(params.id))
     });
     
-    if (!item) {
-      return NextResponse.json({ success: false, message: 'Quote not found' }, { status: 404 });
+    if (!customer) {
+      return NextResponse.json({ success: false, message: 'Customer not found' }, { status: 404 });
     }
     
-    return NextResponse.json({ success: true, data: item });
+    return NextResponse.json({ success: true, data: customer });
   } catch (error: any) {
-    console.error('Fetch quote detail error:', error);
+    console.error('Fetch customer detail error:', error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    await db.delete(quotes).where(eq(quotes.id, Number(params.id)));
+    await db.delete(customers).where(eq(customers.id, Number(params.id)));
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Delete quote error:', error);
+    console.error('Delete customer error:', error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
@@ -33,14 +33,10 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
-    const payload = { ...body };
-    if (payload.validUntil) {
-      payload.validUntil = new Date(payload.validUntil);
-    }
-    const updated = await db.update(quotes).set(payload).where(eq(quotes.id, Number(params.id))).returning();
+    const updated = await db.update(customers).set(body).where(eq(customers.id, Number(params.id))).returning();
     return NextResponse.json({ success: true, data: updated[0] });
   } catch (error: any) {
-    console.error('Update quote error:', error);
+    console.error('Update customer error:', error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }

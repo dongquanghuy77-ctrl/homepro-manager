@@ -63,12 +63,25 @@ export const WORKSPACES: WorkspaceConfig[] = [
     icon: 'UserPlus',
     routes: ['/crm'],
     navItems: [
-      { id: 'crm-grp', label: 'Kinh Doanh', icon: '', href: '#', sprint: 7, isGroupHeader: true },
-      { id: 'crm-leads', label: 'Leads (Tiềm năng)', icon: 'UserPlus', href: '/crm/leads', sprint: 7 },
+      { id: 'crm-grp', label: 'Tổng quan', icon: '', href: '#', sprint: 7, isGroupHeader: true },
+      { id: 'crm-dashboard', label: 'Dashboard CRM', icon: 'BarChart3', href: '/crm', sprint: 7 },
+
+      { id: 'crm-sales-grp', label: 'Kinh Doanh', icon: '', href: '#', sprint: 7, isGroupHeader: true },
       { id: 'crm-customers', label: 'Khách hàng', icon: 'Users', href: '/crm/customers', sprint: 7 },
-      { id: 'crm-opportunities', label: 'Cơ hội', icon: 'Briefcase', href: '/crm/opportunities', sprint: 7 },
+      { id: 'crm-leads', label: 'Lead (Tiềm năng)', icon: 'UserPlus', href: '/crm/leads', sprint: 7 },
+      { id: 'crm-opportunities', label: 'Cơ hội bán hàng', icon: 'Briefcase', href: '/crm/opportunities', sprint: 7 },
+
+      { id: 'crm-process-grp', label: 'Quy trình dự án', icon: '', href: '#', sprint: 7, isGroupHeader: true },
+      { id: 'crm-surveys', label: 'Khảo sát công trình', icon: 'MapPin', href: '/crm/surveys', sprint: 7 },
+      { id: 'crm-designs', label: 'Thiết kế', icon: 'PenTool', href: '/crm/designs', sprint: 7 },
+      { id: 'crm-boq', label: 'BOQ / Khối lượng', icon: 'ClipboardList', href: '/crm/boq', sprint: 7 },
+
+      { id: 'crm-contract-grp', label: 'Chốt đơn', icon: '', href: '#', sprint: 7, isGroupHeader: true },
       { id: 'crm-quotes', label: 'Báo giá', icon: 'FileText', href: '/crm/quotes', sprint: 7 },
       { id: 'crm-contracts', label: 'Hợp đồng', icon: 'FileCheck', href: '/crm/contracts', sprint: 7 },
+
+      { id: 'crm-after-grp', label: 'Chăm sóc', icon: '', href: '#', sprint: 7, isGroupHeader: true },
+      { id: 'crm-care', label: 'Chăm sóc KH', icon: 'Heart', href: '/crm/care', sprint: 7 },
     ],
   },
   {

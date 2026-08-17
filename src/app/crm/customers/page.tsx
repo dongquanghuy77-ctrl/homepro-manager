@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Users, UserPlus, Phone, MapPin, Mail, Search, Trash2, Edit2, FolderOpen } from 'lucide-react';
 
 interface CustomerItem {
@@ -10,6 +11,7 @@ interface CustomerItem {
   email?: string;
   address?: string;
   notes?: string;
+  customerType?: string;
   createdAt?: string;
 }
 
@@ -35,7 +37,7 @@ export default function CustomersPage() {
   async function loadCustomers() {
     setLoading(true);
     try {
-      const res = await fetch('/api/customers');
+      const res = await fetch('/api/crm/customers');
       const data = await res.json();
       if (Array.isArray(data)) setCustomers(data);
     } catch (err) {
@@ -60,7 +62,7 @@ export default function CustomersPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/customers', {
+      const res = await fetch('/api/crm/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -80,7 +82,7 @@ export default function CustomersPage() {
   async function handleDeleteCustomer(id: number, name: string) {
     if (!confirm(`Bạn có chắc muốn XÓA khách hàng "${name}"?`)) return;
     try {
-      const res = await fetch(`/api/customers/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/crm/customers/${id}`, { method: 'DELETE' });
       if (res.ok) loadCustomers();
     } catch (err) {
       console.error('Failed to delete customer:', err);
@@ -134,7 +136,7 @@ export default function CustomersPage() {
             <div key={c.id} className="card flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
+                  <Link href={`/crm/customers/${c.id}`} className="flex items-center gap-2 group cursor-pointer hover:opacity-80">
                     <div
                       style={{
                         width: 36,
@@ -152,10 +154,10 @@ export default function CustomersPage() {
                       {c.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="card-title" style={{ fontSize: 15 }}>{c.name}</div>
-                      <div className="card-subtitle" style={{ fontSize: 11 }}>Khách hàng cá nhân</div>
+                      <div className="card-title group-hover:text-primary transition-colors" style={{ fontSize: 15 }}>{c.name}</div>
+                      <div className="card-subtitle" style={{ fontSize: 11 }}>Khách hàng {c.customerType === 'ENTERPRISE' ? 'Doanh nghiệp' : 'cá nhân'}</div>
                     </div>
-                  </div>
+                  </Link>
 
                   <button
                     className="btn btn-danger btn-sm"

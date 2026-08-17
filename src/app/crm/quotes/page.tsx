@@ -1,29 +1,47 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Search, Plus, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { FileText, Search, Plus, Trash2, Edit2, Download, Eye, DollarSign } from 'lucide-react';
 
 interface QuoteItem {
   id: number;
   quoteNumber: string;
+  version: number;
   customerId: number;
+  opportunityId?: number;
   totalAmount: number;
+  costAmount: number;
+  margin: number;
   status: string;
+  validUntil?: string;
   createdAt?: string;
 }
 
-export default function Page() {
+const STATUS_COLORS: Record<string, string> = {
+  'DRAFT': 'bg-gray-100 text-gray-700 border-gray-200',
+  'INTERNAL_REVIEW': 'bg-purple-100 text-purple-700 border-purple-200',
+  'SENT': 'bg-blue-100 text-blue-700 border-blue-200',
+  'NEGOTIATING': 'bg-amber-100 text-amber-700 border-amber-200',
+  'ACCEPTED': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  'REJECTED': 'bg-red-100 text-red-700 border-red-200',
+  'EXPIRED': 'bg-gray-200 text-gray-500 border-gray-300',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  'DRAFT': 'Nháp',
+  'INTERNAL_REVIEW': 'Chờ duyệt nội bộ',
+  'SENT': 'Đã gửi khách',
+  'NEGOTIATING': 'Đang thương lượng',
+  'ACCEPTED': 'Đã chốt (Win)',
+  'REJECTED': 'Từ chối (Loss)',
+  'EXPIRED': 'Hết hạn',
+};
+
+export default function QuotesPage() {
   const [data, setData] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [formData, setFormData] = useState({
-  "quoteNumber": "",
-  "customerId": 0,
-  "totalAmount": 0,
-  "status": "DRAFT"
-});
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -42,29 +60,8 @@ export default function Page() {
     }
   }
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/crm/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        setShowAddModal(false);
-        setFormData({"quoteNumber":"","customerId":0,"totalAmount":0,"status":"DRAFT"});
-        loadData();
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   async function handleDelete(id: number) {
-    if (!confirm('Bạn có chắc muốn xoá?')) return;
+    if (!confirm('Bạn có chắc muốn xoá báo giá này?')) return;
     try {
       const res = await fetch(`/api/crm/quotes/${id}`, { method: 'DELETE' });
       if (res.ok) loadData();
@@ -73,96 +70,142 @@ export default function Page() {
     }
   }
 
+  const filtered = data.filter(q => q.quoteNumber.toLowerCase().includes(search.toLowerCase()));
+
   return (
     <div className="page-container">
       <div className="page-header">
         <div>
           <h1 className="page-title flex items-center gap-2">
             <FileText className="text-primary" size={24} />
-            Quản lý Báo giá (Quotes)
+            Quản lý Báo giá (Quotations)
           </h1>
-          <p className="page-subtitle">Các báo giá gửi cho khách hàng.</p>
+          <p className="page-subtitle">Quản lý và theo dõi các bản báo giá dự án, nội thất gửi cho khách hàng.</p>
         </div>
-        <button className="btn btn-primary flex items-center gap-2" onClick={() => setShowAddModal(true)}>
-          <Plus size={20} /> Thêm mới
+        <button className="btn btn-primary flex items-center gap-2">
+          <Plus size={20} /> Tạo Báo giá mới
         </button>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="card p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Tổng số Báo giá</p>
+            <p className="text-2xl font-bold text-gray-800">{data.length}</p>
+          </div>
+          <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center">
+            <FileText size={20} />
+          </div>
+        </div>
+        <div className="card p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Đã gửi / Chờ chốt</p>
+            <p className="text-2xl font-bold text-amber-600">
+              {data.filter(q => ['SENT', 'NEGOTIATING'].includes(q.status)).length}
+            </p>
+          </div>
+          <div className="w-10 h-10 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center">
+            <DollarSign size={20} />
+          </div>
+        </div>
+        <div className="card p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Đã chốt (Accepted)</p>
+            <p className="text-2xl font-bold text-emerald-600">
+              {data.filter(q => q.status === 'ACCEPTED').length}
+            </p>
+          </div>
+          <div className="w-10 h-10 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center">
+            <FileText size={20} />
+          </div>
+        </div>
+      </div>
+
       <div className="card">
-        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-          <div className="relative w-64">
+        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div className="relative w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input type="text" placeholder="Tìm kiếm..." className="form-input pl-10 w-full" value={search} onChange={e => setSearch(e.target.value)} />
+            <input type="text" placeholder="Tìm theo mã báo giá..." className="form-input pl-10 w-full bg-white" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-white border-b border-gray-200 shadow-sm">
               <tr>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Mã Báo Giá</th><th className="text-left py-3 px-4 text-sm font-medium text-gray-500">ID Khách hàng</th><th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Tổng tiền</th><th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Trạng thái</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Thao tác</th>
+                <th className="text-left py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Mã Báo Giá</th>
+                <th className="text-left py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Khách hàng</th>
+                <th className="text-right py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tổng giá trị</th>
+                <th className="text-right py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Biên lợi nhuận</th>
+                <th className="text-center py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                <th className="text-center py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Hiệu lực đến</th>
+                <th className="text-right py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={10} className="text-center py-8 text-gray-500">Đang tải...</td></tr>
-              ) : data.length === 0 ? (
-                <tr><td colSpan={10} className="text-center py-8 text-gray-500">Không có dữ liệu</td></tr>
+                <tr><td colSpan={7} className="text-center py-12 text-gray-500">Đang tải danh sách báo giá...</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={7} className="text-center py-12 text-gray-500">Không tìm thấy báo giá nào</td></tr>
               ) : (
-                data.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4">{item.quoteNumber}</td><td className="py-3 px-4">{Number(item.customerId).toLocaleString()}</td><td className="py-3 px-4">{Number(item.totalAmount).toLocaleString()}</td><td className="py-3 px-4"><span className="badge badge-primary">{item.status}</span></td>
-                    <td className="py-3 px-4 text-right">
-                      <button onClick={() => handleDelete(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={18} /></button>
-                    </td>
-                  </tr>
-                ))
+                filtered.map((item) => {
+                  const marginPct = item.totalAmount > 0 ? (item.margin / item.totalAmount) * 100 : 0;
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <td className="py-3 px-4">
+                        <Link href={`/crm/quotes/${item.id}`} className="font-semibold text-primary hover:underline flex items-center gap-2">
+                          {item.quoteNumber} <span className="text-xs font-normal text-gray-400 bg-gray-100 px-1.5 rounded">v{item.version}</span>
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4">
+                        <Link href={`/crm/customers/${item.customerId}`} className="text-sm font-medium text-gray-700 hover:text-primary">
+                          KH-{item.customerId}
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <span className="font-bold text-gray-800">
+                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.totalAmount)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex flex-col items-end">
+                          <span className="text-sm font-medium text-gray-600">
+                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.margin)}
+                          </span>
+                          <span className={`text-xs ${marginPct >= 20 ? 'text-green-600' : marginPct > 10 ? 'text-amber-500' : 'text-red-500'}`}>
+                            {marginPct.toFixed(1)}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span className={`px-2.5 py-1 text-xs font-medium border rounded-full ${STATUS_COLORS[item.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
+                          {STATUS_LABELS[item.status] || item.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center text-sm text-gray-500">
+                        {item.validUntil ? new Date(item.validUntil).toLocaleDateString('vi-VN') : '—'}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Link href={`/crm/quotes/${item.id}`} className="p-2 text-gray-400 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors">
+                            <Eye size={18} />
+                          </Link>
+                          <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                            <Download size={18} />
+                          </button>
+                          <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-gray-800">Thêm mới</h2>
-              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">×</button>
-            </div>
-            <div className="p-4 md:p-6 overflow-y-auto flex-1">
-              <form id="add-form" onSubmit={handleCreate} className="space-y-4">
-                
-              <div>
-                <label className="block text-sm font-medium mb-1">Mã Báo Giá</label>
-                <input type="text" className="form-input w-full" value={formData.quoteNumber as any} onChange={e => setFormData({...formData, quoteNumber: e.target.value})} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">ID Khách hàng</label>
-                <input type="number" className="form-input w-full" value={formData.customerId as any} onChange={e => setFormData({...formData, customerId: Number(e.target.value)})} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Tổng tiền</label>
-                <input type="number" className="form-input w-full" value={formData.totalAmount as any} onChange={e => setFormData({...formData, totalAmount: Number(e.target.value)})} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Trạng thái</label>
-                <select className="form-input w-full" value={formData.status as string} onChange={e => setFormData({...formData, status: e.target.value})}>
-                  <option value="DRAFT">DRAFT</option><option value="SENT">SENT</option><option value="ACCEPTED">ACCEPTED</option><option value="REJECTED">REJECTED</option>
-                </select>
-              </div>
-              </form>
-            </div>
-            <div className="p-4 md:p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
-              <button type="button" onClick={() => setShowAddModal(false)} className="btn btn-secondary">Hủy</button>
-              <button type="submit" form="add-form" className="btn btn-primary" disabled={submitting}>
-                {submitting ? 'Đang lưu...' : 'Lưu lại'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
