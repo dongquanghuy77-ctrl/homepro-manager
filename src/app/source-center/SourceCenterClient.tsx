@@ -178,6 +178,7 @@ export default function SourceCenterClient({ initialData }: Props) {
           setExtractionLogs(prev => [...prev, 'Đang load lõi PDF.js (Client-side)...', 'Tiến hành bóc tách lớp Text Layer...']);
           
           // Dynamically load pdfjs to avoid SSR issues
+          // @ts-ignore
           const pdfjsLib = await import('pdfjs-dist/build/pdf');
           pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
