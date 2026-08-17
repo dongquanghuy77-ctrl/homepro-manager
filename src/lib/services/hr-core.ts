@@ -87,6 +87,34 @@ export async function createEmployeeTransaction(payload: CreateEmployeePayload) 
       status: 'ACTIVE',
     });
 
+    // Initialize Leave Balances
+    const currentYear = new Date().getFullYear();
+    const { leaveTypes, leaveBalances, managerDepartments } = await import('@/db/schema');
+    const allLeaveTypes = await tx.select().from(leaveTypes).where(eq(leaveTypes.isActive, true));
+    for (const lt of allLeaveTypes) {
+      await tx.insert(leaveBalances).values({
+        employeeId: newUser.id,
+        leaveTypeId: lt.id,
+        year: currentYear,
+        totalDays: lt.maxDaysPerYear || 0,
+        carryOverDays: 0,
+        usedDays: 0,
+        pendingDays: 0,
+      });
+    }
+
+    // Assign RBAC manager_departments if role requires it
+    if (departmentId && (payload.role === 'MANAGER' || payload.role === 'SUPERVISOR')) {
+      await tx.insert(managerDepartments).values({
+        managerId: newUser.id,
+        departmentId: departmentId,
+        managementLevel: payload.role === 'MANAGER' ? 2 : 1,
+        canView: true,
+        canApprove: true,
+        canManage: payload.role === 'MANAGER',
+      });
+    }
+
     try {
       await writeHrAuditLog({
         action: 'EMPLOYEE_CREATED',
@@ -201,6 +229,49 @@ export async function updateEmployeeTransaction(userId: number, payload: UpdateE
         effectiveFrom: finalJoinDate,
         status: 'ACTIVE',
       });
+
+      // Initialize Leave Balances for promoted user
+      const currentYear = new Date().getFullYear();
+      const { leaveTypes, leaveBalances, managerDepartments } = await import('@/db/schema');
+      const allLeaveTypes = await tx.select().from(leaveTypes).where(eq(leaveTypes.isActive, true));
+      for (const lt of allLeaveTypes) {
+        // Prevent duplicate if already exists (just in case)
+        const [existing] = await tx.select().from(leaveBalances).where(and(
+          eq(leaveBalances.employeeId, userId),
+          eq(leaveBalances.leaveTypeId, lt.id),
+          eq(leaveBalances.year, currentYear)
+        ));
+        if (!existing) {
+          await tx.insert(leaveBalances).values({
+            employeeId: userId,
+            leaveTypeId: lt.id,
+            year: currentYear,
+            totalDays: lt.maxDaysPerYear || 0,
+            carryOverDays: 0,
+            usedDays: 0,
+            pendingDays: 0,
+          });
+        }
+      }
+
+      const finalRole = payload.role ?? oldUser.role;
+      if (finalDepartmentId && (finalRole === 'MANAGER' || finalRole === 'SUPERVISOR')) {
+        const [existingRbac] = await tx.select().from(managerDepartments).where(and(
+          eq(managerDepartments.managerId, userId),
+          eq(managerDepartments.departmentId, finalDepartmentId)
+        ));
+        if (!existingRbac) {
+          await tx.insert(managerDepartments).values({
+            managerId: userId,
+            departmentId: finalDepartmentId,
+            managementLevel: finalRole === 'MANAGER' ? 2 : 1,
+            canView: true,
+            canApprove: true,
+            canManage: finalRole === 'MANAGER',
+          });
+        }
+      }
+
     } else {
       // Salary Check
       if (payload.officialSalary !== undefined && payload.officialSalary !== oldUser.officialSalary) {

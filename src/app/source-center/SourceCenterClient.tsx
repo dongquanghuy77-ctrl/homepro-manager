@@ -111,10 +111,7 @@ export default function SourceCenterClient({ initialData }: Props) {
     if (file) {
       alert(`Đang phân tích file ${file.name} bằng thuật toán ánh xạ...`);
       setTimeout(() => {
-        const mockData = [
-          { source_id: docs[0]?.source_id, category: 'CONFIRMED_BOQ', status: 'APPROVED', mapped_data: 'Mapped Auto-Sync' }
-        ];
-        processGlobalImportedData(mockData);
+        alert('Tính năng import tổng đang được xây dựng (không tự sinh dữ liệu).');
         if (fileInputRef.current) fileInputRef.current.value = '';
       }, 1500);
     }
@@ -137,7 +134,7 @@ export default function SourceCenterClient({ initialData }: Props) {
   const handleAddRow = () => {
     const newRow: Document = {
       id: Date.now(),
-      source_id: `SRC-MN-${Math.floor(Math.random() * 9000) + 1000}`,
+      source_id: `SRC-MN-${Date.now().toString().slice(-4)}`,
       source_name: 'Manual Entry',
       source_type: 'Manual',
       file_name: 'Dữ liệu nhập tay',
@@ -196,56 +193,59 @@ export default function SourceCenterClient({ initialData }: Props) {
           setExtractionLogs(prev => [...prev, `Chạy thuật toán NLP phân tích Token để Map Data...`]);
 
           const lines = (pdfData.text || '').split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 5);
-          let idCounter = 1;
           
-          for (let i = 0; i < lines.length; i++) {
-             const line = lines[i];
-             // Detect lines that look like valid items (contains letters, not too short, not too long)
-             if (line.length > 8 && line.length < 150 && /[a-zA-Záàãảạăắằẵẳặâấầẫẩậéèẽẻẹêếềễểệíìĩỉịóòõỏọôốồỗổộơớờỡởợúùũủụưứừữửựýỳỹỷỵđ]/i.test(line)) {
-                
-                // Heuristic for Qty and Price
-                const numbers = line.match(/\d+/g);
-                let qty = 1;
-                let price = Math.floor(Math.random() * 500 + 50) * 1000;
-                
-                if (numbers && numbers.length > 0) {
-                   const firstNum = parseInt(numbers[0]);
-                   if (firstNum > 0 && firstNum <= 1000) qty = firstNum;
-                   if (numbers.length > 1) {
-                      const lastNum = parseInt(numbers[numbers.length - 1]);
-                      if (lastNum > 1000) price = lastNum;
-                   }
-                }
-                
-                const lowerLine = line.toLowerCase();
-                // Filter out common header/footer junk
-                if (!lowerLine.includes('tổng cộng') && !lowerLine.includes('công ty') && !lowerLine.includes('trang ') && !lowerLine.includes('page ') && !lowerLine.includes('http')) {
-                   extracted.push({
-                      item_code: `AI-${idCounter.toString().padStart(3, '0')}`,
-                      description: line.substring(0, 100) + (line.length > 100 ? '...' : ''),
-                      qty: qty,
-                      unit: 'Đơn vị',
-                      price: price
-                   });
-                   idCounter++;
-                }
-             }
-             if (extracted.length >= 15) break; // Limit payload
-          }
-          
-          if (extracted.length === 0) {
-             // Generic fallback based on any PDF
-             extracted.push({ item_code: 'SYS-EXT-01', description: `Vật tư tổng hợp trích xuất tự động (Bản vẽ)`, qty: 1, unit: 'Lô', price: 1000000 });
-             extracted.push({ item_code: 'SYS-SVC-01', description: 'Chi phí thi công (Dự toán theo file)', qty: 1, unit: 'Gói', price: 5000000 });
+          if (lines.length === 0) {
+            extracted.push({ item_code: 'ERR', description: 'PDF_NEEDS_OCR - MANUAL_REVIEW_REQUIRED', qty: 0, unit: '-', price: 0 });
+          } else {
+            let idCounter = 1;
+            for (let i = 0; i < lines.length; i++) {
+               const line = lines[i];
+               // Detect lines that look like valid items (contains letters, not too short, not too long)
+               if (line.length > 8 && line.length < 150 && /[a-zA-Záàãảạăắằẵẳặâấầẫẩậéèẽẻẹêếềễểệíìĩỉịóòõỏọôốồỗổộơớờỡởợúùũủụưứừữửựýỳỹỷỵđ]/i.test(line)) {
+                  
+                  // Heuristic for Qty and Price
+                  const numbers = line.match(/\d+/g);
+                  let qty = 0;
+                  let price = 0;
+                  
+                  if (numbers && numbers.length > 0) {
+                     const firstNum = parseInt(numbers[0]);
+                     qty = firstNum;
+                     if (numbers.length > 1) {
+                        price = parseInt(numbers[numbers.length - 1]);
+                     }
+                  }
+                  
+                  const lowerLine = line.toLowerCase();
+                  // Filter out common header/footer junk
+                  if (!lowerLine.includes('tổng cộng') && !lowerLine.includes('công ty') && !lowerLine.includes('trang ') && !lowerLine.includes('page ') && !lowerLine.includes('http')) {
+                     let desc = line.substring(0, 100) + (line.length > 100 ? '...' : '');
+                     if (qty === 0 || price === 0) {
+                        desc += ' [PENDING VERIFICATION]';
+                     }
+                     extracted.push({
+                        item_code: `AI-${idCounter.toString().padStart(3, '0')}`,
+                        description: desc,
+                        qty: qty,
+                        unit: 'Đơn vị',
+                        price: price
+                     });
+                     idCounter++;
+                  }
+               }
+               if (extracted.length >= 15) break; // Limit payload
+            }
+            
+            if (extracted.length === 0) {
+               extracted.push({ item_code: 'ERR', description: 'EXTRACTION_FAILED', qty: 0, unit: '-', price: 0 });
+            }
           }
         } else {
           // Image / Excel mockup
           setExtractionLogs(prev => [...prev, 'Phân tích điểm ảnh (Computer Vision)...', 'Chạy thuật toán nhận diện lưới (Grid Detection)...']);
           await new Promise(resolve => setTimeout(resolve, 2000));
           extracted = [
-            { item_code: 'VT-001', description: 'Gỗ MDF chống ẩm 17mm (Image OCR)', qty: 50, unit: 'Tấm', price: 450000 },
-            { item_code: 'VT-002', description: 'Keo dán gỗ chuyên dụng (Image OCR)', qty: 5, unit: 'Thùng', price: 1200000 },
-            { item_code: 'VT-003', description: 'Bản lề giảm chấn inox (Image OCR)', qty: 200, unit: 'Cái', price: 25000 }
+            { item_code: 'ERR', description: 'IMAGE_NEEDS_OCR - MANUAL_REVIEW_REQUIRED', qty: 0, unit: '-', price: 0 }
           ];
         }
 
@@ -253,14 +253,12 @@ export default function SourceCenterClient({ initialData }: Props) {
         setExtractionLogs(prev => [...prev, '✅ Hoàn thành phân tích và bóc tách dữ liệu!']);
       } catch (err) {
         console.error('Extraction error:', err);
-        setExtractionLogs(prev => [...prev, '⚠️ Cảnh báo: Thuật toán gặp khó khăn khi parse mã nhị phân. Đang chạy luồng dự phòng...']);
-        // Fallback robustly so the user never sees an error.
+        setExtractionLogs(prev => [...prev, '⚠️ Cảnh báo: Lỗi trích xuất dữ liệu.']);
         await new Promise(resolve => setTimeout(resolve, 1500));
         setExtractedData([
-          { item_code: 'SYS-EXT-01', description: `Vật tư tổng hợp (Luồng dự phòng)`, qty: 1, unit: 'Lô', price: 1000000 },
-          { item_code: 'SYS-SVC-01', description: 'Chi phí thi công (Dự toán)', qty: 1, unit: 'Gói', price: 5000000 }
+          { item_code: 'ERR', description: 'EXTRACTION_FAILED', qty: 0, unit: '-', price: 0 }
         ]);
-        setExtractionLogs(prev => [...prev, '✅ Hoàn thành phân tích bằng luồng dự phòng!']);
+        setExtractionLogs(prev => [...prev, 'Hoàn thành bóc tách với lỗi.']);
       } finally {
         setIsProcessing(false);
       }
