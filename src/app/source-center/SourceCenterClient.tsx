@@ -535,15 +535,31 @@ export default function SourceCenterClient({ initialData }: Props) {
                     // Image Preview
                     <img src={previewUrl!} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', border: '1px solid #334155' }} />
                   ) : (previewFile?.type === 'application/pdf' || previewFile?.name.toLowerCase().endsWith('.pdf')) ? (
-                    // PDF Preview - fallback to a nice custom preview if iframe fails
-                    <div style={{ width: '100%', height: '100%', position: 'relative', borderRadius: '8px', overflow: 'hidden' }}>
-                      <iframe src={`${previewUrl!}#toolbar=0`} style={{ width: '100%', height: '100%', border: 'none', position: 'absolute', inset: 0, zIndex: 1 }} title="PDF Preview" />
-                      <div style={{ position: 'absolute', inset: 0, zIndex: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
-                         <FileText size={48} color="#3b82f6" style={{ marginBottom: '16px' }} />
-                         <h3 style={{ color: '#f8fafc', fontSize: '16px', fontWeight: 600 }}>Tài liệu PDF đã được tải vào Bộ nhớ</h3>
-                         <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '8px' }}>Tên file: {previewFile.name}</p>
-                         <p style={{ color: '#94a3b8', fontSize: '13px' }}>Kích thước: {(previewFile.size / 1024).toFixed(1)} KB</p>
+                    // PDF Metadata Card — no iframe, no browser security issues
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+                      <div style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)', border: '1px solid #3b82f6', borderRadius: '20px', padding: '40px', width: '80%', maxWidth: '360px', textAlign: 'center', boxShadow: '0 10px 40px rgba(59,130,246,0.2)' }}>
+                        <div style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', borderRadius: '16px', padding: '20px', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                          <FileText size={40} color="#fff" />
+                        </div>
+                        <h3 style={{ color: '#f8fafc', fontSize: '18px', fontWeight: 800, margin: '0 0 8px' }}>Tài liệu PDF</h3>
+                        <p style={{ color: '#60a5fa', fontSize: '13px', fontWeight: 600, margin: '0 0 20px', wordBreak: 'break-all' }}>{previewFile.name}</p>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', background: '#0f172a', borderRadius: '10px', padding: '12px 16px', marginBottom: '12px' }}>
+                          <span style={{ color: '#94a3b8', fontSize: '13px' }}>Kích thước</span>
+                          <span style={{ color: '#34d399', fontWeight: 700, fontSize: '13px' }}>{(previewFile.size / 1024).toFixed(1)} KB</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', background: '#0f172a', borderRadius: '10px', padding: '12px 16px', marginBottom: '12px' }}>
+                          <span style={{ color: '#94a3b8', fontSize: '13px' }}>Định dạng</span>
+                          <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '13px' }}>PDF Document</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', background: '#0f172a', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px' }}>
+                          <span style={{ color: '#94a3b8', fontSize: '13px' }}>Trạng thái</span>
+                          <span style={{ color: '#34d399', fontWeight: 700, fontSize: '13px' }}>✅ Đã tải vào RAM</span>
+                        </div>
+                        <a href={previewUrl!} target="_blank" rel="noreferrer" style={{ display: 'block', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff', padding: '10px 20px', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '13px' }}>
+                          🔗 Mở PDF trong Tab mới
+                        </a>
                       </div>
+                      <p style={{ color: '#64748b', fontSize: '12px', textAlign: 'center' }}>Thuật toán đang xử lý dữ liệu bên phải →</p>
                     </div>
                   ) : (
                     // Other file generic preview
