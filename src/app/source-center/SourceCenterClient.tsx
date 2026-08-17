@@ -16,6 +16,7 @@ type Document = {
   created_at: string;
   classification_confidence: number;
   mapped_data?: string;
+  extracted_items?: ExtractedItem[];
 };
 
 type ExtractedItem = {
@@ -45,6 +46,7 @@ export default function SourceCenterClient({ initialData }: Props) {
   // Row specific file import
   const rowFileInputRef = useRef<HTMLInputElement>(null);
   const [activeRowId, setActiveRowId] = useState<number | null>(null);
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
 
   // Preview Modal State
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -247,7 +249,8 @@ export default function SourceCenterClient({ initialData }: Props) {
             file_size: previewFile?.size || d.file_size,
             mapped_data: summary,
             source_status: 'STAGED',
-            document_category: previewFile?.type.includes('image') ? 'MATERIAL_IMAGE' : 'BOQ_EXCEL'
+            document_category: previewFile?.type.includes('image') ? 'MATERIAL_IMAGE' : 'BOQ_EXCEL',
+            extracted_items: extractedData
           };
         }
         return d;
@@ -401,7 +404,14 @@ export default function SourceCenterClient({ initialData }: Props) {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px', borderRight: '1px solid #1e293b', maxWidth: '200px' }}>
-                      <div style={{ fontWeight: 600, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={doc.file_name}>
+                      <div 
+                        style={{ fontWeight: 600, color: '#60a5fa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }} 
+                        title={doc.file_name}
+                        onClick={() => setExpandedRowId(expandedRowId === doc.id ? null : doc.id)}
+                      >
+                        {doc.extracted_items && (
+                          <span style={{ transform: expandedRowId === doc.id ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s', fontSize: '10px' }}>▶</span>
+                        )}
                         {doc.file_name}
                       </div>
                       <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>{formatSize(doc.file_size)}</div>
@@ -460,6 +470,44 @@ export default function SourceCenterClient({ initialData }: Props) {
                     </td>
                   </tr>
                 ))}
+                {filteredDocs.map((doc) => {
+                  if (expandedRowId === doc.id && doc.extracted_items) {
+                    return (
+                      <tr key={`${doc.id}-expanded`} style={{ background: '#020617' }}>
+                        <td colSpan={8} style={{ padding: '16px 32px', borderBottom: '1px solid #1e293b' }}>
+                          <div style={{ background: '#1e293b', borderRadius: '12px', border: '1px solid #334155', overflow: 'hidden', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.3)' }}>
+                            <div style={{ padding: '12px 16px', background: '#3b82f6', color: '#fff', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <FileText size={16} /> Bảng Dữ Liệu Bóc Tách (Gắn liền với File)
+                            </div>
+                            <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr style={{ background: '#0f172a', color: '#94a3b8' }}>
+                                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mã Vật Tư</th>
+                                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #334155' }}>Mô tả</th>
+                                  <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #334155' }}>SL</th>
+                                  <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #334155' }}>Đơn Giá</th>
+                                  <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #334155' }}>Thành Tiền</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {doc.extracted_items.map((item, i) => (
+                                  <tr key={i} style={{ borderBottom: '1px solid #334155' }}>
+                                    <td style={{ padding: '12px', color: '#93c5fd', fontWeight: 600 }}>{item.item_code}</td>
+                                    <td style={{ padding: '12px', color: '#f8fafc' }}>{item.description}</td>
+                                    <td style={{ padding: '12px', color: '#f8fafc', textAlign: 'right' }}>{item.qty} <span style={{color:'#64748b'}}>{item.unit}</span></td>
+                                    <td style={{ padding: '12px', color: '#f8fafc', textAlign: 'right' }}>{item.price.toLocaleString()}đ</td>
+                                    <td style={{ padding: '12px', color: '#34d399', textAlign: 'right', fontWeight: 600 }}>{(item.qty * item.price).toLocaleString()}đ</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+                  return null;
+                })}
               </tbody>
             </table>
           </div>
