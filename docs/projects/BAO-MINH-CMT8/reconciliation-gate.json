@@ -1,0 +1,122 @@
+{
+  "gate": {
+    "source_traceability_100pct": true,
+    "source_123_reconciled": true,
+    "normalized_82_reconciled": true,
+    "scope_math_valid": true,
+    "pricing_traceability": true,
+    "quantity_traceability": true,
+    "no_assumed_price": true,
+    "no_assumed_quantity": true,
+    "no_erp_transaction": true,
+    "fail": 0,
+    "blocker": 0,
+    "issues": []
+  },
+  "sectionStats": {
+    "A": {
+      "name": "PHÒNG HỌP",
+      "total": 7,
+      "homepro": 6,
+      "client_supplied": 1,
+      "not_executed": 0,
+      "need_quotation": 6,
+      "not_applicable": 1,
+      "clarification_required": 1,
+      "qty_from_source": 5,
+      "qty_with_factor": 2,
+      "qty_need_clarification": 0
+    },
+    "B": {
+      "name": "PHÒNG LÀM VIỆC",
+      "total": 33,
+      "homepro": 25,
+      "client_supplied": 8,
+      "not_executed": 0,
+      "need_quotation": 25,
+      "not_applicable": 8,
+      "clarification_required": 5,
+      "qty_from_source": 31,
+      "qty_with_factor": 2,
+      "qty_need_clarification": 0
+    },
+    "C": {
+      "name": "PHÒNG GIÁM ĐỐC CHI NHÁNH",
+      "total": 11,
+      "homepro": 7,
+      "client_supplied": 4,
+      "not_executed": 0,
+      "need_quotation": 7,
+      "not_applicable": 4,
+      "clarification_required": 2,
+      "qty_from_source": 9,
+      "qty_with_factor": 2,
+      "qty_need_clarification": 0
+    },
+    "D": {
+      "name": "PHÒNG PANTRY",
+      "total": 12,
+      "homepro": 4,
+      "client_supplied": 3,
+      "not_executed": 5,
+      "need_quotation": 4,
+      "not_applicable": 8,
+      "clarification_required": 2,
+      "qty_from_source": 11,
+      "qty_with_factor": 1,
+      "qty_need_clarification": 0
+    },
+    "E": {
+      "name": "PHÒNG CHỦ TỊCH",
+      "total": 16,
+      "homepro": 7,
+      "client_supplied": 9,
+      "not_executed": 0,
+      "need_quotation": 7,
+      "not_applicable": 9,
+      "clarification_required": 4,
+      "qty_from_source": 13,
+      "qty_with_factor": 2,
+      "qty_need_clarification": 1
+    },
+    "F": {
+      "name": "HÀNH LANG",
+      "total": 2,
+      "homepro": 0,
+      "client_supplied": 0,
+      "not_executed": 2,
+      "need_quotation": 0,
+      "not_applicable": 2,
+      "clarification_required": 0,
+      "qty_from_source": 2,
+      "qty_with_factor": 0,
+      "qty_need_clarification": 0
+    },
+    "G": {
+      "name": "CHI PHÍ KHÁC",
+      "total": 1,
+      "homepro": 1,
+      "client_supplied": 0,
+      "not_executed": 0,
+      "need_quotation": 1,
+      "not_applicable": 0,
+      "clarification_required": 0,
+      "qty_from_source": 1,
+      "qty_with_factor": 0,
+      "qty_need_clarification": 0
+    }
+  },
+  "counts": {
+    "total_source": 123,
+    "normalized": 82,
+    "merged": 17,
+    "header": 21,
+    "empty": 2,
+    "subtotal": 1,
+    "homepro": 50,
+    "client_supplied": 25,
+    "not_executed": 7,
+    "need_quotation": 50,
+    "clarification": 14
+  }
+}

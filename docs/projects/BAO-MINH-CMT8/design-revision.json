@@ -1,0 +1,59 @@
+{
+  "project_id": "BAO-MINH-CMT8",
+  "design_package_id": "BAO-MINH-CMT8-T15-DESIGN-PKG",
+  "current_version": "V01",
+  "generated_at": "2026-08-17T08:56:08.075Z",
+  "versions": [
+    {
+      "version_id": "V01",
+      "label": "Version 01 (Main Design)",
+      "date": "07/2026",
+      "file": "26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+      "status": "CURRENT",
+      "num_pages": 35,
+      "content": {
+        "floor_plan": {
+          "page": 3,
+          "desc": "Mặt bằng thiết kế"
+        },
+        "existing": {
+          "page": 2,
+          "desc": "MẶT BẰNG HIỆN TRẠNG VP TẦNG 15 — 326.56 m²"
+        },
+        "perspectives": {
+          "pages": "4-35 (excl PA2)",
+          "desc": "3D Perspectives V01"
+        }
+      }
+    },
+    {
+      "version_id": "PA2",
+      "label": "PA2 (Alternative Design Option)",
+      "date": "07/2026",
+      "file": "26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+      "status": "ALTERNATIVE — SEPARATE, không merge vào V01",
+      "num_pages": 2,
+      "pa2_pages": [
+        6,
+        8
+      ],
+      "rule": "PA2 MUST NOT be written over V01. If V02 arrives, V01 → Superseded, V02 → Current.",
+      "content": {
+        "perspectives": {
+          "pages": "6,8",
+          "desc": "Alternative 3D Perspectives"
+        }
+      }
+    }
+  ],
+  "superseded_versions": [],
+  "future_version_rule": "When V02 arrives: set V01.status=SUPERSEDED, create V02 record. DO NOT delete V01.",
+  "technical_counterpart": {
+    "version_id": "REV 0",
+    "label": "Technical Shop Drawings REV 0",
+    "date": "05/08/2026",
+    "file": "060826_TKNT_VP BAO MINH.pdf",
+    "status": "CURRENT_TECHNICAL",
+    "note": "These are shop drawings. When REV 1 arrives: DO NOT overwrite REV 0."
+  }
+}

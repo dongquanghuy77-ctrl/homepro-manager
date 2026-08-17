@@ -1,0 +1,88 @@
+{
+  "phase": "3I",
+  "generated_at": "2026-08-17T16:32:36.397457",
+  "source_sha256": "664ABC00CB34EE109B7E9830D75B05D9E9921319156320ED29B17755CAC9EF72",
+  "design_source": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skp",
+  "survey_source": "Phase 2 — SURVEY-SOURCE-MANIFEST.json / survey-photo-analysis.json",
+  "summary": {
+    "total_issues": 4,
+    "HIGH_severity": 3,
+    "MEDIUM_severity": 1,
+    "CONFLICT": 1,
+    "NEEDS_HUMAN_VERIFICATION": 4,
+    "BLOCKER_count": 3
+  },
+  "design_dimensions_from_skp": {
+    "total_length_mm": 10470,
+    "total_width_mm": 1035,
+    "ceiling_height_mm": 2540,
+    "note": "Extracted from largest bounding boxes in SKP model (Phase 3B)"
+  },
+  "survey_dimensions": {
+    "note": "Exact site dimensions not extracted from Phase 2 survey photos — manual measurement required",
+    "source": "SURVEY_PHASE2_PHOTOS",
+    "verification_status": "NEEDS_HUMAN_MEASUREMENT"
+  },
+  "design_vs_survey_issues": [
+    {
+      "issue_id": "DSI-001",
+      "issue_type": "DIMENSION_COMPARISON",
+      "design_source": "SKP_BOUNDING_BOX",
+      "survey_source": "SURVEY_PHASE2_PHOTOS",
+      "component": "Ceiling Height / Chiều cao trần",
+      "boq_item": null,
+      "design_value": "2540mm (from SKP bounding box max Z)",
+      "survey_value": "PENDING — not measured in Phase 2 structured data",
+      "difference": "UNKNOWN — requires site measurement",
+      "severity": "HIGH",
+      "verification_status": "NEEDS_HUMAN_VERIFICATION",
+      "photos": [],
+      "notes": "Design assumes 2540mm finish ceiling height. Survey photos show existing ceiling but no structured measurement was recorded. Must verify before production."
+    },
+    {
+      "issue_id": "DSI-002",
+      "issue_type": "DIMENSION_COMPARISON",
+      "design_source": "SKP_BOUNDING_BOX",
+      "survey_source": "SURVEY_PHASE2_PHOTOS",
+      "component": "Total Furniture Run Length",
+      "boq_item": null,
+      "design_value": "10470mm (largest X extent in SKP)",
+      "survey_value": "PENDING — not measured in Phase 2 structured data",
+      "difference": "UNKNOWN — requires site measurement",
+      "severity": "HIGH",
+      "verification_status": "NEEDS_HUMAN_VERIFICATION",
+      "photos": [],
+      "notes": "10.47m total furniture run. Site length must be verified before cutting any panels."
+    },
+    {
+      "issue_id": "DSI-003",
+      "issue_type": "OBSTRUCTION_CHECK",
+      "design_source": "SKP_MODEL",
+      "survey_source": "SURVEY_PHASE2_PHOTOS",
+      "component": "Column / MEP obstruction",
+      "boq_item": null,
+      "design_value": "No column/MEP flagged in SKP model",
+      "survey_value": "Survey photos show existing structure — potential column/beam at entry",
+      "difference": "Survey shows possible structural element not in design",
+      "severity": "HIGH",
+      "verification_status": "NEEDS_HUMAN_VERIFICATION",
+      "photos": [],
+      "notes": "Site survey Phase 2 flagged potential obstructions. SKP design must be validated against as-built conditions."
+    },
+    {
+      "issue_id": "DSI-004",
+      "issue_type": "MATERIAL_MATCH",
+      "design_source": "SKP_MATERIAL:AC - 9205 S",
+      "survey_source": "SURVEY_PHASE2_MATERIAL_CONFIRMED:An Cuong MS 608EV",
+      "component": "Main board material",
+      "boq_item": null,
+      "design_value": "AC - 9205 S (in SKP)",
+      "survey_value": "An Cuong MS 608EV (in Phase 2 confirmed materials)",
+      "difference": "SKP uses AC-9205S; Survey confirmed MS-608EV. Both are An Cuong MDF but different specs.",
+      "severity": "MEDIUM",
+      "verification_status": "CONFLICT",
+      "photos": [],
+      "notes": "Possible same product different code, or design change. Requires vendor+client confirmation before cutting."
+    }
+  ]
+}

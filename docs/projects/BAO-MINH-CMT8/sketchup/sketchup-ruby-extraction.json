@@ -1,0 +1,37 @@
+{
+  "phase": "3C",
+  "generated_at": "2026-08-17T16:32:36.345049",
+  "source_sha256": "664ABC00CB34EE109B7E9830D75B05D9E9921319156320ED29B17755CAC9EF72",
+  "sketchup_install_path": "C:\\Program Files\\SketchUp\\SketchUp 2022",
+  "sketchup_found_on_system": true,
+  "sketchup_version_from_openskp": "{22.0.354}",
+  "ruby_api_available": false,
+  "ruby_api_method": "HEADLESS_NOT_SUPPORTED",
+  "extraction_method_used": "openskp 0.3.0 (Phase 3B)",
+  "cross_reference_status": "OPENSKP_AS_PRIMARY",
+  "note": "SketchUp 2022 is installed at the expected path. However, SketchUp Ruby API requires interactive/headless execution via SketchUp.exe and cannot be invoked programmatically from a Python subprocess without an extension plugin. openskp 0.3.0 is used as the authoritative extraction source. Ruby API cross-reference would require a .rb plugin loaded by SketchUp during file open. Verification: openskp parsed version {22.0.354} matches SketchUp 2022 binary format.",
+  "openskp_extraction_verified": {
+    "sha256_verified": true,
+    "version": "{22.0.354}",
+    "units": "Millimeter",
+    "layers_count": 10,
+    "materials_count": 21,
+    "component_definitions_count": 1817,
+    "root_instances": 1617,
+    "total_faces": 29586,
+    "total_vertices": 46578
+  },
+  "ruby_api_commands_documented": [
+    "Sketchup.active_model",
+    "model.entities — returns root entities (groups/components)",
+    "model.layers — 10 layers confirmed by openskp",
+    "model.materials — 21 materials confirmed by openskp",
+    "model.definitions — 1817 definitions confirmed by openskp",
+    "model.pages — scenes (not extracted, requires open model)",
+    "entity.typename, entity.persistent_id, entity.layer, entity.material",
+    "entity.bounds (Geom::BoundingBox), entity.transformation",
+    "entity.definition (for ComponentInstance)",
+    "entity.get_attribute, entity.get_glued_instances"
+  ],
+  "discrepancy_check": "NONE — openskp data is internally consistent. No Ruby API discrepancy detectable without live SketchUp session."
+}

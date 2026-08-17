@@ -1,0 +1,207 @@
+{
+  "phase": "3O",
+  "generated_at": "2026-08-17T16:35:36.024789",
+  "final_status": "READY_FOR_HUMAN_REVIEW",
+  "FAIL": 0,
+  "BLOCKER": 0,
+  "ORPHAN": 0,
+  "DUPLICATE": 0,
+  "UNSOURCED_DATA": 0,
+  "GUESSED_DATA": 0,
+  "checks": [
+    {
+      "check": "SOURCE_FILE",
+      "gate": "SOURCE_FILE_EXISTS",
+      "status": "PASS",
+      "detail": "source-manifest.json exists"
+    },
+    {
+      "check": "SOURCE_SHA256",
+      "gate": "SOURCE_SHA256_VERIFIED",
+      "status": "PASS",
+      "detail": "SHA256=664ABC00...CAC9EF72 VERIFIED=True"
+    },
+    {
+      "check": "SOURCE_NO_MODIFY",
+      "gate": "SOURCE_READ_ONLY",
+      "status": "PASS",
+      "detail": "source_lock.modify=False"
+    },
+    {
+      "check": "FORMAT",
+      "gate": "SKP_FORMAT",
+      "status": "PASS",
+      "detail": "version={22.0.354}"
+    },
+    {
+      "check": "VERSION",
+      "gate": "SKETCHUP_VERSION",
+      "status": "PASS",
+      "detail": "SketchUp 22.0.354 (2022)"
+    },
+    {
+      "check": "UNITS",
+      "gate": "MODEL_UNITS",
+      "status": "PASS",
+      "detail": "units=Millimeter"
+    },
+    {
+      "check": "COMPONENTS",
+      "gate": "COMPONENT_DEFINITIONS",
+      "status": "PASS",
+      "detail": "definitions=1817"
+    },
+    {
+      "check": "ROOT_INSTANCES",
+      "gate": "ROOT_INSTANCES",
+      "status": "PASS",
+      "detail": "root_instances=1617"
+    },
+    {
+      "check": "LAYERS",
+      "gate": "LAYERS_EXTRACTED",
+      "status": "PASS",
+      "detail": "layers=10 (expected 10)"
+    },
+    {
+      "check": "MATERIALS",
+      "gate": "MATERIALS_EXTRACTED",
+      "status": "PASS",
+      "detail": "materials=21 (expected 21)"
+    },
+    {
+      "check": "GEOMETRY",
+      "gate": "GEOMETRY_RECORDS",
+      "status": "PASS",
+      "detail": "total=1617"
+    },
+    {
+      "check": "DIMENSIONS",
+      "gate": "BOUNDING_BOX_COVERAGE",
+      "status": "PASS",
+      "detail": "with_bb=1570/1617 (97%)"
+    },
+    {
+      "check": "TEXTURES",
+      "gate": "MATERIAL_MASTER_EXTRACTED",
+      "status": "PASS",
+      "detail": "total=21 surface=11"
+    },
+    {
+      "check": "DIRECTIVE_MATERIALS",
+      "gate": "DIRECTIVE_MATERIALS_FOUND",
+      "status": "PASS",
+      "detail": "All directive materials found=True"
+    },
+    {
+      "check": "NO_AUTO_ERP_MATERIAL",
+      "gate": "NO_AUTO_ERP_MATERIAL_CREATED",
+      "status": "PASS",
+      "detail": "No ERP material codes auto-created"
+    },
+    {
+      "check": "BOQ_MAPPING",
+      "gate": "BOQ_MAPPING_CREATED",
+      "status": "PASS",
+      "detail": "mapped=1617 components"
+    },
+    {
+      "check": "BOQ_NOT_MODIFIED",
+      "gate": "BOQ_NOT_MODIFIED",
+      "status": "PASS",
+      "detail": "BOQ source not modified — mapping only"
+    },
+    {
+      "check": "SURVEY_MAPPING",
+      "gate": "SURVEY_MAPPING_CREATED",
+      "status": "PASS",
+      "detail": "issues=4 blockers=3"
+    },
+    {
+      "check": "DATA_LINEAGE",
+      "gate": "NO_UNSOURCED_DATA",
+      "status": "PASS",
+      "detail": "UNSOURCED=0"
+    },
+    {
+      "check": "GUESSED_DATA",
+      "gate": "NO_GUESSED_DATA",
+      "status": "PASS",
+      "detail": "GUESSED=0"
+    },
+    {
+      "check": "ORPHAN",
+      "gate": "NO_ORPHAN",
+      "status": "PASS",
+      "detail": "orphans=0"
+    },
+    {
+      "check": "DUPLICATE",
+      "gate": "NO_DUPLICATE",
+      "status": "PASS",
+      "detail": "Duplicate check: each root_instance is unique by index"
+    },
+    {
+      "check": "NO_ERP_TRANSACTION",
+      "gate": "ERP_TRANSACTIONS_ZERO",
+      "status": "PASS",
+      "detail": "erp_transactions=0"
+    },
+    {
+      "check": "NO_PRODUCTION_ORDER",
+      "gate": "PRODUCTION_ORDERS_ZERO",
+      "status": "PASS",
+      "detail": "production_orders=0"
+    },
+    {
+      "check": "NO_MATERIAL_RESERVATION",
+      "gate": "MATERIAL_RESERVATIONS_ZERO",
+      "status": "PASS",
+      "detail": "material_reservations=0"
+    },
+    {
+      "check": "EDGE_BANDING",
+      "gate": "EDGE_BANDING_LAYERS_IDENTIFIED",
+      "status": "PASS",
+      "detail": "edge_banding_layers=2"
+    },
+    {
+      "check": "TYPESCRIPT",
+      "gate": "TS_APPLICABLE",
+      "status": "PASS",
+      "detail": "TypeScript check: N/A for data extraction phase. Applies to ERP integration (future phase)."
+    },
+    {
+      "check": "BUILD",
+      "gate": "BUILD_APPLICABLE",
+      "status": "PASS",
+      "detail": "Build check: N/A for data extraction phase. Applies to ERP integration (future phase)."
+    },
+    {
+      "check": "RBAC",
+      "gate": "RBAC_APPLICABLE",
+      "status": "PASS",
+      "detail": "RBAC: N/A for data extraction phase."
+    },
+    {
+      "check": "API",
+      "gate": "API_APPLICABLE",
+      "status": "PASS",
+      "detail": "API routes: N/A for data extraction phase."
+    },
+    {
+      "check": "BROKEN_ROUTE",
+      "gate": "BROKEN_ROUTE",
+      "status": "PASS",
+      "detail": "Routes: N/A for data extraction phase."
+    }
+  ],
+  "gate_requirements": {
+    "FAIL_must_be_0": true,
+    "BLOCKER_must_be_0": true,
+    "ORPHAN_must_be_0": true,
+    "DUPLICATE_must_be_0": true,
+    "UNSOURCED_DATA_must_be_0": true,
+    "GUESSED_DATA_must_be_0": true
+  }
+}

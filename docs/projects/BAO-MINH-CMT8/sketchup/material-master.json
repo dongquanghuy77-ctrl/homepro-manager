@@ -1,0 +1,481 @@
+{
+  "phase": "3F",
+  "generated_at": "2026-08-17T16:30:32.981405",
+  "source_sha256": "664ABC00CB34EE109B7E9830D75B05D9E9921319156320ED29B17755CAC9EF72",
+  "summary": {
+    "total_materials": 21,
+    "layer_materials_auto": 10,
+    "surface_materials": 11,
+    "confirmed": 0,
+    "candidates": 7,
+    "unmapped": 1,
+    "color_only": 3,
+    "directive_materials_checked": [
+      "AC - 9205 S",
+      "HN - 111G",
+      "BT - 200T",
+      "BT - SC 010 MW",
+      "THAN TRE",
+      "GO GHEP THANH",
+      "MICA"
+    ],
+    "directive_all_found": true
+  },
+  "material_master": [
+    {
+      "sketchup_material_id": 83866,
+      "material_name": "MICA",
+      "real_name": "MICA",
+      "is_layer_material": false,
+      "in_directive_list": true,
+      "color_rgba": [
+        204,
+        235,
+        244,
+        255
+      ],
+      "transparency": 0.5,
+      "texture": {
+        "filename": "Translucent_Glass_Saftey.jpg",
+        "width_scale_mm": 152.4,
+        "height_scale_mm": 152.4,
+        "has_embedded_data": true
+      },
+      "erp_material_candidate": "MICA (surface finish)",
+      "erp_confidence": "HIGH",
+      "verification_status": "CANDIDATE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": 533644,
+      "material_name": "AC - 9205 S",
+      "real_name": "AC - 9205 S",
+      "is_layer_material": false,
+      "in_directive_list": true,
+      "color_rgba": [
+        172,
+        143,
+        117,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": {
+        "filename": "D:/OneDrive/Documents/.Texture/An Cường 2022/AC Melamin/AC383WG.jpg",
+        "width_scale_mm": 1219.2,
+        "height_scale_mm": 2438.4,
+        "has_embedded_data": true
+      },
+      "erp_material_candidate": "An Cuong AC 9205S",
+      "erp_confidence": "HIGH",
+      "verification_status": "CANDIDATE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": 533648,
+      "material_name": "#da354b",
+      "real_name": "#da354b",
+      "is_layer_material": false,
+      "in_directive_list": false,
+      "color_rgba": [
+        218,
+        53,
+        75,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "COLOR_ONLY_NO_MATERIAL",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 126
+    },
+    {
+      "sketchup_material_id": 535994,
+      "material_name": "HN - 111G",
+      "real_name": "HN - 111G",
+      "is_layer_material": false,
+      "in_directive_list": true,
+      "color_rgba": [
+        244,
+        206,
+        83,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": {
+        "filename": "D:/OneDrive/Documents/.Texture/An Cường 2022/AC Melamin/AC032T.jpg",
+        "width_scale_mm": 1219.2,
+        "height_scale_mm": 2438.4,
+        "has_embedded_data": true
+      },
+      "erp_material_candidate": "Hoa Nghiem HN-111G (edge band)",
+      "erp_confidence": "MEDIUM",
+      "verification_status": "CANDIDATE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": 543219,
+      "material_name": "#8208ec",
+      "real_name": "#8208ec",
+      "is_layer_material": false,
+      "in_directive_list": false,
+      "color_rgba": [
+        130,
+        8,
+        236,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "COLOR_ONLY_NO_MATERIAL",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 2834
+    },
+    {
+      "sketchup_material_id": 543220,
+      "material_name": "#539903",
+      "real_name": "#539903",
+      "is_layer_material": false,
+      "in_directive_list": false,
+      "color_rgba": [
+        83,
+        153,
+        3,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "COLOR_ONLY_NO_MATERIAL",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 30
+    },
+    {
+      "sketchup_material_id": 543782,
+      "material_name": "BT - 200T",
+      "real_name": "BT - 200T",
+      "is_layer_material": false,
+      "in_directive_list": true,
+      "color_rgba": [
+        80,
+        82,
+        94,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": {
+        "filename": "D:/OneDrive/Documents/.Texture/An Cường 2022/AC Melamin/AC200NV.jpg",
+        "width_scale_mm": 1219.2,
+        "height_scale_mm": 2438.4,
+        "has_embedded_data": true
+      },
+      "erp_material_candidate": "Cai Bang BT-200T",
+      "erp_confidence": "MEDIUM",
+      "verification_status": "CANDIDATE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": 546655,
+      "material_name": "BT - SC 010 MW",
+      "real_name": "BT - SC 010 MW",
+      "is_layer_material": false,
+      "in_directive_list": true,
+      "color_rgba": [
+        143,
+        104,
+        75,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": {
+        "filename": "D:/OneDrive/Documents/.Texture/An Cường 2022/AC Melamin/AC334NV.jpg",
+        "width_scale_mm": 1219.2,
+        "height_scale_mm": 2438.4,
+        "has_embedded_data": true
+      },
+      "erp_material_candidate": "Cai Bang BT-SC-010 MW",
+      "erp_confidence": "MEDIUM",
+      "verification_status": "CANDIDATE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": 568681,
+      "material_name": "THAN TRE",
+      "real_name": "THAN TRE",
+      "is_layer_material": false,
+      "in_directive_list": true,
+      "color_rgba": [
+        207,
+        207,
+        207,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": {
+        "filename": "Carrera Marble.jpg",
+        "width_scale_mm": 914.4,
+        "height_scale_mm": 914.4,
+        "has_embedded_data": true
+      },
+      "erp_material_candidate": "Than Tre bamboo board 1220x2440x8mm",
+      "erp_confidence": "HIGH",
+      "verification_status": "CANDIDATE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": 750805,
+      "material_name": "GO GHEP THANH",
+      "real_name": "GO GHEP THANH",
+      "is_layer_material": false,
+      "in_directive_list": true,
+      "color_rgba": [
+        83,
+        80,
+        69,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": {
+        "filename": "D:/OneDrive/Documents/.Texture/An Cường 2022/AC Melamin/AC23015T.jpg",
+        "width_scale_mm": 1219.2,
+        "height_scale_mm": 2438.4,
+        "has_embedded_data": true
+      },
+      "erp_material_candidate": "Go Ghep Thanh (finger-jointed timber)",
+      "erp_confidence": "MEDIUM",
+      "verification_status": "CANDIDATE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": 775344,
+      "material_name": "\"[Text]\"",
+      "real_name": "\"[Text]\"",
+      "is_layer_material": false,
+      "in_directive_list": false,
+      "color_rgba": [
+        68,
+        86,
+        128,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "UNMAPPED",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_Layer0",
+      "real_name": "Layer0",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_[Ẩn/Hiện] - [Cánh/MNK]",
+      "real_name": "[Ẩn/Hiện] - [Cánh/MNK]",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        0,
+        153,
+        135,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_CỐT",
+      "real_name": "CỐT",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        102,
+        68,
+        0,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_cốt",
+      "real_name": "cốt",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        0,
+        153,
+        135,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_sắt",
+      "real_name": "sắt",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        119,
+        119,
+        153,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_OneClick_edge_banding",
+      "real_name": "OneClick_edge_banding",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        153,
+        0,
+        255,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_MICA",
+      "real_name": "MICA",
+      "is_layer_material": true,
+      "in_directive_list": true,
+      "color_rgba": [
+        204,
+        68,
+        0,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_BO CONG",
+      "real_name": "BO CONG",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        170,
+        68,
+        0,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_Fuji_miscellaneous",
+      "real_name": "Fuji_miscellaneous",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        204,
+        102,
+        0,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    },
+    {
+      "sketchup_material_id": null,
+      "material_name": "Layer_[Ẩn/Hiện] - [Text]",
+      "real_name": "[Ẩn/Hiện] - [Text]",
+      "is_layer_material": true,
+      "in_directive_list": false,
+      "color_rgba": [
+        153,
+        153,
+        204,
+        255
+      ],
+      "transparency": 1.0,
+      "texture": null,
+      "erp_material_candidate": null,
+      "erp_confidence": "NONE",
+      "verification_status": "LAYER_MATERIAL_NOT_SURFACE",
+      "source": "SKP_MATERIAL_OPENSKP",
+      "face_usage_count": 0
+    }
+  ]
+}

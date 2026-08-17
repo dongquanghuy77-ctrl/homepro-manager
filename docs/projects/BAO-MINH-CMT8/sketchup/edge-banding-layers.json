@@ -1,0 +1,200 @@
+{
+  "phase": "3K",
+  "generated_at": "2026-08-17T16:34:10.169350",
+  "source_sha256": "664ABC00CB34EE109B7E9830D75B05D9E9921319156320ED29B17755CAC9EF72",
+  "summary": {
+    "total_layers": 10,
+    "edge_banding_layers": 2,
+    "production_layers": 5,
+    "annotation_layers": 2,
+    "uncertain_needs_verification": 1
+  },
+  "layer_analysis": {
+    "Layer0": {
+      "production_role": "DEFAULT_GEOMETRY",
+      "evidence": "Default SketchUp layer. Instances may be ungrouped geometry or catch-all.",
+      "edge_banding": false,
+      "production_operation": null,
+      "confidence": "MEDIUM"
+    },
+    "[Ẩn/Hiện] - [Cánh/MNK]": {
+      "production_role": "DOOR_DRAWER_VISIBILITY_TOGGLE",
+      "evidence": "Name = Hide/Show - Door/Drawer. Used to toggle visibility of door/drawer fronts for presentation.",
+      "edge_banding": false,
+      "production_operation": "DOOR_DRAWER_PANEL",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    "CỐT": {
+      "production_role": "STRUCTURAL_CARCASS_BOARD",
+      "evidence": "CỐT = carcass/core material. Board substrate before surface finish.",
+      "edge_banding": false,
+      "production_operation": "CNC_CUT",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    "cốt": {
+      "production_role": "STRUCTURAL_CARCASS_BOARD",
+      "evidence": "Same as CỐT (case variant). Carcass board.",
+      "edge_banding": false,
+      "production_operation": "CNC_CUT",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    "sắt": {
+      "production_role": "METAL_FRAMEWORK",
+      "evidence": "sắt = iron/steel. Metal frame or hardware component.",
+      "edge_banding": false,
+      "production_operation": "METAL_FABRICATION",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    "OneClick_edge_banding": {
+      "production_role": "EDGE_BANDING",
+      "evidence": "Layer name explicitly contains 'edge_banding'. OneClick plugin generates this layer.",
+      "edge_banding": true,
+      "production_operation": "EDGE_BAND_APPLY",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    "MICA": {
+      "production_role": "MICA_ACRYLIC_SURFACE",
+      "evidence": "MICA = acrylic/mica decorative surface. Applied after carcass assembly.",
+      "edge_banding": false,
+      "production_operation": "MICA_LAMINATE",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    "BO CONG": {
+      "production_role": "ROUNDED_EDGE_PROFILE",
+      "evidence": "BO CONG = curved/rounded edge. Likely edge profile bending or postform edge.",
+      "edge_banding": true,
+      "production_operation": "EDGE_PROFILE_CURVE",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    "Fuji_miscellaneous": {
+      "production_role": "HARDWARE_ACCESSORY",
+      "evidence": "Fuji = hardware brand (Fuji hinges/slides). Miscellaneous hardware items.",
+      "edge_banding": false,
+      "production_operation": "HARDWARE_INSTALL",
+      "confidence": "MEDIUM",
+      "needs_human_verification": true
+    },
+    "[Ẩn/Hiện] - [Text]": {
+      "production_role": "ANNOTATION_ONLY",
+      "evidence": "Text layer for model annotations. Not a production layer.",
+      "edge_banding": false,
+      "production_operation": null,
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    }
+  },
+  "edge_banding_layers": [
+    {
+      "layer_name": "OneClick_edge_banding",
+      "instance_count": 0,
+      "production_role": "EDGE_BANDING",
+      "evidence": "Layer name explicitly contains 'edge_banding'. OneClick plugin generates this layer.",
+      "edge_banding": true,
+      "production_operation": "EDGE_BAND_APPLY",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    {
+      "layer_name": "BO CONG",
+      "instance_count": 37,
+      "production_role": "ROUNDED_EDGE_PROFILE",
+      "evidence": "BO CONG = curved/rounded edge. Likely edge profile bending or postform edge.",
+      "edge_banding": true,
+      "production_operation": "EDGE_PROFILE_CURVE",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    }
+  ],
+  "production_layers": [
+    {
+      "layer_name": "[Ẩn/Hiện] - [Cánh/MNK]",
+      "instance_count": 0,
+      "production_role": "DOOR_DRAWER_VISIBILITY_TOGGLE",
+      "evidence": "Name = Hide/Show - Door/Drawer. Used to toggle visibility of door/drawer fronts for presentation.",
+      "edge_banding": false,
+      "production_operation": "DOOR_DRAWER_PANEL",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    {
+      "layer_name": "CỐT",
+      "instance_count": 9,
+      "production_role": "STRUCTURAL_CARCASS_BOARD",
+      "evidence": "CỐT = carcass/core material. Board substrate before surface finish.",
+      "edge_banding": false,
+      "production_operation": "CNC_CUT",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    {
+      "layer_name": "cốt",
+      "instance_count": 3,
+      "production_role": "STRUCTURAL_CARCASS_BOARD",
+      "evidence": "Same as CỐT (case variant). Carcass board.",
+      "edge_banding": false,
+      "production_operation": "CNC_CUT",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    {
+      "layer_name": "sắt",
+      "instance_count": 9,
+      "production_role": "METAL_FRAMEWORK",
+      "evidence": "sắt = iron/steel. Metal frame or hardware component.",
+      "edge_banding": false,
+      "production_operation": "METAL_FABRICATION",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    },
+    {
+      "layer_name": "MICA",
+      "instance_count": 1,
+      "production_role": "MICA_ACRYLIC_SURFACE",
+      "evidence": "MICA = acrylic/mica decorative surface. Applied after carcass assembly.",
+      "edge_banding": false,
+      "production_operation": "MICA_LAMINATE",
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    }
+  ],
+  "annotation_layers": [
+    {
+      "layer_name": "Layer0",
+      "instance_count": 0,
+      "production_role": "DEFAULT_GEOMETRY",
+      "evidence": "Default SketchUp layer. Instances may be ungrouped geometry or catch-all.",
+      "edge_banding": false,
+      "production_operation": null,
+      "confidence": "MEDIUM"
+    },
+    {
+      "layer_name": "[Ẩn/Hiện] - [Text]",
+      "instance_count": 0,
+      "production_role": "ANNOTATION_ONLY",
+      "evidence": "Text layer for model annotations. Not a production layer.",
+      "edge_banding": false,
+      "production_operation": null,
+      "confidence": "HIGH",
+      "needs_human_verification": false
+    }
+  ],
+  "uncertain_layers": [
+    {
+      "layer_name": "Fuji_miscellaneous",
+      "instance_count": 0,
+      "production_role": "HARDWARE_ACCESSORY",
+      "evidence": "Fuji = hardware brand (Fuji hinges/slides). Miscellaneous hardware items.",
+      "edge_banding": false,
+      "production_operation": "HARDWARE_INSTALL",
+      "confidence": "MEDIUM",
+      "needs_human_verification": true
+    }
+  ]
+}

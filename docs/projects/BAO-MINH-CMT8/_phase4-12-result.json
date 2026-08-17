@@ -1,0 +1,25 @@
+{
+  "project_code": "BAO-MINH-CMT8",
+  "document_id": "BAO-MINH-CMT8-DESIGN-V01",
+  "survey_area_m2": 326.56,
+  "design_id": "BAO-MINH-CMT8-T15-DESIGN-V01",
+  "zones_count": 8,
+  "design_zone_links": 35,
+  "unresolved_zone_links": 32,
+  "kl_mapped": 81,
+  "kl_unmapped": 0,
+  "kl_cost_items": 1,
+  "control_gate": {
+    "total_checks": 10,
+    "pass": 10,
+    "fail": 0,
+    "warning": 0
+  },
+  "has_pa2": true,
+  "pa2_pages": [
+    6,
+    8
+  ],
+  "current_design_version": "V01",
+  "generated_at": "2026-08-17T08:56:08.076Z"
+}

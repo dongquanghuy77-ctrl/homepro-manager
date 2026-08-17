@@ -1,0 +1,48 @@
+{
+  "survey_id": "BAO-MINH-CMT8-SURVEY-T15",
+  "project_id": "BAO-MINH-CMT8",
+  "survey_name": "MẶT BẰNG HIỆN TRẠNG VP TẦNG 15",
+  "floor": "Tầng 15",
+  "address": "201–203 Cách Mạng Tháng Tám, P.Bàn Cờ, Q.3, TP.HCM",
+  "total_area_m2": 326.56,
+  "area_note": "SOURCE-DERIVED from PDF Page 2 — DO NOT recalculate without verified geometry data",
+  "area_confidence": "HIGH — explicitly stated on drawing page",
+  "source_document": "BAO-MINH-CMT8-DESIGN-V01",
+  "source_page": 2,
+  "source_file": "26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+  "survey_type": "EXISTING_CONDITION",
+  "survey_date": "07/2026",
+  "status": "REFERENCE_ONLY",
+  "floors_surveyed": [
+    "Tầng 15"
+  ],
+  "notes": "Diện tích 326.56 m² là diện tích tổng sàn hiện trạng. Diện tích thực thi từng phòng lấy từ KL Excel đã reconcile.",
+  "linked_kl_areas": {
+    "Phòng Chủ Tịch": {
+      "area_m2": 94,
+      "source": "KL Excel E.I.1"
+    },
+    "Phòng Họp": {
+      "area_m2": 23,
+      "source": "KL Excel A.I.1"
+    },
+    "Phòng Làm Việc": {
+      "area_m2": 112,
+      "source": "KL Excel B.I.1"
+    },
+    "Phòng GĐ CN": {
+      "area_m2": 26.3,
+      "source": "KL Excel C.I.1"
+    },
+    "Pantry": {
+      "area_m2": null,
+      "area_len_md": 13.2,
+      "source": "KL Excel D.I.2"
+    },
+    "Pantry+Kho (rèm)": {
+      "area_m2": 15.555,
+      "source": "KL Excel D.I.3"
+    }
+  },
+  "registered_at": "2026-08-17T08:56:08.051Z"
+}

@@ -1,0 +1,346 @@
+{
+  "manifest_id": "BAO-MINH-CMT8-SURVEY-MANIFEST-V1",
+  "project_id": "BAO-MINH-CMT8",
+  "generated_at": "2026-08-17T09:10:00.000Z",
+  "source_root": "D:\\\\XUONG HOMEPRO SG\\\\9. THANG 08.2026\\\\3. VAN PHONG BAO MINH",
+  "total_files_scanned": 25,
+  "categories": {
+    "HINH_ANH_KICH_THUOC": {
+      "label": "Anh kich thuoc thuc te",
+      "count": 14,
+      "folder": "HINH ANH KICH THUOC THUC TE"
+    },
+    "HINH_ANH_VAT_LIEU": {
+      "label": "Anh vat lieu / mau vat lieu",
+      "count": 7,
+      "folder": "HINH ANH VAT LIEU"
+    },
+    "PHIEU_NHAP_VAT_TU": {
+      "label": "Phieu nhap vat tu / don hang",
+      "count": 4,
+      "folder": "PHIEU NHAP VAT TU"
+    }
+  },
+  "survey_photos": [
+    {
+      "file_id": "S01",
+      "seq": 1,
+      "captured_at": "2026-08-17T09:05:46+07:00"
+    },
+    {
+      "file_id": "S02",
+      "seq": 2,
+      "captured_at": "2026-08-17T09:05:47+07:00"
+    },
+    {
+      "file_id": "S03",
+      "seq": 3,
+      "captured_at": "2026-08-17T09:05:47+07:00"
+    },
+    {
+      "file_id": "S04",
+      "seq": 4,
+      "captured_at": "2026-08-17T09:05:47+07:00"
+    },
+    {
+      "file_id": "S05",
+      "seq": 5,
+      "captured_at": "2026-08-17T09:05:47+07:00"
+    },
+    {
+      "file_id": "S06",
+      "seq": 6,
+      "captured_at": "2026-08-17T09:05:47+07:00"
+    },
+    {
+      "file_id": "S07",
+      "seq": 7,
+      "captured_at": "2026-08-17T09:05:47+07:00"
+    },
+    {
+      "file_id": "S08",
+      "seq": 8,
+      "captured_at": "2026-08-17T09:05:50+07:00"
+    },
+    {
+      "file_id": "S09",
+      "seq": 9,
+      "captured_at": "2026-08-17T09:05:51+07:00"
+    },
+    {
+      "file_id": "S10",
+      "seq": 10,
+      "captured_at": "2026-08-17T09:05:53+07:00"
+    },
+    {
+      "file_id": "S11",
+      "seq": 11,
+      "captured_at": "2026-08-17T09:05:55+07:00"
+    },
+    {
+      "file_id": "S12",
+      "seq": 12,
+      "captured_at": "2026-08-17T09:06:10+07:00"
+    },
+    {
+      "file_id": "S13",
+      "seq": 13,
+      "captured_at": "2026-08-17T09:06:12+07:00"
+    },
+    {
+      "file_id": "S14",
+      "seq": 14,
+      "captured_at": "2026-08-17T09:06:14+07:00"
+    }
+  ],
+  "material_photos": [
+    {
+      "file_id": "M01",
+      "seq": 1,
+      "content": "iWood MA PRO-3 - Tam Op Than Tre - Marble - day 8mm x rong 1220mm",
+      "captured_at": "2026-08-17T09:06:32+07:00"
+    },
+    {
+      "file_id": "M02",
+      "seq": 2,
+      "content": "iWood MA PRO-3 showroom render - product catalog photo",
+      "captured_at": "2026-08-17T09:06:34+07:00"
+    },
+    {
+      "file_id": "M03",
+      "seq": 3,
+      "content": "Phong doi chi dao / showroom lounge render - reference design",
+      "captured_at": "2026-08-17T09:06:36+07:00"
+    },
+    {
+      "file_id": "M04",
+      "seq": 4,
+      "content": "Mau sat CCCM 802 - cream/off-white - san pham boc bi",
+      "captured_at": "2026-08-17T09:06:38+07:00"
+    },
+    {
+      "file_id": "M05",
+      "seq": 5,
+      "content": "An Cuong MS 608EV Melamine MDF MUF + MS 4017T Len Tuong + Kinh thuy tinh tro + CCCM 810 (gold/tan) fabric",
+      "captured_at": "2026-08-17T09:06:55+07:00"
+    },
+    {
+      "file_id": "M06",
+      "seq": 6,
+      "content": "An Cuong MS 608EV Melamine MDF MUF + MS 4017T Len Tuong + Kinh thuy tinh tro + CCCM 823 (brown/cognac) fabric",
+      "captured_at": "2026-08-17T09:06:57+07:00"
+    },
+    {
+      "file_id": "M07",
+      "seq": 7,
+      "content": "Tham vat lieu: carpet tile (blue/orange) + van san AC4017PL Mellow Chestnut (check mark = selected) + iWood marble tile (check mark = selected)",
+      "captured_at": "2026-08-17T09:07:00+07:00"
+    }
+  ],
+  "receipts": [
+    {
+      "file_id": "P01",
+      "seq": 1,
+      "doc_type": "PHIEU_NHAP_KHO",
+      "title": "THAN TRE - KHOI LUONG VAN VA CHI DAN CANH VP BAO MINH",
+      "items": [
+        {
+          "stt": 1,
+          "ten_ma": "THAN TRE (KT: 1220 x 2440 x 8)mm",
+          "dvt": "TAM",
+          "so_luong": 10
+        }
+      ],
+      "captured_at": "2026-08-17T09:07:03+07:00"
+    },
+    {
+      "file_id": "P02",
+      "seq": 2,
+      "doc_type": "XAC_NHAN_DON_HANG",
+      "supplier": "Hang Nghi",
+      "total_incl_vat": 38220754,
+      "vat_note": "8% VAT included",
+      "items": [
+        {
+          "stt": 1,
+          "ten_hang": "111G 2M LMR 17MM DW",
+          "so_luong": 65,
+          "don_gia": 420292,
+          "thanh_tien": 27318980
+        },
+        {
+          "stt": 2,
+          "ten_hang": "111G 2M LMR 9MM DW",
+          "so_luong": 26,
+          "don_gia": 300499,
+          "thanh_tien": 7812974
+        },
+        {
+          "stt": 3,
+          "ten_hang": "CHI 111SH (21x0.8)mm SM",
+          "so_luong": 2,
+          "don_gia": 140400,
+          "thanh_tien": 280800
+        },
+        {
+          "stt": 4,
+          "ten_hang": "CHI 111SH (43x0.8)mm SM",
+          "so_luong": 8,
+          "don_gia": 351000,
+          "thanh_tien": 2808000
+        }
+      ],
+      "captured_at": "2026-08-17T09:07:22+07:00"
+    },
+    {
+      "file_id": "P03",
+      "seq": 3,
+      "doc_type": "HOA_DON_XUAT_KHO",
+      "customer": "Cong Ty Co Phan Dau Tu Va Phat Trien Homepro",
+      "vat_no": "0317248874",
+      "delivery": "137 Nguyen Thi Nhung, Hiep Binh, Thu Duc, HCM",
+      "note": "Tong kho 1",
+      "items": [
+        {
+          "stt": 1,
+          "ma_hang": "250003217",
+          "ten_hang": "Chi PVC 9205 44x0.8mm",
+          "dvt": "Met",
+          "so_luong": 30,
+          "don_gia": 4370,
+          "thanh_tien": 131100
+        },
+        {
+          "stt": 2,
+          "ma_hang": "500005562",
+          "ten_hang": "Van MELMDF 9205S/9205S MUFSTD 1220x2440x17mm",
+          "dvt": "Tam",
+          "so_luong": 4,
+          "don_gia": 665000,
+          "thanh_tien": 2660000
+        }
+      ],
+      "subtotal": 2791100,
+      "vat_8pct": 223288,
+      "total": 3014388,
+      "captured_at": "2026-08-17T09:07:25+07:00"
+    },
+    {
+      "file_id": "P04",
+      "seq": 4,
+      "doc_type": "DON_DAT_HANG",
+      "doc_no": "DHQ12.26008450",
+      "date": "2026-08-14",
+      "supplier": "VietinBank",
+      "customer": "Cong Ty Co Phan Dau Tu Va Phat Trien Homepro",
+      "delivery": "7P28XP36+FQ Thuan An Binh Duong",
+      "nvkd": "Huynh Ngoc Thien Thanh (BTQ12-0005)",
+      "items": [
+        {
+          "stt": 1,
+          "ma_hang": "LMRDW-17-ML2.SC010MW",
+          "ten_hang": "Van LMR DW 17mm x 1220 x 2440 phu Melamine 2 mat SC010MW",
+          "dvt": "Tam",
+          "so_luong": 67,
+          "don_gia": 510000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 479400,
+          "thanh_tien_sau_ck": 32119800
+        },
+        {
+          "stt": 2,
+          "ma_hang": "LMRDW-8-ML2.SC010MW",
+          "ten_hang": "Van LMR DW 8mm x 1220 x 2440 phu Melamine 2 mat SC010MW",
+          "dvt": "Tam",
+          "so_luong": 21,
+          "don_gia": 350000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 329000,
+          "thanh_tien_sau_ck": 6909000
+        },
+        {
+          "stt": 3,
+          "ma_hang": "CSC010M-21x0.8",
+          "ten_hang": "Chi SC010M (21 x 0.8) mm",
+          "dvt": "Cuon",
+          "so_luong": 2,
+          "don_gia": 180000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 169200,
+          "thanh_tien_sau_ck": 338400
+        },
+        {
+          "stt": 4,
+          "ma_hang": "CSC010M-43x0.8",
+          "ten_hang": "Chi SC010M (43 x 0.8) mm",
+          "dvt": "Cuon",
+          "so_luong": 6,
+          "don_gia": 370000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 347800,
+          "thanh_tien_sau_ck": 2086800
+        },
+        {
+          "stt": 5,
+          "ma_hang": "LMRDW-17-ML2.XAM200T",
+          "ten_hang": "Van LMR DW 17mm phu Melamine 2 mat Xam 200T",
+          "dvt": "Tam",
+          "so_luong": 6,
+          "don_gia": 500000,
+          "ty_le_ck": 23,
+          "don_gia_sau_ck": 385000,
+          "thanh_tien_sau_ck": 2310000
+        },
+        {
+          "stt": 6,
+          "ma_hang": "CXAMCT-21x0.8",
+          "ten_hang": "Chi Xam chi T (21 x 0.8) mm",
+          "dvt": "Cuon",
+          "so_luong": 1,
+          "don_gia": 180000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 169200,
+          "thanh_tien_sau_ck": 169200
+        },
+        {
+          "stt": 7,
+          "ma_hang": "CXAMCT-43x0.8",
+          "ten_hang": "Chi Xam chi T (43 x 0.8) mm",
+          "dvt": "Cuon",
+          "so_luong": 1,
+          "don_gia": 370000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 347800,
+          "thanh_tien_sau_ck": 347800
+        },
+        {
+          "stt": 8,
+          "ma_hang": "LMRDWE2-17",
+          "ten_hang": "LDF E2 LMR Premium 17mm x 1220 x 2440",
+          "dvt": "Tam",
+          "so_luong": 20,
+          "don_gia": 350000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 329000,
+          "thanh_tien_sau_ck": 6580000
+        },
+        {
+          "stt": 9,
+          "ma_hang": "LMRDWE2-8",
+          "ten_hang": "LDF E2 LMR Premium 8mm x 1220 x 2440",
+          "dvt": "Tam",
+          "so_luong": 10,
+          "don_gia": 190000,
+          "ty_le_ck": 6,
+          "don_gia_sau_ck": 178600,
+          "thanh_tien_sau_ck": 1786000
+        }
+      ],
+      "tong_ck": 3903000,
+      "cong_tien_hang": 52647000,
+      "thue_gtgt_8pct": 4211760,
+      "tong_thanh_toan": 56858760,
+      "captured_at": "2026-08-17T09:07:28+07:00"
+    }
+  ]
+}

@@ -1,0 +1,832 @@
+{
+  "generated_at": "2026-08-17T13:06:06.537Z",
+  "bom": {
+    "items": [
+      {
+        "stt": 1,
+        "material_code": "HN - 111G-17.5",
+        "qty": 62,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 2,
+        "supplier": "HN",
+        "material_name": "111G",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 2,
+        "material_code": "BT - 200T-17.5",
+        "qty": 6,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 3,
+        "supplier": "BT",
+        "material_name": "200T",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 3,
+        "material_code": "HN - 111G-10",
+        "qty": 25,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 4,
+        "supplier": "HN",
+        "material_name": "111G",
+        "thickness_mm": 10
+      },
+      {
+        "stt": 4,
+        "material_code": "BT - SC 010 MW-17.5",
+        "qty": 65,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 5,
+        "supplier": "BT",
+        "material_name": "SC 010 MW",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 5,
+        "material_code": "BT - SC 010 MW-10",
+        "qty": 20,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 6,
+        "supplier": "BT",
+        "material_name": "SC 010 MW",
+        "thickness_mm": 10
+      },
+      {
+        "stt": 6,
+        "material_code": "THAN TRE-8",
+        "qty": 10,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 7,
+        "supplier": "THAN TRE",
+        "material_name": "",
+        "thickness_mm": 8
+      },
+      {
+        "stt": 7,
+        "material_code": "AC - 9205 S-17.5",
+        "qty": 4,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 8,
+        "supplier": "AC",
+        "material_name": "9205 S",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 8,
+        "material_code": "GO GHEP THANH-30",
+        "qty": 1,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 9,
+        "supplier": "GO GHEP THANH",
+        "material_name": "",
+        "thickness_mm": 30
+      },
+      {
+        "stt": 9,
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 2P",
+        "qty": 749.93,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 10,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 10,
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 45",
+        "qty": 6.27,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 11,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 45"
+      },
+      {
+        "stt": 11,
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 4P",
+        "qty": 58.7,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 12,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 12,
+        "material_code": "Nẹp dán cạnh~BT   200T 17.5~Chỉ 2P",
+        "qty": 51.25,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 13,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   200T 17.5",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 13,
+        "material_code": "Nẹp dán cạnh~BT   200T 17.5~Chỉ 4P",
+        "qty": 3.4,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 14,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   200T 17.5",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 14,
+        "material_code": "Nẹp dán cạnh~HN   111G 10~Chỉ 2P",
+        "qty": 4.99,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 15,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 10",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 15,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 2P",
+        "qty": 522.25,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 16,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 16,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 4P",
+        "qty": 32.56,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 17,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 17,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 45",
+        "qty": 4.75,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 18,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 45"
+      },
+      {
+        "stt": 18,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 2P",
+        "qty": 12.2,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 19,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 10",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 19,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 4P",
+        "qty": 22.47,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 20,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 10",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 20,
+        "material_code": "Nẹp dán cạnh~AC   9205 S 17.5~Chỉ 4P",
+        "qty": 16.59,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 21,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "AC   9205 S 17.5",
+        "edge_size": "Chỉ 4P"
+      }
+    ],
+    "van_count": 8,
+    "nep_count": 12,
+    "van_details": [
+      {
+        "stt": 1,
+        "material_code": "HN - 111G-17.5",
+        "qty": 62,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 2,
+        "supplier": "HN",
+        "material_name": "111G",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 2,
+        "material_code": "BT - 200T-17.5",
+        "qty": 6,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 3,
+        "supplier": "BT",
+        "material_name": "200T",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 3,
+        "material_code": "HN - 111G-10",
+        "qty": 25,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 4,
+        "supplier": "HN",
+        "material_name": "111G",
+        "thickness_mm": 10
+      },
+      {
+        "stt": 4,
+        "material_code": "BT - SC 010 MW-17.5",
+        "qty": 65,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 5,
+        "supplier": "BT",
+        "material_name": "SC 010 MW",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 5,
+        "material_code": "BT - SC 010 MW-10",
+        "qty": 20,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 6,
+        "supplier": "BT",
+        "material_name": "SC 010 MW",
+        "thickness_mm": 10
+      },
+      {
+        "stt": 6,
+        "material_code": "THAN TRE-8",
+        "qty": 10,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 7,
+        "supplier": "THAN TRE",
+        "material_name": "",
+        "thickness_mm": 8
+      },
+      {
+        "stt": 7,
+        "material_code": "AC - 9205 S-17.5",
+        "qty": 4,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 8,
+        "supplier": "AC",
+        "material_name": "9205 S",
+        "thickness_mm": 17.5
+      },
+      {
+        "stt": 8,
+        "material_code": "GO GHEP THANH-30",
+        "qty": 1,
+        "unit": "Tấm",
+        "source_sheet": "BOM",
+        "source_row": 9,
+        "supplier": "GO GHEP THANH",
+        "material_name": "",
+        "thickness_mm": 30
+      }
+    ],
+    "nep_details": [
+      {
+        "stt": 9,
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 2P",
+        "qty": 749.93,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 10,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 10,
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 45",
+        "qty": 6.27,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 11,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 45"
+      },
+      {
+        "stt": 11,
+        "material_code": "Nẹp dán cạnh~HN   111G 17.5~Chỉ 4P",
+        "qty": 58.7,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 12,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 17.5",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 12,
+        "material_code": "Nẹp dán cạnh~BT   200T 17.5~Chỉ 2P",
+        "qty": 51.25,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 13,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   200T 17.5",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 13,
+        "material_code": "Nẹp dán cạnh~BT   200T 17.5~Chỉ 4P",
+        "qty": 3.4,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 14,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   200T 17.5",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 14,
+        "material_code": "Nẹp dán cạnh~HN   111G 10~Chỉ 2P",
+        "qty": 4.99,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 15,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "HN   111G 10",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 15,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 2P",
+        "qty": 522.25,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 16,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 16,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 4P",
+        "qty": 32.56,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 17,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 17,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 17.5~Chỉ 45",
+        "qty": 4.75,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 18,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 17.5",
+        "edge_size": "Chỉ 45"
+      },
+      {
+        "stt": 18,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 2P",
+        "qty": 12.2,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 19,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 10",
+        "edge_size": "Chỉ 2P"
+      },
+      {
+        "stt": 19,
+        "material_code": "Nẹp dán cạnh~BT   SC 010 MW 10~Chỉ 4P",
+        "qty": 22.47,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 20,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "BT   SC 010 MW 10",
+        "edge_size": "Chỉ 4P"
+      },
+      {
+        "stt": 20,
+        "material_code": "Nẹp dán cạnh~AC   9205 S 17.5~Chỉ 4P",
+        "qty": 16.59,
+        "unit": "m",
+        "source_sheet": "BOM",
+        "source_row": 21,
+        "edge_type": "Nẹp dán cạnh",
+        "material_ref": "AC   9205 S 17.5",
+        "edge_size": "Chỉ 4P"
+      }
+    ]
+  },
+  "cut_list": {
+    "total_data_rows": 1557,
+    "unique_materials": [
+      "HN - 111G",
+      "BT - 200T",
+      "BT - SC 010 MW",
+      "THAN TRE",
+      "AC - 9205 S",
+      "GO GHEP THANH"
+    ],
+    "assembly_count": 37,
+    "by_material": {
+      "HN - 111G": {
+        "count": 854,
+        "thicknesses": [
+          17.5,
+          10
+        ]
+      },
+      "BT - 200T": {
+        "count": 63,
+        "thicknesses": [
+          17.5
+        ]
+      },
+      "BT - SC 010 MW": {
+        "count": 580,
+        "thicknesses": [
+          17.5,
+          10
+        ]
+      },
+      "THAN TRE": {
+        "count": 22,
+        "thicknesses": [
+          8
+        ]
+      },
+      "AC - 9205 S": {
+        "count": 26,
+        "thicknesses": [
+          17.5
+        ]
+      },
+      "GO GHEP THANH": {
+        "count": 12,
+        "thicknesses": [
+          30
+        ]
+      }
+    },
+    "qc": {
+      "missing_material": 0,
+      "missing_dim": 0,
+      "zero_dim": 0
+    },
+    "assemblies": [
+      {
+        "id": "124",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 23
+      },
+      {
+        "id": "122",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 5
+      },
+      {
+        "id": "114",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 11
+      },
+      {
+        "id": "120",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 25
+      },
+      {
+        "id": "125",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 23
+      },
+      {
+        "id": "121",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 110
+      },
+      {
+        "id": "116",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 9
+      },
+      {
+        "id": "118",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 90
+      },
+      {
+        "id": "115",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 169
+      },
+      {
+        "id": "133",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 0
+      },
+      {
+        "id": "128",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 15
+      },
+      {
+        "id": "126",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 40
+      },
+      {
+        "id": "129",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 241
+      },
+      {
+        "id": "109",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 24
+      },
+      {
+        "id": "113",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 0
+      },
+      {
+        "id": "106",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 0
+      },
+      {
+        "id": "107",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 4
+      },
+      {
+        "id": "132",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 15
+      },
+      {
+        "id": "119",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 0
+      },
+      {
+        "id": "117",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 1
+      },
+      {
+        "id": "127",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 0
+      },
+      {
+        "id": "123",
+        "name": "BEND_PANEL",
+        "material": "BT - 200T",
+        "part_count": 46
+      },
+      {
+        "id": "131",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 22
+      },
+      {
+        "id": "98",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 0
+      },
+      {
+        "id": "100",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 16
+      },
+      {
+        "id": "99",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 0
+      },
+      {
+        "id": "101",
+        "name": "BEND_PANEL",
+        "material": "HN - 111G",
+        "part_count": 20
+      },
+      {
+        "id": "105",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 0
+      },
+      {
+        "id": "102",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 9
+      },
+      {
+        "id": "112",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 0
+      },
+      {
+        "id": "103",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 19
+      },
+      {
+        "id": "111",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 2
+      },
+      {
+        "id": "104",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 323
+      },
+      {
+        "id": "110",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 79
+      },
+      {
+        "id": "108",
+        "name": "BEND_PANEL",
+        "material": "BT - SC 010 MW",
+        "part_count": 130
+      },
+      {
+        "id": "134",
+        "name": "BEND_PANEL",
+        "material": "THAN TRE",
+        "part_count": 1
+      },
+      {
+        "id": "130",
+        "name": "BEND_PANEL",
+        "material": "THAN TRE",
+        "part_count": 47
+      }
+    ]
+  },
+  "cross_ref": [
+    {
+      "bom_code": "HN - 111G-17.5",
+      "bom_qty": 62,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": 65,
+      "vat_tu_unit": "Tấm",
+      "po_qty": 65,
+      "po_source": "SOURCE-02",
+      "delta": 3,
+      "variance_pct": "4.8",
+      "status": "⚠️ VARIANCE +3 tấm (purchase > BOM)"
+    },
+    {
+      "bom_code": "HN - 111G-10",
+      "bom_qty": 25,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": 26,
+      "vat_tu_unit": "Tấm",
+      "po_qty": 26,
+      "po_source": "SOURCE-02",
+      "delta": 1,
+      "variance_pct": "4.0",
+      "status": "⚠️ VARIANCE +1 tấm (purchase > BOM)"
+    },
+    {
+      "bom_code": "BT - SC 010 MW-17.5",
+      "bom_qty": 65,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": 67,
+      "vat_tu_unit": "Tấm",
+      "po_qty": 67,
+      "po_source": "SOURCE-04",
+      "delta": 2,
+      "variance_pct": "3.1",
+      "status": "⚠️ VARIANCE +2 tấm (purchase > BOM)"
+    },
+    {
+      "bom_code": "BT - SC 010 MW-10",
+      "bom_qty": 20,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": 21,
+      "vat_tu_unit": "Tấm",
+      "po_qty": 21,
+      "po_source": "SOURCE-04",
+      "delta": 1,
+      "variance_pct": "5.0",
+      "status": "⚠️ VARIANCE +1 tấm (purchase > BOM)"
+    },
+    {
+      "bom_code": "BT - 200T-17.5",
+      "bom_qty": 6,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": 6,
+      "vat_tu_unit": "Tấm",
+      "po_qty": 6,
+      "po_source": "SOURCE-04",
+      "delta": 0,
+      "variance_pct": "0.0",
+      "status": "✅ MATCH"
+    },
+    {
+      "bom_code": "AC - 9205 S-17.5",
+      "bom_qty": 4,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": 4,
+      "vat_tu_unit": "Tấm",
+      "po_qty": 4,
+      "po_source": "SOURCE-03",
+      "delta": 0,
+      "variance_pct": "0.0",
+      "status": "✅ MATCH"
+    },
+    {
+      "bom_code": "THAN TRE-8",
+      "bom_qty": 10,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": 10,
+      "vat_tu_unit": "Tấm",
+      "po_qty": 10,
+      "po_source": "SOURCE-01",
+      "delta": 0,
+      "variance_pct": "0.0",
+      "status": "✅ MATCH"
+    },
+    {
+      "bom_code": "GO GHEP THANH-30",
+      "bom_qty": 1,
+      "bom_unit": "Tấm",
+      "vat_tu_qty": null,
+      "vat_tu_unit": null,
+      "po_qty": null,
+      "po_source": null,
+      "delta": null,
+      "variance_pct": null,
+      "status": "❌ NOT IN PURCHASE DOCS — new material found"
+    }
+  ]
+}

@@ -1,0 +1,3051 @@
+{
+  "phase": "3L",
+  "generated_at": "2026-08-17T16:34:10.241381",
+  "source_sha256": "664ABC00CB34EE109B7E9830D75B05D9E9921319156320ED29B17755CAC9EF72",
+  "report_status": "PENDING_HUMAN_REVIEW",
+  "summary": {
+    "component_list_count": 200,
+    "material_list_count": 2,
+    "unmapped_components": 0,
+    "conflicts": 1,
+    "human_verification_queue": 1325
+  },
+  "component_list": [
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0001",
+      "component": "",
+      "role": "PANEL_CUT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 10470.0,
+      "W_mm": 2540.0,
+      "T_mm": 700.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0002",
+      "component": "",
+      "role": "PANEL_CUT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 3281.0,
+      "W_mm": 2540.0,
+      "T_mm": 1035.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0003",
+      "component": "OuterShell",
+      "role": "OUTER_SHELL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2540.0,
+      "W_mm": 2435.0,
+      "T_mm": 100.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0004",
+      "component": "OuterShell",
+      "role": "OUTER_SHELL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 4820.0,
+      "W_mm": 2520.0,
+      "T_mm": 100.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0005",
+      "component": "",
+      "role": "PANEL_CUT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 4820.0,
+      "W_mm": 400.0,
+      "T_mm": 400.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0006",
+      "component": "OuterShell",
+      "role": "OUTER_SHELL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2520.0,
+      "W_mm": 2405.64,
+      "T_mm": 230.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0007",
+      "component": "",
+      "role": "PANEL_CUT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2520.0,
+      "W_mm": 2100.0,
+      "T_mm": 1740.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0008",
+      "component": "",
+      "role": "PANEL_CUT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2520.0,
+      "W_mm": 2100.0,
+      "T_mm": 1940.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0009",
+      "component": "H.Giữa",
+      "role": "MIDDLE_PARTITION",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 762.4,
+      "W_mm": 463.7,
+      "T_mm": 56.62,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0010",
+      "component": "OuterShell",
+      "role": "OUTER_SHELL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2700.0,
+      "W_mm": 2364.87,
+      "T_mm": 100.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0011",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2060.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0012",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 840.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0013",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1730.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0014",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 840.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0015",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 840.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0016",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2060.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0017",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1170.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0018",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1730.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0019",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1170.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0020",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1170.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0021",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1730.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0022",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2060.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0023",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 300.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0024",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 300.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0025",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2400.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0026",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1730.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0027",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2400.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0028",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 300.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0029",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 840.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0030",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2400.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0031",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 840.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0032",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2060.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0033",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 300.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0034",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 300.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0035",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2400.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0036",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2400.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0037",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1170.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0038",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1730.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0039",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1170.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0040",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2060.0,
+      "W_mm": 180.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0041",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1730.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0042",
+      "component": "hồi",
+      "role": "SIDE_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1170.0,
+      "W_mm": 300.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0043",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0044",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1400.0,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0045",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0046",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1400.0,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0047",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0048",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1400.0,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0049",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0050",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0051",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0052",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0053",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1400.0,
+      "W_mm": 600.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0054",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1345.0,
+      "W_mm": 400.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0055",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0056",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1345.0,
+      "W_mm": 400.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0057",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0058",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0059",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1400.0,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0060",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0061",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1345.0,
+      "W_mm": 400.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0062",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1400.0,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0063",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 722.5,
+      "W_mm": 600.0,
+      "T_mm": 17.5,
+      "material": "#da354b",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0064",
+      "component": "Đáy",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 460.0,
+      "W_mm": 315.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0065",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 500.0,
+      "W_mm": 350.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0066",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0067",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0068",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 541.0,
+      "W_mm": 332.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0069",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 541.0,
+      "W_mm": 332.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0070",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0071",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 500.0,
+      "W_mm": 350.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0072",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0073",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0074",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 500.0,
+      "W_mm": 350.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0075",
+      "component": "Đáy",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 460.0,
+      "W_mm": 315.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0076",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0077",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0078",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 500.0,
+      "W_mm": 350.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0079",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 541.0,
+      "W_mm": 332.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0080",
+      "component": "Đáy",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 460.0,
+      "W_mm": 315.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0081",
+      "component": "Đáy",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 460.0,
+      "W_mm": 315.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0082",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0083",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 541.0,
+      "W_mm": 332.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0084",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0085",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 500.0,
+      "W_mm": 350.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0086",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0087",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 541.0,
+      "W_mm": 332.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0088",
+      "component": "Đáy",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 460.0,
+      "W_mm": 315.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0089",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0090",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0091",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0092",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0093",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0094",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0095",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 282.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0096",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0097",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0098",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 282.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0099",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0100",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0101",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0102",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0103",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0104",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0105",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0106",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0107",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0108",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0109",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0110",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0111",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0112",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0113",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0114",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0115",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0116",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 282.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0117",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0118",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0119",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0120",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0121",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0122",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0123",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0124",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0125",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0126",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0127",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0128",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0129",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0130",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0131",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 282.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0132",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0133",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0134",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0135",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0136",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0137",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0138",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0139",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0140",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0141",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0142",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0143",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 282.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0144",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0145",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0146",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0147",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0148",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0149",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0150",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0151",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0152",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0153",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0154",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0155",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0156",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0157",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0158",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0159",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0160",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0161",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0162",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0163",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0164",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0165",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0166",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0167",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0168",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0169",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0170",
+      "component": "Thanh móc tay",
+      "role": "HANDLE_RAIL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 315.0,
+      "W_mm": 65.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0171",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 50.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0172",
+      "component": "Đáy NK",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 270.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0173",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 100.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0174",
+      "component": "MNK",
+      "role": "DRAWER_FRONT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 350.0,
+      "W_mm": 282.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0175",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 60.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0176",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0177",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 400.0,
+      "W_mm": 40.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0178",
+      "component": "Thành NK",
+      "role": "SHELF",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 253.0,
+      "W_mm": 30.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0179",
+      "component": "Đáy",
+      "role": "BOTTOM_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 460.0,
+      "W_mm": 315.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0180",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 500.0,
+      "W_mm": 350.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0181",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 541.0,
+      "W_mm": 332.0,
+      "T_mm": 10.0,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0182",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0183",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 532.5,
+      "W_mm": 480.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0184",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2209.17,
+      "W_mm": 82.5,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0185",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1113.33,
+      "W_mm": 92.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0186",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2226.67,
+      "W_mm": 92.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0187",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1095.83,
+      "W_mm": 82.5,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0188",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 582.5,
+      "W_mm": 382.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0189",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 582.5,
+      "W_mm": 265.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0190",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 582.5,
+      "W_mm": 265.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0191",
+      "component": "Hông Phải",
+      "role": "SIDE_PANEL_RIGHT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 582.5,
+      "W_mm": 265.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0192",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2226.67,
+      "W_mm": 400.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0193",
+      "component": "Hông Trái",
+      "role": "SIDE_PANEL_LEFT",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 582.5,
+      "W_mm": 382.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0194",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1095.83,
+      "W_mm": 482.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0195",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2209.17,
+      "W_mm": 482.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0196",
+      "component": "Nóc",
+      "role": "TOP_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1113.33,
+      "W_mm": 400.0,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0197",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 1095.83,
+      "W_mm": 582.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0198",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 2209.17,
+      "W_mm": 582.5,
+      "T_mm": 17.5,
+      "material": "#8208ec",
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0199",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 706.5,
+      "W_mm": 106.5,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0200",
+      "component": "Hậu",
+      "role": "BACK_PANEL",
+      "area": "UNKNOWN",
+      "room": "VĂN PHÒNG",
+      "qty": 1,
+      "L_mm": 706.5,
+      "W_mm": 106.5,
+      "T_mm": 17.5,
+      "material": null,
+      "status": "CANDIDATE_PENDING_HUMAN_APPROVAL"
+    }
+  ],
+  "material_list": [
+    {
+      "material": "#8208ec",
+      "component_count": 825,
+      "erp_candidate": null,
+      "confidence": "NONE",
+      "mapping_status": "COLOR_ONLY"
+    },
+    {
+      "material": "#da354b",
+      "component_count": 56,
+      "erp_candidate": null,
+      "confidence": "NONE",
+      "mapping_status": "COLOR_ONLY"
+    }
+  ],
+  "unmapped_components": [],
+  "conflicts": [
+    {
+      "issue_id": "DSI-004",
+      "issue_type": "MATERIAL_MATCH",
+      "design_source": "SKP_MATERIAL:AC - 9205 S",
+      "survey_source": "SURVEY_PHASE2_MATERIAL_CONFIRMED:An Cuong MS 608EV",
+      "component": "Main board material",
+      "boq_item": null,
+      "design_value": "AC - 9205 S (in SKP)",
+      "survey_value": "An Cuong MS 608EV (in Phase 2 confirmed materials)",
+      "difference": "SKP uses AC-9205S; Survey confirmed MS-608EV. Both are An Cuong MDF but different specs.",
+      "severity": "MEDIUM",
+      "verification_status": "CONFLICT",
+      "photos": [],
+      "notes": "Possible same product different code, or design change. Requires vendor+client confirmation before cutting."
+    }
+  ],
+  "human_verification_queue": [
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0001",
+      "component": "",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0002",
+      "component": "",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0003",
+      "component": "OuterShell",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0004",
+      "component": "OuterShell",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0005",
+      "component": "",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0006",
+      "component": "OuterShell",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0007",
+      "component": "",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0008",
+      "component": "",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0009",
+      "component": "H.Giữa",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0010",
+      "component": "OuterShell",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0011",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0012",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0013",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0014",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0015",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0016",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0017",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0018",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0019",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0020",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0021",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0022",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0023",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0024",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0025",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0026",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0027",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0028",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0029",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0030",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0031",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0032",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0033",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0034",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0035",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0036",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0037",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0038",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0039",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0040",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0041",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0042",
+      "component": "hồi",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0043",
+      "component": "Hông Trái",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0044",
+      "component": "Nóc",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0045",
+      "component": "Hông Phải",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0046",
+      "component": "Nóc",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0047",
+      "component": "Hông Trái",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0048",
+      "component": "Nóc",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0049",
+      "component": "Hông Phải",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    },
+    {
+      "pi_id": "PI-BAO-MINH-CMT8-0050",
+      "component": "Hông Trái",
+      "reasons": [
+        "BOQ not confirmed",
+        "Material ERP candidate unconfirmed"
+      ]
+    }
+  ]
+}

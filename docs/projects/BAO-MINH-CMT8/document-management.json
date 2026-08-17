@@ -1,0 +1,53 @@
+{
+  "documents": [
+    {
+      "document_id": "BAO-MINH-CMT8-DESIGN-V01",
+      "project_id": "BAO-MINH-CMT8",
+      "document_type": "Hồ sơ thiết kế",
+      "document_category": "Technical / Design",
+      "filename": "26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+      "version": "V01",
+      "version_label": "01",
+      "date": "07/2026",
+      "floor": "Tầng 15",
+      "status": "SOURCE_REFERENCE",
+      "approved_for_production": false,
+      "approval_note": "NOT APPROVED FOR PRODUCTION — source reference only until shop drawings confirmed",
+      "design_type": "Interior Design I",
+      "num_pages": 35,
+      "has_pa2": true,
+      "pa2_pages": [
+        6,
+        8
+      ],
+      "linked_to_erp": true,
+      "document_scope": "DESIGN_CONCEPT_AND_3D_PERSPECTIVES",
+      "source_path": "D:\\XƯỞNG HOMEPRO SG\\9. THÁNG 08.2026\\3. VĂN PHÒNG BẢO MINH\\26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+      "registered_at": "2026-08-17T08:56:08.050Z",
+      "registered_by": "HomePro ERP — Design Ingestion Script",
+      "erp_attachment_instructions": [
+        "Attach to Project record: BAO-MINH-CMT8",
+        "Set document_type = Hồ sơ thiết kế",
+        "Set version = V01",
+        "Do NOT mark as APPROVED FOR PRODUCTION",
+        "Link page records from technical_document_pages.json"
+      ]
+    },
+    {
+      "document_id": "BAO-MINH-CMT8-SHOPDRW-REV0",
+      "project_id": "BAO-MINH-CMT8",
+      "document_type": "Bản vẽ kỹ thuật",
+      "document_category": "Technical / Shop Drawing",
+      "filename": "060826_TKNT_VP BAO MINH.pdf",
+      "version": "REV 0",
+      "date": "05/08/2026",
+      "floor": "Tầng 15",
+      "status": "SOURCE_OF_TRUTH",
+      "approved_for_production": false,
+      "approval_note": "Source of truth for shop drawings. NOT approved for production until QC and sign-off.",
+      "design_type": "Technical Shop Drawings",
+      "num_pages": 37,
+      "registered_at": "2026-08-17T08:56:08.050Z"
+    }
+  ]
+}

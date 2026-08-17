@@ -1,0 +1,45 @@
+{
+  "phase": "4B-SUPPLIER",
+  "generated_at": "2026-08-17T16:48:03.954607",
+  "summary": {
+    "total_suppliers_identified": 3,
+    "confirmed": 0,
+    "pending": 3,
+    "note": "No supplier is confirmed. All are SUPPLIER_PENDING. Cannot create official Purchase Orders or Receipts until suppliers are confirmed in supplier master."
+  },
+  "suppliers": [
+    {
+      "supplier_id": "SUP-HONG-NGHI",
+      "name": "Hồng Nghi (PENDING CONFIRMATION)",
+      "evidence": "SRC-002 delivery to 'kho Hồng Nghi', payment to VCB GIA PHÚC acc 0501000112233. Items: LMR 111G boards + CHỈ 111SH edge bands. 111G/111SH codes consistent with Hồng Nghi brand.",
+      "match_status": "SUPPLIER_PENDING",
+      "doc_sources": [
+        "SRC-BAO-MINH-002"
+      ],
+      "bank_info": "VCB GIA PHÚC — 0501000112233",
+      "notes": "Supplier name NOT on document. Inferred from delivery location and product codes 111G/111SH. Must be confirmed by user."
+    },
+    {
+      "supplier_id": "SUP-AN-CUONG",
+      "name": "An Cuong Group (PENDING CONFIRMATION)",
+      "evidence": "SRC-003 shows item codes 250003217 (Chỉ PVC 9205) and 500005562 (Ván MDF 9205S). 9205 is An Cuong's product code series. 'MUESTSTD' = An Cuong product format. 'Tổng kho 1' may be An Cuong distribution center.",
+      "match_status": "SUPPLIER_PENDING",
+      "doc_sources": [
+        "SRC-BAO-MINH-003"
+      ],
+      "notes": "Source document was issued TO HOMEPRO. Supplier is the document issuer. Item code format and 9205 product codes strongly suggest An Cuong Group. Must be confirmed by user."
+    },
+    {
+      "supplier_id": "SUP-SOURCE-04",
+      "name": "SUPPLIER_PENDING — SOURCE-04 (ĐƠN ĐẶT HÀNG)",
+      "evidence": "SOURCE-04 is a PO from HOMEPRO to an unnamed supplier. Items: LMRDW (SC010MW, XAM200T), LMRDWE2, CSC010M, CXAMCT. SC010MW suggests same supplier as SOURCE-03 (An Cuong 9205S family). But needs confirmation.",
+      "match_status": "SUPPLIER_PENDING",
+      "doc_sources": [
+        "SRC-BAO-MINH-004"
+      ],
+      "bank": "VIETINBANK",
+      "sales_rep": "Huỳnh Ngọc Thiên Thanh (BTQ12-0005)",
+      "notes": "Supplier identity = document issuer. SC010MW/9205S correlation with An Cuong. Sales rep code BTQ12-0005 may help identify supplier."
+    }
+  ]
+}

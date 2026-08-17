@@ -1,0 +1,75 @@
+{
+  "control_id": "CTRL-NO-BOQ-FROM-3D",
+  "project_id": "BAO-MINH-CMT8",
+  "document_id": "BAO-MINH-CMT8-DESIGN-V01",
+  "checked_at": "2026-08-17T08:56:08.066Z",
+  "checks": [
+    {
+      "id": "C01",
+      "rule": "NO_QTY_FROM_3D",
+      "result": "PASS",
+      "detail": "No quantities generated from 3D perspective pages (4-35)"
+    },
+    {
+      "id": "C02",
+      "rule": "NO_PRICE_FROM_3D",
+      "result": "PASS",
+      "detail": "No prices generated from 3D perspective pages"
+    },
+    {
+      "id": "C03",
+      "rule": "NO_BOM_FROM_3D",
+      "result": "PASS",
+      "detail": "No BOM created from design reference images"
+    },
+    {
+      "id": "C04",
+      "rule": "NO_WO_FROM_3D",
+      "result": "PASS",
+      "detail": "No Work Orders created in this phase"
+    },
+    {
+      "id": "C05",
+      "rule": "NO_PO_FROM_3D",
+      "result": "PASS",
+      "detail": "No Purchase Orders created in this phase"
+    },
+    {
+      "id": "C06",
+      "rule": "NO_MAT_CODE_FROM_3D",
+      "result": "PASS",
+      "detail": "No material codes invented from 3D images"
+    },
+    {
+      "id": "C07",
+      "rule": "KL_FROM_CONTROLLED_SOURCE",
+      "result": "PASS",
+      "detail": "BOQ/KL data sourced from BAO-MINH-SOURCE-REVIEW.xlsx (Phase 1 reconciliation)"
+    },
+    {
+      "id": "C08",
+      "rule": "PA2_SEPARATE_FROM_V01",
+      "result": "PASS",
+      "detail": "PA2 pages (6,8) tracked separately. NOT merged into V01."
+    },
+    {
+      "id": "C09",
+      "rule": "AREA_NOT_MEASURED_FROM_IMAGE",
+      "result": "PASS",
+      "detail": "Area 326.56 m² taken from PDF Page 2 text/annotation, not measured from image"
+    },
+    {
+      "id": "C10",
+      "rule": "DIM_NOT_INFERRED_FROM_3D",
+      "result": "PASS",
+      "detail": "No dimensions inferred from 3D perspective images"
+    }
+  ],
+  "summary": {
+    "total_checks": 10,
+    "pass": 10,
+    "fail": 0,
+    "warning": 0
+  },
+  "note": "All 3D perspective pages (4-35) are tagged DESIGN_REFERENCE_ONLY. BOQ MUST continue from existing KL reconciliation."
+}

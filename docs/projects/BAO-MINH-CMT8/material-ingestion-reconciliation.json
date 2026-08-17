@@ -1,0 +1,917 @@
+{
+  "phase": "4B-RECONCILIATION",
+  "generated_at": "2026-08-17T16:48:03.954607",
+  "project_id": "BAO-MINH-CMT8",
+  "summary": {
+    "total_source_documents": 4,
+    "total_line_items": 16,
+    "reconciliation_status_distribution": {
+      "PENDING": 9,
+      "PARTIAL_MATCH": 7
+    },
+    "product_match_distribution": {
+      "PRODUCT_MATCH_PENDING": 9,
+      "CANDIDATE": 7
+    },
+    "boq_match_distribution": {
+      "BOQ_CANDIDATE": 16
+    },
+    "erp_transactions_created": 0,
+    "erp_postable_now": 0,
+    "erp_blocked": 16,
+    "suppliers_confirmed": 0,
+    "suppliers_pending": 4,
+    "warehouses_confirmed": 0,
+    "warehouses_pending": 3,
+    "amount_mismatches": 0,
+    "boq_note": "BOQ is at furniture-item level (tủ/bàn/vách). Raw material → BOQ link requires Bill of Materials (BOM) explosion. BOQ_MATCH_PENDING is correct — not an error."
+  },
+  "category_A_ready_for_erp": [],
+  "category_B_needs_product_master": [
+    "SRC-001-L01",
+    "SRC-002-L01",
+    "SRC-002-L02",
+    "SRC-002-L03",
+    "SRC-002-L04",
+    "SRC-004-L06",
+    "SRC-004-L07",
+    "SRC-004-L08",
+    "SRC-004-L09"
+  ],
+  "category_C_needs_boq": [
+    "SRC-001-L01",
+    "SRC-002-L01",
+    "SRC-002-L02",
+    "SRC-002-L03",
+    "SRC-002-L04",
+    "SRC-003-L01",
+    "SRC-003-L02",
+    "SRC-004-L01",
+    "SRC-004-L02",
+    "SRC-004-L03",
+    "SRC-004-L04",
+    "SRC-004-L05",
+    "SRC-004-L06",
+    "SRC-004-L07",
+    "SRC-004-L08",
+    "SRC-004-L09"
+  ],
+  "category_D_needs_supplier": [
+    "SRC-001-L01",
+    "SRC-002-L01",
+    "SRC-002-L02",
+    "SRC-002-L03",
+    "SRC-002-L04",
+    "SRC-003-L01",
+    "SRC-003-L02",
+    "SRC-004-L01",
+    "SRC-004-L02",
+    "SRC-004-L03",
+    "SRC-004-L04",
+    "SRC-004-L05",
+    "SRC-004-L06",
+    "SRC-004-L07",
+    "SRC-004-L08",
+    "SRC-004-L09"
+  ],
+  "category_E_needs_warehouse": [
+    "SRC-001-L01",
+    "SRC-002-L01",
+    "SRC-002-L02",
+    "SRC-002-L03",
+    "SRC-002-L04",
+    "SRC-003-L01",
+    "SRC-003-L02",
+    "SRC-004-L01",
+    "SRC-004-L02",
+    "SRC-004-L03",
+    "SRC-004-L04",
+    "SRC-004-L05",
+    "SRC-004-L06",
+    "SRC-004-L07",
+    "SRC-004-L08",
+    "SRC-004-L09"
+  ],
+  "category_F_needs_receipt_confirmation": [
+    "SRC-002-L01",
+    "SRC-002-L02",
+    "SRC-002-L03",
+    "SRC-002-L04",
+    "SRC-004-L01",
+    "SRC-004-L02",
+    "SRC-004-L03",
+    "SRC-004-L04",
+    "SRC-004-L05",
+    "SRC-004-L06",
+    "SRC-004-L07",
+    "SRC-004-L08",
+    "SRC-004-L09"
+  ],
+  "category_G_conflicts": [],
+  "reconciliation_rows": [
+    {
+      "source_id": "SRC-BAO-MINH-001",
+      "source_image": "SOURCE-01.jpg",
+      "document_type": "MATERIAL_REQUIREMENT",
+      "line_id": "SRC-001-L01",
+      "item_code": null,
+      "description_raw": "THAN TRE (KT: 1220 x 2440 x 8)mm",
+      "description_normalized": "THAN TRE — Than Tre bamboo board 1220x2440x8mm",
+      "quantity": 10,
+      "unit": "TẤM",
+      "unit_price": null,
+      "discount_pct": null,
+      "unit_price_after_discount": null,
+      "line_amount": null,
+      "vat_included": false,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "THAN TRE / bamboo charcoal board 1220x2440x8mm (from Phase 3F material master)",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "A.I.4",
+        "E.I.5",
+        "A.I.5"
+      ],
+      "boq_note": "Candidate BOQ items: A.I.4, E.I.5, A.I.5, B.I.4, E.I.4",
+      "warehouse": null,
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": null,
+      "procurement_chain": "MR → [PO] → [Receipt] → [Stock]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "No price — cannot create PO",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-01.jpg → SRC-BAO-MINH-001 → SRC-001-L01"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-002",
+      "source_image": "SOURCE-02.jpg",
+      "document_type": "SUPPLIER_ORDER_CONFIRMATION",
+      "line_id": "SRC-002-L01",
+      "item_code": null,
+      "description_raw": "111G 2M LMR 17MM DW",
+      "description_normalized": "Ván MDF/Melamine LMR 111G 2 mặt 17mm (Hồng Nghi)",
+      "quantity": 65,
+      "unit": "CUỘN",
+      "unit_price": 420292,
+      "discount_pct": null,
+      "unit_price_after_discount": null,
+      "line_amount": 27318980,
+      "vat_included": true,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "Ván Melamine MDF LMR 17mm 111G — possibly Hồng Nghi brand (consistent with kho Hồng Nghi delivery)",
+      "product_match_confidence": "MEDIUM",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "kho Hồng Nghi",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO ← [Supplier confirms] → [Receipt] → Stock",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-02.jpg → SRC-BAO-MINH-002 → SRC-002-L01"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-002",
+      "source_image": "SOURCE-02.jpg",
+      "document_type": "SUPPLIER_ORDER_CONFIRMATION",
+      "line_id": "SRC-002-L02",
+      "item_code": null,
+      "description_raw": "111G 2M LMR 9MM DW",
+      "description_normalized": "Ván MDF/Melamine LMR 111G 2 mặt 9mm",
+      "quantity": 26,
+      "unit": "PENDING",
+      "unit_price": 300499,
+      "discount_pct": null,
+      "unit_price_after_discount": null,
+      "line_amount": 7812974,
+      "vat_included": true,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "Ván Melamine MDF LMR 9mm 111G",
+      "product_match_confidence": "MEDIUM",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "kho Hồng Nghi",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO ← [Supplier confirms] → [Receipt] → Stock",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-02.jpg → SRC-BAO-MINH-002 → SRC-002-L02"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-002",
+      "source_image": "SOURCE-02.jpg",
+      "document_type": "SUPPLIER_ORDER_CONFIRMATION",
+      "line_id": "SRC-002-L03",
+      "item_code": null,
+      "description_raw": "CHỈ 111SH (21x0.8)mm SM",
+      "description_normalized": "Chỉ dán cạnh PVC/ABS 111SH 21x0.8mm (SM = Satin Matt?)",
+      "quantity": 2,
+      "unit": "PENDING",
+      "unit_price": 140400,
+      "discount_pct": null,
+      "unit_price_after_discount": null,
+      "line_amount": 280800,
+      "vat_included": true,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "Chỉ dán cạnh 111SH 21x0.8mm — matching HN-111G family from Phase 3F material master",
+      "product_match_confidence": "MEDIUM",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "kho Hồng Nghi",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO ← [Supplier confirms] → [Receipt] → Stock",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-02.jpg → SRC-BAO-MINH-002 → SRC-002-L03"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-002",
+      "source_image": "SOURCE-02.jpg",
+      "document_type": "SUPPLIER_ORDER_CONFIRMATION",
+      "line_id": "SRC-002-L04",
+      "item_code": null,
+      "description_raw": "CHỈ 111SH (43x0.8)mm SM",
+      "description_normalized": "Chỉ dán cạnh PVC/ABS 111SH 43x0.8mm (SM = Satin Matt?)",
+      "quantity": 8,
+      "unit": "PENDING",
+      "unit_price": 351000,
+      "discount_pct": null,
+      "unit_price_after_discount": null,
+      "line_amount": 2808000,
+      "vat_included": true,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "Chỉ dán cạnh 111SH 43x0.8mm — matching HN-111G family",
+      "product_match_confidence": "MEDIUM",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "kho Hồng Nghi",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO ← [Supplier confirms] → [Receipt] → Stock",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-02.jpg → SRC-BAO-MINH-002 → SRC-002-L04"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-003",
+      "source_image": "SOURCE-03.jpg",
+      "document_type": "GOODS_DELIVERY_NOTE",
+      "line_id": "SRC-003-L01",
+      "item_code": "250003217",
+      "description_raw": "Chỉ PVC 9205 44x0.8mm",
+      "description_normalized": "Chỉ dán cạnh PVC An Cuong 9205 — 44mm x 0.8mm",
+      "quantity": 30,
+      "unit": "Mét",
+      "unit_price": 4370,
+      "discount_pct": null,
+      "unit_price_after_discount": null,
+      "line_amount": 131100,
+      "vat_included": false,
+      "product_match_status": "CANDIDATE",
+      "product_match_candidate": "Chỉ PVC An Cuong 9205 44x0.8mm",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Tổng kho 1",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "Delivery Note → [GRN] → [QC] → Stock",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "Document type ambiguous — needs human confirmation",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PARTIAL_MATCH",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-03.jpg → SRC-BAO-MINH-003 → SRC-003-L01"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-003",
+      "source_image": "SOURCE-03.jpg",
+      "document_type": "GOODS_DELIVERY_NOTE",
+      "line_id": "SRC-003-L02",
+      "item_code": "500005562",
+      "description_raw": "Ván MELMDF 9205S/9205 MUESTSTD 1220x2440x17mm",
+      "description_normalized": "Ván Melamine MDF chống ẩm STD An Cuong — mã 9205S — 1220x2440x17mm",
+      "quantity": 4,
+      "unit": "Tấm",
+      "unit_price": 665000,
+      "discount_pct": null,
+      "unit_price_after_discount": null,
+      "line_amount": 2660000,
+      "vat_included": false,
+      "product_match_status": "CANDIDATE",
+      "product_match_candidate": "Ván MDF Melamine chống ẩm STD An Cuong 9205S 1220x2440x17mm",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Tổng kho 1",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "Delivery Note → [GRN] → [QC] → Stock",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "Document type ambiguous — needs human confirmation",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PARTIAL_MATCH",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-03.jpg → SRC-BAO-MINH-003 → SRC-003-L02"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L01",
+      "item_code": "LMRDW-17-ML2.SC010MW",
+      "description_raw": "Ván LMR DW 17 mm x 1220 x 2440 phủ Melamine 2 mặt SC010MW",
+      "description_normalized": "Ván LMR DW 17mm 1220x2440 Melamine 2 mặt màu SC010MW (Mat White)",
+      "quantity": 67,
+      "unit": "Tấm",
+      "unit_price": 510000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 479400,
+      "line_amount": 32119800,
+      "vat_included": false,
+      "product_match_status": "CANDIDATE",
+      "product_match_candidate": "Ván MDF LMR DW 17mm SC010MW — matches BT-SC 010 MW from Phase 3F material master",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PARTIAL_MATCH",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L01"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L02",
+      "item_code": "LMRDW-8-ML2.SC010MW",
+      "description_raw": "Ván LMR DW 8mm x 1220 x 2440 phủ Melamine 2 mặt SC010MW",
+      "description_normalized": "Ván LMR DW 8mm 1220x2440 Melamine 2 mặt màu SC010MW",
+      "quantity": 21,
+      "unit": "Tấm",
+      "unit_price": 350000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 329000,
+      "line_amount": 6909000,
+      "vat_included": false,
+      "product_match_status": "CANDIDATE",
+      "product_match_candidate": "Ván MDF LMR DW 8mm SC010MW",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PARTIAL_MATCH",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L02"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L03",
+      "item_code": "CSC010M-21x0.8",
+      "description_raw": "Chỉ SC010M (21 x 0.8) mm",
+      "description_normalized": "Chỉ dán cạnh SC010M 21x0.8mm (Mat White edge band)",
+      "quantity": 2,
+      "unit": "Cuộn",
+      "unit_price": 180000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 169200,
+      "line_amount": 338400,
+      "vat_included": false,
+      "product_match_status": "CANDIDATE",
+      "product_match_candidate": "Chỉ SC010M 21x0.8mm — matching BT-SC 010 MW edge band from Phase 3F",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PARTIAL_MATCH",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L03"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L04",
+      "item_code": "CSC010M-43x0.8",
+      "description_raw": "Chỉ SC010M (43 x 0.8) mm",
+      "description_normalized": "Chỉ dán cạnh SC010M 43x0.8mm",
+      "quantity": 6,
+      "unit": "Cuộn",
+      "unit_price": 370000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 347800,
+      "line_amount": 2086800,
+      "vat_included": false,
+      "product_match_status": "CANDIDATE",
+      "product_match_candidate": "Chỉ SC010M 43x0.8mm",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PARTIAL_MATCH",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L04"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L05",
+      "item_code": "LMRDW-17-ML2.XAM200T",
+      "description_raw": "Ván LMR DW 17mm x 1220 x 2440 phủ Melamine 2 mặt Xám 200T",
+      "description_normalized": "Ván LMR DW 17mm 1220x2440 Melamine 2 mặt màu Xám 200T",
+      "quantity": 6,
+      "unit": "Tấm",
+      "unit_price": 500000,
+      "discount_pct": 23.0,
+      "unit_price_after_discount": 385000,
+      "line_amount": 2310000,
+      "vat_included": false,
+      "product_match_status": "CANDIDATE",
+      "product_match_candidate": "Ván MDF LMR DW 17mm Xám 200T — matches BT-200T from Phase 3F material master",
+      "product_match_confidence": "HIGH",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PARTIAL_MATCH",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L05"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L06",
+      "item_code": "CXAMCT-21x0.8",
+      "description_raw": "Chỉ Xám chỉ T (21 x 0.8) mm",
+      "description_normalized": "Chỉ dán cạnh Xám CT 21x0.8mm",
+      "quantity": 1,
+      "unit": "Cuộn",
+      "unit_price": 180000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 169200,
+      "line_amount": 169200,
+      "vat_included": false,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "Chỉ Xám CT 21x0.8mm — not in Phase 3F material master",
+      "product_match_confidence": "LOW",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L06"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L07",
+      "item_code": "CXAMCT-43x0.8",
+      "description_raw": "Chỉ Xám chỉ T (43 x 0.8) mm",
+      "description_normalized": "Chỉ dán cạnh Xám CT 43x0.8mm",
+      "quantity": 1,
+      "unit": "Cuộn",
+      "unit_price": 370000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 347800,
+      "line_amount": 347800,
+      "vat_included": false,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "Chỉ Xám CT 43x0.8mm — not in Phase 3F material master",
+      "product_match_confidence": "LOW",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L07"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L08",
+      "item_code": "LMRDWE2-17",
+      "description_raw": "LDF E2, LMR, Premium 17mm x 1220 x 2440",
+      "description_normalized": "Ván LDF E2 Premium LMR 17mm 1220x2440mm",
+      "quantity": 20,
+      "unit": "Tấm",
+      "unit_price": 350000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 329000,
+      "line_amount": 6580000,
+      "vat_included": false,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "LDF E2 Premium 17mm — LDF (Low Density Fiber) vs MDF. Not in Phase 3F material master. NEW product.",
+      "product_match_confidence": "LOW",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L08"
+    },
+    {
+      "source_id": "SRC-BAO-MINH-004",
+      "source_image": "SOURCE-04.jpg",
+      "document_type": "PURCHASE_ORDER",
+      "line_id": "SRC-004-L09",
+      "item_code": "LMRDWE2-8",
+      "description_raw": "LDF E2, LMR, Premium 8mm x 1220 x 2440",
+      "description_normalized": "Ván LDF E2 Premium LMR 8mm 1220x2440mm",
+      "quantity": 10,
+      "unit": "Tấm",
+      "unit_price": 190000,
+      "discount_pct": 6.0,
+      "unit_price_after_discount": 178600,
+      "line_amount": 1786000,
+      "vat_included": false,
+      "product_match_status": "PRODUCT_MATCH_PENDING",
+      "product_match_candidate": "LDF E2 Premium 8mm — NEW product type not in SKP model.",
+      "product_match_confidence": "LOW",
+      "boq_match_status": "BOQ_CANDIDATE",
+      "boq_candidates": [
+        "C.I.4",
+        "E.I.5",
+        "B.II.1"
+      ],
+      "boq_note": "Candidate BOQ items: C.I.4, E.I.5, B.II.1, B.II.15, A.I.5",
+      "warehouse": "Workshop site — Thuận Giao",
+      "warehouse_status": "WAREHOUSE_MATCH_PENDING",
+      "supplier": "PENDING_REVIEW",
+      "procurement_chain": "PO → [Receipt] → [Invoice] → [Payment]",
+      "erp_can_post": false,
+      "erp_block_reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ],
+      "reconciliation_status": "PENDING",
+      "source_file": "PHIẾU NHẬP VẬT TU.zip",
+      "lineage": "ZIP:PHIẾU NHẬP VẬT TU.zip → IMG:SOURCE-04.jpg → SRC-BAO-MINH-004 → SRC-004-L09"
+    }
+  ],
+  "erp_gate_checks": [
+    {
+      "line_id": "SRC-001-L01",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "No price — cannot create PO",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-002-L01",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-002-L02",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-002-L03",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-002-L04",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "No receipt confirmation — cannot post stock",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-003-L01",
+      "can_post": false,
+      "block_count": 3,
+      "reasons": [
+        "Document type ambiguous — needs human confirmation",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-003-L02",
+      "can_post": false,
+      "block_count": 3,
+      "reasons": [
+        "Document type ambiguous — needs human confirmation",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L01",
+      "can_post": false,
+      "block_count": 3,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L02",
+      "can_post": false,
+      "block_count": 3,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L03",
+      "can_post": false,
+      "block_count": 3,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L04",
+      "can_post": false,
+      "block_count": 3,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L05",
+      "can_post": false,
+      "block_count": 3,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L06",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L07",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L08",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    },
+    {
+      "line_id": "SRC-004-L09",
+      "can_post": false,
+      "block_count": 4,
+      "reasons": [
+        "PO only — no goods receipt",
+        "Product not matched in master",
+        "Warehouse not confirmed",
+        "Supplier not confirmed"
+      ]
+    }
+  ]
+}

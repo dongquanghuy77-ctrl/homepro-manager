@@ -1,0 +1,38 @@
+{
+  "acceptance": "PASS",
+  "timestamp": "2026-08-17T09:52:19.142Z",
+  "gates": [
+    {
+      "gate": "GATE-1: FAIL",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "gate": "GATE-2: BLOCKER",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "gate": "GATE-3: ORPHAN",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "gate": "GATE-4: UNTRACED",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "gate": "GATE-5: AMOUNT_MISMATCH",
+      "status": "PASS",
+      "count": 0
+    },
+    {
+      "gate": "GATE-6: ERP_CREATED",
+      "status": "PASS",
+      "count": 0
+    }
+  ],
+  "next_action": "HUMAN_REVIEW",
+  "erp_cleared": false
+}

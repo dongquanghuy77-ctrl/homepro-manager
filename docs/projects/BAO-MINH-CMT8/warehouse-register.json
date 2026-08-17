@@ -1,0 +1,39 @@
+{
+  "phase": "4B-WAREHOUSE",
+  "generated_at": "2026-08-17T16:48:03.954607",
+  "summary": {
+    "total_warehouses": 3,
+    "confirmed": 0,
+    "pending": 3,
+    "note": "All 3 delivery/warehouse locations from source documents are WAREHOUSE_MATCH_PENDING. Cannot be treated as same location. No stock transactions until confirmed."
+  },
+  "warehouses": [
+    {
+      "warehouse_id": "WH-HONG-NGHI",
+      "name": "Kho Hồng Nghi",
+      "source": "SRC-BAO-MINH-002",
+      "source_text": "Địa điểm giao hàng: Tại kho Hồng Nghi",
+      "match_status": "WAREHOUSE_MATCH_PENDING",
+      "notes": "Mentioned in SOURCE-02 (Xác nhận đơn hàng từ supplier). May be supplier's warehouse, not HomePro warehouse. Needs human confirmation.",
+      "type": "SUPPLIER_WAREHOUSE_OR_DELIVERY_POINT"
+    },
+    {
+      "warehouse_id": "WH-TONG-KHO-1",
+      "name": "Tổng kho 1",
+      "source": "SRC-BAO-MINH-003",
+      "source_text": "Annotated on document: 'Tổng kho 1'",
+      "match_status": "WAREHOUSE_MATCH_PENDING",
+      "notes": "Annotated on SOURCE-03 (Goods Delivery Note). May be HomePro's warehouse or An Cuong's distribution center. Needs human confirmation.",
+      "type": "UNKNOWN_WAREHOUSE"
+    },
+    {
+      "warehouse_id": "WH-THUAN-GIAO",
+      "name": "Xưởng Thuận Giao",
+      "source": "SRC-BAO-MINH-004",
+      "source_text": "Địa Chỉ Giao Hàng: 7P28XP36+FQ (Ấp Bình Thuận 2, Xã Thuận Giao, Huyện Thuận An)",
+      "match_status": "WAREHOUSE_MATCH_PENDING",
+      "notes": "Delivery address from SOURCE-04 (PO). This is the HomePro workshop/production site at Thuận Giao. Likely NOT a stock warehouse but a production consumption point.",
+      "type": "PRODUCTION_SITE"
+    }
+  ]
+}

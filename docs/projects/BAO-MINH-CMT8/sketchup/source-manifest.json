@@ -1,0 +1,56 @@
+{
+  "phase": "3A",
+  "manifest_id": "BAO-MINH-CMT8-SKP-SOURCE-MANIFEST-V1",
+  "project_id": "BAO-MINH-CMT8",
+  "generated_at": "2026-08-17T09:20:42.926Z",
+  "extraction_timestamp": "2026-08-17T09:20:42.927Z",
+  "source_lock": {
+    "directive": "SOURCE_LOCKED_READ_ONLY",
+    "modify": false,
+    "overwrite": false,
+    "rename": false,
+    "move": false
+  },
+  "file": {
+    "filename": "KHAI TRIEN VAN PHONG BAO MINH.skp",
+    "filename_original": "KHAI TRIỂN VĂN PHÒNG BẢO MINH.skp",
+    "absolute_source_path": "D:\\XUONG HOMEPRO SG\\9. THANG 08.2026\\3. VAN PHONG BAO MINH\\KHAI TRIEN VAN PHONG BAO MINH.skp",
+    "absolute_source_path_unicode": "D:\\XƯỞNG HOMEPRO SG\\9. THÁNG 08.2026\\3. VĂN PHÒNG BẢO MINH\\KHAI TRIỂN VĂN PHÒNG BẢO MINH.skp",
+    "file_size_bytes": 8733830,
+    "file_size_mb": "8.329",
+    "sha256": "664ABC00CB34EE109B7E9830D75B05D9E9921319156320ED29B17755CAC9EF72",
+    "file_format": "SketchUp Binary (.skp)",
+    "last_modified": "2026-08-15T15:41:33.722+07:00",
+    "file_extension": ".skp"
+  },
+  "sketchup_meta": {
+    "sketchup_version": "PENDING_PARSER — to be determined by Phase 3B/3C",
+    "model_units": "mm",
+    "units_source": "DIRECTIVE — confirmed mm in master directive",
+    "extraction_method": "PENDING — openskp Phase 3B + SketchUp Ruby API Phase 3C",
+    "parser_version": "openskp@latest + custom binary reader"
+  },
+  "output_directory": "docs/projects/BAO-MINH-CMT8/sketchup/",
+  "phase_outputs": {
+    "3A": "sketchup/source-manifest.json",
+    "3B": "sketchup/sketchup-raw-model.json",
+    "3C": "sketchup/sketchup-ruby-extraction.json",
+    "3D": "sketchup/component-inventory.json",
+    "3E": "sketchup/geometry-dimensions.json",
+    "3F": "sketchup/material-master.json",
+    "3G": "sketchup/material-mapping.json",
+    "3H": "sketchup/boq-mapping.json",
+    "3I": "sketchup/design-vs-survey.json",
+    "3J": "sketchup/production-items.json",
+    "3K": "sketchup/edge-banding-layers.json",
+    "3L": "sketchup/production-preview.json",
+    "3Q": "BAO-MINH-SKETCHUP-PRODUCTION-REPORT.md"
+  },
+  "lineage": {
+    "project": "BAO-MINH-CMT8",
+    "design_source": "Phase 1 — 26.07.22 HS TKYT NOI THAT VP BAO MINH CHI NHANH.pdf",
+    "survey_source": "Phase 2 — SURVEY-SOURCE-MANIFEST.json",
+    "sketchup_source": "Phase 3 — KHAI TRIEN VAN PHONG BAO MINH.skp",
+    "sha256_lock": "664ABC00CB34EE109B7E9830D75B05D9E9921319156320ED29B17755CAC9EF72"
+  }
+}

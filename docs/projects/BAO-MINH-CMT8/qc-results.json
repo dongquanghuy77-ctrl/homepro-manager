@@ -1,0 +1,115 @@
+{
+  "generated_at": "2026-08-17T13:03:12.910Z",
+  "commit": "3940b4b",
+  "checks": [
+    {
+      "id": "001",
+      "name": "Missing classification",
+      "status": "PASS",
+      "severity": "HIGH",
+      "count": 0,
+      "items": [],
+      "note": "All files must be classified"
+    },
+    {
+      "id": "002",
+      "name": "Duplicate files (SHA-256)",
+      "status": "PASS",
+      "severity": "MEDIUM",
+      "count": 0,
+      "items": [],
+      "note": "Exact duplicate files detected by SHA-256"
+    },
+    {
+      "id": "003",
+      "name": "Scope conflict files",
+      "status": "FAIL",
+      "severity": "HIGH",
+      "count": 2,
+      "items": [
+        "BANG MÃ VAN BMS T15.xlsx: CONFLICT: filename=T15, content=Tang9 — needs human confirmation",
+        "BANG MÃ VAN BMS T15.xlsx: CONFLICT: filename=T15, content=Tang9 — needs human confirmation"
+      ],
+      "note": "Files with project/floor scope mismatch"
+    },
+    {
+      "id": "004",
+      "name": "ERP blocked files",
+      "status": "WARN",
+      "severity": "MEDIUM",
+      "count": 4,
+      "items": [
+        "1786726627657_1791217085357045439_g3012541106012426922_e4755e8fa6569051e856c28d06013beb.jpg",
+        "1786756872391_1379853987600875586_g5812822616793222863_c8a560649f682cbfe246f0671b9e3186.jpg",
+        "1786756934695_8137523709257542538_g4656990525555217860_a3dde3d13c3d830d2f4b8a5f988de892.jpg",
+        "1786759210828_2001472300353136802_g3081737217842092960_b55026a92fe9b1e21dba2b7397dbd36d.jpg"
+      ],
+      "note": "Files with ERP transactions blocked pending approval"
+    },
+    {
+      "id": "005",
+      "name": "NT-23 directive correction documented",
+      "status": "PASS",
+      "severity": "HIGH",
+      "count": 1,
+      "items": [
+        "NT-23.pdf — RECEPTION_COUNTER (was CURTAIN_RAIL) — documented in NT-23-ANALYSIS.md, CONFLICT-002"
+      ],
+      "note": "Critical correction documented and confirmed"
+    },
+    {
+      "id": "006",
+      "name": "ERP transaction count = 0",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "count": 0,
+      "items": [],
+      "note": "No ERP transactions created. Correct behavior."
+    },
+    {
+      "id": "007",
+      "name": "Orphan source files (unknown project)",
+      "status": "PASS",
+      "severity": "MEDIUM",
+      "count": 0,
+      "items": [],
+      "note": "Files not linked to a confirmed project"
+    },
+    {
+      "id": "008",
+      "name": "Unanalyzed PDF files",
+      "status": "PASS",
+      "severity": "MEDIUM",
+      "count": 0,
+      "items": [],
+      "note": "PDF files not yet analyzed"
+    },
+    {
+      "id": "009",
+      "name": "BOQ items without confirmed drawing reference",
+      "status": "WARN",
+      "severity": "MEDIUM",
+      "count": 8,
+      "items": [
+        "A.I.4",
+        "B.II.7",
+        "C.I.4",
+        "C.II.1",
+        "D.I.4",
+        "D.I.9",
+        "E.I.6",
+        "E.I.7"
+      ],
+      "note": "14 clarification items; 8 without dimension/material"
+    },
+    {
+      "id": "010",
+      "name": "Production queue = 0 (pre-approval)",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "count": 0,
+      "items": [],
+      "note": "No production orders. Correct — SKP issues unresolved."
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "qcReport": {
+    "source_rows": 82,
+    "normalized_rows": 82,
+    "client_supplied": 25,
+    "not_executed": 7,
+    "ready_for_review": 0,
+    "missing_quantity": 0,
+    "missing_price": 49,
+    "needs_review": 14,
+    "orphan": 0,
+    "duplicate": 0,
+    "fail": 0,
+    "blocker": 0,
+    "issues": []
+  },
+  "itemCount": 82,
+  "sectionStats": {
+    "A": {
+      "name": "PHÒNG HỌP",
+      "count": 7,
+      "client_supplied": 1,
+      "not_executed": 0,
+      "missing_price": 6,
+      "missing_qty": 0
+    },
+    "B": {
+      "name": "PHÒNG LÀM VIỆC",
+      "count": 33,
+      "client_supplied": 8,
+      "not_executed": 0,
+      "missing_price": 25,
+      "missing_qty": 0
+    },
+    "C": {
+      "name": "PHÒNG GIÁM ĐỐC CHI NHÁNH",
+      "count": 11,
+      "client_supplied": 4,
+      "not_executed": 0,
+      "missing_price": 7,
+      "missing_qty": 0
+    },
+    "D": {
+      "name": "PHÒNG PANTRY",
+      "count": 12,
+      "client_supplied": 3,
+      "not_executed": 5,
+      "missing_price": 4,
+      "missing_qty": 0
+    },
+    "E": {
+      "name": "PHÒNG CHỦ TỊCH",
+      "count": 16,
+      "client_supplied": 9,
+      "not_executed": 0,
+      "missing_price": 6,
+      "missing_qty": 0
+    },
+    "F": {
+      "name": "HÀNH LANG",
+      "count": 2,
+      "client_supplied": 0,
+      "not_executed": 2,
+      "missing_price": 0,
+      "missing_qty": 0
+    },
+    "G": {
+      "name": "CHI PHÍ KHÁC",
+      "count": 1,
+      "client_supplied": 0,
+      "not_executed": 0,
+      "missing_price": 1,
+      "missing_qty": 0
+    }
+  }
+}

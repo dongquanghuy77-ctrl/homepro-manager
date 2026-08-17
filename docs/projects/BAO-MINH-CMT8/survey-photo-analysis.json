@@ -1,0 +1,943 @@
+{
+  "analysis_id": "BAO-MINH-CMT8-PHOTO-ANALYSIS-V1",
+  "project_id": "BAO-MINH-CMT8",
+  "survey_id": "BAO-MINH-CMT8-SURVEY-T15",
+  "generated_at": "2026-08-17T09:13:52.211Z",
+  "analyst_note": "All observations derived strictly from visual evidence in source photos. No inferred quantities.",
+  "survey_photos": [
+    {
+      "file_id": "S01",
+      "zone_observed": "PHONG_LAM_VIEC",
+      "zone_code": "B",
+      "construction_phase": "DEMOLITION_IN_PROGRESS",
+      "observations": [
+        "Old plasterboard ceiling and partitions removed — exposed concrete slab visible",
+        "Existing MEP systems: red fire suppression pipes, white HVAC ducts, blue and yellow wiring runs visible at slab soffit",
+        "Concrete slab height visible — sets actual finished ceiling height constraints",
+        "Demolished partition debris on floor — gypsum board fragments, dust, old wall panels",
+        "Gold-anodised steel stud framing (khung xuong thep) erected — new partition layout in progress",
+        "Glazed curtain wall (cua kinh) visible on far elevation — city skyline backdrop confirms high-rise location"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S01-01",
+          "severity": "HIGH",
+          "description": "Dense MEP network at slab soffit — HVAC ducts, fire pipes, conduit — will reduce usable ceiling plenum. Risk of insufficient clearance for new suspended ceiling system (tran thach cao)."
+        },
+        {
+          "risk_id": "R-S01-02",
+          "severity": "MEDIUM",
+          "description": "Demolition debris volume is large — disposal cost and time may not be captured in BOQ."
+        }
+      ],
+      "boq_relevance": [
+        "B.I.1 Tran thach cao phong lam viec",
+        "B.II Vach ngan",
+        "DEMO_COST"
+      ]
+    },
+    {
+      "file_id": "S02",
+      "zone_observed": "PHONG_LAM_VIEC",
+      "zone_code": "B",
+      "construction_phase": "DEMOLITION_IN_PROGRESS",
+      "observations": [
+        "Partition demolition in progress — steel stud frames being erected simultaneously",
+        "Flexible HVAC duct (ong mem bac nhiet linh kien) hanging from slab — major branch duct from chiller",
+        "Blue electrical cable bundles routed along slab — existing building services retained",
+        "Polished existing floor tiles still in place — light grey 600x600 format"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S02-01",
+          "severity": "HIGH",
+          "description": "Flexible HVAC duct routing appears chaotic — needs coordination with new suspended ceiling grid before installation."
+        },
+        {
+          "risk_id": "R-S02-02",
+          "severity": "LOW",
+          "description": "Existing floor tiles may need surface preparation before new carpet/flooring installation."
+        }
+      ],
+      "boq_relevance": [
+        "B.I.1 Tran",
+        "MEP_COORDINATION",
+        "San"
+      ]
+    },
+    {
+      "file_id": "S03",
+      "zone_observed": "MULTI_ZONE",
+      "zone_code": "B_C",
+      "construction_phase": "SURVEY_REFERENCE",
+      "observations": [
+        "Wide view of entire floor plate — confirms open plan layout before partition installation",
+        "Full suite of existing MEP systems visible: rectangular galvanised HVAC ductwork (ong gio vuong ma kem), flexible insulated branches, fire suppression mains, electrical trays",
+        "A/C cassette units visible mounted at slab — existing FCU positions",
+        "Worker on site with materials — confirms active construction",
+        "Stacks of prefabricated ceiling tiles on floor (white, grid system) — likely recycled/reused from demolished area",
+        "Stack of galvanised ductwork sections on floor — new duct materials delivered"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S03-01",
+          "severity": "HIGH",
+          "description": "Rectangular HVAC ductwork is large-section — will consume significant ceiling plenum. Coordinate with finished ceiling height in design documents."
+        }
+      ],
+      "boq_relevance": [
+        "HVAC_MEP",
+        "B.I.1",
+        "C.I.1"
+      ]
+    },
+    {
+      "file_id": "S04",
+      "zone_observed": "PHONG_CHU_TICH",
+      "zone_code": "E",
+      "construction_phase": "SURVEY_REFERENCE",
+      "observations": [
+        "Surveyor team (2 persons in work clothes) on site inspecting",
+        "Large open area — high-ceiling floor plate with city panoramic window view",
+        "MEP: large rectangular duct, fire mains (red), multiple HVAC branches",
+        "Stack of metal profiles (L-section steel) on floor — new structural elements delivered",
+        "Confirms floor area is clear for new layout"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S04-01",
+          "severity": "MEDIUM",
+          "description": "Heavy steel profile materials on floor — confirm delivery logistics and floor load capacity."
+        }
+      ],
+      "boq_relevance": [
+        "E.I.1 Phong Chu Tich",
+        "MEP_COORDINATION"
+      ]
+    },
+    {
+      "file_id": "S05",
+      "zone_observed": "PHONG_CHU_TICH",
+      "zone_code": "E",
+      "construction_phase": "SURVEY_REFERENCE",
+      "observations": [
+        "Similar to S04 — wide angle showing full open plan of zone E",
+        "Large insulated HVAC duct runs visible — octopus junction boxes at slab",
+        "Two survey team members visible — confirms formal site walkthrough",
+        "Stack of ceiling grid / tee-bar system materials on floor (right side)"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [],
+      "boq_relevance": [
+        "E.I.1",
+        "Tran thach cao"
+      ]
+    },
+    {
+      "file_id": "S06",
+      "zone_observed": "PHONG_LAM_VIEC_HANH_LANG",
+      "zone_code": "B_CORRIDOR",
+      "construction_phase": "DEMOLITION_IN_PROGRESS",
+      "observations": [
+        "Area near elevator core / secondary entrance — door visible",
+        "Large insulated HVAC duct routing down from slab junction",
+        "Existing ceiling tiles removed and stacked on floor (white mineral fibre grid tiles)",
+        "Multiple cable bundles hanging loose from slab — existing electrical infrastructure",
+        "Electrical distribution board (tu dien chinh) mounted on wall — white enclosure with panel label",
+        "Fire extinguishers visible near entry — safety equipment in place"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S06-01",
+          "severity": "HIGH",
+          "description": "Loose cable bundles hanging from slab — electrical safety hazard during construction. Must be secured or de-energised."
+        },
+        {
+          "risk_id": "R-S06-02",
+          "severity": "HIGH",
+          "description": "Large HVAC duct descends to slab level near working area — major routing obstacle for new ceiling."
+        }
+      ],
+      "boq_relevance": [
+        "B.I.1",
+        "MEP",
+        "ELECTRICAL_BOARD"
+      ]
+    },
+    {
+      "file_id": "S07",
+      "zone_observed": "PHONG_CHU_TICH",
+      "zone_code": "E",
+      "construction_phase": "DEMOLITION_IN_PROGRESS",
+      "observations": [
+        "Demolition debris zone — gypsum board and plaster fragments, cardboard, dust",
+        "Active demolition with scaffolding frame (gian giap) erected",
+        "Gold-anodised steel stud partition frames visible — new partition skeleton in place",
+        "Vertical flexible HVAC duct visible — routing to ceiling void",
+        "City view through floor-to-ceiling glazing",
+        "Black plastic waste bags filled with demolition waste"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S07-01",
+          "severity": "HIGH",
+          "description": "Demolition and new partition erection happening simultaneously — risk of damage to new frames from debris."
+        },
+        {
+          "risk_id": "R-S07-02",
+          "severity": "MEDIUM",
+          "description": "Scaffolding inside unit — confirm removal timeline does not delay ceiling works."
+        }
+      ],
+      "boq_relevance": [
+        "DEMO",
+        "Vach ngan",
+        "E.I.1"
+      ]
+    },
+    {
+      "file_id": "S08",
+      "zone_observed": "PHONG_LAM_VIEC",
+      "zone_code": "B",
+      "construction_phase": "DEMOLITION_IN_PROGRESS",
+      "observations": [
+        "Mid-demo state — heavy debris field, broken gypsum tile pieces, plaster chunks, cardboard",
+        "Gold-anodised steel stud frames being installed simultaneously with demo ongoing",
+        "Flexible insulated HVAC ducts hanging from slab — multiple branches",
+        "City skyline visible through glazing",
+        "Scaffolding frame visible — ceiling works ongoing",
+        "Waste material in black bags accumulating at window zone"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S08-01",
+          "severity": "HIGH",
+          "description": "Heavy debris volume on floor combined with scaffolding — high fall/trip hazard for workers."
+        },
+        {
+          "risk_id": "R-S08-02",
+          "severity": "MEDIUM",
+          "description": "New partition frames installed before debris cleared — stud alignment may be compromised."
+        }
+      ],
+      "boq_relevance": [
+        "DEMO",
+        "B.II Vach ngan",
+        "B.I Tran"
+      ]
+    },
+    {
+      "file_id": "S09",
+      "zone_observed": "PHONG_LAM_VIEC",
+      "zone_code": "B",
+      "construction_phase": "DEMOLITION_COMPLETE",
+      "observations": [
+        "Debris mostly cleared — floor visible and mostly clean",
+        "Large insulated HVAC duct junction (octopus) at slab — central distribution point",
+        "Multiple flexible branches from main duct",
+        "Existing ceiling tiles removed — open slab visible",
+        "Scaffolding remains for ceiling access",
+        "Black waste bags near windows — last phase of waste collection"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S09-01",
+          "severity": "HIGH",
+          "description": "Central HVAC junction at slab is massive — will significantly impact ceiling design and room height."
+        }
+      ],
+      "boq_relevance": [
+        "HVAC_EXISTING",
+        "Tran thach cao",
+        "MEP_COORDINATION"
+      ]
+    },
+    {
+      "file_id": "S10",
+      "zone_observed": "PHONG_HOP_PHONG_GD",
+      "zone_code": "A_C",
+      "construction_phase": "CONSTRUCTION_IN_PROGRESS",
+      "observations": [
+        "Zone with existing tile floor visible — grey 600x600 format",
+        "Stack of prefabricated ceiling panels on floor (white mineral fibre, standard grid)",
+        "Large rectangular galvanised HVAC duct installed",
+        "Fire mains (red pipes) with sprinkler drops",
+        "Brown wooden door (cua go) — existing door retained or new door installed",
+        "White electrical cabinet on wall (may be existing building services)",
+        "Worker seated — inspection in progress",
+        "New galvanised ductwork section on floor — awaiting installation"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S10-01",
+          "severity": "MEDIUM",
+          "description": "Mix of new and old ductwork on-site — risk of incorrect installation sequence."
+        }
+      ],
+      "boq_relevance": [
+        "A.I.1 Phong Hop",
+        "C.I.1 Phong GD CN",
+        "Tran thach cao",
+        "Cu a"
+      ]
+    },
+    {
+      "file_id": "S11",
+      "zone_observed": "PHONG_CHU_TICH_PHONG_GD",
+      "zone_code": "E_C",
+      "construction_phase": "CONSTRUCTION_IN_PROGRESS",
+      "observations": [
+        "Survey team (3 persons) in large open area — active site inspection with documents",
+        "Floor is clean tile — light grey polished",
+        "MEP: large insulated duct octopus junction at slab",
+        "Fire mains, electrical conduit, data cable trays at slab",
+        "Stack of framing profiles and insulated panels on right — materials staged",
+        "City panoramic view confirms window-facing elevation"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [],
+      "boq_relevance": [
+        "E.I.1",
+        "C.I.1",
+        "MEP_COORDINATION"
+      ]
+    },
+    {
+      "file_id": "S12",
+      "zone_observed": "PHONG_CHU_TICH",
+      "zone_code": "E",
+      "construction_phase": "CONSTRUCTION_IN_PROGRESS",
+      "observations": [
+        "Survey team inspecting near another zone boundary",
+        "Insulated HVAC duct makes dramatic descent from slab to near-floor level — risk item",
+        "Ceiling tile panels stacked on right — Tran thach cao vat lieu delivered",
+        "Existing door frame (white, recessed) on left elevation",
+        "Slab soffit exposed — confirms ceiling void accessible"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S12-01",
+          "severity": "HIGH",
+          "description": "HVAC duct descends nearly to floor level — must be rerouted before ceiling installation. Rerouting cost may not be in BOQ."
+        }
+      ],
+      "boq_relevance": [
+        "E.I.1",
+        "HVAC_REROUTE",
+        "Tran thach cao"
+      ]
+    },
+    {
+      "file_id": "S13",
+      "zone_observed": "PHONG_LAM_VIEC_HANH_LANG",
+      "zone_code": "B_CORRIDOR",
+      "construction_phase": "CONSTRUCTION_IN_PROGRESS",
+      "observations": [
+        "Area with secondary entrance/elevator lobby visible",
+        "Large insulated HVAC duct with exposed insulation (bac nhiet ong gio) — partially damaged insulation",
+        "Dense cable bundle hanging loose from slab — electrical infrastructure",
+        "Ceiling tile panels stacked on right — staged for installation",
+        "Electrical distribution board and panels on wall",
+        "Fire extinguishers at access point",
+        "Floor shows 2-tone: polished tile on left, exposed screed on right (boundary of old and new construction zones)"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S13-01",
+          "severity": "HIGH",
+          "description": "Loose cable mass hanging from slab — electrical safety hazard. Cables must be organised and anchored before any ceiling works in this area."
+        },
+        {
+          "risk_id": "R-S13-02",
+          "severity": "MEDIUM",
+          "description": "Damaged HVAC duct insulation — must be repaired before enclosed ceiling installation (mould/moisture risk)."
+        }
+      ],
+      "boq_relevance": [
+        "MEP",
+        "Tran",
+        "Hanh lang"
+      ]
+    },
+    {
+      "file_id": "S14",
+      "zone_observed": "MULTI_ZONE",
+      "zone_code": "ALL",
+      "construction_phase": "SURVEY_REFERENCE",
+      "observations": [
+        "Wide-angle view of full floor plate from window-side",
+        "Confirms open plan layout before partition works",
+        "Dense MEP network at slab: rectangular ducts, insulated branches, red fire mains, cable trays",
+        "Survey team (2 persons) mid-discussion with documents",
+        "Stack of materials (framing, panels) on right side",
+        "Full-height glazed curtain wall on entire window elevation",
+        "Floor plate: tile in centre, screed/concrete at edges — demarcation of fit-out zones"
+      ],
+      "key_dimensions_visible": [],
+      "risks": [
+        {
+          "risk_id": "R-S14-01",
+          "severity": "HIGH",
+          "description": "MEP density across entire floor plate — every zone will have ceiling coordination challenges."
+        }
+      ],
+      "boq_relevance": [
+        "ALL_ZONES",
+        "MEP_COORDINATION",
+        "Tran thach cao"
+      ]
+    }
+  ],
+  "material_analysis": [
+    {
+      "file_id": "M01",
+      "material_type": "TAM_OP_THAN_TRE",
+      "brand": "iWood",
+      "model": "MA PRO-3",
+      "series": "Van Da - Marble",
+      "specifications": {
+        "day_mm": 8,
+        "rong_mm": 1220,
+        "chieu_dai_options_m": [
+          2,
+          2.44,
+          2.8,
+          3,
+          3.3,
+          3.6,
+          4
+        ],
+        "surface": "Film PVC van da trang (white marble)"
+      },
+      "usage_intent": "Tam op tuong trang tri (decorative wall cladding)",
+      "boq_relevance": [
+        "E.II Vach op phong chu tich",
+        "A.II Vach op phong hop"
+      ]
+    },
+    {
+      "file_id": "M02",
+      "material_type": "TAM_OP_THAN_TRE",
+      "brand": "iWood",
+      "model": "MA PRO-3",
+      "series": "Van Da - Marble",
+      "content": "Showroom render showing application on feature wall (reception lobby) — reference for installation look",
+      "boq_relevance": [
+        "E.II",
+        "A.II"
+      ]
+    },
+    {
+      "file_id": "M03",
+      "material_type": "REFERENCE_RENDER",
+      "content": "Interior design render — lounge/VIP waiting area with trophy display shelving, sofa, plants — director office aesthetic reference",
+      "boq_relevance": [
+        "E.I Phong Chu Tich"
+      ]
+    },
+    {
+      "file_id": "M04",
+      "material_type": "MAU_VAI_TAPHAM",
+      "brand": "CCCM",
+      "model": "CCCM 802",
+      "specifications": {
+        "colour": "Cream / off-white",
+        "texture": "Smooth faux leather / vinyl"
+      },
+      "usage_intent": "Boc bi ghe / sofa",
+      "boq_relevance": [
+        "NOI_THAT_PHONG_CHU_TICH",
+        "NOI_THAT_PHONG_HOP"
+      ]
+    },
+    {
+      "file_id": "M05",
+      "material_type": "VAT_LIEU_TONG_HOP",
+      "items": [
+        {
+          "brand": "An Cuong",
+          "model": "Melamine MDF MUF MS 608EV",
+          "type": "Van go cong nghiep",
+          "specs": "Melamine 2 mat"
+        },
+        {
+          "brand": "An Cuong",
+          "model": "Len Tuong MS 4017T",
+          "type": "Van len tuong / skirting panel"
+        },
+        {
+          "brand": "Kinh thuy tinh tro",
+          "type": "Bronze/dark tinted glass panel — showroom/partition glass",
+          "note": "Sticky note label visible: Kinh thuy tinh tro"
+        },
+        {
+          "brand": "CCCM",
+          "model": "CCCM 810",
+          "colour": "Gold/tan/khaki",
+          "type": "Fabric upholstery"
+        }
+      ],
+      "boq_relevance": [
+        "Van go noi that",
+        "Vach kinh",
+        "Upholstery"
+      ]
+    },
+    {
+      "file_id": "M06",
+      "material_type": "VAT_LIEU_TONG_HOP",
+      "items": [
+        {
+          "brand": "An Cuong",
+          "model": "Melamine MDF MUF MS 608EV",
+          "type": "Van go cong nghiep"
+        },
+        {
+          "brand": "An Cuong",
+          "model": "Len Tuong MS 4017T",
+          "type": "Van len tuong"
+        },
+        {
+          "brand": "Kinh thuy tinh tro",
+          "type": "Bronze tinted glass"
+        },
+        {
+          "brand": "CCCM",
+          "model": "CCCM 823",
+          "colour": "Cognac brown",
+          "type": "Fabric upholstery"
+        }
+      ],
+      "boq_relevance": [
+        "Van go noi that",
+        "Vach kinh",
+        "Upholstery"
+      ]
+    },
+    {
+      "file_id": "M07",
+      "material_type": "MAU_TUYEN_CHON",
+      "content": "Material selection board — carpet tiles (blue/orange pattern visible at top), two wood flooring options (one crossed = REJECTED, one ticked = SELECTED), iWood marble tile (ticked = SELECTED)",
+      "selected_materials": [
+        {
+          "type": "San van go",
+          "brand": "An Cuong",
+          "model": "AC 4017PL Mellow Chestnut",
+          "status": "SELECTED"
+        },
+        {
+          "type": "Tran/vach op",
+          "brand": "iWood",
+          "model": "MA PRO-3 marble tile",
+          "status": "SELECTED"
+        }
+      ],
+      "rejected_materials": [
+        {
+          "type": "San van go",
+          "note": "Another An Cuong panel (lighter tone) — marked X = REJECTED"
+        }
+      ],
+      "boq_relevance": [
+        "San van go",
+        "Tran/vach iWood"
+      ]
+    }
+  ],
+  "procurement_receipts": [
+    {
+      "file_id": "P01",
+      "document": "PHIEU_NHAP_KHO",
+      "title": "THAN TRE - KHOI LUONG VAN VA CHI DAN CANH VP BAO MINH",
+      "supplier": "N/A",
+      "date": "N/A",
+      "items": [
+        {
+          "stt": 1,
+          "ten_ma": "THAN TRE (KT: 1220 x 2440 x 8)mm",
+          "dvt": "TAM",
+          "so_luong": 10
+        }
+      ],
+      "boq_linkage": [
+        {
+          "boq_ref": "Tam op than tre iWood MA PRO-3",
+          "qty_ordered": 10,
+          "unit": "TAM",
+          "note": "Matches M01/M02 material selection"
+        }
+      ],
+      "risks": []
+    },
+    {
+      "file_id": "P02",
+      "document": "XAC_NHAN_DON_HANG",
+      "supplier": "Hang Nghi (Viet My)",
+      "total_vnd": 38220754,
+      "vat": "8% included",
+      "items": [
+        {
+          "sku": "111G 2M LMR 17MM DW",
+          "qty": 65,
+          "unit_price": 420292,
+          "total": 27318980,
+          "note": "LMR = Laminate/MDF-core board 17mm — door/cabinet substrate"
+        },
+        {
+          "sku": "111G 2M LMR 9MM DW",
+          "qty": 26,
+          "unit_price": 300499,
+          "total": 7812974,
+          "note": "LMR 9mm — thinner substrate"
+        },
+        {
+          "sku": "CHI 111SH 21x0.8mm SM",
+          "qty": 2,
+          "unit_price": 140400,
+          "total": 280800,
+          "note": "Edge banding roll 21mm width"
+        },
+        {
+          "sku": "CHI 111SH 43x0.8mm SM",
+          "qty": 8,
+          "unit_price": 351000,
+          "total": 2808000,
+          "note": "Edge banding roll 43mm width"
+        }
+      ],
+      "boq_linkage": [
+        {
+          "boq_ref": "Van noi that/tu/ban",
+          "note": "LMR substrate boards for cabinet/furniture manufacturing"
+        }
+      ],
+      "risks": [
+        {
+          "risk_id": "R-P02-01",
+          "severity": "MEDIUM",
+          "description": "65+26=91 tam LMR received — large volume. Confirm matches BOM for Bao Minh furniture scope."
+        }
+      ]
+    },
+    {
+      "file_id": "P03",
+      "document": "HOA_DON_XUAT_KHO",
+      "supplier": "Tong kho 1 (An Cuong authorized distributor implied)",
+      "customer": "Homepro",
+      "total_vnd": 3014388,
+      "items": [
+        {
+          "sku": "250003217",
+          "ten_hang": "Chi PVC 9205 44x0.8mm",
+          "dvt": "Met",
+          "qty": 30,
+          "unit_price": 4370,
+          "total": 131100,
+          "note": "PVC edge banding 44mm"
+        },
+        {
+          "sku": "500005562",
+          "ten_hang": "Van MELMDF 9205S MUFSTD 1220x2440x17mm",
+          "dvt": "Tam",
+          "qty": 4,
+          "unit_price": 665000,
+          "total": 2660000,
+          "note": "Moisture-resistant Melamine MDF 17mm"
+        }
+      ],
+      "boq_linkage": [
+        {
+          "boq_ref": "Van MDF chong am noi that",
+          "note": "Moisture-resistant boards — pantry/wet area furniture"
+        }
+      ],
+      "risks": []
+    },
+    {
+      "file_id": "P04",
+      "document": "DON_DAT_HANG",
+      "doc_no": "DHQ12.26008450",
+      "date": "2026-08-14",
+      "supplier": "VietinBank account supplier",
+      "customer": "Homepro",
+      "total_incl_vat": 56858760,
+      "items": [
+        {
+          "sku": "LMRDW-17-ML2.SC010MW",
+          "desc": "Van LMR DW 17mm Melamine 2 mat SC010MW",
+          "qty": 67,
+          "net_price": 479400,
+          "net_total": 32119800
+        },
+        {
+          "sku": "LMRDW-8-ML2.SC010MW",
+          "desc": "Van LMR DW 8mm Melamine 2 mat SC010MW",
+          "qty": 21,
+          "net_price": 329000,
+          "net_total": 6909000
+        },
+        {
+          "sku": "CSC010M-21x0.8",
+          "desc": "Chi SC010M 21x0.8mm",
+          "qty": 2,
+          "net_price": 169200,
+          "net_total": 338400
+        },
+        {
+          "sku": "CSC010M-43x0.8",
+          "desc": "Chi SC010M 43x0.8mm",
+          "qty": 6,
+          "net_price": 347800,
+          "net_total": 2086800
+        },
+        {
+          "sku": "LMRDW-17-ML2.XAM200T",
+          "desc": "Van LMR DW 17mm Melamine 2 mat Xam 200T",
+          "qty": 6,
+          "net_price": 385000,
+          "net_total": 2310000
+        },
+        {
+          "sku": "CXAMCT-21x0.8",
+          "desc": "Chi Xam chi T 21x0.8mm",
+          "qty": 1,
+          "net_price": 169200,
+          "net_total": 169200
+        },
+        {
+          "sku": "CXAMCT-43x0.8",
+          "desc": "Chi Xam chi T 43x0.8mm",
+          "qty": 1,
+          "net_price": 347800,
+          "net_total": 347800
+        },
+        {
+          "sku": "LMRDWE2-17",
+          "desc": "LDF E2 LMR Premium 17mm",
+          "qty": 20,
+          "net_price": 329000,
+          "net_total": 6580000
+        },
+        {
+          "sku": "LMRDWE2-8",
+          "desc": "LDF E2 LMR Premium 8mm",
+          "qty": 10,
+          "net_price": 178600,
+          "net_total": 1786000
+        }
+      ],
+      "boq_linkage": [
+        {
+          "boq_ref": "Van go noi that (LMR + Melamine)",
+          "note": "Primary board supply for all furniture — matches material selections M05/M06"
+        },
+        {
+          "boq_ref": "Chi dan canh (edge banding)",
+          "note": "Matching edge banding for all board types"
+        }
+      ],
+      "risks": [
+        {
+          "risk_id": "R-P04-01",
+          "severity": "MEDIUM",
+          "description": "Total 67+21+20+10 = 118 tam boards ordered. Confirm BOM quantities match design scope."
+        },
+        {
+          "risk_id": "R-P04-02",
+          "severity": "LOW",
+          "description": "6 tam Xam 200T (grey) ordered separately — confirm this is for a specific zone/application (may be server room or secondary zone)."
+        }
+      ]
+    }
+  ],
+  "construction_risk_summary": [
+    {
+      "risk_id": "RISK-001",
+      "severity": "HIGH",
+      "category": "MEP_COORDINATION",
+      "description": "Entire floor plate has dense existing MEP at slab soffit (HVAC ducts, fire mains, cable trays). Effective ceiling plenum will be significantly reduced. This may require design adjustment to finished ceiling height or rerouting of services.",
+      "affected_zones": [
+        "B",
+        "C",
+        "E",
+        "A"
+      ],
+      "evidence_files": [
+        "S01",
+        "S02",
+        "S03",
+        "S06",
+        "S09",
+        "S10",
+        "S14"
+      ]
+    },
+    {
+      "risk_id": "RISK-002",
+      "severity": "HIGH",
+      "category": "ELECTRICAL_SAFETY",
+      "description": "Multiple loose cable bundles hanging from slab — bare conductors visible. Must be de-energised, labelled, and secured before any ceiling works.",
+      "affected_zones": [
+        "B_CORRIDOR",
+        "B"
+      ],
+      "evidence_files": [
+        "S06",
+        "S13"
+      ]
+    },
+    {
+      "risk_id": "RISK-003",
+      "severity": "HIGH",
+      "category": "HVAC_REROUTE",
+      "description": "At least 2 locations where HVAC duct descends dramatically close to floor level — these ducts must be rerouted before partition and ceiling installation.",
+      "affected_zones": [
+        "E",
+        "B_CORRIDOR"
+      ],
+      "evidence_files": [
+        "S12",
+        "S13"
+      ]
+    },
+    {
+      "risk_id": "RISK-004",
+      "severity": "HIGH",
+      "category": "DEMOLITION_SEQUENCE",
+      "description": "In several zones, new partition steel stud frames are being erected while demolition debris is still present — risk of structural damage to new frames and worker safety.",
+      "affected_zones": [
+        "B",
+        "E"
+      ],
+      "evidence_files": [
+        "S07",
+        "S08"
+      ]
+    },
+    {
+      "risk_id": "RISK-005",
+      "severity": "MEDIUM",
+      "category": "BOM_QUANTITY",
+      "description": "Large volume of boards received (P02: 91 LMR boards, P04: 118 boards) — should be reconciled against final BOM to confirm no over-supply or scope creep.",
+      "affected_zones": [
+        "ALL"
+      ],
+      "evidence_files": [
+        "P02",
+        "P04"
+      ]
+    },
+    {
+      "risk_id": "RISK-006",
+      "severity": "MEDIUM",
+      "category": "DAMAGED_INSULATION",
+      "description": "At S13, HVAC duct insulation appears partially damaged — must be repaired/replaced before enclosing within suspended ceiling (moisture/mould risk).",
+      "affected_zones": [
+        "B_CORRIDOR"
+      ],
+      "evidence_files": [
+        "S13"
+      ]
+    },
+    {
+      "risk_id": "RISK-007",
+      "severity": "LOW",
+      "category": "WASTE_DISPOSAL",
+      "description": "Large demolition debris volume — disposal cost may not be fully captured in BOQ.",
+      "affected_zones": [
+        "B",
+        "E"
+      ],
+      "evidence_files": [
+        "S07",
+        "S08",
+        "S09"
+      ]
+    }
+  ],
+  "material_selections_confirmed": [
+    {
+      "material": "Tam op than tre iWood MA PRO-3 (Marble)",
+      "status": "CONFIRMED_SELECTED",
+      "evidence": [
+        "M01",
+        "M02",
+        "M07"
+      ],
+      "boq_ref": "Tam op tuong trang tri"
+    },
+    {
+      "material": "San van go An Cuong AC 4017PL Mellow Chestnut",
+      "status": "CONFIRMED_SELECTED",
+      "evidence": [
+        "M07"
+      ],
+      "boq_ref": "San van go"
+    },
+    {
+      "material": "Van go noi that An Cuong MS 608EV Melamine + MS 4017T Len Tuong",
+      "status": "CONFIRMED_SELECTED",
+      "evidence": [
+        "M05",
+        "M06",
+        "P03",
+        "P04"
+      ],
+      "boq_ref": "Van go noi that/tu"
+    },
+    {
+      "material": "CCCM 810 (gold/tan)",
+      "status": "UNDER_CONSIDERATION",
+      "evidence": [
+        "M05"
+      ],
+      "boq_ref": "Boc bi sofa/ghe"
+    },
+    {
+      "material": "CCCM 823 (cognac)",
+      "status": "UNDER_CONSIDERATION",
+      "evidence": [
+        "M06"
+      ],
+      "boq_ref": "Boc bi sofa/ghe"
+    },
+    {
+      "material": "CCCM 802 (cream)",
+      "status": "UNDER_CONSIDERATION",
+      "evidence": [
+        "M04"
+      ],
+      "boq_ref": "Boc bi sofa/ghe"
+    },
+    {
+      "material": "Kinh thuy tinh tro (bronze tinted glass)",
+      "status": "UNDER_CONSIDERATION",
+      "evidence": [
+        "M05",
+        "M06"
+      ],
+      "boq_ref": "Vach kinh / cua kinh"
+    }
+  ],
+  "lineage": {
+    "survey_date": "2026-08-17",
+    "photo_source": "D:\\XUONG HOMEPRO SG\\9. THANG 08.2026\\3. VAN PHONG BAO MINH\\HINH ANH KICH THUOC THUC TE",
+    "material_source": "D:\\XUONG HOMEPRO SG\\9. THANG 08.2026\\3. VAN PHONG BAO MINH\\HINH ANH VAT LIEU",
+    "receipt_source": "D:\\XUONG HOMEPRO SG\\9. THANG 08.2026\\3. VAN PHONG BAO MINH\\PHIEU NHAP VAT TU",
+    "linked_survey_json": "docs/projects/BAO-MINH-CMT8/survey.json",
+    "linked_zone_master": "docs/projects/BAO-MINH-CMT8/zone-master.json",
+    "linked_kl_crossref": "docs/projects/BAO-MINH-CMT8/kl-crossref.json",
+    "analyst_constraint": "STRICTLY_NO_ERP_TRANSACTIONS — phase is survey documentation only"
+  }
+}

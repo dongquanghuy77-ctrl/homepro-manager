@@ -1,0 +1,103 @@
+{
+  "project_id": "BAO-MINH-CMT8",
+  "check_at": "2026-08-17T08:59:29.020Z",
+  "project_data": {
+    "visible": true,
+    "fields": 8,
+    "ok": 8
+  },
+  "zones": {
+    "count": 8,
+    "visible": true
+  },
+  "documents": {
+    "count": 2,
+    "visible": true
+  },
+  "modules": [
+    {
+      "module": "Dự án",
+      "file_exists": false,
+      "required": true,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Hồ sơ",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Thiết kế",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Khảo sát",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "BOQ",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Vật tư",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Sản xuất",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Tiến độ",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "QC",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Lắp đặt",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Nghiệm thu",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "Chi phí",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    },
+    {
+      "module": "CRM",
+      "file_exists": false,
+      "required": false,
+      "action": "USE_EXISTING_ROUTE_OR_CREATE"
+    }
+  ],
+  "key_project_data": {
+    "name": "VĂN PHÒNG CHỨNG KHOÁN BẢO MINH CHI NHÁNH CMT8 - TP HỒ CHÍ MINH",
+    "customer": "Công ty Cổ phần Chứng khoán Bảo Minh (BMSC)",
+    "floor": "Tầng 15",
+    "design_status": "DESIGN_INGESTION_IN_PROGRESS"
+  }
+}
