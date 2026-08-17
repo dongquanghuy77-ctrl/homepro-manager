@@ -2,6 +2,7 @@
 
 export type WorkspaceId =
   | 'dashboard'
+  | 'source-center'
   | 'operations'
   | 'hr'
   | 'finance'
@@ -44,6 +45,16 @@ export const WORKSPACES: WorkspaceConfig[] = [
     routes: ['/'],
     navItems: [
       { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', href: '/', sprint: 1 },
+    ],
+  },
+  {
+    id: 'source-center',
+    label: 'Source Data Center',
+    icon: 'Inbox',
+    routes: ['/source-center'],
+    navItems: [
+      { id: 'src-grp', label: 'Source Center', icon: '', href: '#', sprint: 1, isGroupHeader: true },
+      { id: 'src-dash', label: 'Ingestion Dashboard', icon: 'Inbox', href: '/source-center', sprint: 1 },
     ],
   },
   {
