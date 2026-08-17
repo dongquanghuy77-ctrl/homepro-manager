@@ -1,12 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
+  const authResult = await requireAuth(_request as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
@@ -25,6 +29,9 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const authResult = await requireAuth(request as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
@@ -70,6 +77,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
+  const authResult = await requireAuth(_request as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });

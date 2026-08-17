@@ -5,12 +5,16 @@ import { db } from '@/db';
 import { projects, tasks, boqs, boqSections, boqItems, materials, suppliers,
          sourceDocuments, dataLineage } from '@/db/schema';
 import { eq, and, like } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 interface Params { params: { id: string } }
 
 export async function GET(_req: NextRequest, { params }: Params) {
+  const authResult = await requireAuth(_req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   const projectId = parseInt(params.id);
   if (isNaN(projectId)) return NextResponse.json({ error: 'Invalid project ID' }, { status: 400 });
 

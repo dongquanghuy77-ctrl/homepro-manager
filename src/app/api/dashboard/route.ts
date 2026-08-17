@@ -1,12 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { calculateProjectProgress, getTaskStats, daysUntilDeadline } from '@/lib/utils';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  const authResult = await requireAuth(request as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('project_id');

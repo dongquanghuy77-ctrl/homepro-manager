@@ -3,6 +3,8 @@ import { productionOrders, productionPlans, projects, materials } from '@/db/sch
 import { eq, desc } from 'drizzle-orm';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -28,12 +30,15 @@ export default async function ProductionOrdersPage() {
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Lệnh Sản Xuất</h1>
-        <Link href="/production/plans" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          Xem Kế Hoạch Sản Xuất
-        </Link>
+        <div className="flex gap-2">
+          <PdfExportButton targetId="production-orders-container" filename="Lenh-San-Xuat-HomePro" />
+          <Link href="/production/plans" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Xem Kế Hoạch Sản Xuất
+          </Link>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div id="production-orders-container" className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { customers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
@@ -34,6 +38,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(_req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });

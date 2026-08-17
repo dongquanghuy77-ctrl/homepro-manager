@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { leads, opportunities, quotes, customers, contracts, surveys, designs } from '@/db/schema';
 import { sql, eq } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     // Customers
     const [totalCustomersRes] = await db.select({ count: sql<number>`count(*)` }).from(customers);

@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { quotes } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const item = await db.query.quotes.findFirst({
       where: eq(quotes.id, Number(params.id))
@@ -21,6 +25,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     await db.delete(quotes).where(eq(quotes.id, Number(params.id)));
     return NextResponse.json({ success: true });
@@ -31,6 +38,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 }
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const body = await req.json();
     const payload = { ...body };

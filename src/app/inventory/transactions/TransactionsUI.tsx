@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { ArrowDownLeft, ArrowUpRight, ArrowRightLeft, Search, Calendar, FileText, Package } from 'lucide-react';
 import { receiveGoodsAction, issueMaterialAction, transferStockAction } from '../actions';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 type Transaction = any; // Type accurately mapped from join
 type Material = any;
@@ -107,6 +109,7 @@ export default function TransactionsUI({
           <p className="page-subtitle">Quản lý các phiếu Nhập, Xuất, Chuyển kho nội bộ</p>
         </div>
         <div className="flex gap-2">
+          <PdfExportButton targetId="inventory-transactions-card" filename="Giao-Dich-Kho-HomePro" />
           <button className="btn btn-secondary text-green-700 bg-green-50 border-green-200 hover:bg-green-100" onClick={() => setShowReceiptModal(true)}>
             <ArrowDownLeft size={16} /> Nhập Kho
           </button>
@@ -119,7 +122,7 @@ export default function TransactionsUI({
         </div>
       </div>
 
-      <div className="card">
+      <div id="inventory-transactions-card" className="card">
         <div className="card-header flex items-center gap-4">
           <div className="search-box flex-1">
             <Search size={18} className="search-icon" />

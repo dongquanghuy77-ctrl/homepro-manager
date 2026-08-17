@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { withDb } from '@/lib/source-center/db';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const authResult = await requireAuth(request as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const docId = parseInt(params.id, 10);
     if (isNaN(docId)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });

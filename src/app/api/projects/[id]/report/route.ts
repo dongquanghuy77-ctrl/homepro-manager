@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks, boqItems, workLogs, qcIssues, costs, settings } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(_req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const projectId = parseInt(params.id);
     if (isNaN(projectId)) {

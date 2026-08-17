@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { opportunities } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const list = await db.select().from(opportunities).orderBy(desc(opportunities.createdAt));
     return NextResponse.json(list);
@@ -14,6 +18,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const body = await req.json();
     const newOpp = await db.insert(opportunities).values({

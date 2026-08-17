@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { boqs, opportunities } from '@/db/schema';
 import { eq, inArray } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export async function GET(req: Request) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const { searchParams } = new URL(req.url);
     const projectId = searchParams.get('projectId');

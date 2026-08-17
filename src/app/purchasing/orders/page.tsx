@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Search, Plus, Trash2 } from 'lucide-react';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 interface PurchaseOrder {
   id: number;
@@ -89,12 +91,15 @@ export default function Page() {
           </h1>
           <p className="page-subtitle">Quản lý đơn đặt hàng gửi nhà cung cấp.</p>
         </div>
-        <button className="btn btn-primary flex items-center gap-2" onClick={() => setShowAddModal(true)}>
-          <Plus size={20} /> Thêm mới
-        </button>
+        <div className="flex gap-2">
+          <PdfExportButton targetId="po-table-container" filename="Danh-Sach-Don-Mua-Hang-PO" />
+          <button className="btn btn-primary flex items-center gap-2" onClick={() => setShowAddModal(true)}>
+            <Plus size={20} /> Thêm mới
+          </button>
+        </div>
       </div>
 
-      <div className="card">
+      <div id="po-table-container" className="card">
         <div className="p-4 border-b border-gray-100 flex justify-between items-center">
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />

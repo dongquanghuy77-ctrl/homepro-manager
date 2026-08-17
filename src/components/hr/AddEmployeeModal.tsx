@@ -141,6 +141,14 @@ export default function AddEmployeeModal({ onClose }: { onClose: () => void }) {
                 placeholder="example@homepro.vn" />
             </div>
 
+            {/* Lương chính thức */}
+            <div className="form-group">
+              <label className="form-label">Lương chính thức (VNĐ)</label>
+              <input type="number" name="officialSalary" className="form-input"
+                placeholder="10000000" min="0" step="1000" />
+            </div>
+
+
             {/* Chức vụ */}
             <div className="form-group">
               <label className="form-label">Chức vụ</label>

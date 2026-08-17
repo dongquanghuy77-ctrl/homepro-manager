@@ -4,6 +4,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { buildColumnMap, parseClientHeaders } from '@/lib/import-parser';
 import type { ColumnMapResult } from '@/lib/import-parser';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 type Project = { id: number; code: string; name: string; status: string };
 type BomLine = {
@@ -95,6 +97,7 @@ export default function BomClient({ projects, initialBomLines, defaultProject = 
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <PdfExportButton targetId="bom-client-table" filename={`BOQ-BOM-DuAn-${selProject}`} />
           <button className="btn btn-ghost" onClick={() => setShowImport(true)}
             style={{ display: 'flex', alignItems: 'center', gap: 6 }}>⬆ Import BOQ</button>
           <button className="btn btn-primary" onClick={() => setShowAdd(true)}
@@ -146,30 +149,32 @@ export default function BomClient({ projects, initialBomLines, defaultProject = 
         </div>
       )}
 
-      {/* ─ B\u1ea3ng theo Zone ─────────────────────────────────────────────────── */}
-      {!selProject && (
-        <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '4rem 0' }}>
-          👆 Vui l\u00f2ng ch\u1ecdn d\u1ef1 \u00e1n \u0111\u1ec3 xem BOM
-        </div>
-      )}
+      {/* ─ Bảng theo Zone ─────────────────────────────────────────────────── */}
+      <div id="bom-client-table">
+        {!selProject && (
+          <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '4rem 0' }}>
+            👆 Vui lòng chọn dự án để xem BOM
+          </div>
+        )}
 
-      {selProject && filtered.length === 0 && (
-        <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '4rem 0' }}>
-          Kh\u00f4ng c\u00f3 d\u1eef li\u1ec7u BOM cho d\u1ef1 \u00e1n n\u00e0y
-          <br /><br />
-          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-            + Th\u00eam d\u00f2ng BOM \u0111\u1ea7u ti\u00ean
-          </button>
-        </div>
-      )}
+        {selProject && filtered.length === 0 && (
+          <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '4rem 0' }}>
+            Không có dữ liệu BOM cho dự án này
+            <br /><br />
+            <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+              + Thêm dòng BOM đầu tiên
+            </button>
+          </div>
+        )}
 
-      {[...byZone.entries()].map(([zoneId, { zoneName, lines }]) => {
-        const zoneTotal = lines.reduce((s, b) => s + (b.total ?? 0), 0);
-        return (
-          <ZoneSection key={zoneId} zoneId={zoneId} zoneName={zoneName}
-            lines={lines} zoneTotal={zoneTotal} onDelete={handleDelete} />
-        );
-      })}
+        {[...byZone.entries()].map(([zoneId, { zoneName, lines }]) => {
+          const zoneTotal = lines.reduce((s, b) => s + (b.total ?? 0), 0);
+          return (
+            <ZoneSection key={zoneId} zoneId={zoneId} zoneName={zoneName}
+              lines={lines} zoneTotal={zoneTotal} onDelete={handleDelete} />
+          );
+        })}
+      </div>
 
       {/* ─ Modal thêm dòng BOM ──────────────────────────────────────────────── */}
       {showAdd && (

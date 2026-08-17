@@ -6,6 +6,8 @@
 
 import { useState, useCallback }  from 'react';
 import useSWR                     from 'swr';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -210,6 +212,9 @@ export default function EmployeePayslip() {
             </select>
           )}
           {payslip && (
+            <PdfExportButton targetId="payslip-card" filename={`Phieu-Luong-${payslip.employeeCode}-T${payslip.month}-${payslip.year}`} />
+          )}
+          {payslip && (
             <button
               id="btn-open-dispute"
               className="btn btn-warning"
@@ -243,7 +248,7 @@ export default function EmployeePayslip() {
 
       {/* ── Payslip Main ──────────────────────────────────────────────── */}
       {payslip && (
-        <>
+        <div id="payslip-card">
           {/* ── Hero: Thực nhận ───────────────────────────────────────── */}
           <div className="payslip-hero card">
             <div className="payslip-hero-left">
@@ -411,7 +416,7 @@ export default function EmployeePayslip() {
               })}
             </div>
           )}
-        </>
+        </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════════

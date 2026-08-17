@@ -14,6 +14,8 @@
 
 import { useState, useCallback, useEffect, useRef }  from 'react';
 import useSWR, { mutate as globalMutate }             from 'swr';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -307,6 +309,7 @@ export default function PayrollMasterDashboard() {
           >
             {publishing ? '⏳ Đang công bố...' : `📢 Công Bố${selectAll ? ' Tất Cả' : selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}`}
           </button>
+          <PdfExportButton targetId="payroll-master-table" filename={`Bang-Luong-Tong-Hop-T${month}-${year}`} />
           <button
             id="btn-export-excel"
             className="btn btn-ghost"
@@ -378,7 +381,7 @@ export default function PayrollMasterDashboard() {
       </div>
 
       {/* ── Data Grid ───────────────────────────────────────────────────── */}
-      <div className="card" style={{ overflow: 'hidden', padding: 0 }}>
+      <div id="payroll-master-table" className="card" style={{ overflow: 'hidden', padding: 0 }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>

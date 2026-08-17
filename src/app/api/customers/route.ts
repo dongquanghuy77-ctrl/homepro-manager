@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { customers } from '@/db/schema';
 import { desc } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const list = await db.select().from(customers).orderBy(desc(customers.id));
     return NextResponse.json(list);
@@ -16,6 +20,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const body = await req.json();
     const { name, phone, email, address, notes } = body;

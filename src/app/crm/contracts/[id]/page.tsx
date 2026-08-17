@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, FileText, User, Calendar, DollarSign, ExternalLink, Briefcase } from 'lucide-react';
 import Link from 'next/link';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 interface ContractDetail {
   id: string;
@@ -97,13 +99,16 @@ export default function ContractDetailPage({ params }: { params: { id: string } 
         <Link href="/crm/contracts" className="text-gray-500 hover:text-gray-900 mr-4">
           <ArrowLeft size={24} />
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="page-title">Hợp đồng: {contract.contractNumber}</h1>
           <p className="page-subtitle">Chi tiết và theo dõi trạng thái hợp đồng</p>
         </div>
+        <div>
+          <PdfExportButton targetId="contract-detail-content" filename={`Hop-Dong-${contract.contractNumber}`} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div id="contract-detail-content" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <div className="card p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">

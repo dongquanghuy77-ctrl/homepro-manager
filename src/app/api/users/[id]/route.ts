@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
-    await db.delete(users).where(eq(users.id, id));
+    await db.update(users).set({ active: false, employeeStatus: 'TERMINATED' }).where(eq(users.id, id));
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('DELETE /api/users/:id error:', err);

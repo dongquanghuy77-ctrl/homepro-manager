@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { qcIssues } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 // GET /api/qc/[id]
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(_req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
@@ -21,6 +25,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
 // PUT /api/qc/[id]
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
@@ -63,6 +70,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 // DELETE /api/qc/[id]
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const authResult = await requireAuth(_req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });

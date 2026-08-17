@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export async function GET(request: Request) {
+  const authResult = await requireAuth(request as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('project_id');
@@ -27,6 +31,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const authResult = await requireAuth(request as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const body = await request.json();
     const { projectId, category, title, assignee, startDate, endDate, status, priority, progress, notes } = body;

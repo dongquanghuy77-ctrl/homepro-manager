@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { qcIssues, projects } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 // GET /api/qc?project_id=1
 export async function GET(req: NextRequest) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const { searchParams } = new URL(req.url);
     const projectId = searchParams.get('project_id');
@@ -26,6 +30,9 @@ export async function GET(req: NextRequest) {
 
 // POST /api/qc
 export async function POST(req: NextRequest) {
+  const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+  if (authResult.error) return authResult.error;
+
   try {
     const body = await req.json();
 

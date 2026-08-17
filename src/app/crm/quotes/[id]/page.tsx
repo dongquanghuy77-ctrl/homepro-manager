@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, FileText, Send, CheckCircle2, Download, Printer, Plus, Trash2, Edit2, Save } from 'lucide-react';
+import { PdfExportButton } from '@/components/bao-minh/PdfExportButton';
+
 
 export default function QuoteDetailPage() {
   const { id } = useParams();
@@ -52,7 +54,8 @@ export default function QuoteDetailPage() {
         </div>
         <div className="flex items-center gap-3">
           <button className="btn btn-secondary flex items-center gap-2"><Printer size={16}/> In</button>
-          <button className="btn btn-secondary flex items-center gap-2"><Download size={16}/> PDF</button>
+          <PdfExportButton targetId="quote-detail-content" filename={`Bao-Gia-${quote.quoteNumber}`} />
+
           {quote.status === 'DRAFT' && (
             <button className="btn btn-primary flex items-center gap-2"><Send size={16}/> Gửi Khách hàng</button>
           )}
@@ -62,7 +65,8 @@ export default function QuoteDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Content for PDF export */}
+      <div id="quote-detail-content" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: General Info */}
         <div className="lg:col-span-1 space-y-6">
           <div className="card p-5">

@@ -1,12 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks, costs } from '@/db/schema';
 import { getTaskStats, calculateProjectProgress, daysUntilDeadline } from '@/lib/utils';
+import { requireAuth, ALL_ROLES, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 // Public endpoint — no auth required — used only by /demo page
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+
   try {
     const allProjects = await db.select().from(projects);
     const allTasks = await db.select().from(tasks);
