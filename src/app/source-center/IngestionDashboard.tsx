@@ -149,17 +149,62 @@ const FIELD_TYPE_CONFIG: Record<FieldType, { label: string; color: string }> = {
   NOTES:     { label: 'Ghi chú',     color: '#94a3b8' },
 };
 
-const formatBytes = (bytes?: number) => {
-  if (!bytes) return '—';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+const formatBytes = (bytes?: number | string) => {
+  const b = typeof bytes === 'string' ? parseInt(bytes, 10) : bytes;
+  if (!b || isNaN(b)) return '—';
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  return `${(b / (1024 * 1024)).toFixed(1)} MB`;
 };
 
 const formatDate = (s: string) => {
   try { return new Date(s).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
   catch { return s; }
 };
+
+// ─── File Extension Utilities ─────────────────────
+const getFileExt = (fileName: string): string =>
+  (fileName.split('.').pop() || '').toLowerCase();
+
+const EXT_CONFIG: Record<string, { icon: React.ReactNode; bg: string; color: string; label: string }> = {
+  pdf:   { icon: <FileText size={14} />,        bg: '#ef444420', color: '#ef4444', label: 'PDF'   },
+  xlsx:  { icon: <FileSpreadsheet size={14} />, bg: '#10b98120', color: '#10b981', label: 'XLSX'  },
+  xls:   { icon: <FileSpreadsheet size={14} />, bg: '#10b98120', color: '#10b981', label: 'XLS'   },
+  csv:   { icon: <FileSpreadsheet size={14} />, bg: '#06b6d420', color: '#06b6d4', label: 'CSV'   },
+  docx:  { icon: <FileText size={14} />,        bg: '#3b82f620', color: '#3b82f6', label: 'DOCX'  },
+  doc:   { icon: <FileText size={14} />,        bg: '#3b82f620', color: '#3b82f6', label: 'DOC'   },
+  jpg:   { icon: <Image size={14} />,           bg: '#f59e0b20', color: '#f59e0b', label: 'JPG'   },
+  jpeg:  { icon: <Image size={14} />,           bg: '#f59e0b20', color: '#f59e0b', label: 'JPEG'  },
+  png:   { icon: <Image size={14} />,           bg: '#f59e0b20', color: '#f59e0b', label: 'PNG'   },
+  gif:   { icon: <Image size={14} />,           bg: '#f59e0b20', color: '#f59e0b', label: 'GIF'   },
+  webp:  { icon: <Image size={14} />,           bg: '#f59e0b20', color: '#f59e0b', label: 'WEBP'  },
+  heic:  { icon: <Image size={14} />,           bg: '#f59e0b20', color: '#f59e0b', label: 'HEIC'  },
+  skp:   { icon: <BookOpen size={14} />,        bg: '#6366f120', color: '#6366f1', label: 'SKP'   },
+  dwg:   { icon: <BookOpen size={14} />,        bg: '#7c3aed20', color: '#7c3aed', label: 'DWG'   },
+  dxf:   { icon: <BookOpen size={14} />,        bg: '#7c3aed20', color: '#7c3aed', label: 'DXF'   },
+  zip:   { icon: <Package size={14} />,         bg: '#a78bfa20', color: '#a78bfa', label: 'ZIP'   },
+  rar:   { icon: <Package size={14} />,         bg: '#a78bfa20', color: '#a78bfa', label: 'RAR'   },
+  txt:   { icon: <FileText size={14} />,        bg: '#64748b20', color: '#64748b', label: 'TXT'   },
+  pptx:  { icon: <FileText size={14} />,        bg: '#f97316', color: '#f97316',  label: 'PPTX'  },
+};
+
+const getExtConfig = (fileName: string) => {
+  const ext = getFileExt(fileName);
+  return EXT_CONFIG[ext] || { icon: <File size={14} />, bg: '#47556920', color: '#475569', label: ext.toUpperCase() || 'FILE' };
+};
+
+function FileExtBadge({ fileName }: { fileName: string }) {
+  const { bg, color, label } = getExtConfig(fileName);
+  return (
+    <span style={{
+      fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4,
+      background: bg, color, letterSpacing: '0.04em', flexShrink: 0,
+      border: `1px solid ${color}40`,
+    }}>
+      {label}
+    </span>
+  );
+}
 
 // Build tree from flat documents
 function buildTree(docs: SourceDocument[]): TreeNode[] {
@@ -597,20 +642,35 @@ function TreeRow({
             )}
 
             {/* Document row */}
-            {node.type === 'document' && doc && (
+            {node.type === 'document' && doc && (() => {
+              const extCfg = getExtConfig(doc.fileName);
+              const safeLineCount = parseInt(String(doc.lineCount || 0), 10);
+              return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                {/* File type icon with colored background */}
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6, flexShrink: 0,
+                  background: extCfg.bg, color: extCfg.color,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: `1px solid ${extCfg.color}30`,
+                }}>
+                  {extCfg.icon}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#93c5fd', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                    onDoubleClick={startLabelEdit} title="Double-click để đổi tên file">
-                    {doc.fileName}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      onDoubleClick={startLabelEdit} title={`Double-click để đổi tên\n${doc.fileName}`}>
+                      {doc.fileName}
+                    </div>
+                    <FileExtBadge fileName={doc.fileName} />
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 3, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 3, alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 10, color: '#475569' }}>{formatBytes(doc.fileSize)}</span>
                     <span style={{ fontSize: 10, color: '#334155' }}>·</span>
                     <span style={{ fontSize: 10, color: '#475569' }}>{formatDate(doc.uploadedAt)}</span>
-                    {doc.lineCount != null && doc.lineCount > 0 && (
+                    {safeLineCount > 0 && (
                       <><span style={{ fontSize: 10, color: '#334155' }}>·</span>
-                      <span style={{ fontSize: 10, color: '#475569' }}>{doc.lineCount} dòng</span></>
+                      <span style={{ fontSize: 10, color: '#64748b', fontWeight: 600 }}>{safeLineCount} dòng</span></>
                     )}
                   </div>
                 </div>
@@ -637,7 +697,8 @@ function TreeRow({
                   )}
                 </div>
               </div>
-            )}
+              );
+            })()}\n
 
             {/* Line row */}
             {node.type === 'line' && line && (
@@ -883,7 +944,8 @@ export default function IngestionDashboard({ documents }: Props) {
   const totalDocs = documents.length;
   const stagedCount = documents.filter(d => d.sourceStatus === 'STAGED').length;
   const approvedCount = documents.filter(d => d.sourceStatus === 'APPROVED').length;
-  const totalLines = documents.reduce((s, d) => s + (d.lineCount || 0), 0);
+  // Fix: lineCount may arrive as string from PostgreSQL bigint — always parseInt
+  const totalLines = documents.reduce((s, d) => s + (parseInt(String(d.lineCount || 0), 10)), 0);
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#020617', minHeight: '100vh', color: '#f8fafc', position: 'relative' }}>

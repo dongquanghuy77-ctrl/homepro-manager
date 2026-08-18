@@ -22,7 +22,7 @@ export default async function IngestionPage() {
         sd.auto_routed_to as "autoRoutedTo",
         sd.classification_confidence as "classificationConfidence",
         p.name as "projectName",
-        (SELECT COUNT(*) FROM source_document_lines sdl WHERE sdl.source_doc_id = sd.id) as "lineCount"
+        CAST((SELECT COUNT(*) FROM source_document_lines sdl WHERE sdl.source_doc_id = sd.id) AS INTEGER) as "lineCount"
       FROM source_documents sd
       LEFT JOIN projects p ON p.id = sd.project_id
       ORDER BY p.name NULLS LAST, sd.document_category, sd.uploaded_at DESC
