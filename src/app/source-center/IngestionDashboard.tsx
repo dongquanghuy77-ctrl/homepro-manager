@@ -480,7 +480,7 @@ function TreeRow({
   onAddChild: (parentId: string) => void;
   onDeleteNode: (nodeId: string) => void;
 }) {
-  const hasChildren = node.children && node.children.length > 0;
+  const hasChildren = (node.children && node.children.length > 0) || (node.type === 'document' && (node.data as any)?.lineCount > 0);
   const doc = node.type === 'document' ? node.data as SourceDocument : null;
   const line = node.type === 'line' ? node.data as ExtractedLine : null;
 
@@ -1019,7 +1019,7 @@ function TreeView({
   onLabelSave, onStatusChange, onAddChild, onDeleteNode,
 }: {
   nodes: TreeNode[]; expandedIds: Set<string>; selectedId: string | null;
-  onToggle: (id: string) => void; onSelect: (node: TreeNode) => void; depth?: number;
+  onToggle: (node: TreeNode) => void; onSelect: (node: TreeNode) => void; depth?: number;
   onLabelSave: (nodeId: string, newLabel: string) => void;
   onStatusChange: (nodeId: string, status: DataFlowStatus) => void;
   onAddChild: (parentId: string) => void;
@@ -1041,7 +1041,7 @@ function TreeView({
               depth={depth}
               isExpanded={expandedIds.has(node.id)}
               isSelected={selectedId === node.id}
-              onToggle={() => onToggle(node.id)}
+              onToggle={() => onToggle(node)}
               onSelect={() => onSelect(node)}
               onLabelSave={onLabelSave}
               onStatusChange={onStatusChange}
@@ -1501,13 +1501,21 @@ export default function IngestionDashboard({ documents }: Props) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
 
-  const toggleExpand = useCallback((id: string) => {
+  const toggleExpand = useCallback((node: TreeNode) => {
     setExpandedIds(prev => {
       const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
+      const id = node.id;
+      if (s.has(id)) {
+        s.delete(id);
+      } else {
+        s.add(id);
+        if (node.type === 'document' && (!node.children || node.children.length === 0)) {
+          setTimeout(() => handleAddChild(id), 0);
+        }
+      }
       return s;
     });
-  }, []);
+  }, [handleAddChild]);
 
   const expandAll = () => {
     const ids = new Set<string>();
