@@ -508,6 +508,44 @@ function TreeRow({
 
   // Inline status change for documents
   const [editingStatus, setEditingStatus] = useState(false);
+  const [editingCat, setEditingCat] = useState(false);
+
+  // Inline edit state for Line rows
+  const [editingLine, setEditingLine] = useState(line?.rowData?.isNew || false);
+  const [editLineData, setEditLineData] = useState<any>(line?.rowData || {});
+  const [savingLine, setSavingLine] = useState(false);
+
+  const handleSaveLine = async () => {
+    if (!line) return;
+    setSavingLine(true);
+    try {
+      const isManual = line.lineId.startsWith('manual-') || editLineData.isNew;
+      const url = isManual ? `/api/source-center/${line.sourceDocId || doc?.id}/lines` : `/api/source-center/${line.sourceDocId}/lines`;
+      const method = isManual ? 'POST' : 'PATCH';
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: line.id,
+          lineId: line.lineId,
+          rawValue: editLineData.ten || line.rawValue,
+          parsedValue: editLineData.ten || line.parsedValue,
+          normalizedValue: JSON.stringify(editLineData)
+        })
+      });
+      
+      if (!res.ok) throw new Error('Save failed');
+      setEditingLine(false);
+      // Let parent re-fetch or optimistically update
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('source-status-changed', { detail: { docId: line.sourceDocId || doc?.id, status: 'PARSED' }}));
+    } catch (e) {
+      console.error(e);
+      alert('Lỗi lưu dòng');
+    } finally {
+      setSavingLine(false);
+    }
+  };
 
   // Row background
   let rowBg = 'transparent';
@@ -878,10 +916,9 @@ function TreeRow({
 
               if (hasStructured) return (
                 <div style={{ width: '100%' }}>
-                  {/* BOQ row grid: STT | Tên hàng | SL | Đơn vị | Đơn giá | Thành tiền | Ghi chú | actions */}
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '28px 1fr 60px 44px 90px 100px auto',
+                    gridTemplateColumns: '40px 1fr 80px 80px 120px 120px 70px',
                     gap: 0,
                     alignItems: 'center',
                     borderRadius: 6,
@@ -889,50 +926,49 @@ function TreeRow({
                     border: '1px solid rgba(30,41,59,0.8)',
                     background: line.needsReview ? 'rgba(245,158,11,0.06)' : 'rgba(15,23,42,0.5)',
                   }}>
-                    {/* STT */}
-                    <div style={{ padding: '6px 4px', textAlign: 'center', fontSize: 11, color: '#64748b', fontWeight: 700, borderRight: '1px solid #1e293b', fontFamily: 'monospace' }}>
-                      {rd?.stt ?? line.lineNumber}
-                    </div>
-                    {/* Tên hàng hoá */}
-                    <div style={{ padding: '6px 8px', fontSize: 12, color: '#e2e8f0', fontWeight: 500, borderRight: '1px solid #1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                      title={rd?.ten || line.parsedValue || line.rawValue}
-                      onDoubleClick={startLabelEdit}>
-                      {rd?.ten || line.parsedValue || line.rawValue}
-                    </div>
-                    {/* Số lượng */}
-                    <div style={{ padding: '6px 6px', textAlign: 'right', fontSize: 12, color: '#cbd5e1', borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>
-                      {rd?.soLuong != null ? fmtN(rd.soLuong) : ''}
-                    </div>
-                    {/* Đơn vị */}
-                    <div style={{ padding: '6px 4px', textAlign: 'center', fontSize: 10, color: '#64748b', borderRight: '1px solid #1e293b' }}>
-                      {rd?.donVi || ''}
-                    </div>
-                    {/* Đơn giá */}
-                    <div style={{ padding: '6px 8px', textAlign: 'right', fontSize: 12, color: '#93c5fd', borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>
-                      {rd?.donGia != null ? fmtN(rd.donGia) : ''}
-                    </div>
-                    {/* Thành tiền */}
-                    <div style={{ padding: '6px 8px', textAlign: 'right', fontSize: 12, color: '#10b981', fontWeight: 700, borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>
-                      {rd?.thanhTien != null ? fmtN(rd.thanhTien) : ''}
-                    </div>
-                    {/* Actions: flags + delete */}
-                    <div style={{ padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      {line.confidence === 'HIGH' && <CheckCircle size={10} color="#10b981" />}
-                      {line.confidence === 'LOW'  && <AlertTriangle size={10} color="#f59e0b" />}
-                      {line.needsReview && <span title={line.reviewNote}><AlertTriangle size={10} color="#ef4444" /></span>}
-                      {hovering && (
-                        <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 1, display: 'flex', borderRadius: 3 }}
-                          title="Xóa dòng này">
-                          <Trash2 size={10} />
-                        </button>
-                      )}
-                    </div>
+                    {editingLine ? (
+                      <>
+                        <div style={{ padding: '4px' }}><input style={{width:'100%',background:'#1e293b',color:'#fff',border:'none',borderRadius:4,padding:'4px 2px',fontSize:11,textAlign:'center'}} value={editLineData.stt || ''} onChange={e => setEditLineData({...editLineData, stt: e.target.value})} placeholder="STT" /></div>
+                        <div style={{ padding: '4px' }}><input style={{width:'100%',background:'#1e293b',color:'#fff',border:'none',borderRadius:4,padding:'4px 8px',fontSize:12}} value={editLineData.ten || ''} onChange={e => setEditLineData({...editLineData, ten: e.target.value})} placeholder="Tên hàng hoá" autoFocus /></div>
+                        <div style={{ padding: '4px' }}><input style={{width:'100%',background:'#1e293b',color:'#fff',border:'none',borderRadius:4,padding:'4px 6px',fontSize:12,textAlign:'right'}} value={editLineData.soLuong || ''} onChange={e => setEditLineData({...editLineData, soLuong: e.target.value})} placeholder="SL" /></div>
+                        <div style={{ padding: '4px' }}><input style={{width:'100%',background:'#1e293b',color:'#fff',border:'none',borderRadius:4,padding:'4px 4px',fontSize:11,textAlign:'center'}} value={editLineData.donVi || ''} onChange={e => setEditLineData({...editLineData, donVi: e.target.value})} placeholder="ĐVT" /></div>
+                        <div style={{ padding: '4px' }}><input style={{width:'100%',background:'#1e293b',color:'#fff',border:'none',borderRadius:4,padding:'4px 8px',fontSize:12,textAlign:'right'}} value={editLineData.donGia || ''} onChange={e => setEditLineData({...editLineData, donGia: e.target.value})} placeholder="Đơn giá" /></div>
+                        <div style={{ padding: '4px' }}><input style={{width:'100%',background:'#1e293b',color:'#fff',border:'none',borderRadius:4,padding:'4px 8px',fontSize:12,textAlign:'right'}} value={editLineData.thanhTien || ''} onChange={e => setEditLineData({...editLineData, thanhTien: e.target.value})} placeholder="Thành tiền" /></div>
+                        <div style={{ padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+                          <button onClick={e => { e.stopPropagation(); handleSaveLine(); }} disabled={savingLine} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', fontSize: 10, fontWeight: 'bold' }}>{savingLine ? '...' : 'Lưu'}</button>
+                          <button onClick={e => { e.stopPropagation(); setEditingLine(false); }} style={{ background: '#475569', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', fontSize: 10 }}>Hủy</button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ padding: '6px 4px', textAlign: 'center', fontSize: 11, color: '#64748b', fontWeight: 700, borderRight: '1px solid #1e293b', fontFamily: 'monospace' }}>{rd?.stt ?? line.lineNumber}</div>
+                        <div style={{ padding: '6px 8px', fontSize: 12, color: '#e2e8f0', fontWeight: 500, borderRight: '1px solid #1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={rd?.ten || line.parsedValue || line.rawValue} onDoubleClick={() => { setEditLineData(rd || {}); setEditingLine(true); }}>{rd?.ten || line.parsedValue || line.rawValue}</div>
+                        <div style={{ padding: '6px 6px', textAlign: 'right', fontSize: 12, color: '#cbd5e1', borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>{rd?.soLuong != null ? fmtN(rd.soLuong) : ''}</div>
+                        <div style={{ padding: '6px 4px', textAlign: 'center', fontSize: 10, color: '#64748b', borderRight: '1px solid #1e293b' }}>{rd?.donVi || ''}</div>
+                        <div style={{ padding: '6px 8px', textAlign: 'right', fontSize: 12, color: '#93c5fd', borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>{rd?.donGia != null ? fmtN(rd.donGia) : ''}</div>
+                        <div style={{ padding: '6px 8px', textAlign: 'right', fontSize: 12, color: '#10b981', fontWeight: 700, borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>{rd?.thanhTien != null ? fmtN(rd.thanhTien) : ''}</div>
+                        <div style={{ padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+                          {hovering && (
+                            <button onClick={e => { e.stopPropagation(); setEditLineData(rd || {}); setEditingLine(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6', padding: 1, display: 'flex', borderRadius: 3 }} title="Sửa dòng này"><Pencil size={11} /></button>
+                          )}
+                          {line.confidence === 'HIGH' && <CheckCircle size={10} color="#10b981" />}
+                          {line.confidence === 'LOW'  && <AlertTriangle size={10} color="#f59e0b" />}
+                          {hovering && (
+                            <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 1, display: 'flex', borderRadius: 3 }} title="Xóa dòng này"><Trash2 size={11} /></button>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                   {/* Ghi chú nếu có */}
-                  {rd?.ghiChu && rd.ghiChu.trim() && rd.ghiChu !== rd.ten && (
+                  {rd?.ghiChu && rd.ghiChu.trim() && rd.ghiChu !== rd.ten && !editingLine && (
                     <div style={{ fontSize: 10, color: '#475569', paddingLeft: 36, marginTop: 2, fontStyle: 'italic' }}>
                       💬 {rd.ghiChu}
+                    </div>
+                  )}
+                  {editingLine && (
+                    <div style={{ paddingLeft: 40, marginTop: 4 }}>
+                      <input style={{width:'100%',background:'#1e293b',color:'#cbd5e1',border:'none',borderRadius:4,padding:'4px 8px',fontSize:11}} value={editLineData.ghiChu || ''} onChange={e => setEditLineData({...editLineData, ghiChu: e.target.value})} placeholder="Ghi chú thêm..." />
                     </div>
                   )}
                 </div>
@@ -1207,9 +1243,19 @@ export default function IngestionDashboard({ documents }: Props) {
     };
     window.addEventListener('source-status-changed', statusHandler);
 
+    const manualLineHandler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const { docId, node } = detail;
+      if (!docId || !node) return;
+      setTreeData(prev => addChildNode(prev, `doc-${docId}`, node));
+      setExpandedIds(prev => new Set([...prev, `doc-${docId}`]));
+    };
+    window.addEventListener('add-manual-line', manualLineHandler);
+
     return () => {
       window.removeEventListener('source-lines-loaded', handler);
       window.removeEventListener('source-status-changed', statusHandler);
+      window.removeEventListener('add-manual-line', manualLineHandler);
     };
   }, []);
 
