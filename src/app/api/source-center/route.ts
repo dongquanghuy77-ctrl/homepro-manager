@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     const res = await client.query(`
       SELECT sd.*,
         p.name as project_name,
-        u.full_name as uploader_name,
+        u.name as uploader_name,
         (SELECT COUNT(*) FROM source_document_lines sdl WHERE sdl.source_doc_id = sd.id) as line_count
       FROM source_documents sd
       LEFT JOIN projects p ON p.id = sd.project_id

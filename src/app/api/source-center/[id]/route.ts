@@ -9,7 +9,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return withDb(async (client) => {
     const id = parseInt(params.id);
     const res = await client.query(`
-      SELECT sd.*, p.name as project_name, u.full_name as uploader_name
+      SELECT sd.*, p.name as project_name, u.name as uploader_name
       FROM source_documents sd
       LEFT JOIN projects p ON p.id = sd.project_id
       LEFT JOIN users u ON u.id = sd.uploaded_by

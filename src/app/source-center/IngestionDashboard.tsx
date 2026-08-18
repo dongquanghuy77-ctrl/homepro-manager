@@ -1363,9 +1363,10 @@ export default function IngestionDashboard({ documents }: Props) {
           return result;
         });
         showToast(`✅ Đã tải ${lineNodes.length} dòng dữ liệu`, 'success');
-      } catch (err) {
+      } catch (err: any) {
+        console.error('Failed to load lines for doc', docId, err);
         setTreeData(prev => deleteNode(prev, `loading-${docId}`));
-        showToast('❌ Không tải được dữ liệu', 'error');
+        showToast(`❌ Không tải được dữ liệu: ${err.message}`, 'error');
       }
       return;
     }
