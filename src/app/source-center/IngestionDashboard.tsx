@@ -39,6 +39,16 @@ export interface ExtractedLine {
   stagedRecordId?: string;
   erpRecordType?: string;
   erpRecordId?: string;
+  // Structured row data — parsed from the source table
+  rowData?: {
+    stt?: number | string;
+    ten?: string;        // Tên hàng hoá
+    soLuong?: number | string;
+    donVi?: string;      // Đơn vị
+    donGia?: number | string;
+    thanhTien?: number | string;
+    ghiChu?: string;
+  };
 }
 
 export interface SourceDocument {
@@ -737,32 +747,126 @@ function TreeRow({
               );
             })()}
 
-            {/* Line row */}
-            {node.type === 'line' && line && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', flexShrink: 0 }}>#{line.lineNumber}</span>
-                <span
-                  onDoubleClick={startLabelEdit}
-                  title="Double-click để chỉnh sửa giá trị"
-                  style={{ fontSize: 12, color: '#94a3b8', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'text' }}
-                >
-                  {line.parsedValue || line.rawValue}
-                </span>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `${FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569'}20`, color: FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569', flexShrink: 0 }}>
-                  {FIELD_TYPE_CONFIG[line.fieldType]?.label || line.fieldType}
-                </span>
-                {line.confidence === 'HIGH' && <CheckCircle size={10} color="#10b981" />}
-                {line.confidence === 'LOW'  && <AlertTriangle size={10} color="#f59e0b" />}
-                {line.needsReview && <AlertTriangle size={10} color="#ef4444" />}
-                {hovering && (
-                  <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2, display: 'flex', borderRadius: 3 }}
-                    title="Xóa dòng này">
-                    <Trash2 size={10} />
-                  </button>
-                )}
-              </div>
-            )}
+            {/* Line row — structured BOQ data table */}
+            {node.type === 'line' && line && (() => {
+              const isLoading = line.lineId === 'loading';
+              const isEmpty   = line.lineId === 'empty';
+              const rd = line.rowData;
+              const hasStructured = rd && (rd.ten || rd.soLuong || rd.donGia);
+
+              const fmtN = (v: number | string | undefined) => {
+                if (v == null || v === '' || v === undefined) return '';
+                const n = typeof v === 'string' ? parseFloat(v.replace(/[^0-9.-]/g, '')) : v;
+                if (isNaN(n)) return String(v);
+                return n.toLocaleString('vi-VN');
+              };
+
+              if (isLoading) return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 12 }}>
+                  <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                  Đang tải dữ liệu từ server…
+                </div>
+              );
+
+              if (isEmpty) return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f59e0b', fontSize: 12 }}>
+                  <AlertTriangle size={12} />
+                  Chưa có dữ liệu — hãy chạy Extract trước
+                </div>
+              );
+
+              if (hasStructured) return (
+                <div style={{ width: '100%' }}>
+                  {/* BOQ row grid: STT | Tên hàng | SL | Đơn vị | Đơn giá | Thành tiền | Ghi chú | actions */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '28px 1fr 60px 44px 90px 100px auto',
+                    gap: 0,
+                    alignItems: 'center',
+                    borderRadius: 6,
+                    overflow: 'hidden',
+                    border: '1px solid rgba(30,41,59,0.8)',
+                    background: line.needsReview ? 'rgba(245,158,11,0.06)' : 'rgba(15,23,42,0.5)',
+                  }}>
+                    {/* STT */}
+                    <div style={{ padding: '6px 4px', textAlign: 'center', fontSize: 11, color: '#64748b', fontWeight: 700, borderRight: '1px solid #1e293b', fontFamily: 'monospace' }}>
+                      {rd?.stt ?? line.lineNumber}
+                    </div>
+                    {/* Tên hàng hoá */}
+                    <div style={{ padding: '6px 8px', fontSize: 12, color: '#e2e8f0', fontWeight: 500, borderRight: '1px solid #1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      title={rd?.ten || line.parsedValue || line.rawValue}
+                      onDoubleClick={startLabelEdit}>
+                      {rd?.ten || line.parsedValue || line.rawValue}
+                    </div>
+                    {/* Số lượng */}
+                    <div style={{ padding: '6px 6px', textAlign: 'right', fontSize: 12, color: '#cbd5e1', borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>
+                      {rd?.soLuong != null ? fmtN(rd.soLuong) : ''}
+                    </div>
+                    {/* Đơn vị */}
+                    <div style={{ padding: '6px 4px', textAlign: 'center', fontSize: 10, color: '#64748b', borderRight: '1px solid #1e293b' }}>
+                      {rd?.donVi || ''}
+                    </div>
+                    {/* Đơn giá */}
+                    <div style={{ padding: '6px 8px', textAlign: 'right', fontSize: 12, color: '#93c5fd', borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>
+                      {rd?.donGia != null ? fmtN(rd.donGia) : ''}
+                    </div>
+                    {/* Thành tiền */}
+                    <div style={{ padding: '6px 8px', textAlign: 'right', fontSize: 12, color: '#10b981', fontWeight: 700, borderRight: '1px solid #1e293b', fontVariantNumeric: 'tabular-nums' }}>
+                      {rd?.thanhTien != null ? fmtN(rd.thanhTien) : ''}
+                    </div>
+                    {/* Actions: flags + delete */}
+                    <div style={{ padding: '4px 6px', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {line.confidence === 'HIGH' && <CheckCircle size={10} color="#10b981" />}
+                      {line.confidence === 'LOW'  && <AlertTriangle size={10} color="#f59e0b" />}
+                      {line.needsReview && <span title={line.reviewNote}><AlertTriangle size={10} color="#ef4444" /></span>}
+                      {hovering && (
+                        <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 1, display: 'flex', borderRadius: 3 }}
+                          title="Xóa dòng này">
+                          <Trash2 size={10} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {/* Ghi chú nếu có */}
+                  {rd?.ghiChu && rd.ghiChu.trim() && rd.ghiChu !== rd.ten && (
+                    <div style={{ fontSize: 10, color: '#475569', paddingLeft: 36, marginTop: 2, fontStyle: 'italic' }}>
+                      💬 {rd.ghiChu}
+                    </div>
+                  )}
+                </div>
+              );
+
+              // Fallback: simple text row (no structured data)
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                  <span style={{ fontSize: 11, color: '#475569', fontFamily: 'monospace', flexShrink: 0, minWidth: 24, textAlign: 'right' }}>
+                    {line.lineNumber}
+                  </span>
+                  <span
+                    onDoubleClick={startLabelEdit}
+                    title="Double-click để chỉnh sửa"
+                    style={{ fontSize: 12, color: '#94a3b8', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'text' }}
+                  >
+                    {line.parsedValue || line.rawValue}
+                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `${FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569'}20`, color: FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569', flexShrink: 0 }}>
+                    {FIELD_TYPE_CONFIG[line.fieldType]?.label || line.fieldType}
+                  </span>
+                  {line.confidence === 'HIGH' && <CheckCircle size={10} color="#10b981" />}
+                  {line.confidence === 'LOW'  && <AlertTriangle size={10} color="#f59e0b" />}
+                  {line.needsReview && <AlertTriangle size={10} color="#ef4444" />}
+                  {hovering && (
+                    <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2, display: 'flex', borderRadius: 3 }}
+                      title="Xóa dòng này">
+                      <Trash2 size={10} />
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
+
           </>
         )}
       </div>
@@ -786,39 +890,92 @@ function TreeView({
 }) {
   return (
     <>
-      {nodes.map((node) => (
-        <React.Fragment key={node.id}>
-          <TreeRow
-            node={node}
-            depth={depth}
-            isExpanded={expandedIds.has(node.id)}
-            isSelected={selectedId === node.id}
-            onToggle={() => onToggle(node.id)}
-            onSelect={() => onSelect(node)}
-            onLabelSave={onLabelSave}
-            onStatusChange={onStatusChange}
-            onAddChild={onAddChild}
-            onDeleteNode={onDeleteNode}
-          />
-          {expandedIds.has(node.id) && node.children && (
-            <TreeView
-              nodes={node.children}
-              expandedIds={expandedIds}
-              selectedId={selectedId}
-              onToggle={onToggle}
-              onSelect={onSelect}
-              depth={depth + 1}
+      {nodes.map((node) => {
+        const isDocExpanded = expandedIds.has(node.id) && node.type === 'document';
+        const hasLineChildren = isDocExpanded && node.children && node.children.some(c => c.type === 'line');
+        const hasStructuredLines = hasLineChildren && node.children!.some(c =>
+          c.type === 'line' && (c.data as ExtractedLine)?.rowData?.ten
+        );
+
+        return (
+          <React.Fragment key={node.id}>
+            <TreeRow
+              node={node}
+              depth={depth}
+              isExpanded={expandedIds.has(node.id)}
+              isSelected={selectedId === node.id}
+              onToggle={() => onToggle(node.id)}
+              onSelect={() => onSelect(node)}
               onLabelSave={onLabelSave}
               onStatusChange={onStatusChange}
               onAddChild={onAddChild}
               onDeleteNode={onDeleteNode}
             />
-          )}
-        </React.Fragment>
-      ))}
+            {/* BOQ column header — shown when document with structured line children is expanded */}
+            {hasStructuredLines && (
+              <div style={{
+                paddingLeft: 16 + (depth + 1) * 24 + 20 + 28 + 8,
+                paddingRight: 16,
+                paddingTop: 4,
+                paddingBottom: 2,
+                background: 'rgba(30,41,59,0.6)',
+                borderBottom: '1px solid #1e293b',
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '28px 1fr 60px 44px 90px 100px auto',
+                  gap: 0,
+                  borderRadius: '6px 6px 0 0',
+                  overflow: 'hidden',
+                  border: '1px solid rgba(51,65,85,0.8)',
+                  background: '#0a111f',
+                }}>
+                  {[
+                    { label: 'STT',        style: { textAlign: 'center' as const, width: 28 } },
+                    { label: 'TÊN HÀNG HOÁ', style: { flex: 1 } },
+                    { label: 'SL',         style: { textAlign: 'right' as const } },
+                    { label: 'ĐVT',        style: { textAlign: 'center' as const } },
+                    { label: 'ĐƠN GIÁ',   style: { textAlign: 'right' as const } },
+                    { label: 'THÀNH TIỀN', style: { textAlign: 'right' as const } },
+                    { label: '',           style: { minWidth: 40 } },
+                  ].map((col, i) => (
+                    <div key={i} style={{
+                      padding: '4px 6px',
+                      fontSize: 9,
+                      fontWeight: 800,
+                      color: '#475569',
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                      borderRight: i < 6 ? '1px solid #1e293b' : 'none',
+                      ...col.style,
+                    }}>
+                      {col.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {expandedIds.has(node.id) && node.children && (
+              <TreeView
+                nodes={node.children}
+                expandedIds={expandedIds}
+                selectedId={selectedId}
+                onToggle={onToggle}
+                onSelect={onSelect}
+                depth={depth + 1}
+                onLabelSave={onLabelSave}
+                onStatusChange={onStatusChange}
+                onAddChild={onAddChild}
+                onDeleteNode={onDeleteNode}
+              />
+            )}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 }
+
 
 // ─────────────────────────────────────────────────
 // STAT CARDS — top of dashboard
@@ -919,17 +1076,156 @@ export default function IngestionDashboard({ documents }: Props) {
     showToast('🗑️ Đã xóa', 'error');
   }, [deleteNode]);
 
-  const handleAddChild = useCallback((parentId: string) => {
+  const handleAddChild = useCallback(async (parentId: string) => {
+    const parts = parentId.split('-');
+    const isDoc = parts[0] === 'doc' && parts[1];
+
+    if (isDoc) {
+      // ── DOCUMENT: fetch real extracted lines from API ──
+      const docId = parts[1];
+
+      // Show loading placeholder
+      const loadingNode: TreeNode = {
+        id: `loading-${docId}`,
+        label: 'Đang tải dữ liệu…',
+        level: 3,
+        type: 'line',
+        data: { id: -1, lineId: 'loading', lineNumber: 0, rawValue: 'loading…', fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
+      };
+      setTreeData(prev => addChildNode(prev, parentId, loadingNode));
+      setExpandedIds(prev => new Set([...prev, parentId]));
+
+      try {
+        const res = await fetch(`/api/source-center/${docId}`);
+        const json = await res.json();
+        const rawLines: Record<string, string>[] = json.lines || [];
+
+        // Parse raw DB rows → structured ExtractedLine with rowData
+        const parseNum = (v: string | null | undefined): number | undefined => {
+          if (!v) return undefined;
+          const clean = String(v).replace(/[^0-9.,-]/g, '').replace(/,/g, '.');
+          const n = parseFloat(clean);
+          return isNaN(n) ? undefined : n;
+        };
+
+        const fmt = (n: number | string | undefined) => {
+          if (n == null || n === '') return '—';
+          const num = typeof n === 'string' ? parseNum(n) : n;
+          if (num == null) return String(n);
+          return num.toLocaleString('vi-VN');
+        };
+
+        let lineNodes: TreeNode[];
+
+        if (rawLines.length === 0) {
+          lineNodes = [{
+            id: `empty-${docId}`,
+            label: 'Chưa có dữ liệu — hãy chạy Extract tước',
+            level: 3,
+            type: 'line',
+            data: { id: -2, lineId: 'empty', lineNumber: 0, rawValue: 'empty', fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
+          }];
+        } else {
+          // Map DB columns to structured rows
+          lineNodes = rawLines.map((row, idx) => {
+            // DB columns (snake_case from PostgreSQL)
+            const stt        = row.line_number ?? row.stt ?? (idx + 1);
+            const rawVal     = row.raw_value || row.parsed_value || '';
+            const parsedVal  = row.parsed_value || '';
+            const normVal    = row.normalized_value || '';
+            const fType      = (row.field_type || 'NOTES') as FieldType;
+
+            // Try to parse structured data from normalized_value JSON or raw_value TSV
+            let rowData: ExtractedLine['rowData'] = undefined;
+            try {
+              // Try JSON first (if parser stored structured data)
+              const obj = JSON.parse(normVal || rawVal);
+              if (obj && typeof obj === 'object') {
+                rowData = {
+                  stt:       obj.stt ?? obj.STT ?? stt,
+                  ten:       obj.ten ?? obj.TEN ?? obj.name ?? obj.material ?? obj.description ?? parsedVal,
+                  soLuong:   obj.so_luong ?? obj.soLuong ?? obj.SL ?? obj.quantity,
+                  donVi:     obj.don_vi ?? obj.donVi ?? obj.unit,
+                  donGia:    obj.don_gia ?? obj.donGia ?? obj.price ?? obj.unit_price,
+                  thanhTien: obj.thanh_tien ?? obj.thanhTien ?? obj.total ?? obj.amount,
+                  ghiChu:    obj.ghi_chu ?? obj.ghiChu ?? obj.note ?? obj.notes,
+                };
+              }
+            } catch {
+              // Not JSON — try TSV/CSV split (common for Excel rows)
+              const parts2 = rawVal.split(/\t|\|/);
+              if (parts2.length >= 3) {
+                rowData = {
+                  stt:       parts2[0]?.trim() || stt,
+                  ten:       parts2[1]?.trim() || parsedVal,
+                  soLuong:   parseNum(parts2[2]),
+                  donVi:     parts2.length > 4 ? parts2[3]?.trim() : undefined,
+                  donGia:    parseNum(parts2.length > 4 ? parts2[4] : parts2[3]),
+                  thanhTien: parseNum(parts2.length > 5 ? parts2[5] : parts2[4]),
+                  ghiChu:    parts2[parts2.length - 1]?.trim(),
+                };
+              } else {
+                // Fallback: use raw_value as item name
+                rowData = {
+                  stt:  stt,
+                  ten:  parsedVal || rawVal,
+                };
+              }
+            }
+
+            const extractedLine: ExtractedLine = {
+              id:              parseInt(String(row.id || idx)),
+              lineId:          row.line_id || `line-${idx}`,
+              lineNumber:      parseInt(String(stt)) || (idx + 1),
+              rawValue:        rawVal,
+              parsedValue:     parsedVal,
+              normalizedValue: normVal,
+              fieldType:       fType,
+              confidence:      (row.confidence || 'NONE') as Confidence,
+              needsReview:     String(row.needs_review) === 'true' || row.needs_review === 't',
+              reviewNote:      row.review_note || undefined,
+              rowData,
+            };
+
+            return {
+              id: `line-${row.id || idx}-${docId}`,
+              label: rowData?.ten || rawVal || `Dòng ${idx + 1}`,
+              level: 3 as const,
+              type: 'line' as const,
+              data: extractedLine,
+            };
+          });
+        }
+
+        // Remove loading node, add real line nodes
+        setTreeData(prev => {
+          const withoutLoading = deleteNode(prev, `loading-${docId}`);
+          let result = withoutLoading;
+          for (const ln of lineNodes) {
+            result = addChildNode(result, parentId, ln);
+          }
+          return result;
+        });
+        showToast(`✅ Đã tải ${lineNodes.length} dòng dữ liệu`, 'success');
+      } catch (err) {
+        setTreeData(prev => deleteNode(prev, `loading-${docId}`));
+        showToast('❌ Không tải được dữ liệu', 'error');
+      }
+      return;
+    }
+
+    // ── PROJECT / CATEGORY: add blank child node (original behavior) ──
     const newNode: TreeNode = {
       id: `manual-${Date.now()}`,
-      label: 'Nhóm mới (double-click để đổi tên)',
+      label: 'Mục mới (double-click để đổi tên)',
       level: 1,
       type: 'category',
       count: 0,
     };
     setTreeData(prev => addChildNode(prev, parentId, newNode));
-    showToast('➕ Đã thêm nhóm mới', 'info');
-  }, [addChildNode]);
+    showToast('➕ Đã thêm mục mới', 'info');
+  }, [addChildNode, deleteNode]);
+
 
   const tree = treeData;
 
