@@ -3,10 +3,10 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
   ChevronRight, ChevronDown, FolderOpen, Folder, File, FileText,
-  FileSpreadsheet, Image, Upload, Search, Filter, RefreshCw,
+  FileSpreadsheet, Image, Upload, Search, RefreshCw,
   CheckCircle, Clock, AlertTriangle, XCircle, Zap, Database,
-  ArrowRight, Link, Layers, Hash, Tag, Download, Eye,
-  BarChart3, TrendingUp, Package, BookOpen
+  ArrowRight, Layers, Hash, Tag, Download,
+  BarChart3, Package, BookOpen, Pencil, Save, X as XIcon, Plus, Trash2
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────
@@ -69,6 +69,32 @@ export interface TreeNode {
 
 interface Props {
   documents: SourceDocument[];
+}
+
+// ─────────────────────────────────────────────────
+// INLINE EDIT HOOK — universal double-click-to-edit
+// ─────────────────────────────────────────────────
+function useInlineEdit(onSave: (value: string) => void, initialValue: string) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(initialValue);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const startEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditing(true);
+    setTimeout(() => inputRef.current?.focus(), 20);
+  };
+  const commit = () => {
+    setEditing(false);
+    if (value.trim() && value.trim() !== initialValue) onSave(value.trim());
+    else setValue(initialValue);
+  };
+  const cancel = () => { setEditing(false); setValue(initialValue); };
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') cancel();
+  };
+  return { editing, value, setValue, startEdit, commit, cancel, handleKey, inputRef };
 }
 
 // ─────────────────────────────────────────────────
@@ -372,10 +398,15 @@ function DetailPanel({ node, onClose }: { node: TreeNode | null; onClose: () => 
 // TREE ROW COMPONENT
 // ─────────────────────────────────────────────────
 function TreeRow({
-  node, isExpanded, isSelected, onToggle, onSelect, depth
+  node, isExpanded, isSelected, onToggle, onSelect, depth,
+  onLabelSave, onStatusChange, onAddChild, onDeleteNode,
 }: {
   node: TreeNode; isExpanded: boolean; isSelected: boolean;
   onToggle: () => void; onSelect: () => void; depth: number;
+  onLabelSave: (nodeId: string, newLabel: string) => void;
+  onStatusChange: (nodeId: string, status: DataFlowStatus) => void;
+  onAddChild: (parentId: string) => void;
+  onDeleteNode: (nodeId: string) => void;
 }) {
   const hasChildren = node.children && node.children.length > 0;
   const doc = node.type === 'document' ? node.data as SourceDocument : null;
@@ -383,6 +414,28 @@ function TreeRow({
 
   const indent = depth * 24;
   const levelColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+  const [hovering, setHovering] = useState(false);
+
+  // Inline edit state for this row's label
+  const [editingLabel, setEditingLabel] = useState(false);
+  const [editLabelVal, setEditLabelVal] = useState(node.label);
+  const labelInputRef = useRef<HTMLInputElement>(null);
+
+  const startLabelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditLabelVal(node.label);
+    setEditingLabel(true);
+    setTimeout(() => labelInputRef.current?.focus(), 20);
+  };
+  const commitLabelEdit = () => {
+    setEditingLabel(false);
+    if (editLabelVal.trim() && editLabelVal.trim() !== node.label)
+      onLabelSave(node.id, editLabelVal.trim());
+  };
+  const cancelLabelEdit = () => { setEditingLabel(false); setEditLabelVal(node.label); };
+
+  // Inline status change for documents
+  const [editingStatus, setEditingStatus] = useState(false);
 
   // Row background
   let rowBg = 'transparent';
@@ -392,19 +445,19 @@ function TreeRow({
   return (
     <div
       onClick={onSelect}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 0,
         padding: `${node.type === 'project' ? 10 : node.type === 'category' ? 8 : 6}px 16px`,
         paddingLeft: 16 + indent,
-        background: rowBg,
+        background: hovering && !isSelected ? 'rgba(255,255,255,0.03)' : rowBg,
         borderBottom: node.type === 'project' ? '1px solid #1e293b' : '1px solid rgba(30,41,59,0.5)',
         cursor: 'pointer',
         transition: 'background 0.15s',
         borderLeft: isSelected ? '2px solid #3b82f6' : '2px solid transparent',
         position: 'relative',
       }}
-      onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
-      onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = rowBg; }}
     >
       {/* Depth indicator line */}
       {depth > 0 && (
@@ -446,72 +499,160 @@ function TreeRow({
 
       {/* Label */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Project row */}
-        {node.type === 'project' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: '#f1f5f9', letterSpacing: '0.02em' }}>{node.label}</span>
-            {node.count != null && (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 10, background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}>
-                {node.count} files
-              </span>
-            )}
-          </div>
-        )}
 
-        {/* Category row */}
-        {node.type === 'category' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#cbd5e1' }}>
-              {['I','II','III','IV','V','VI','VII','VIII','IX','X'][0]} {node.label}
-            </span>
-            {node.count != null && (
-              <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 6, background: '#1e293b', color: '#64748b', border: '1px solid #334155' }}>
-                {node.count}
-              </span>
-            )}
+        {/* ── UNIVERSAL LABEL INLINE EDIT ── */}
+        {editingLabel ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={e => e.stopPropagation()}>
+            <input
+              ref={labelInputRef}
+              value={editLabelVal}
+              onChange={e => setEditLabelVal(e.target.value)}
+              onBlur={commitLabelEdit}
+              onKeyDown={e => {
+                if (e.key === 'Enter') { e.preventDefault(); commitLabelEdit(); }
+                if (e.key === 'Escape') cancelLabelEdit();
+              }}
+              style={{
+                flex: 1, background: '#0f172a', border: '1px solid #3b82f6', borderRadius: 6,
+                color: '#f1f5f9', fontSize: node.type === 'project' ? 14 : 13,
+                fontWeight: node.type === 'project' ? 800 : 600,
+                padding: '4px 8px', outline: 'none',
+              }}
+            />
+            <button onClick={commitLabelEdit} style={{ background: '#10b981', border: 'none', borderRadius: 4, padding: '3px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <Save size={11} color="#fff" />
+            </button>
+            <button onClick={cancelLabelEdit} style={{ background: '#334155', border: 'none', borderRadius: 4, padding: '3px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              <XIcon size={11} color="#fff" />
+            </button>
           </div>
-        )}
-
-        {/* Document row */}
-        {node.type === 'document' && doc && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#93c5fd', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {doc.fileName}
-              </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 3, alignItems: 'center' }}>
-                <span style={{ fontSize: 10, color: '#475569' }}>{formatBytes(doc.fileSize)}</span>
-                <span style={{ fontSize: 10, color: '#334155' }}>·</span>
-                <span style={{ fontSize: 10, color: '#475569' }}>{formatDate(doc.uploadedAt)}</span>
-                {doc.lineCount != null && doc.lineCount > 0 && (
+        ) : (
+          <>
+            {/* Project row */}
+            {node.type === 'project' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  onDoubleClick={startLabelEdit}
+                  title="Double-click để chỉnh sửa"
+                  style={{ fontSize: 14, fontWeight: 800, color: '#f1f5f9', letterSpacing: '0.02em', cursor: 'text' }}
+                >{node.label}</span>
+                {node.count != null && (
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 10, background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}>
+                    {node.count} files
+                  </span>
+                )}
+                {hovering && (
                   <>
-                    <span style={{ fontSize: 10, color: '#334155' }}>·</span>
-                    <span style={{ fontSize: 10, color: '#475569' }}>{doc.lineCount} dòng</span>
+                    <button onClick={e => { e.stopPropagation(); startLabelEdit(e); }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 2, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+                      title="Chỉnh sửa tên">
+                      <Pencil size={11} />
+                    </button>
+                    <button onClick={e => { e.stopPropagation(); onAddChild(node.id); }}
+                      style={{ background: 'rgba(16,185,129,0.15)', border: 'none', borderRadius: 4, cursor: 'pointer', color: '#10b981', padding: '1px 5px', fontSize: 10 }}
+                      title="Thêm nhóm con">
+                      <Plus size={11} />
+                    </button>
                   </>
                 )}
               </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <PipelineBar current={doc.sourceStatus} />
-              <StatusBadge status={doc.sourceStatus} />
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Line row */}
-        {node.type === 'line' && line && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', flexShrink: 0 }}>#{line.lineNumber}</span>
-            <span style={{ fontSize: 12, color: '#94a3b8', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {line.parsedValue || line.rawValue}
-            </span>
-            <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `${FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569'}20`, color: FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569', flexShrink: 0 }}>
-              {FIELD_TYPE_CONFIG[line.fieldType]?.label || line.fieldType}
-            </span>
-            {line.confidence === 'HIGH' && <CheckCircle size={10} color="#10b981" />}
-            {line.confidence === 'LOW'  && <AlertTriangle size={10} color="#f59e0b" />}
-            {line.needsReview && <AlertTriangle size={10} color="#ef4444" />}
-          </div>
+            {/* Category row */}
+            {node.type === 'category' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  onDoubleClick={startLabelEdit}
+                  title="Double-click để chỉnh sửa"
+                  style={{ fontSize: 13, fontWeight: 700, color: '#cbd5e1', cursor: 'text' }}
+                >
+                  {['I','II','III','IV','V','VI','VII','VIII','IX','X'][0]} {node.label}
+                </span>
+                {node.count != null && (
+                  <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 6, background: '#1e293b', color: '#64748b', border: '1px solid #334155' }}>
+                    {node.count}
+                  </span>
+                )}
+                {hovering && (
+                  <button onClick={e => { e.stopPropagation(); startLabelEdit(e); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 2, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+                    title="Chỉnh sửa nhóm">
+                    <Pencil size={10} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Document row */}
+            {node.type === 'document' && doc && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#93c5fd', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    onDoubleClick={startLabelEdit} title="Double-click để đổi tên file">
+                    {doc.fileName}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 3, alignItems: 'center' }}>
+                    <span style={{ fontSize: 10, color: '#475569' }}>{formatBytes(doc.fileSize)}</span>
+                    <span style={{ fontSize: 10, color: '#334155' }}>·</span>
+                    <span style={{ fontSize: 10, color: '#475569' }}>{formatDate(doc.uploadedAt)}</span>
+                    {doc.lineCount != null && doc.lineCount > 0 && (
+                      <><span style={{ fontSize: 10, color: '#334155' }}>·</span>
+                      <span style={{ fontSize: 10, color: '#475569' }}>{doc.lineCount} dòng</span></>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  <PipelineBar current={doc.sourceStatus} />
+                  {/* Inline status edit */}
+                  {editingStatus ? (
+                    <select
+                      autoFocus
+                      value={doc.sourceStatus}
+                      onBlur={() => setEditingStatus(false)}
+                      onChange={e => { onStatusChange(node.id, e.target.value as DataFlowStatus); setEditingStatus(false); }}
+                      onClick={e => e.stopPropagation()}
+                      style={{ background: '#1e293b', border: '1px solid #3b82f6', borderRadius: 6, color: '#f8fafc', fontSize: 11, padding: '2px 4px', cursor: 'pointer', outline: 'none' }}
+                    >
+                      {(['RAW','INGESTING','PARSED','STAGED','APPROVED','REJECTED'] as DataFlowStatus[]).map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div onClick={e => { e.stopPropagation(); setEditingStatus(true); }} title="Click để đổi trạng thái">
+                      <StatusBadge status={doc.sourceStatus} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Line row */}
+            {node.type === 'line' && line && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace', flexShrink: 0 }}>#{line.lineNumber}</span>
+                <span
+                  onDoubleClick={startLabelEdit}
+                  title="Double-click để chỉnh sửa giá trị"
+                  style={{ fontSize: 12, color: '#94a3b8', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'text' }}
+                >
+                  {line.parsedValue || line.rawValue}
+                </span>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: `${FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569'}20`, color: FIELD_TYPE_CONFIG[line.fieldType]?.color || '#475569', flexShrink: 0 }}>
+                  {FIELD_TYPE_CONFIG[line.fieldType]?.label || line.fieldType}
+                </span>
+                {line.confidence === 'HIGH' && <CheckCircle size={10} color="#10b981" />}
+                {line.confidence === 'LOW'  && <AlertTriangle size={10} color="#f59e0b" />}
+                {line.needsReview && <AlertTriangle size={10} color="#ef4444" />}
+                {hovering && (
+                  <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 2, display: 'flex', borderRadius: 3 }}
+                    title="Xóa dòng này">
+                    <Trash2 size={10} />
+                  </button>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -522,10 +663,15 @@ function TreeRow({
 // RECURSIVE TREE RENDERER
 // ─────────────────────────────────────────────────
 function TreeView({
-  nodes, expandedIds, selectedId, onToggle, onSelect, depth = 0
+  nodes, expandedIds, selectedId, onToggle, onSelect, depth = 0,
+  onLabelSave, onStatusChange, onAddChild, onDeleteNode,
 }: {
   nodes: TreeNode[]; expandedIds: Set<string>; selectedId: string | null;
   onToggle: (id: string) => void; onSelect: (node: TreeNode) => void; depth?: number;
+  onLabelSave: (nodeId: string, newLabel: string) => void;
+  onStatusChange: (nodeId: string, status: DataFlowStatus) => void;
+  onAddChild: (parentId: string) => void;
+  onDeleteNode: (nodeId: string) => void;
 }) {
   return (
     <>
@@ -538,6 +684,10 @@ function TreeView({
             isSelected={selectedId === node.id}
             onToggle={() => onToggle(node.id)}
             onSelect={() => onSelect(node)}
+            onLabelSave={onLabelSave}
+            onStatusChange={onStatusChange}
+            onAddChild={onAddChild}
+            onDeleteNode={onDeleteNode}
           />
           {expandedIds.has(node.id) && node.children && (
             <TreeView
@@ -547,6 +697,10 @@ function TreeView({
               onToggle={onToggle}
               onSelect={onSelect}
               depth={depth + 1}
+              onLabelSave={onLabelSave}
+              onStatusChange={onStatusChange}
+              onAddChild={onAddChild}
+              onDeleteNode={onDeleteNode}
             />
           )}
         </React.Fragment>
@@ -579,7 +733,94 @@ function StatCard({ label, value, icon, color, trend }: { label: string; value: 
 // MAIN DASHBOARD COMPONENT
 // ─────────────────────────────────────────────────
 export default function IngestionDashboard({ documents }: Props) {
-  const tree = buildTree(documents);
+  const [treeData, setTreeData] = useState<TreeNode[]>(() => buildTree(documents));
+
+  // ── Toast notification ──
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const showToast = (msg: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  // ── Helpers to mutate tree nodes by id ──
+  const updateNodeLabel = useCallback((nodes: TreeNode[], id: string, newLabel: string): TreeNode[] =>
+    nodes.map(n => (
+      n.id === id
+        ? { ...n, label: newLabel, data: n.data ? { ...n.data, fileName: newLabel } as any : n.data }
+        : { ...n, children: n.children ? updateNodeLabel(n.children, id, newLabel) : undefined }
+    )), []);
+
+  const updateNodeStatus = useCallback((nodes: TreeNode[], id: string, status: DataFlowStatus): TreeNode[] =>
+    nodes.map(n => (
+      n.id === id && n.type === 'document'
+        ? { ...n, status, data: { ...n.data as SourceDocument, sourceStatus: status } }
+        : { ...n, children: n.children ? updateNodeStatus(n.children, id, status) : undefined }
+    )), []);
+
+  const deleteNode = useCallback((nodes: TreeNode[], id: string): TreeNode[] =>
+    nodes
+      .filter(n => n.id !== id)
+      .map(n => ({ ...n, children: n.children ? deleteNode(n.children, id) : undefined })),
+    []);
+
+  const addChildNode = useCallback((nodes: TreeNode[], parentId: string, newNode: TreeNode): TreeNode[] =>
+    nodes.map(n => (
+      n.id === parentId
+        ? { ...n, children: [...(n.children || []), newNode] }
+        : { ...n, children: n.children ? addChildNode(n.children, parentId, newNode) : undefined }
+    )), []);
+
+  // ── Handlers ──
+  const handleLabelSave = useCallback(async (nodeId: string, newLabel: string) => {
+    setTreeData(prev => updateNodeLabel(prev, nodeId, newLabel));
+    showToast(`✏️ Đã cập nhật: "${newLabel}"`, 'success');
+    // Persist: find node type and call appropriate API
+    try {
+      // Extract numeric ID from nodeId like "doc-123"
+      const parts = nodeId.split('-');
+      if (parts[0] === 'doc' && parts[1]) {
+        await fetch(`/api/source-center/${parts[1]}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file_name: newLabel }),
+        });
+      }
+    } catch { /* silent fail, UI already updated */ }
+  }, [updateNodeLabel]);
+
+  const handleStatusChange = useCallback(async (nodeId: string, status: DataFlowStatus) => {
+    setTreeData(prev => updateNodeStatus(prev, nodeId, status));
+    showToast(`🔄 Trạng thái → ${status}`, 'info');
+    try {
+      const parts = nodeId.split('-');
+      if (parts[0] === 'doc' && parts[1]) {
+        await fetch(`/api/source-center/${parts[1]}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_status: status }),
+        });
+      }
+    } catch { /* silent */ }
+  }, [updateNodeStatus]);
+
+  const handleDeleteNode = useCallback(async (nodeId: string) => {
+    setTreeData(prev => deleteNode(prev, nodeId));
+    showToast('🗑️ Đã xóa', 'error');
+  }, [deleteNode]);
+
+  const handleAddChild = useCallback((parentId: string) => {
+    const newNode: TreeNode = {
+      id: `manual-${Date.now()}`,
+      label: 'Nhóm mới (double-click để đổi tên)',
+      level: 1,
+      type: 'category',
+      count: 0,
+    };
+    setTreeData(prev => addChildNode(prev, parentId, newNode));
+    showToast('➕ Đã thêm nhóm mới', 'info');
+  }, [addChildNode]);
+
+  const tree = treeData;
 
   // Auto-expand first project
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
@@ -632,7 +873,27 @@ export default function IngestionDashboard({ documents }: Props) {
   const totalLines = documents.reduce((s, d) => s + (d.lineCount || 0), 0);
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#020617', minHeight: '100vh', color: '#f8fafc' }}>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#020617', minHeight: '100vh', color: '#f8fafc', position: 'relative' }}>
+      {/* ── TOAST ── */}
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 16, right: 24, zIndex: 99999,
+          background: toast.type === 'success' ? '#10b981' : toast.type === 'error' ? '#ef4444' : '#3b82f6',
+          color: '#fff', padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)', animation: 'none',
+        }}>
+          {toast.msg}
+        </div>
+      )}
+
+      {/* ── HINT BAR ── */}
+      <div style={{ padding: '6px 24px', background: 'rgba(59,130,246,0.08)', borderBottom: '1px solid rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', gap: 16, fontSize: 11, color: '#60a5fa' }}>
+        <span>💡 <strong>Cách chỉnh sửa thủ công:</strong></span>
+        <span>• <strong>Double-click</strong> vào tên để đổi tên bất kỳ mục nào</span>
+        <span>• <strong>Click</strong> vào Badge trạng thái để thay đổi trạng thái file</span>
+        <span>• Di chuột để thấy nút ✏️ Sửa / ➕ Thêm / 🗑️ Xóa</span>
+        <span>• <strong>Enter</strong> để lưu · <strong>Esc</strong> để huỷ</span>
+      </div>
       {/* ── TOP BAR ── */}
       <div style={{ padding: '20px 24px', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0a111f' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -712,7 +973,7 @@ export default function IngestionDashboard({ documents }: Props) {
       </div>
 
       {/* ── MAIN CONTENT: Tree + Detail Panel ── */}
-      <div style={{ display: 'flex', height: 'calc(100vh - 262px)', overflow: 'hidden', margin: '0 24px 24px', background: '#0a111f', borderRadius: 14, border: '1px solid #1e293b', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', height: 'calc(100vh - 262px)', overflow: 'hidden', margin: '0 24px 24px', background: '#0a111f', borderRadius: 14, border: '1px solid #1e293b' }}>
         {/* Tree Panel */}
         <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
           {displayTree.length === 0 ? (
@@ -727,6 +988,10 @@ export default function IngestionDashboard({ documents }: Props) {
               selectedId={selectedNode?.id || null}
               onToggle={toggleExpand}
               onSelect={setSelectedNode}
+              onLabelSave={handleLabelSave}
+              onStatusChange={handleStatusChange}
+              onAddChild={handleAddChild}
+              onDeleteNode={handleDeleteNode}
             />
           )}
         </div>
