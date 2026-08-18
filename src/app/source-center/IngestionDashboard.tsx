@@ -511,7 +511,7 @@ function TreeRow({
   const [editingCat, setEditingCat] = useState(false);
 
   // Inline edit state for Line rows
-  const [editingLine, setEditingLine] = useState(line?.rowData?.isNew || false);
+  const [editingLine, setEditingLine] = useState((line?.rowData as any)?.isNew || false);
   const [editLineData, setEditLineData] = useState<any>(line?.rowData || {});
   const [savingLine, setSavingLine] = useState(false);
 
@@ -520,7 +520,7 @@ function TreeRow({
     setSavingLine(true);
     try {
       const isManual = line.lineId.startsWith('manual-') || editLineData.isNew;
-      const url = isManual ? `/api/source-center/${line.sourceDocId || doc?.id}/lines` : `/api/source-center/${line.sourceDocId}/lines`;
+      const url = isManual ? `/api/source-center/${(line as any).sourceDocId || doc?.id}/lines` : `/api/source-center/${(line as any).sourceDocId}/lines`;
       const method = isManual ? 'POST' : 'PATCH';
       
       const res = await fetch(url, {
@@ -538,7 +538,7 @@ function TreeRow({
       if (!res.ok) throw new Error('Save failed');
       setEditingLine(false);
       // Let parent re-fetch or optimistically update
-      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('source-status-changed', { detail: { docId: line.sourceDocId || doc?.id, status: 'PARSED' }}));
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('source-status-changed', { detail: { docId: (line as any).sourceDocId || doc?.id, status: 'PARSED' }}));
     } catch (e) {
       console.error(e);
       alert('Lỗi lưu dòng');

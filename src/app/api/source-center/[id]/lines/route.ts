@@ -55,8 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         normalizedValue: body.normalizedValue,
         linkedMaterialId: body.linkedMaterialId,
         reviewNote: body.reviewNote,
-        needsReview: body.needsReview,
-        updatedAt: new Date()
+        needsReview: body.needsReview
       })
       .where(and(eq(sourceDocumentLines.lineId, lineId), eq(sourceDocumentLines.sourceDocId, docId)))
       .returning();
