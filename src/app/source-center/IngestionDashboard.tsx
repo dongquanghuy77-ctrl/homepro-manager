@@ -12,11 +12,13 @@ import {
 // ─────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────
-export type DataFlowStatus = 'RAW' | 'INGESTING' | 'PARSED' | 'STAGED' | 'APPROVED' | 'REJECTED';
+export type DataFlowStatus = 'RAW' | 'INGESTING' | 'PARSED' | 'STAGED' | 'APPROVED' | 'REJECTED' | 'COMMITTED' | 'CLASSIFIED';
 
 export type DocumentCategory =
   | 'BOQ_EXCEL' | 'BOQ_PDF' | 'DESIGN_PDF' | 'MATERIAL_IMAGE'
-  | 'SURVEY_IMAGE' | 'UNCATEGORIZED' | 'MANUAL_ENTRY' | 'CONTRACT' | 'OTHER';
+  | 'SURVEY_IMAGE' | 'UNCATEGORIZED' | 'MANUAL_ENTRY' | 'CONTRACT' | 'OTHER'
+  | 'MATERIAL_REGISTER' | 'PROCUREMENT_DOCUMENT' | 'BOM' | 'DESIGN_SKETCHUP' | 'DESIGN_AUTOCAD'
+  | 'PHOTO' | 'REPORT' | 'SPECIFICATION';
 
 export type FieldType = 'MATERIAL' | 'QUANTITY' | 'PRICE' | 'SUPPLIER' | 'DATE' | 'CUSTOMER' | 'PROJECT' | 'COMPONENT' | 'DIMENSION' | 'HARDWARE' | 'BOQ' | 'BOM' | 'NOTES';
 
@@ -100,25 +102,35 @@ function useInlineEdit(onSave: (value: string) => void, initialValue: string) {
 // ─────────────────────────────────────────────────
 // CONSTANTS & HELPERS
 // ─────────────────────────────────────────────────
-const STATUS_CONFIG: Record<DataFlowStatus, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  RAW:       { label: 'RAW',       color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', icon: <Clock size={11} /> },
-  INGESTING: { label: 'INGESTING', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: <RefreshCw size={11} /> },
-  PARSED:    { label: 'PARSED',    color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  icon: <Zap size={11} /> },
-  STAGED:    { label: 'STAGED',    color: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  icon: <Database size={11} /> },
-  APPROVED:  { label: 'APPROVED',  color: '#10b981', bg: 'rgba(16,185,129,0.12)', icon: <CheckCircle size={11} /> },
-  REJECTED:  { label: 'REJECTED',  color: '#ef4444', bg: 'rgba(239,68,68,0.12)',  icon: <XCircle size={11} /> },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
+  RAW:        { label: 'RAW',        color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', icon: <Clock size={11} /> },
+  INGESTING:  { label: 'INGESTING',  color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: <RefreshCw size={11} /> },
+  PARSED:     { label: 'PARSED',     color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  icon: <Zap size={11} /> },
+  CLASSIFIED: { label: 'CLASSIFIED', color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', icon: <Zap size={11} /> },
+  STAGED:     { label: 'STAGED',     color: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  icon: <Database size={11} /> },
+  COMMITTED:  { label: 'COMMITTED',  color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',  icon: <CheckCircle size={11} /> },
+  APPROVED:   { label: 'APPROVED',   color: '#10b981', bg: 'rgba(16,185,129,0.12)', icon: <CheckCircle size={11} /> },
+  REJECTED:   { label: 'REJECTED',   color: '#ef4444', bg: 'rgba(239,68,68,0.12)',  icon: <XCircle size={11} /> },
 };
 
-const CATEGORY_CONFIG: Record<DocumentCategory, { label: string; icon: React.ReactNode; color: string }> = {
-  BOQ_EXCEL:    { label: 'BOQ Excel',    icon: <FileSpreadsheet size={14} />, color: '#10b981' },
-  BOQ_PDF:      { label: 'BOQ PDF',      icon: <FileText size={14} />,        color: '#3b82f6' },
-  DESIGN_PDF:   { label: 'Bản vẽ PDF',   icon: <BookOpen size={14} />,        color: '#8b5cf6' },
-  MATERIAL_IMAGE:{ label: 'Ảnh Vật tư',  icon: <Image size={14} />,           color: '#f59e0b' },
-  SURVEY_IMAGE: { label: 'Ảnh Khảo sát', icon: <Image size={14} />,           color: '#ec4899' },
-  UNCATEGORIZED:{ label: 'Chưa phân loại',icon: <File size={14} />,           color: '#64748b' },
-  MANUAL_ENTRY: { label: 'Nhập thủ công', icon: <Hash size={14} />,           color: '#06b6d4' },
-  CONTRACT:     { label: 'Hợp đồng',      icon: <Tag size={14} />,            color: '#f97316' },
-  OTHER:        { label: 'Khác',          icon: <Package size={14} />,         color: '#a78bfa' },
+const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+  BOQ_EXCEL:             { label: 'BOQ Excel',         icon: <FileSpreadsheet size={14} />, color: '#10b981' },
+  BOQ_PDF:               { label: 'BOQ PDF',           icon: <FileText size={14} />,        color: '#3b82f6' },
+  DESIGN_PDF:            { label: 'Bản vẽ PDF',        icon: <BookOpen size={14} />,        color: '#8b5cf6' },
+  DESIGN_SKETCHUP:       { label: 'SketchUp 3D',       icon: <BookOpen size={14} />,        color: '#6366f1' },
+  DESIGN_AUTOCAD:        { label: 'AutoCAD',           icon: <BookOpen size={14} />,        color: '#7c3aed' },
+  MATERIAL_IMAGE:        { label: 'Ảnh Vật tư',        icon: <Image size={14} />,           color: '#f59e0b' },
+  MATERIAL_REGISTER:     { label: 'Bảng Vật tư',       icon: <FileSpreadsheet size={14} />, color: '#0ea5e9' },
+  SURVEY_IMAGE:          { label: 'Ảnh Khảo sát',      icon: <Image size={14} />,           color: '#ec4899' },
+  PROCUREMENT_DOCUMENT:  { label: 'Phiếu Mua hàng',    icon: <Tag size={14} />,             color: '#f97316' },
+  BOM:                   { label: 'Định mức BOM',       icon: <Hash size={14} />,            color: '#14b8a6' },
+  UNCATEGORIZED:         { label: 'Chưa phân loại',    icon: <File size={14} />,            color: '#64748b' },
+  MANUAL_ENTRY:          { label: 'Nhập thủ công',     icon: <Hash size={14} />,            color: '#06b6d4' },
+  CONTRACT:              { label: 'Hợp đồng',          icon: <Tag size={14} />,             color: '#f97316' },
+  PHOTO:                 { label: 'Ảnh thi công',      icon: <Image size={14} />,           color: '#a78bfa' },
+  REPORT:                { label: 'Báo cáo',           icon: <FileText size={14} />,        color: '#22d3ee' },
+  SPECIFICATION:         { label: 'Thuyết minh KT',    icon: <BookOpen size={14} />,        color: '#4ade80' },
+  OTHER:                 { label: 'Khác',              icon: <Package size={14} />,         color: '#a78bfa' },
 };
 
 const FIELD_TYPE_CONFIG: Record<FieldType, { label: string; color: string }> = {
@@ -238,7 +250,8 @@ function StatusBadge({ status }: { status: DataFlowStatus }) {
 // ─────────────────────────────────────────────────
 // FLOW PIPELINE INDICATOR
 // ─────────────────────────────────────────────────
-const PIPELINE_STAGES: DataFlowStatus[] = ['RAW', 'INGESTING', 'PARSED', 'STAGED', 'APPROVED'];
+// Order matters: this is the canonical flow progression
+const PIPELINE_STAGES: string[] = ['RAW', 'CLASSIFIED', 'PARSED', 'STAGED', 'COMMITTED', 'APPROVED'];
 
 function PipelineBar({ current }: { current: DataFlowStatus }) {
   const stageIdx = PIPELINE_STAGES.indexOf(current);
@@ -613,7 +626,7 @@ function TreeRow({
                       onClick={e => e.stopPropagation()}
                       style={{ background: '#1e293b', border: '1px solid #3b82f6', borderRadius: 6, color: '#f8fafc', fontSize: 11, padding: '2px 4px', cursor: 'pointer', outline: 'none' }}
                     >
-                      {(['RAW','INGESTING','PARSED','STAGED','APPROVED','REJECTED'] as DataFlowStatus[]).map(s => (
+                      {(['RAW','CLASSIFIED','PARSED','STAGED','COMMITTED','APPROVED','REJECTED'] as DataFlowStatus[]).map(s => (
                         <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
@@ -944,7 +957,7 @@ export default function IngestionDashboard({ documents }: Props) {
           style={{ height: 36, padding: '0 10px', background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, color: '#94a3b8', fontSize: 12, cursor: 'pointer', outline: 'none' }}
         >
           <option value="">Tất cả trạng thái</option>
-          {(['RAW', 'INGESTING', 'PARSED', 'STAGED', 'APPROVED', 'REJECTED'] as DataFlowStatus[]).map(s => (
+          {(['RAW', 'CLASSIFIED', 'PARSED', 'STAGED', 'COMMITTED', 'APPROVED', 'REJECTED'] as DataFlowStatus[]).map(s => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>

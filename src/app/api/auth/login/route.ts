@@ -167,14 +167,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check today's attendance
+    // Check today's attendance — office roles (ADMIN, MANAGER, VIEWER, HR, ACCOUNTANT) bypass gate
     const today = getTodayVN();
-    const [attRecord] = await db
-      .select()
-      .from(attendance)
-      .where(and(eq(attendance.employeeId, user.id), eq(attendance.workDate, today)));
-      
-    const lastAttendanceDate = (attRecord && attRecord.checkIn) ? today : null;
+    const OFFICE_ROLES = ['ADMIN', 'MANAGER', 'VIEWER', 'HR', 'ACCOUNTANT'];
+    let lastAttendanceDate: string | null = null;
+
+    if (OFFICE_ROLES.includes(user.role)) {
+      // Office roles always pass attendance gate — set to today
+      lastAttendanceDate = today;
+    } else {
+      // For WORKER/STAFF/DESIGNER — check via employees table
+      try {
+        const empRes = await db.execute(
+          `SELECT a.work_date FROM attendance a
+           JOIN employees e ON e.id = a.employee_id
+           WHERE e.user_id = ${user.id} AND a.work_date = '${today}'
+           LIMIT 1`
+        );
+        const rows = (empRes as any).rows || [];
+        lastAttendanceDate = rows.length > 0 ? today : null;
+      } catch {
+        // fallback: also check attendance by employee_id=user.id
+        const [attRecord] = await db
+          .select()
+          .from(attendance)
+          .where(and(eq(attendance.employeeId, user.id), eq(attendance.workDate, today)));
+        lastAttendanceDate = (attRecord && attRecord.checkIn) ? today : null;
+      }
+    }
 
     const userPayload = {
       id:           user.id,

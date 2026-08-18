@@ -257,7 +257,7 @@ export default function SourceCenterClient({ initialData }: Props) {
           setExtractionLogs(prev => [...prev, 'Phân tích điểm ảnh (Computer Vision)...', 'Chạy thuật toán nhận diện lưới (Grid Detection)...']);
           await new Promise(resolve => setTimeout(resolve, 2000));
           extracted = [
-            { item_code: 'ERR', description: 'IMAGE_NEEDS_OCR - MANUAL_REVIEW_REQUIRED', qty: 0, unit: '-', price: 0 }
+            { item_code: 'ERR', category: 'N/A', target: 'MANUAL_REVIEW', description: 'IMAGE_NEEDS_OCR - MANUAL_REVIEW_REQUIRED', qty: 0, unit: '-', price: 0 }
           ];
         }
 
@@ -268,7 +268,7 @@ export default function SourceCenterClient({ initialData }: Props) {
         setExtractionLogs(prev => [...prev, '⚠️ Cảnh báo: Lỗi trích xuất dữ liệu.']);
         await new Promise(resolve => setTimeout(resolve, 1500));
         setExtractedData([
-          { item_code: 'ERR', description: 'EXTRACTION_FAILED', qty: 0, unit: '-', price: 0 }
+          { item_code: 'ERR', category: 'N/A', target: 'ERROR', description: 'EXTRACTION_FAILED', qty: 0, unit: '-', price: 0 }
         ]);
         setExtractionLogs(prev => [...prev, 'Hoàn thành bóc tách với lỗi.']);
       } finally {
