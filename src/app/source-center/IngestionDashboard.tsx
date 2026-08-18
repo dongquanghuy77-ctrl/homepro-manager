@@ -1332,147 +1332,168 @@ export default function IngestionDashboard({ documents }: Props) {
     showToast('🗑️ Đã xóa', 'error');
   }, [deleteNode]);
 
+  const loadLines = useCallback(async (parentId: string) => {
+    const parts = parentId.split('-');
+    const isDoc = parts[0] === 'doc' && parts[1];
+
+    if (!isDoc) return;
+    const docId = parts[1];
+
+    // Show loading placeholder
+    const loadingNode: TreeNode = {
+      id: `loading-${docId}`,
+      label: 'Đang tải dữ liệu…',
+      level: 3,
+      type: 'line',
+      data: { id: -1, lineId: 'loading', lineNumber: 0, rawValue: 'loading…', fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
+    };
+    setTreeData(prev => addChildNode(prev, parentId, loadingNode));
+    setExpandedIds(prev => new Set([...prev, parentId]));
+
+    try {
+      // Add a timeout to prevent hanging forever
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(`/api/source-center/${docId}`, { credentials: 'include', signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `HTTP ${res.status}`);
+      }
+      const json = await res.json();
+      const rawLines: Record<string, string>[] = json.lines || [];
+
+      // Parse raw DB rows → structured ExtractedLine with rowData
+      const parseNum = (v: string | null | undefined): number | undefined => {
+        if (!v) return undefined;
+        const clean = String(v).replace(/[^0-9.,-]/g, '').replace(/,/g, '.');
+        const n = parseFloat(clean);
+        return isNaN(n) ? undefined : n;
+      };
+
+      let lineNodes: TreeNode[];
+
+      if (rawLines.length === 0) {
+        lineNodes = [{
+          id: `empty-${docId}`,
+          label: `__EXTRACT_ACTION__${docId}__${parentId}`,
+          level: 3,
+          type: 'line',
+          data: { id: -2, lineId: 'empty', lineNumber: 0, rawValue: `__EXTRACT_ACTION__${docId}__${parentId}`, fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
+        }];
+      } else {
+        lineNodes = rawLines.map((row, idx) => {
+          const stt        = row.line_number ?? row.stt ?? (idx + 1);
+          const rawVal     = row.raw_value || row.parsed_value || '';
+          const parsedVal  = row.parsed_value || '';
+          const normVal    = row.normalized_value || '';
+          const fType      = (row.field_type || 'NOTES') as FieldType;
+
+          let rowData: ExtractedLine['rowData'] = undefined;
+          try {
+            const obj = JSON.parse(normVal || rawVal);
+            if (obj && typeof obj === 'object') {
+              rowData = {
+                stt:       obj.stt ?? obj.STT ?? stt,
+                ten:       obj.ten ?? obj.TEN ?? obj.name ?? obj.material ?? obj.description ?? parsedVal,
+                soLuong:   obj.so_luong ?? obj.soLuong ?? obj.SL ?? obj.quantity,
+                donVi:     obj.don_vi ?? obj.donVi ?? obj.unit,
+                donGia:    obj.don_gia ?? obj.donGia ?? obj.price ?? obj.unit_price,
+                thanhTien: obj.thanh_tien ?? obj.thanhTien ?? obj.total ?? obj.amount,
+                ghiChu:    obj.ghi_chu ?? obj.ghiChu ?? obj.note ?? obj.notes,
+              };
+            }
+          } catch {
+            const parts2 = rawVal.split(/\t|\|/);
+            if (parts2.length >= 3) {
+              rowData = {
+                stt:       parts2[0]?.trim() || stt,
+                ten:       parts2[1]?.trim() || parsedVal,
+                soLuong:   parseNum(parts2[2]),
+                donVi:     parts2.length > 4 ? parts2[3]?.trim() : undefined,
+                donGia:    parseNum(parts2.length > 4 ? parts2[4] : parts2[3]),
+                thanhTien: parseNum(parts2.length > 5 ? parts2[5] : parts2[4]),
+                ghiChu:    parts2[parts2.length - 1]?.trim(),
+              };
+            } else {
+              rowData = {
+                stt:  stt,
+                ten:  parsedVal || rawVal,
+              };
+            }
+          }
+
+          const extractedLine: ExtractedLine = {
+            id:              parseInt(String(row.id || idx)),
+            sourceDocId:     parseInt(String(docId)),
+            lineId:          row.line_id || `line-${idx}`,
+            lineNumber:      parseInt(String(stt)) || (idx + 1),
+            rawValue:        rawVal,
+            parsedValue:     parsedVal,
+            normalizedValue: normVal,
+            fieldType:       fType,
+            confidence:      (row.confidence || 'NONE') as Confidence,
+            needsReview:     String(row.needs_review) === 'true' || row.needs_review === 't',
+            reviewNote:      row.review_note || undefined,
+            rowData,
+          };
+
+          return {
+            id: `line-${row.id || idx}-${docId}`,
+            label: rowData?.ten || rawVal || `Dòng ${idx + 1}`,
+            level: 3 as const,
+            type: 'line' as const,
+            data: extractedLine,
+          };
+        });
+      }
+
+      setTreeData(prev => {
+        const withoutLoading = deleteNode(prev, `loading-${docId}`);
+        let result = withoutLoading;
+        for (const ln of lineNodes) {
+          result = addChildNode(result, parentId, ln);
+        }
+        return result;
+      });
+      showToast(`✅ Đã tải ${lineNodes.length} dòng dữ liệu`, 'success');
+    } catch (err: any) {
+      console.error('Failed to load lines for doc', docId, err);
+      setTreeData(prev => deleteNode(prev, `loading-${docId}`));
+      showToast(`❌ Lỗi tải dữ liệu: ${err.message}`, 'error');
+    }
+  }, [addChildNode, deleteNode, showToast]);
+
   const handleAddChild = useCallback(async (parentId: string) => {
     const parts = parentId.split('-');
     const isDoc = parts[0] === 'doc' && parts[1];
 
     if (isDoc) {
-      // ── DOCUMENT: fetch real extracted lines from API ──
       const docId = parts[1];
-
-      // Show loading placeholder
-      const loadingNode: TreeNode = {
-        id: `loading-${docId}`,
-        label: 'Đang tải dữ liệu…',
+      const newLineId = `new-line-${Date.now()}`;
+      const newStt = treeData.find(c => c.id === parentId)?.children?.length || 1;
+      const newNode: TreeNode = {
+        id: newLineId,
+        label: `Dòng mới ${newStt}`,
         level: 3,
         type: 'line',
-        data: { id: -1, lineId: 'loading', lineNumber: 0, rawValue: 'loading…', fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
+        data: {
+          id: -1,
+          isNew: true,
+          sourceDocId: parseInt(String(docId)),
+          lineId: newLineId,
+          lineNumber: newStt,
+          rawValue: '',
+          fieldType: 'NOTES',
+          confidence: 'NONE',
+          needsReview: true,
+          rowData: { stt: String(newStt), ten: 'Tên vật tư (Nhập tay)', soLuong: 1, donGia: 0 }
+        } as ExtractedLine,
       };
-      setTreeData(prev => addChildNode(prev, parentId, loadingNode));
+      setTreeData(prev => addChildNode(prev, parentId, newNode));
       setExpandedIds(prev => new Set([...prev, parentId]));
-
-      try {
-        const res = await fetch(`/api/source-center/${docId}`, { credentials: 'include' });
-        if (!res.ok) {
-          const errJson = await res.json().catch(() => ({}));
-          throw new Error(errJson.error || `HTTP ${res.status}`);
-        }
-        const json = await res.json();
-        const rawLines: Record<string, string>[] = json.lines || [];
-
-        // Parse raw DB rows → structured ExtractedLine with rowData
-        const parseNum = (v: string | null | undefined): number | undefined => {
-          if (!v) return undefined;
-          const clean = String(v).replace(/[^0-9.,-]/g, '').replace(/,/g, '.');
-          const n = parseFloat(clean);
-          return isNaN(n) ? undefined : n;
-        };
-
-        const fmt = (n: number | string | undefined) => {
-          if (n == null || n === '') return '—';
-          const num = typeof n === 'string' ? parseNum(n) : n;
-          if (num == null) return String(n);
-          return num.toLocaleString('vi-VN');
-        };
-
-        let lineNodes: TreeNode[];
-
-        if (rawLines.length === 0) {
-          // No lines yet — add a special node with Extract action embedded
-          lineNodes = [{
-            id: `empty-${docId}`,
-            label: `__EXTRACT_ACTION__${docId}__${parentId}`,
-            level: 3,
-            type: 'line',
-            data: { id: -2, lineId: 'empty', lineNumber: 0, rawValue: `__EXTRACT_ACTION__${docId}__${parentId}`, fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
-          }];
-        } else {
-          // Map DB columns to structured rows
-          lineNodes = rawLines.map((row, idx) => {
-            // DB columns (snake_case from PostgreSQL)
-            const stt        = row.line_number ?? row.stt ?? (idx + 1);
-            const rawVal     = row.raw_value || row.parsed_value || '';
-            const parsedVal  = row.parsed_value || '';
-            const normVal    = row.normalized_value || '';
-            const fType      = (row.field_type || 'NOTES') as FieldType;
-
-            // Try to parse structured data from normalized_value JSON or raw_value TSV
-            let rowData: ExtractedLine['rowData'] = undefined;
-            try {
-              // Try JSON first (if parser stored structured data)
-              const obj = JSON.parse(normVal || rawVal);
-              if (obj && typeof obj === 'object') {
-                rowData = {
-                  stt:       obj.stt ?? obj.STT ?? stt,
-                  ten:       obj.ten ?? obj.TEN ?? obj.name ?? obj.material ?? obj.description ?? parsedVal,
-                  soLuong:   obj.so_luong ?? obj.soLuong ?? obj.SL ?? obj.quantity,
-                  donVi:     obj.don_vi ?? obj.donVi ?? obj.unit,
-                  donGia:    obj.don_gia ?? obj.donGia ?? obj.price ?? obj.unit_price,
-                  thanhTien: obj.thanh_tien ?? obj.thanhTien ?? obj.total ?? obj.amount,
-                  ghiChu:    obj.ghi_chu ?? obj.ghiChu ?? obj.note ?? obj.notes,
-                };
-              }
-            } catch {
-              // Not JSON — try TSV/CSV split (common for Excel rows)
-              const parts2 = rawVal.split(/\t|\|/);
-              if (parts2.length >= 3) {
-                rowData = {
-                  stt:       parts2[0]?.trim() || stt,
-                  ten:       parts2[1]?.trim() || parsedVal,
-                  soLuong:   parseNum(parts2[2]),
-                  donVi:     parts2.length > 4 ? parts2[3]?.trim() : undefined,
-                  donGia:    parseNum(parts2.length > 4 ? parts2[4] : parts2[3]),
-                  thanhTien: parseNum(parts2.length > 5 ? parts2[5] : parts2[4]),
-                  ghiChu:    parts2[parts2.length - 1]?.trim(),
-                };
-              } else {
-                // Fallback: use raw_value as item name
-                rowData = {
-                  stt:  stt,
-                  ten:  parsedVal || rawVal,
-                };
-              }
-            }
-
-            const extractedLine: ExtractedLine = {
-              id:              parseInt(String(row.id || idx)),
-              lineId:          row.line_id || `line-${idx}`,
-              lineNumber:      parseInt(String(stt)) || (idx + 1),
-              rawValue:        rawVal,
-              parsedValue:     parsedVal,
-              normalizedValue: normVal,
-              fieldType:       fType,
-              confidence:      (row.confidence || 'NONE') as Confidence,
-              needsReview:     String(row.needs_review) === 'true' || row.needs_review === 't',
-              reviewNote:      row.review_note || undefined,
-              rowData,
-            };
-
-            return {
-              id: `line-${row.id || idx}-${docId}`,
-              label: rowData?.ten || rawVal || `Dòng ${idx + 1}`,
-              level: 3 as const,
-              type: 'line' as const,
-              data: extractedLine,
-            };
-          });
-        }
-
-        // Remove loading node, add real line nodes
-        setTreeData(prev => {
-          const withoutLoading = deleteNode(prev, `loading-${docId}`);
-          let result = withoutLoading;
-          for (const ln of lineNodes) {
-            result = addChildNode(result, parentId, ln);
-          }
-          return result;
-        });
-        showToast(`✅ Đã tải ${lineNodes.length} dòng dữ liệu`, 'success');
-      } catch (err: any) {
-        console.error('Failed to load lines for doc', docId, err);
-        setTreeData(prev => deleteNode(prev, `loading-${docId}`));
-        showToast(`❌ Không tải được dữ liệu: ${err.message}`, 'error');
-      }
+      showToast('➕ Đã thêm dòng mới. Click icon Sửa để chỉnh sửa.', 'info');
       return;
     }
 
@@ -1510,12 +1531,12 @@ export default function IngestionDashboard({ documents }: Props) {
       } else {
         s.add(id);
         if (node.type === 'document' && (!node.children || node.children.length === 0)) {
-          setTimeout(() => handleAddChild(id), 0);
+          setTimeout(() => loadLines(id), 0);
         }
       }
       return s;
     });
-  }, [handleAddChild]);
+  }, [loadLines]);
 
   const expandAll = () => {
     const ids = new Set<string>();
