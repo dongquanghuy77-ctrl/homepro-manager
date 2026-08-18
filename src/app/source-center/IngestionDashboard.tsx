@@ -228,6 +228,7 @@ function buildTree(docs: SourceDocument[]): TreeNode[] {
     }
 
     const categoryNodes: TreeNode[] = [];
+    let catIdx = 0;
     for (const [cat, catDocs] of categoryMap.entries()) {
       const docNodes: TreeNode[] = catDocs.map((doc) => {
         const lineNodes: TreeNode[] = (doc.lines || []).map((line) => ({
@@ -251,7 +252,7 @@ function buildTree(docs: SourceDocument[]): TreeNode[] {
         };
       });
 
-      categoryNodes.push({
+      const catNode: TreeNode & { __catIndex?: number } = {
         id: `cat-${pIdx}-${cat}`,
         label: CATEGORY_CONFIG[cat]?.label || cat,
         level: 1 as const,
@@ -259,8 +260,11 @@ function buildTree(docs: SourceDocument[]): TreeNode[] {
         children: docNodes,
         count: catDocs.length,
         status: undefined,
-      });
+      };
+      (catNode as any).__catIndex = catIdx++;
+      categoryNodes.push(catNode);
     }
+
 
     roots.push({
       id: `project-${pIdx++}`,
@@ -616,15 +620,18 @@ function TreeRow({
               </div>
             )}
 
-            {/* Category row */}
-            {node.type === 'category' && (
+            {/* Category row — shows Roman numeral index + label + count + ✏️ + ➕ */}
+            {node.type === 'category' && (() => {
+              const romans = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+              const catIndex = (node as any).__catIndex ?? 0;
+              return (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span
                   onDoubleClick={startLabelEdit}
-                  title="Double-click để chỉnh sửa"
+                  title="Double-click để chỉnh sửa tên nhóm"
                   style={{ fontSize: 13, fontWeight: 700, color: '#cbd5e1', cursor: 'text' }}
                 >
-                  {['I','II','III','IV','V','VI','VII','VIII','IX','X'][0]} {node.label}
+                  {romans[catIndex] || 'I'} {node.label}
                 </span>
                 {node.count != null && (
                   <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 6, background: '#1e293b', color: '#64748b', border: '1px solid #334155' }}>
@@ -632,14 +639,23 @@ function TreeRow({
                   </span>
                 )}
                 {hovering && (
-                  <button onClick={e => { e.stopPropagation(); startLabelEdit(e); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 2, display: 'flex', alignItems: 'center', borderRadius: 4 }}
-                    title="Chỉnh sửa nhóm">
-                    <Pencil size={10} />
-                  </button>
+                  <>
+                    <button onClick={e => { e.stopPropagation(); startLabelEdit(e); }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 2, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+                      title="Chỉnh sửa tên nhóm">
+                      <Pencil size={10} />
+                    </button>
+                    <button onClick={e => { e.stopPropagation(); onAddChild(node.id); }}
+                      style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 4, cursor: 'pointer', color: '#10b981', padding: '1px 6px', fontSize: 10, display: 'flex', alignItems: 'center', gap: 3 }}
+                      title="Thêm file vào nhóm này">
+                      <Plus size={10} /> Thêm file
+                    </button>
+                  </>
                 )}
               </div>
-            )}
+              );
+            })()}
+
 
             {/* Document row */}
             {node.type === 'document' && doc && (() => {
@@ -676,6 +692,14 @@ function TreeRow({
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                   <PipelineBar current={doc.sourceStatus} />
+                  {/* + button to add child data line */}
+                  {hovering && (
+                    <button onClick={e => { e.stopPropagation(); onAddChild(node.id); }}
+                      style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 4, cursor: 'pointer', color: '#10b981', padding: '1px 5px', fontSize: 10, display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}
+                      title="Thêm dòng dữ liệu con">
+                      <Plus size={10} />
+                    </button>
+                  )}
                   {/* Inline status edit */}
                   {editingStatus ? (
                     <select
@@ -698,7 +722,7 @@ function TreeRow({
                 </div>
               </div>
               );
-            })()}\n
+            })()}
 
             {/* Line row */}
             {node.type === 'line' && line && (
