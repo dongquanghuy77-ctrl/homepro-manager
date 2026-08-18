@@ -13,8 +13,8 @@ import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
-    if (!authResult.success) return NextResponse.json({ error: authResult.error }, { status: 401 });
+    const { session, error } = await requireAuth(req as any, MANAGER_AND_ABOVE);
+    if (error) return error;
 
     const docId = parseInt(params.id);
     if (isNaN(docId)) return NextResponse.json({ error: 'Invalid document ID' }, { status: 400 });
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         projectId: doc.projectId,
         version: '1.0',
         status: 'DRAFT',
-        createdBy: authResult.user?.id
+        createdBy: session?.user?.id
       }).returning();
       boq = newBoq;
     }
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     // 6. Audit log
     await db.insert(sourceAuditLog).values({
       action: 'COMMIT_TO_BOQ',
-      userId: authResult.user?.id || 0,
+      userId: session?.user?.id || 0,
       sourceDocId: docId,
       module: 'source-center',
       beforeData: JSON.stringify({ status: doc.sourceStatus }),
