@@ -26,32 +26,95 @@ export async function POST(
         return { message: 'Already extracted', count: parseInt(linesRes.rows[0].count, 10) };
       }
 
-      // Mock 16 lines for testing Phase 2
-      const mockItems = [
-        { raw: 'Gỗ MDF phủ Melamine 17mm', parsed: 'Gỗ MDF 17mm Melamine', type: 'MATERIAL', n: 'go mdf 17mm melamine' },
-        { raw: 'Bản lề giảm chấn Hafele', parsed: 'Bản lề Hafele', type: 'HARDWARE', n: 'ban le hafele' },
-        { raw: 'Ray bi 3 tầng', parsed: 'Ray bi 3 tầng', type: 'HARDWARE', n: 'ray bi 3 tang' },
-        { raw: 'Ván sàn Inovar 12mm', parsed: 'Sàn Inovar 12mm', type: 'MATERIAL', n: 'san inovar 12mm' },
-        { raw: 'Len chân tường nhựa', parsed: 'Len nhựa', type: 'MATERIAL', n: 'len nhua' },
-        { raw: 'Nẹp nhôm T', parsed: 'Nẹp chữ T nhôm', type: 'MATERIAL', n: 'nep nhom t' },
-        { raw: 'Sơn nước Dulux 5 in 1', parsed: 'Sơn Dulux 5in1', type: 'MATERIAL', n: 'son dulux 5in1' },
-        { raw: 'Bột trét Jotun', parsed: 'Bột trét Jotun', type: 'MATERIAL', n: 'bot tret jotun' },
-        { raw: 'Kính cường lực 10mm', parsed: 'Kính CL 10ly', type: 'MATERIAL', n: 'kinh cl 10mm' },
-        { raw: 'Khóa cửa vân tay Kassler', parsed: 'Khóa Kassler', type: 'HARDWARE', n: 'khoa kassler' },
-        { raw: 'Silicon Apollo A500', parsed: 'Silicon A500', type: 'MATERIAL', n: 'silicon a500' },
-        { raw: 'Keo titebond', parsed: 'Keo titebond', type: 'MATERIAL', n: 'keo titebond' },
-        { raw: 'Đèn led dây Rạng Đông', parsed: 'LED dây Rạng Đông', type: 'MATERIAL', n: 'led day rang dong' },
-        { raw: 'Đèn downlight 9W âm trần', parsed: 'Downlight 9W', type: 'MATERIAL', n: 'downlight 9w' },
-        { raw: 'Dây điện Cadivi 2.5', parsed: 'Dây Cadivi 2.5', type: 'MATERIAL', n: 'day cadivi 2.5' },
-        { raw: 'Ống luồn dây điện PVC', parsed: 'Ống luồn PVC', type: 'MATERIAL', n: 'ong luon pvc' },
-      ];
+      const doc = docRes.rows[0];
+      const filePath = doc.storage_path || doc.original_path;
 
-      for (let i = 0; i < mockItems.length; i++) {
-        const item = mockItems[i];
-        const lineId = `L-${docId}-${Date.now()}-${i}`;
+      if (!filePath) {
+        throw new Error('File path not found in database');
+      }
+
+      // Check if file exists using fs
+      const fs = require('fs');
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`File not found at path: ${filePath}`);
+      }
+
+      const XLSX = require('xlsx');
+      const workbook = XLSX.readFile(filePath, { cellDates: true, cellNF: true });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
+      // Find header row based on keywords
+      const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1');
+      const keywords = ['tên', 'name', 'mã', 'code', 'sl', 'số lượng', 'quantity', 'đơn giá', 'price', 'thành tiền', 'amount', 'total', 'stt', 'no', 'mô tả', 'description', 'vật tư', 'material'];
+      
+      let headerRow = 0;
+      for (let r = range.s.r; r <= Math.min(range.s.r + 15, range.e.r); r++) {
+        let matchCount = 0;
+        for (let c = range.s.c; c <= Math.min(range.s.c + 20, range.e.c); c++) {
+          const cell = sheet[XLSX.utils.encode_cell({ r, c })];
+          if (cell && cell.v) {
+            const val = String(cell.v).toLowerCase().trim();
+            if (keywords.some(k => val.includes(k))) matchCount++;
+          }
+        }
+        if (matchCount >= 2) {
+          headerRow = r;
+          break;
+        }
+      }
+
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        defval: '',
+        blankrows: false,
+        range: headerRow
+      });
+
+      let insertedCount = 0;
+
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i] as any;
         
-        // Randomize confidence
-        const conf = i < 10 ? 'HIGH' : i < 14 ? 'MEDIUM' : 'LOW';
+        // Find best column matches based on values/keys
+        let stt = r['STT'] || r['No'] || r['Số TT'] || r['STT_1'] || (i + 1);
+        let ten = r['TÊN MÃ SẢN PHẨM'] || r['TÊN MÃ SẢN PHẨM_1'] || r['Tên vật tư'] || r['Description'] || r['Tên hàng'] || r['Mô tả'] || '';
+        let sl = r['SỐ LƯỢNG'] || r['SỐ LƯỢNG_1'] || r['Số lượng'] || r['SL'] || r['Quantity'] || null;
+        let donVi = r['ĐVT'] || r['ĐVT_1'] || r['Đơn vị'] || r['Unit'] || '';
+        let donGia = r['ĐƠN GIÁ'] || r['ĐƠN GIÁ_1'] || r['Đơn giá'] || r['Price'] || r['Unit Price'] || null;
+        let thanhTien = r['THÀNH TIỀN'] || r['THÀNH TIỀN_1'] || r['Thành tiền'] || r['Amount'] || r['Total'] || null;
+        let ghiChu = r['GHI CHÚ'] || r['GHI CHÚ_1'] || r['Ghi chú'] || r['Note'] || r['Notes'] || '';
+
+        // Clean numeric fields
+        const parseNum = (v: any) => {
+          if (!v && v !== 0) return null;
+          if (typeof v === 'number') return v;
+          const clean = String(v).replace(/[^0-9.,-]/g, '').replace(/,/g, '.');
+          const n = parseFloat(clean);
+          return isNaN(n) ? null : n;
+        };
+
+        sl = parseNum(sl);
+        donGia = parseNum(donGia);
+        thanhTien = parseNum(thanhTien);
+
+        // Skip completely empty rows
+        if (!ten && !sl && !donGia && !thanhTien) continue;
+
+        const rowData = {
+          stt, ten, soLuong: sl, donVi, donGia, thanhTien, ghiChu
+        };
+
+        const rawValue = JSON.stringify(r);
+        const parsedValue = ten || `Dòng ${i + 1}`;
+        const normalizedValue = JSON.stringify(rowData);
+        
+        const lineId = `L-${docId}-${Date.now()}-${insertedCount}`;
+        
+        // Calculate confidence
+        let conf = 'LOW';
+        if (ten && sl && donGia) conf = 'HIGH';
+        else if (ten && (sl || donGia)) conf = 'MEDIUM';
+
         const needsReview = conf !== 'HIGH';
 
         await client.query(`
@@ -60,9 +123,11 @@ export async function POST(
             field_type, confidence, needs_review
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `, [
-          lineId, docId, i + 1, item.raw, item.parsed, item.n,
-          item.type, conf, needsReview
+          lineId, docId, insertedCount + 1, rawValue, parsedValue, normalizedValue,
+          'MATERIAL', conf, needsReview
         ]);
+        
+        insertedCount++;
       }
 
       // Update doc status
@@ -72,7 +137,7 @@ export async function POST(
         WHERE id = $1
       `, [docId]);
 
-      return { message: 'Extracted successfully', count: mockItems.length };
+      return { message: 'Extracted successfully', count: insertedCount };
     });
 
     return NextResponse.json(result);
