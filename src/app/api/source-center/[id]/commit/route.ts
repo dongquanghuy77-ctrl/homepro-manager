@@ -51,7 +51,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         projectId: doc.projectId,
         version: '1.0',
         status: 'DRAFT',
-        createdBy: session?.user?.id
+        createdBy: session?.id
       }).returning();
       boq = newBoq;
     }
@@ -74,8 +74,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           projectId: doc.projectId,
           materialName: String(data.ten).substring(0, 255), // Max length
           unit: data.donVi || 'cái',
-          unitPrice: data.donGia ? String(data.donGia) : '0',
-          qtyRequired: data.soLuong ? String(data.soLuong) : '0',
+          unitPrice: data.donGia ? parseFloat(String(data.donGia).replace(/,/g, '')) || 0 : 0,
+          qtyRequired: data.soLuong ? parseFloat(String(data.soLuong).replace(/,/g, '')) || 0 : 0,
           notes: data.ghiChu || null,
         });
       } catch (err) {
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     // 6. Audit log
     await db.insert(sourceAuditLog).values({
       action: 'COMMIT_TO_BOQ',
-      userId: session?.user?.id || 0,
+      userId: session?.id || 0,
       sourceDocId: docId,
       module: 'source-center',
       beforeData: JSON.stringify({ status: doc.sourceStatus }),
