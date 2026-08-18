@@ -650,6 +650,11 @@ function TreeRow({
                       title="Thêm file vào nhóm này">
                       <Plus size={10} /> Thêm file
                     </button>
+                    <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }}
+                      style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 4, cursor: 'pointer', color: '#ef4444', padding: '1px 5px', display: 'flex', alignItems: 'center' }}
+                      title="Xóa nhóm này">
+                      <Trash2 size={10} />
+                    </button>
                   </>
                 )}
               </div>
@@ -718,6 +723,14 @@ function TreeRow({
                     <div onClick={e => { e.stopPropagation(); setEditingStatus(true); }} title="Click để đổi trạng thái">
                       <StatusBadge status={doc.sourceStatus} />
                     </div>
+                  )}
+                  {/* Delete document button */}
+                  {hovering && (
+                    <button onClick={e => { e.stopPropagation(); onDeleteNode(node.id); }}
+                      style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 4, cursor: 'pointer', color: '#ef4444', padding: '3px 5px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                      title="Xóa file này">
+                      <Trash2 size={11} />
+                    </button>
                   )}
                 </div>
               </div>
