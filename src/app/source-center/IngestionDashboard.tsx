@@ -761,10 +761,72 @@ function TreeRow({
                 return n.toLocaleString('vi-VN');
               };
 
+              // Check for extract action node
+              const isExtractAction = line.lineId === 'empty' && line.rawValue?.startsWith('__EXTRACT_ACTION__');
+              const eDocId    = isExtractAction ? (line.rawValue.match(/__EXTRACT_ACTION__(\d+)__/) || [])[1] : null;
+              const eParentId = isExtractAction ? (line.rawValue.match(/__EXTRACT_ACTION__\d+__(.+)/) || [])[1] : null;
+
               if (isLoading) return (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 12 }}>
                   <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} />
                   Đang tải dữ liệu từ server…
+                </div>
+              );
+
+              if (isEmpty && isExtractAction && eDocId && eParentId) return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 0' }}>
+                  <AlertTriangle size={13} color="#f59e0b" />
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>File chưa được trích xuất dữ liệu</span>
+                  <button
+                    onClick={async e => {
+                      e.stopPropagation();
+                      // Show extracting toast
+                      const btn = e.currentTarget as HTMLButtonElement;
+                      btn.disabled = true;
+                      btn.textContent = '⏳ Đang trích xuất…';
+                      try {
+                        const extractRes = await fetch(`/api/source-center/${eDocId}/extract`, {
+                          method: 'POST',
+                          credentials: 'include',
+                          headers: { 'Content-Type': 'application/json' },
+                        });
+                        if (!extractRes.ok) {
+                          const err = await extractRes.json().catch(() => ({}));
+                          throw new Error(err.error || `HTTP ${extractRes.status}`);
+                        }
+                        const extractJson = await extractRes.json();
+                        const count = extractJson.count || 0;
+
+                        if (count === 0) {
+                          btn.textContent = '⚠️ Không trích xuất được';
+                          return;
+                        }
+
+                        // Reload lines
+                        btn.textContent = `✅ Đã trích xuất ${count} dòng, đang tải…`;
+                        const linesRes = await fetch(`/api/source-center/${eDocId}`, { credentials: 'include' });
+                        if (!linesRes.ok) throw new Error('Cannot reload');
+                        const linesJson = await linesRes.json();
+                        const rawLines: Record<string, string>[] = linesJson.lines || [];
+
+                        // Re-trigger the same parse logic via custom event
+                        window.dispatchEvent(new CustomEvent('source-lines-loaded', {
+                          detail: { docId: eDocId, parentId: eParentId, rawLines }
+                        }));
+                      } catch (err: any) {
+                        btn.disabled = false;
+                        btn.textContent = `❌ Lỗi: ${err.message}`;
+                      }
+                    }}
+                    style={{
+                      background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)',
+                      borderRadius: 6, cursor: 'pointer', color: '#10b981',
+                      padding: '4px 12px', fontSize: 11, fontWeight: 700,
+                      display: 'flex', alignItems: 'center', gap: 4,
+                    }}
+                  >
+                    <Zap size={11} /> Trích xuất ngay
+                  </button>
                 </div>
               );
 
@@ -1003,6 +1065,95 @@ function StatCard({ label, value, icon, color, trend }: { label: string; value: 
 export default function IngestionDashboard({ documents }: Props) {
   const [treeData, setTreeData] = useState<TreeNode[]>(() => buildTree(documents));
 
+  // ── Listen for extraction completion event from line row buttons ──
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const { docId, parentId, rawLines } = (e as CustomEvent).detail as {
+        docId: string; parentId: string; rawLines: Record<string, string>[];
+      };
+
+      const parseNum = (v: string | null | undefined): number | undefined => {
+        if (!v) return undefined;
+        const clean = String(v).replace(/[^0-9.,-]/g, '').replace(/,/g, '.');
+        const n = parseFloat(clean);
+        return isNaN(n) ? undefined : n;
+      };
+
+      const lineNodes: TreeNode[] = rawLines.map((row, idx) => {
+        const stt       = row.line_number ?? (idx + 1);
+        const rawVal    = row.raw_value || row.parsed_value || '';
+        const parsedVal = row.parsed_value || '';
+        const normVal   = row.normalized_value || '';
+        const fType     = (row.field_type || 'NOTES') as FieldType;
+
+        let rowData: ExtractedLine['rowData'];
+        try {
+          const obj = JSON.parse(normVal || rawVal);
+          if (obj && typeof obj === 'object') {
+            rowData = {
+              stt: obj.stt ?? stt,
+              ten: obj.ten ?? obj.name ?? obj.material ?? parsedVal,
+              soLuong: obj.so_luong ?? obj.soLuong ?? obj.quantity,
+              donVi: obj.don_vi ?? obj.unit,
+              donGia: obj.don_gia ?? obj.price ?? obj.unit_price,
+              thanhTien: obj.thanh_tien ?? obj.total,
+              ghiChu: obj.ghi_chu ?? obj.note,
+            };
+          }
+        } catch {
+          const parts2 = rawVal.split(/\t|\|/);
+          rowData = parts2.length >= 3 ? {
+            stt: parts2[0]?.trim() || stt,
+            ten: parts2[1]?.trim() || parsedVal,
+            soLuong: parseNum(parts2[2]),
+            donVi: parts2.length > 4 ? parts2[3]?.trim() : undefined,
+            donGia: parseNum(parts2.length > 4 ? parts2[4] : parts2[3]),
+            thanhTien: parseNum(parts2.length > 5 ? parts2[5] : parts2[4]),
+          } : { stt, ten: parsedVal || rawVal };
+        }
+
+        const extractedLine: ExtractedLine = {
+          id: parseInt(String(row.id || idx)),
+          lineId: row.line_id || `line-${idx}`,
+          lineNumber: parseInt(String(stt)) || (idx + 1),
+          rawValue: rawVal, parsedValue: parsedVal, normalizedValue: normVal,
+          fieldType: fType,
+          confidence: (row.confidence || 'NONE') as Confidence,
+          needsReview: String(row.needs_review) === 'true' || row.needs_review === 't',
+          reviewNote: row.review_note || undefined,
+          rowData,
+        };
+
+        return {
+          id: `line-${row.id || idx}-${docId}`,
+          label: rowData?.ten || rawVal || `Dòng ${idx + 1}`,
+          level: 3 as const,
+          type: 'line' as const,
+          data: extractedLine,
+        };
+      });
+
+      setTreeData(prev => {
+        // Remove the empty node
+        const withoutEmpty = (nodes: TreeNode[]): TreeNode[] =>
+          nodes.filter(n => n.id !== `empty-${docId}`)
+               .map(n => ({ ...n, children: n.children ? withoutEmpty(n.children) : undefined }));
+
+        // Add real lines to parent
+        const addAll = (nodes: TreeNode[]): TreeNode[] =>
+          nodes.map(n => n.id === parentId
+            ? { ...n, children: [...(n.children || []).filter(c => c.id !== `empty-${docId}`), ...lineNodes] }
+            : { ...n, children: n.children ? addAll(n.children) : undefined }
+          );
+
+        return addAll(withoutEmpty(prev));
+      });
+    };
+
+    window.addEventListener('source-lines-loaded', handler);
+    return () => window.removeEventListener('source-lines-loaded', handler);
+  }, []);
+
   // ── Toast notification ──
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
   const showToast = (msg: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -1096,7 +1247,11 @@ export default function IngestionDashboard({ documents }: Props) {
       setExpandedIds(prev => new Set([...prev, parentId]));
 
       try {
-        const res = await fetch(`/api/source-center/${docId}`);
+        const res = await fetch(`/api/source-center/${docId}`, { credentials: 'include' });
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          throw new Error(errJson.error || `HTTP ${res.status}`);
+        }
         const json = await res.json();
         const rawLines: Record<string, string>[] = json.lines || [];
 
@@ -1118,12 +1273,13 @@ export default function IngestionDashboard({ documents }: Props) {
         let lineNodes: TreeNode[];
 
         if (rawLines.length === 0) {
+          // No lines yet — add a special node with Extract action embedded
           lineNodes = [{
             id: `empty-${docId}`,
-            label: 'Chưa có dữ liệu — hãy chạy Extract tước',
+            label: `__EXTRACT_ACTION__${docId}__${parentId}`,
             level: 3,
             type: 'line',
-            data: { id: -2, lineId: 'empty', lineNumber: 0, rawValue: 'empty', fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
+            data: { id: -2, lineId: 'empty', lineNumber: 0, rawValue: `__EXTRACT_ACTION__${docId}__${parentId}`, fieldType: 'NOTES', confidence: 'NONE', needsReview: false } as ExtractedLine,
           }];
         } else {
           // Map DB columns to structured rows
