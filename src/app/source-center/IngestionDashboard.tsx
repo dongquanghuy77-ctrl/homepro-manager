@@ -706,6 +706,45 @@ function TreeRow({
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  {safeLineCount > 0 && doc.sourceStatus !== 'COMMITTED' && doc.sourceStatus !== 'APPROVED' && (
+                    <button
+                      onClick={async e => {
+                        e.stopPropagation();
+                        const btn = e.currentTarget;
+                        const originalText = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ Đang lưu...';
+                        try {
+                          const docId = node.id.replace('doc-', '');
+                          const res = await fetch(`/api/source-center/${docId}/commit`, {
+                            method: 'POST',
+                            credentials: 'include'
+                          });
+                          const json = await res.json();
+                          if (!res.ok) throw new Error(json.error || 'Failed to commit');
+                          
+                          // Dispatch custom event to tell UI that status changed
+                          window.dispatchEvent(new CustomEvent('source-status-changed', {
+                            detail: { docId, status: 'COMMITTED' }
+                          }));
+                          btn.innerHTML = `✅ Đã lưu ${json.count} vật tư`;
+                        } catch (err: any) {
+                          btn.disabled = false;
+                          btn.innerHTML = `❌ Lỗi: ${err.message}`;
+                          setTimeout(() => { if (btn) btn.innerHTML = originalText; }, 3000);
+                        }
+                      }}
+                      style={{
+                        background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)',
+                        borderRadius: 6, cursor: 'pointer', color: '#60a5fa',
+                        padding: '4px 12px', fontSize: 11, fontWeight: 700,
+                        display: 'flex', alignItems: 'center', gap: 4,
+                      }}
+                      title="Chốt dữ liệu và đẩy vào bảng BOQ chính thức của dự án"
+                    >
+                      <Save size={12} /> Lưu & Đẩy vào BOQ
+                    </button>
+                  )}
                   <PipelineBar current={doc.sourceStatus} />
                   {/* + button to add child data line */}
                   {hovering && (
@@ -1151,7 +1190,27 @@ export default function IngestionDashboard({ documents }: Props) {
     };
 
     window.addEventListener('source-lines-loaded', handler);
-    return () => window.removeEventListener('source-lines-loaded', handler);
+
+    const statusHandler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const { docId, status } = detail;
+      if (!docId || !status) return;
+      setTreeData(prev => {
+        const updateRec = (nodes: TreeNode[]): TreeNode[] => 
+          nodes.map(n => 
+            n.id === `doc-${docId}` && n.type === 'document' 
+              ? { ...n, status: status as DataFlowStatus, data: { ...n.data as any, sourceStatus: status } }
+              : { ...n, children: n.children ? updateRec(n.children) : undefined }
+          );
+        return updateRec(prev);
+      });
+    };
+    window.addEventListener('source-status-changed', statusHandler);
+
+    return () => {
+      window.removeEventListener('source-lines-loaded', handler);
+      window.removeEventListener('source-status-changed', statusHandler);
+    };
   }, []);
 
   // ── Toast notification ──

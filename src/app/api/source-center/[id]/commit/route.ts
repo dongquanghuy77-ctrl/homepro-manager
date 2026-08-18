@@ -1,65 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withDb } from '@/lib/source-center/db';
-import { getSessionFromRequest } from '@/lib/session.edge';
+import { db } from '@/db';
+import { 
+  sourceDocuments, 
+  sourceDocumentLines, 
+  boqs, 
+  boqItems,
+  projects,
+  sourceAuditLog
+} from '@/db/schema';
+import { eq, and, ne } from 'drizzle-orm';
+import { requireAuth } from '@/lib/auth';
+import { MANAGER_AND_ABOVE } from '@/lib/roles';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getSessionFromRequest(req);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  
-  const id = parseInt(params.id);
-  
-  return withDb(async (client) => {
-    // Get doc and lines
-    const docRes = await client.query('SELECT * FROM source_documents WHERE id = $1', [id]);
-    if (!docRes.rows.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    const doc = docRes.rows[0];
-    
-    const linesRes = await client.query('SELECT * FROM source_document_lines WHERE source_doc_id = $1 AND staged_record_id IS NULL', [id]);
-    const lines = linesRes.rows;
-    if (!lines.length) return NextResponse.json({ message: 'No pending lines to commit' });
+  try {
+    const authResult = await requireAuth(req as any, MANAGER_AND_ABOVE);
+    if (!authResult.success) return NextResponse.json({ error: authResult.error }, { status: 401 });
 
-    // Group lines into a JSON payload for Staging Record
-    const rawData = {
-      lines: lines.map(l => ({
-        lineId: l.line_id,
-        raw: l.raw_value,
-        parsed: l.parsed_value,
-        materialId: l.linked_material_id
-      }))
-    };
+    const docId = parseInt(params.id);
+    if (isNaN(docId)) return NextResponse.json({ error: 'Invalid document ID' }, { status: 400 });
 
-    const stagingId = `STG-${id}-${Date.now()}`;
-    const targetModule = doc.document_category?.includes('BOQ') ? 'BOQ' : 
-                         doc.document_category?.includes('PROCUREMENT') ? 'PROCUREMENT' : 'INVENTORY';
+    // 1. Fetch document
+    const [doc] = await db.select().from(sourceDocuments).where(eq(sourceDocuments.id, docId));
+    if (!doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
-    // Insert into staging_records
-    await client.query(`
-      INSERT INTO staging_records (
-        staging_id, source_doc_id, target_module, target_entity, raw_data, 
-        staging_status, created_by
-      ) VALUES ($1, $2, $3, $4, $5, 'PENDING', $6)
-    `, [stagingId, id, targetModule, 'materials', JSON.stringify(rawData), session.id]);
+    if (!doc.projectId) {
+      return NextResponse.json({ error: 'Tài liệu phải được gán vào một Dự án trước khi lưu BOQ' }, { status: 400 });
+    }
 
-    // Update lines to point to staging
-    await client.query(`
-      UPDATE source_document_lines 
-      SET staged_record_id = $1 
-      WHERE source_doc_id = $2 AND staged_record_id IS NULL
-    `, [stagingId, id]);
+    if (doc.sourceStatus === 'COMMITTED' || doc.sourceStatus === 'APPROVED') {
+      return NextResponse.json({ error: 'Tài liệu này đã được chốt (Committed) trước đó' }, { status: 400 });
+    }
 
-    // Update document status
-    await client.query(`
-      UPDATE source_documents 
-      SET source_status = 'STAGED' 
-      WHERE id = $1
-    `, [id]);
-    
-    // Lineage
-    await client.query(`
-      INSERT INTO data_lineage (source_doc_id, entity_type, entity_id, action, user_id)
-      VALUES ($1, 'staging', $2, 'STAGED', $3)
-    `, [id, stagingId, session.id]);
+    // 2. Fetch lines
+    const lines = await db.select().from(sourceDocumentLines).where(eq(sourceDocumentLines.sourceDocId, docId));
+    if (lines.length === 0) {
+      return NextResponse.json({ error: 'Không tìm thấy dòng dữ liệu nào để lưu' }, { status: 400 });
+    }
 
-    return NextResponse.json({ message: 'Committed to staging', stagingId });
-  });
+    // 3. Find or create BOQ for this project
+    let [boq] = await db.select()
+      .from(boqs)
+      .where(and(eq(boqs.projectId, doc.projectId), ne(boqs.status, 'LOCKED')))
+      .limit(1);
+
+    if (!boq) {
+      const [proj] = await db.select().from(projects).where(eq(projects.id, doc.projectId));
+      const code = `BOQ-${proj?.code || doc.projectId}-${new Date().getTime().toString().slice(-6)}`;
+      const [newBoq] = await db.insert(boqs).values({
+        code,
+        projectId: doc.projectId,
+        version: '1.0',
+        status: 'DRAFT',
+        createdBy: authResult.user?.id
+      }).returning();
+      boq = newBoq;
+    }
+
+    // 4. Insert lines into boq_items
+    let itemsToInsert = [];
+    for (const line of lines) {
+      if (!line.normalizedValue) continue;
+      
+      try {
+        const data = JSON.parse(line.normalizedValue);
+        // data has: ten, soLuong, donVi, donGia, thanhTien, ghiChu
+        if (!data.ten || data.ten.startsWith('__')) continue; 
+
+        // Bỏ qua dòng có dạng tiêu đề (chứa STT, TÊN HÀNG, v.v)
+        if (String(data.ten).toLowerCase().includes('tên mã sản phẩm') || String(data.ten).toLowerCase() === 'tên hàng hoá') continue;
+
+        itemsToInsert.push({
+          boqId: boq.id,
+          projectId: doc.projectId,
+          materialName: String(data.ten).substring(0, 255), // Max length
+          unit: data.donVi || 'cái',
+          unitPrice: data.donGia ? String(data.donGia) : '0',
+          qtyRequired: data.soLuong ? String(data.soLuong) : '0',
+          notes: data.ghiChu || null,
+        });
+      } catch (err) {
+        console.warn(`Failed to parse normalized_value for line ${line.id}`);
+      }
+    }
+
+    if (itemsToInsert.length > 0) {
+      await db.insert(boqItems).values(itemsToInsert);
+    }
+
+    // 5. Update document status
+    const [updatedDoc] = await db.update(sourceDocuments)
+      .set({ sourceStatus: 'COMMITTED', updatedAt: new Date() })
+      .where(eq(sourceDocuments.id, docId))
+      .returning();
+
+    // 6. Audit log
+    await db.insert(sourceAuditLog).values({
+      action: 'COMMIT_TO_BOQ',
+      userId: authResult.user?.id || 0,
+      sourceDocId: docId,
+      module: 'source-center',
+      beforeData: JSON.stringify({ status: doc.sourceStatus }),
+      afterData: JSON.stringify({ status: 'COMMITTED', boqId: boq.id, itemsCount: itemsToInsert.length }),
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      count: itemsToInsert.length,
+      boqCode: boq.code 
+    });
+
+  } catch (error: any) {
+    console.error('Commit BOQ error:', error);
+    return NextResponse.json({ error: error.message || 'Lỗi hệ thống' }, { status: 500 });
+  }
 }
