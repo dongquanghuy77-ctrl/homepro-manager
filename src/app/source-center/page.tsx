@@ -41,7 +41,10 @@ export default async function SourceCenterPage() {
           <h1 className="text-2xl font-bold text-slate-800">Source Data Center</h1>
           <p className="text-sm text-slate-500">Centralized ingestion and processing for all project files and source data.</p>
         </div>
-        <div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <a href="/source-center/ingestion" className="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 flex items-center gap-2">
+            🌳 Ingestion Dashboard
+          </a>
           <a href="/source-center/staging" className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700">
             Staging Review
           </a>

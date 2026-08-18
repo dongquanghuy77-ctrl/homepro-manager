@@ -52,10 +52,11 @@ export const WORKSPACES: WorkspaceConfig[] = [
     id: 'source-center',
     label: 'Source Data Center',
     icon: 'Inbox',
-    routes: ['/source-center', '/approval-center'],
+    routes: ['/source-center', '/source-center/ingestion', '/approval-center'],
     navItems: [
       { id: 'src-grp', label: 'Source Center', icon: '', href: '#', sprint: 1, isGroupHeader: true },
-      { id: 'src-dash', label: 'Ingestion Dashboard', icon: 'Inbox', href: '/source-center', sprint: 1 },
+      { id: 'src-ingestion', label: 'Ingestion Dashboard', icon: 'Layers', href: '/source-center/ingestion', sprint: 1 },
+      { id: 'src-dash', label: 'Danh sách File nguồn', icon: 'Inbox', href: '/source-center', sprint: 1 },
       { id: 'approval-center', label: 'Approval Center', icon: 'CheckCircle', href: '/approval-center', sprint: 1 },
     ],
   },
