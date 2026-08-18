@@ -18,7 +18,7 @@ export default async function ProductionDashboardPage() {
     }).from(productionOrders),
     db.select({
       total: sql<number>`count(*)`,
-      active: sql<number>`sum(case when ${machines.status} = 'ACTIVE' then 1 else 0 end)`
+      active: sql<number>`sum(case when ${machines.isActive} = true then 1 else 0 end)`
     }).from(machines),
     db.select({
       total: sql<number>`count(*)`
