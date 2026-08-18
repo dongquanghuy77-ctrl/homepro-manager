@@ -9,8 +9,7 @@ import {
   sourceAuditLog
 } from '@/db/schema';
 import { eq, and, ne } from 'drizzle-orm';
-import { requireAuth } from '@/lib/auth';
-import { MANAGER_AND_ABOVE } from '@/lib/roles';
+import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
