@@ -60,6 +60,15 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Tự động lưu người liên quan mới vào danh bạ nếu chưa có
+    if (assignedTo.trim() && !contacts.some(c => c.name.toLowerCase() === assignedTo.trim().toLowerCase())) {
+      fetch('/api/pwr/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: assignedTo.trim() })
+      }).catch(console.error);
+    }
     try {
       const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
       const payload: Record<string, unknown> = {
