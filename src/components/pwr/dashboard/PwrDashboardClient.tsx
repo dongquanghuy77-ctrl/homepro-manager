@@ -49,6 +49,16 @@ export default function PwrDashboardClient({ initialTasks }: Props) {
 
   return (
     <div className="page-container">
+      <style>{`
+        @keyframes pulseCritical {
+          0% { background-color: var(--color-surface-2); box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+          50% { background-color: rgba(239, 68, 68, 0.15); box-shadow: inset 4px 0 0 0 #EF4444; }
+          100% { background-color: var(--color-surface-2); box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .pwr-critical-blink {
+          animation: pulseCritical 1.5s infinite ease-in-out;
+        }
+      `}</style>
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard — Công việc cá nhân</h1>
@@ -104,7 +114,7 @@ export default function PwrDashboardClient({ initialTasks }: Props) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {todayFocus.map(t => (
               <Link key={t.id} href={`/pwr/tasks/${t.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 6, background: 'var(--color-surface-2)', cursor: 'pointer' }}>
+                <div className={t.priority === 'CRITICAL' ? 'pwr-critical-blink' : ''} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 6, background: 'var(--color-surface-2)', cursor: 'pointer' }}>
                   <PwrStatusBadge status={t.status as PwrStatus} />
                   <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text)', flex: 1 }}>{t.title}</span>
                   {t.dueDate && t.dueDate < todayVN && (
