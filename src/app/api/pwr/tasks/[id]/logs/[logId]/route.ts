@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrWorkLogs, pwrTasks } from '@/db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
-import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { LOG_GRACE_PERIOD_MS } from '@/lib/pwr/constants';
 
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string; logId: string } }
 ) {
-  const authResult = await requireAuth(request as any, MANAGER_AND_ABOVE);
+  const authResult = await requireAuth(request as any, ALL_ROLES);
   if (authResult.error) return authResult.error;
   const { session } = authResult;
 

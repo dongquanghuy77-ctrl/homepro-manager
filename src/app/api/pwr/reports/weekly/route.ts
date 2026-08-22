@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { requireAuth, MANAGER_AND_ABOVE } from '@/lib/auth';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { buildWeeklyReport } from '@/lib/pwr/reporting';
 
 export async function GET(request: Request) {
-  const authResult = await requireAuth(request as any, MANAGER_AND_ABOVE);
+  const authResult = await requireAuth(request as any, ALL_ROLES);
   if (authResult.error) return authResult.error;
   const { session } = authResult;
 
