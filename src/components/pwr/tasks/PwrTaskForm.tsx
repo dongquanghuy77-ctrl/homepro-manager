@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Settings } from 'lucide-react';
 import type { PwrTask, PwrStatus } from '@/db/schema';
 import { PWR_CATEGORY, PWR_PRIORITY, PWR_STATUS, VALID_TRANSITIONS, PWR_COMMON_PEOPLE } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
+import PwrContactsModal from '../contacts/PwrContactsModal';
 
 interface Props {
   task: PwrTask | null;
@@ -30,6 +31,23 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
   const [result,       setResult]       = useState(task?.result       ?? '');
   const [reason,       setReason]       = useState('');
   const [tagsRaw,      setTagsRaw]      = useState((task?.tags ?? []).join(', '));
+  
+  const [showContactsModal, setShowContactsModal] = useState(false);
+  const [contacts, setContacts] = useState<{id: number; name: string}[]>([]);
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  async function fetchContacts() {
+    try {
+      const res = await fetch('/api/pwr/contacts');
+      const data = await res.json();
+      if (data.contacts) setContacts(data.contacts);
+    } catch (e) {
+      console.error('Fetch contacts failed', e);
+    }
+  }
 
   // Status options — for edit: current + valid transitions; for create: all except terminal
   const statusOptions: PwrStatus[] = isEdit
@@ -267,10 +285,19 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
           )}
 
           {/* Assigned to */}
-          <div>
-            <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
-              Người liên quan
-            </label>
+          <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block' }}>
+                Người liên quan
+              </label>
+              <button 
+                type="button" 
+                onClick={() => setShowContactsModal(true)}
+                style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}
+              >
+                <Settings size={12} /> Cài đặt danh sách
+              </button>
+            </div>
             <input
               list="people-list"
               className="form-input"
@@ -280,11 +307,18 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
               placeholder="Tổ trưởng Minh, Khách hàng chị Hoa..."
             />
             <datalist id="people-list">
-              {PWR_COMMON_PEOPLE.map(person => (
-                <option key={person} value={person} />
+              {contacts.map(c => (
+                <option key={c.id} value={c.name} />
               ))}
             </datalist>
           </div>
+
+          {showContactsModal && (
+            <PwrContactsModal 
+              onClose={() => setShowContactsModal(false)}
+              onChanged={fetchContacts}
+            />
+          )}
 
           {/* Project ref */}
           <div>

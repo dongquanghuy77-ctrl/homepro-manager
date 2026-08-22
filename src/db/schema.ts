@@ -1,16 +1,16 @@
-import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
+﻿import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
 
 // ============================================================
-// DEPARTMENTS (PHÒNG BAN / TỔ)
-// Bảng chính thức hóa phòng ban — thay thế trường text users.department
+// DEPARTMENTS (PHÃ’NG BAN / Tá»”)
+// Báº£ng chÃ­nh thá»©c hÃ³a phÃ²ng ban â€” thay tháº¿ trÆ°á»ng text users.department
 // ============================================================
 export const departments = pgTable('departments', {
   id:        serial('id').primaryKey(),
   code:      text('code').notNull().unique(), // 'XUONG_GO' | 'THI_CONG' | 'KHO' | 'KE_TOAN' | 'THIET_KE'
-  name:      text('name').notNull(),          // 'Xưởng Gỗ' | 'Thi Công' | ...
+  name:      text('name').notNull(),          // 'XÆ°á»Ÿng Gá»—' | 'Thi CÃ´ng' | ...
   block:     text('block'),                   // 'SAN_XUAT' | 'VAN_PHONG' | 'KHO'
-  parentId:  integer('parent_id'),            // FK self-ref departments.id (Khối → Phòng)
+  parentId:  integer('parent_id'),            // FK self-ref departments.id (Khá»‘i â†’ PhÃ²ng)
   sortOrder: integer('sort_order').default(0),
   isActive:  boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').defaultNow(),
@@ -32,28 +32,28 @@ export const users = pgTable('users', {
   phone: text('phone'),
   email: text('email'),
   active: boolean('active').notNull().default(true),
-  pinHash: text('pin_hash'),                             // Nullable, chứa hash của mã PIN 6 số
-  failedPinAttempts: integer('failed_pin_attempts').notNull().default(0), // Số lần nhập sai PIN liên tiếp
-  pinLockedUntil: timestamp('pin_locked_until'),         // Thời điểm mở khóa tài khoản
-  requirePasswordChange: boolean('require_password_change').notNull().default(false), // Bắt buộc đổi mật khẩu/PIN ở lần đăng nhập tiếp theo
-  // ── HR Module 01 fields ──────────────────────────────────────
+  pinHash: text('pin_hash'),                             // Nullable, chá»©a hash cá»§a mÃ£ PIN 6 sá»‘
+  failedPinAttempts: integer('failed_pin_attempts').notNull().default(0), // Sá»‘ láº§n nháº­p sai PIN liÃªn tiáº¿p
+  pinLockedUntil: timestamp('pin_locked_until'),         // Thá»i Ä‘iá»ƒm má»Ÿ khÃ³a tÃ i khoáº£n
+  requirePasswordChange: boolean('require_password_change').notNull().default(false), // Báº¯t buá»™c Ä‘á»•i máº­t kháº©u/PIN á»Ÿ láº§n Ä‘Äƒng nháº­p tiáº¿p theo
+  // â”€â”€ HR Module 01 fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   employeeCode: text('employee_code').unique(),          // NV001, NV002...
-  department: text('department'),                        // Xưởng gỗ | Thi công | Thiết kế | Kế toán | Quản lý
+  department: text('department'),                        // XÆ°á»Ÿng gá»— | Thi cÃ´ng | Thiáº¿t káº¿ | Káº¿ toÃ¡n | Quáº£n lÃ½
   employmentType: text('employment_type').default('FULL_TIME'), // FULL_TIME | PART_TIME | CONTRACT
   joinDate: text('join_date'),                           // DD/MM/YYYY
   managerId: integer('manager_id'),                      // FK to users.id (self-referential)
-  departmentId: integer('department_id'),               // FK to departments.id (RBAC core — không dùng .references() tránh circular)
+  departmentId: integer('department_id'),               // FK to departments.id (RBAC core â€” khÃ´ng dÃ¹ng .references() trÃ¡nh circular)
   employeeStatus: text('employee_status').default('ACTIVE'), // ACTIVE | INACTIVE | ON_LEAVE
   note: text('note'),
-  // ── SPRINT 3 — Lương (Payroll Module) ────────────────────────────────────
-  // official_salary: Lương chính thức (bao gồm phụ cấp) — dùng tính lương ngày thường
-  //   Công thức: official_salary / 26 = đơn giá 1 ngày công (T2-T7)
-  // basic_salary: Lương cơ bản (mức BHXH đóng) — dùng tính OT, Chủ nhật, Lễ
-  //   Thường = 60-70% official_salary (theo Thông tư 23/2015/TT-BLĐTBXH)
-  //   Công thức: basic_salary / 26 / 8 = đơn giá 1 giờ làm thêm
-  officialSalary: numeric('official_salary', { precision: 20, scale: 2, mode: 'number' }).default(0),  // VND/tháng
-  basicSalary:    numeric('basic_salary', { precision: 20, scale: 2, mode: 'number' }).default(0),     // VND/tháng
-  // ─────────────────────────────────────────────────────────────
+  // â”€â”€ SPRINT 3 â€” LÆ°Æ¡ng (Payroll Module) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // official_salary: LÆ°Æ¡ng chÃ­nh thá»©c (bao gá»“m phá»¥ cáº¥p) â€” dÃ¹ng tÃ­nh lÆ°Æ¡ng ngÃ y thÆ°á»ng
+  //   CÃ´ng thá»©c: official_salary / 26 = Ä‘Æ¡n giÃ¡ 1 ngÃ y cÃ´ng (T2-T7)
+  // basic_salary: LÆ°Æ¡ng cÆ¡ báº£n (má»©c BHXH Ä‘Ã³ng) â€” dÃ¹ng tÃ­nh OT, Chá»§ nháº­t, Lá»…
+  //   ThÆ°á»ng = 60-70% official_salary (theo ThÃ´ng tÆ° 23/2015/TT-BLÄTBXH)
+  //   CÃ´ng thá»©c: basic_salary / 26 / 8 = Ä‘Æ¡n giÃ¡ 1 giá» lÃ m thÃªm
+  officialSalary: numeric('official_salary', { precision: 20, scale: 2, mode: 'number' }).default(0),  // VND/thÃ¡ng
+  basicSalary:    numeric('basic_salary', { precision: 20, scale: 2, mode: 'number' }).default(0),     // VND/thÃ¡ng
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -71,8 +71,8 @@ export const projects = pgTable('projects', {
   manager: text('manager'),
   location: text('location'),
   contractValue:      numeric('contract_value', { precision: 20, scale: 2, mode: 'number' }).default(0),
-  targetMaterialCost: numeric('target_material_cost', { precision: 20, scale: 2, mode: 'number' }).default(0), // Ngân sách vật tư mục tiêu
-  targetLaborCost:    numeric('target_labor_cost', { precision: 20, scale: 2, mode: 'number' }).default(0),    // Ngân sách nhân công mục tiêu
+  targetMaterialCost: numeric('target_material_cost', { precision: 20, scale: 2, mode: 'number' }).default(0), // NgÃ¢n sÃ¡ch váº­t tÆ° má»¥c tiÃªu
+  targetLaborCost:    numeric('target_labor_cost', { precision: 20, scale: 2, mode: 'number' }).default(0),    // NgÃ¢n sÃ¡ch nhÃ¢n cÃ´ng má»¥c tiÃªu
   status: text('status').notNull().default('ACTIVE'),
   startDate: text('start_date'),
   deadline: text('deadline'),
@@ -239,7 +239,7 @@ export const materials = pgTable('materials', {
   id: serial('id').primaryKey(),
   code: text('code').notNull().unique(),
   name: text('name').notNull(),
-  unit: text('unit').notNull().default('cái'),
+  unit: text('unit').notNull().default('cÃ¡i'),
   unitPrice: numeric('unit_price', { precision: 20, scale: 2, mode: 'number' }).default(0),
   stockQty: numeric('stock_qty', { precision: 18, scale: 4, mode: 'number' }).default(0),
   minStock: numeric('min_stock', { precision: 18, scale: 4, mode: 'number' }).default(0),
@@ -290,7 +290,7 @@ export const boqItems = pgTable('boq_items', {
   materialId: integer('material_id').references(() => materials.id, { onDelete: 'set null' }),
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
   materialName: text('material_name').notNull(),
-  unit: text('unit').notNull().default('cái'),
+  unit: text('unit').notNull().default('cÃ¡i'),
   unitPrice: numeric('unit_price', { precision: 20, scale: 2, mode: 'number' }).default(0),
   qtyRequired: numeric('qty_required', { precision: 18, scale: 4, mode: 'number' }).notNull().default(0),
   qtyOrdered: numeric('qty_ordered', { precision: 18, scale: 4, mode: 'number' }).default(0),
@@ -302,14 +302,14 @@ export const boqItems = pgTable('boq_items', {
 });
 
 // ============================================================
-// COSTS (CHI PHÍ PHÁT SINH DỰ ÁN)
+// COSTS (CHI PHÃ PHÃT SINH Dá»° ÃN)
 // ============================================================
 export const costs = pgTable('costs', {
   id: serial('id').primaryKey(),
   projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   amount: numeric('amount', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
-  category: text('category').default('Vật tư mua ngoài'), // 'Vật tư mua ngoài' | 'Vận chuyển' | 'Nhân công ngoài' | 'Máy móc' | 'Khác'
+  category: text('category').default('Váº­t tÆ° mua ngoÃ i'), // 'Váº­t tÆ° mua ngoÃ i' | 'Váº­n chuyá»ƒn' | 'NhÃ¢n cÃ´ng ngoÃ i' | 'MÃ¡y mÃ³c' | 'KhÃ¡c'
   costDate: text('cost_date').notNull(),
   notes: text('notes'),
   createdByName: text('created_by_name'),
@@ -318,7 +318,7 @@ export const costs = pgTable('costs', {
 });
 
 // ============================================================
-// CUSTOMERS (KHÁCH HÀNG / CRM)
+// CUSTOMERS (KHÃCH HÃ€NG / CRM)
 // ============================================================
 export const customers = pgTable('customers', {
   id: serial('id').primaryKey(),
@@ -355,7 +355,7 @@ export const contacts = pgTable('contacts', {
 });
 
 // ============================================================
-// SETTINGS (CÀI ĐẶT HỆ THỐNG XƯỞNG)
+// SETTINGS (CÃ€I Äáº¶T Há»† THá»NG XÆ¯á»žNG)
 // ============================================================
 export const settings = pgTable('settings', {
   id: serial('id').primaryKey(),
@@ -366,7 +366,7 @@ export const settings = pgTable('settings', {
 
 
 // ============================================================
-// HR MODULE 01 – ATTENDANCE (CHẤM CÔNG)
+// HR MODULE 01 â€“ ATTENDANCE (CHáº¤M CÃ”NG)
 // ============================================================
 export const attendance = pgTable('attendance', {
   id: serial('id').primaryKey(),
@@ -379,27 +379,27 @@ export const attendance = pgTable('attendance', {
   earlyLeaveMinutes: integer('early_leave_minutes').default(0),
   totalHours: doublePrecision('total_hours').default(0),
 
-  // ─── ĐA KÊnh: Nguồn chấm công (Rule Engine đọc để ưu tiên GPS) ─────────────────────
+  // â”€â”€â”€ ÄA KÃŠnh: Nguá»“n cháº¥m cÃ´ng (Rule Engine Ä‘á»c Ä‘á»ƒ Æ°u tiÃªn GPS) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   clockInSource:  text('clock_in_source').default('MANUAL'),
   // 'WEB_GPS' | 'HARDWARE' | 'MANUAL' | 'ADMIN_CORRECTION'
   clockOutSource: text('clock_out_source').default('MANUAL'),
 
   deviceId: text('device_id'),
-  // ID thiết bị phần cứng (VD: 'terminal-A1', 'finger-02'); null nếu Web
+  // ID thiáº¿t bá»‹ pháº§n cá»©ng (VD: 'terminal-A1', 'finger-02'); null náº¿u Web
 
-  // ─── GPS COORDINATES (tách riêng, độ chính xác cao hơn text) ───────────────────
-  // GPS Preservation Rule: không bao giờ ghi đè lat/lng có sẵn bằng null
-  checkInLat:  doublePrecision('check_in_lat'),   // null nếu nguồn là HARDWARE
+  // â”€â”€â”€ GPS COORDINATES (tÃ¡ch riÃªng, Ä‘á»™ chÃ­nh xÃ¡c cao hÆ¡n text) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // GPS Preservation Rule: khÃ´ng bao giá» ghi Ä‘Ã¨ lat/lng cÃ³ sáºµn báº±ng null
+  checkInLat:  doublePrecision('check_in_lat'),   // null náº¿u nguá»“n lÃ  HARDWARE
   checkInLng:  doublePrecision('check_in_lng'),
   checkOutLat: doublePrecision('check_out_lat'),
   checkOutLng: doublePrecision('check_out_lng'),
   location: text('location'),          // deprecated legacy field (lat,lng string)
 
-  // ─── IDEMPOTENCY KEY ─────────────────────────────────────────────────────────
-  // Format: "empId:workDate" — UNIQUE constraint ngăn cản INSERT song song
+  // â”€â”€â”€ IDEMPOTENCY KEY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Format: "empId:workDate" â€” UNIQUE constraint ngÄƒn cáº£n INSERT song song
   idempotencyKey: text('idempotency_key').unique(),
 
-  // ─── SOURCES LOG (audit trail đa kênh) ────────────────────────────────────
+  // â”€â”€â”€ SOURCES LOG (audit trail Ä‘a kÃªnh) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // JSON array: '["WEB_GPS@06:00","HARDWARE@06:02"]'
   confirmSources: text('confirm_sources').default('[]'),
 
@@ -408,43 +408,43 @@ export const attendance = pgTable('attendance', {
   correctedAt: timestamp('corrected_at'),
   correctionReason: text('correction_reason'),
 
-  // ─── LUỒNG DUYỆT 2 CẤP (Manager → HR) ───────────────────────────────────
+  // â”€â”€â”€ LUá»’NG DUYá»†T 2 Cáº¤P (Manager â†’ HR) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   //
   // State machine:
   //   (after clock-out) PENDING_MANAGER
-  //       ↓ Manager approve
+  //       â†“ Manager approve
   //   PENDING_HR
-  //       ↓ HR 'Chốt công'
+  //       â†“ HR 'Chá»‘t cÃ´ng'
   //   APPROVED
-  //       ↓ reject (either level)
+  //       â†“ reject (either level)
   //   REJECTED
   //
   approvalStatus: text('approval_status').notNull().default('PENDING_MANAGER'),
   // PENDING_MANAGER | PENDING_HR | APPROVED | REJECTED
 
-  // Cấp 1: Manager duyệt
+  // Cáº¥p 1: Manager duyá»‡t
   approvedByManager:   integer('approved_by_manager').references(() => users.id),
   approvedByManagerAt: timestamp('approved_by_manager_at'),
   managerNote:         text('manager_note'),
 
-  // Cấp 2: HR chốt công
+  // Cáº¥p 2: HR chá»‘t cÃ´ng
   approvedByHr:   integer('approved_by_hr').references(() => users.id),
   approvedByHrAt: timestamp('approved_by_hr_at'),
   hrNote:         text('hr_note'),
 
-  // HR có thể điều chỉnh giờ công (override totalHours)
-  adjustedHours:  doublePrecision('adjusted_hours'),   // null = dùng totalHours gốc
-  adjustReason:   text('adjust_reason'),    // Lý do điều chỉnh
+  // HR cÃ³ thá»ƒ Ä‘iá»u chá»‰nh giá» cÃ´ng (override totalHours)
+  adjustedHours:  doublePrecision('adjusted_hours'),   // null = dÃ¹ng totalHours gá»‘c
+  adjustReason:   text('adjust_reason'),    // LÃ½ do Ä‘iá»u chá»‰nh
 
-  // ─── LIÊN KẾT NGHỈ PHÉP (Sprint 2) ──────────────────────────────────────
-  // Khi HR duyệt đơn nghỉ → upsert record với status='ON_LEAVE' + leaveRequestId
-  // Rule Engine đọc leaveRequestId → không phạt vắng mặt
+  // â”€â”€â”€ LIÃŠN Káº¾T NGHá»ˆ PHÃ‰P (Sprint 2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Khi HR duyá»‡t Ä‘Æ¡n nghá»‰ â†’ upsert record vá»›i status='ON_LEAVE' + leaveRequestId
+  // Rule Engine Ä‘á»c leaveRequestId â†’ khÃ´ng pháº¡t váº¯ng máº·t
   leaveRequestId: integer('leave_request_id').references(() => leaveRequests.id, { onDelete: 'set null' }),
 
-  // ─── OFFLINE SYNC & FRAUD DETECTION ──────────────────────────────────────
+  // â”€â”€â”€ OFFLINE SYNC & FRAUD DETECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   isOfflineSync:    boolean('is_offline_sync').notNull().default(false),
   clientTimestamp:  timestamp('client_timestamp'),
-  offlineSyncDelta: integer('offline_sync_delta'), // Lệch thời gian tính bằng phút
+  offlineSyncDelta: integer('offline_sync_delta'), // Lá»‡ch thá»i gian tÃ­nh báº±ng phÃºt
   isFlagged:        boolean('is_flagged').notNull().default(false),
   flagReason:       text('flag_reason'),
 
@@ -453,53 +453,53 @@ export const attendance = pgTable('attendance', {
 });
 
 // ============================================================
-// HR MODULE 01 – LEAVE REQUESTS (ĐƠN XIN NGHỈ)
+// HR MODULE 01 â€“ LEAVE REQUESTS (ÄÆ N XIN NGHá»ˆ)
 // ============================================================
 export const leaveRequests = pgTable('leave_requests', {
   id: serial('id').primaryKey(),
   employeeId: integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 
-  // ─── Loại phép ───────────────────────────────────────────────────────────
-  leaveType:   text('leave_type').notNull().default('ANNUAL'), // Giữ text cho legacy compat
+  // â”€â”€â”€ Loáº¡i phÃ©p â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  leaveType:   text('leave_type').notNull().default('ANNUAL'), // Giá»¯ text cho legacy compat
   leaveTypeId: integer('leave_type_id').references(() => leaveTypes.id, { onDelete: 'set null' }),
 
-  // ─── Thời gian ───────────────────────────────────────────────────────────
+  // â”€â”€â”€ Thá»i gian â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   startDate:  text('start_date').notNull(),  // YYYY-MM-DD
   endDate:    text('end_date').notNull(),    // YYYY-MM-DD
   period:     text('period').notNull().default('FULL_DAY'), // FULL_DAY | MORNING | AFTERNOON
   totalDays:  doublePrecision('total_days').notNull().default(1),
   reason:     text('reason'),
-  attachmentUrl: text('attachment_url'),    // Link giấy tờ (bệnh viện, v.v.)
+  attachmentUrl: text('attachment_url'),    // Link giáº¥y tá» (bá»‡nh viá»‡n, v.v.)
 
-  // ─── TRẠNG THÁI (State Machine) ──────────────────────────────────────────
-  // PENDING → PENDING_HR → APPROVED
-  //         ↘ REJECTED  (any level)
-  // APPROVED → CANCELLED (NV hủy trước ngày nghỉ)
+  // â”€â”€â”€ TRáº NG THÃI (State Machine) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // PENDING â†’ PENDING_HR â†’ APPROVED
+  //         â†˜ REJECTED  (any level)
+  // APPROVED â†’ CANCELLED (NV há»§y trÆ°á»›c ngÃ y nghá»‰)
   status: text('status').notNull().default('PENDING'),
 
-  // ─── APPROVAL LEVEL ĐỘNG (chống overlap nhiều cấp quản lý) ───────────────
-  // Mỗi đơn chỉ hiển thị trong queue của 1 cấp duy nhất tại 1 thời điểm
-  // Khi cấp N duyệt: currentApprovalLevel tăng lên N+1, chỉ cấp N+1 thấy
+  // â”€â”€â”€ APPROVAL LEVEL Äá»˜NG (chá»‘ng overlap nhiá»u cáº¥p quáº£n lÃ½) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Má»—i Ä‘Æ¡n chá»‰ hiá»ƒn thá»‹ trong queue cá»§a 1 cáº¥p duy nháº¥t táº¡i 1 thá»i Ä‘iá»ƒm
+  // Khi cáº¥p N duyá»‡t: currentApprovalLevel tÄƒng lÃªn N+1, chá»‰ cáº¥p N+1 tháº¥y
   currentApprovalLevel: integer('current_approval_level').notNull().default(1),
   maxApprovalLevels:    integer('max_approval_levels').notNull().default(2),
-  // maxApprovalLevels lấy từ leaveTypes.approvalLevels khi tạo đơn
+  // maxApprovalLevels láº¥y tá»« leaveTypes.approvalLevels khi táº¡o Ä‘Æ¡n
 
-  // ─── Legacy 1-cấp duyệt (giữ compat) ────────────────────────────────────
+  // â”€â”€â”€ Legacy 1-cáº¥p duyá»‡t (giá»¯ compat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   reviewedBy: integer('reviewed_by').references(() => users.id),
   reviewedAt: timestamp('reviewed_at'),
   reviewNote: text('review_note'),
 
-  // ─── CẤP 1: Manager duyệt ────────────────────────────────────────────────
+  // â”€â”€â”€ Cáº¤P 1: Manager duyá»‡t â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   approvedByManager:   integer('approved_by_manager').references(() => users.id),
   approvedByManagerAt: timestamp('approved_by_manager_at'),
   managerNote:         text('manager_note'),
 
-  // ─── CẤP 2: HR chốt (chỉ với loại phép requiresApproval = 2) ─────────────
+  // â”€â”€â”€ Cáº¤P 2: HR chá»‘t (chá»‰ vá»›i loáº¡i phÃ©p requiresApproval = 2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   approvedByHr:   integer('approved_by_hr').references(() => users.id),
   approvedByHrAt: timestamp('approved_by_hr_at'),
   hrNote:         text('hr_note'),
 
-  // ─── Hủy đơn ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Há»§y Ä‘Æ¡n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   cancelledAt:  timestamp('cancelled_at'),
   cancelReason: text('cancel_reason'),
 
@@ -510,27 +510,27 @@ export const leaveRequests = pgTable('leave_requests', {
 });
 
 // ============================================================
-// SPRINT 2 – LEAVE TYPES (DANH MỤC LOẠI PHÉP)
+// SPRINT 2 â€“ LEAVE TYPES (DANH Má»¤C LOáº I PHÃ‰P)
 // ============================================================
 export const leaveTypes = pgTable('leave_types', {
   id:   serial('id').primaryKey(),
   code: text('code').notNull().unique(), // 'ANNUAL' | 'SICK' | 'UNPAID' | 'MATERNITY' | 'COMPENSATORY'
-  name: text('name').notNull(),          // 'Nghỉ phép năm' | 'Nghỉ ốm' | ...
+  name: text('name').notNull(),          // 'Nghá»‰ phÃ©p nÄƒm' | 'Nghá»‰ á»‘m' | ...
   description: text('description'),
 
-  // ─── Quỹ phép ───────────────────────────────────────────────────────────
-  maxDaysPerYear:  doublePrecision('max_days_per_year'),    // null = không giới hạn
+  // â”€â”€â”€ Quá»¹ phÃ©p â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  maxDaysPerYear:  doublePrecision('max_days_per_year'),    // null = khÃ´ng giá»›i háº¡n
   isPaid:          boolean('is_paid').notNull().default(true),
   isCarryOver:     boolean('is_carry_over').notNull().default(false),
   maxCarryOverDays: integer('max_carry_over_days').default(5),
 
-  // ─── Duyệt ──────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Duyá»‡t â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   requiresApproval: boolean('requires_approval').notNull().default(true),
-  approvalLevels:   integer('approval_levels').notNull().default(2), // 1 hoặc 2
-  maxDaysNoDoc:     integer('max_days_no_doc').default(3),  // Ko cần giấy tờ nếu <= X ngày
+  approvalLevels:   integer('approval_levels').notNull().default(2), // 1 hoáº·c 2
+  maxDaysNoDoc:     integer('max_days_no_doc').default(3),  // Ko cáº§n giáº¥y tá» náº¿u <= X ngÃ y
 
-  // ─── Ảnh hưởng lương (cho Payroll module sau) ────────────────────────────
-  // 'NONE' = hưởng nguyên lương | 'DEDUCT_BASIC' = trừ lương BHXH | 'DEDUCT_FULL' = không lương
+  // â”€â”€â”€ áº¢nh hÆ°á»Ÿng lÆ°Æ¡ng (cho Payroll module sau) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // 'NONE' = hÆ°á»Ÿng nguyÃªn lÆ°Æ¡ng | 'DEDUCT_BASIC' = trá»« lÆ°Æ¡ng BHXH | 'DEDUCT_FULL' = khÃ´ng lÆ°Æ¡ng
   payrollImpact: text('payroll_impact').notNull().default('NONE'),
 
   isActive: boolean('is_active').notNull().default(true),
@@ -540,7 +540,7 @@ export const leaveTypes = pgTable('leave_types', {
 });
 
 // ============================================================
-// SPRINT 2 – LEAVE BALANCES (QUỸ PHÉP TỒN)
+// SPRINT 2 â€“ LEAVE BALANCES (QUá»¸ PHÃ‰P Tá»’N)
 // ============================================================
 export const leaveBalances = pgTable('leave_balances', {
   id:          serial('id').primaryKey(),
@@ -548,22 +548,22 @@ export const leaveBalances = pgTable('leave_balances', {
   leaveTypeId: integer('leave_type_id').notNull().references(() => leaveTypes.id, { onDelete: 'cascade' }),
   year:        integer('year').notNull(),
 
-  // ─── Phân bổ ────────────────────────────────────────────────────────────
-  totalDays:    doublePrecision('total_days').notNull().default(0),  // Phép được cấp trong năm
-  carryOverDays: doublePrecision('carry_over_days').notNull().default(0), // Phép carry-over từ năm trước
+  // â”€â”€â”€ PhÃ¢n bá»• â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  totalDays:    doublePrecision('total_days').notNull().default(0),  // PhÃ©p Ä‘Æ°á»£c cáº¥p trong nÄƒm
+  carryOverDays: doublePrecision('carry_over_days').notNull().default(0), // PhÃ©p carry-over tá»« nÄƒm trÆ°á»›c
 
-  // ─── Theo dõi realtime ───────────────────────────────────────────────────
+  // â”€â”€â”€ Theo dÃµi realtime â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Invariant: remainingDays = totalDays + carryOverDays - usedDays
-  usedDays:    doublePrecision('used_days').notNull().default(0),    // Đã APPROVED
-  pendingDays: doublePrecision('pending_days').notNull().default(0), // Đang chờ duyệt (in-flight)
+  usedDays:    doublePrecision('used_days').notNull().default(0),    // ÄÃ£ APPROVED
+  pendingDays: doublePrecision('pending_days').notNull().default(0), // Äang chá» duyá»‡t (in-flight)
 
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
-// UNIQUE: (employee_id, leave_type_id, year) — enforced via migration
+// UNIQUE: (employee_id, leave_type_id, year) â€” enforced via migration
 
 // ============================================================
-// HR MODULE 01 – OVERTIME REQUESTS (TĂNG CA)
+// HR MODULE 01 â€“ OVERTIME REQUESTS (TÄ‚NG CA)
 // ============================================================
 export const overtimeRequests = pgTable('overtime_requests', {
   id: serial('id').primaryKey(),
@@ -576,16 +576,16 @@ export const overtimeRequests = pgTable('overtime_requests', {
   projectId: integer('project_id').references(() => projects.id, { onDelete: 'set null' }),
   status: text('status').notNull().default('PENDING'), // PENDING | APPROVED | REJECTED | CANCELLED
 
-  // ─── LUỒNG DUYỆT 2 CẤP (giống leave_requests) ─────────────────────────────
+  // â”€â”€â”€ LUá»’NG DUYá»†T 2 Cáº¤P (giá»‘ng leave_requests) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   currentApprovalLevel: integer('current_approval_level').notNull().default(1),
   maxApprovalLevels:    integer('max_approval_levels').notNull().default(1),
 
-  // Cấp 1: Manager trực tiếp
+  // Cáº¥p 1: Manager trá»±c tiáº¿p
   approvedBy: integer('approved_by').references(() => users.id),
   approvedAt: timestamp('approved_at'),
   approveNote: text('approve_note'),
 
-  // Cấp 2: HR chốt (nếu max_approval_levels=2)
+  // Cáº¥p 2: HR chá»‘t (náº¿u max_approval_levels=2)
   approvedByHr:   integer('approved_by_hr').references(() => users.id),
   approvedByHrAt: timestamp('approved_by_hr_at'),
   hrNote:         text('hr_note'),
@@ -595,7 +595,7 @@ export const overtimeRequests = pgTable('overtime_requests', {
 });
 
 // ============================================================
-// HR MODULE 01 – AUDIT LOGS (NHẬT KÝ THAO TÁC)
+// HR MODULE 01 â€“ AUDIT LOGS (NHáº¬T KÃ THAO TÃC)
 // ============================================================
 export const hrAuditLogs = pgTable('hr_audit_logs', {
   id: serial('id').primaryKey(),
@@ -635,7 +635,7 @@ export const productionBomLines = pgTable('production_bom_lines', {
 
 // ============================================================
 // MATERIAL TRACKING LOGS (B\u01af\u1edaC 2: Qu\u00e9t m\u00e3 QR theo c\u00f4ng \u0111o\u1ea1n t\u1ea1i x\u01b0\u1edfng)
-// Vòng đời: C\u1eaft v\u00e1n CNC \u2192 D\u00e1n c\u1ea1nh \u2192 \u0110\u00f3ng g\u00f3i \u2192 L\u1eafp \u0111\u1eb7t t\u1ea1i c\u00f4ng tr\u00ecnh
+// VÃ²ng Ä‘á»i: C\u1eaft v\u00e1n CNC \u2192 D\u00e1n c\u1ea1nh \u2192 \u0110\u00f3ng g\u00f3i \u2192 L\u1eafp \u0111\u1eb7t t\u1ea1i c\u00f4ng tr\u00ecnh
 // ============================================================
 export const materialTrackingLogs = pgTable('material_tracking_logs', {
   id:            serial('id').primaryKey(),
@@ -690,9 +690,9 @@ export type NewOvertimeRequest = typeof overtimeRequests.$inferInsert;
 export type HrAuditLog = typeof hrAuditLogs.$inferSelect;
 
 export type UserRole = 'ADMIN' | 'HR' | 'MANAGER' | 'SUPERVISOR' | 'WORKER' | 'VIEWER';
-// HR: Phụ trách nhân sự + lương — thấy toàn bộ module HR, KHÔNG thấy Dự án
-// MANAGER: Trưởng phòng/Quản đốc — thấy dự án + duyệt team mình
-// SUPERVISOR: Tổ phó/Trưởng nhóm — mục tiêu hợp lệ cho Manager ủy quyền (Delegation)
+// HR: Phá»¥ trÃ¡ch nhÃ¢n sá»± + lÆ°Æ¡ng â€” tháº¥y toÃ n bá»™ module HR, KHÃ”NG tháº¥y Dá»± Ã¡n
+// MANAGER: TrÆ°á»Ÿng phÃ²ng/Quáº£n Ä‘á»‘c â€” tháº¥y dá»± Ã¡n + duyá»‡t team mÃ¬nh
+// SUPERVISOR: Tá»• phÃ³/TrÆ°á»Ÿng nhÃ³m â€” má»¥c tiÃªu há»£p lá»‡ cho Manager á»§y quyá»n (Delegation)
 export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
 export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'PAUSED' | 'OVERDUE';
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
@@ -707,7 +707,7 @@ export type RequestStatus = LeaveRequestStatus; // backwards compat alias
 export type PayrollImpact = 'NONE' | 'DEDUCT_BASIC' | 'DEDUCT_FULL';
 export type EmploymentType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACT';
 export type EmployeeStatus = 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE';
-export type Department = 'Xưởng gỗ' | 'Thi công' | 'Thiết kế' | 'Kế toán' | 'Quản lý' | 'Khác';
+export type Department = 'XÆ°á»Ÿng gá»—' | 'Thi cÃ´ng' | 'Thiáº¿t káº¿' | 'Káº¿ toÃ¡n' | 'Quáº£n lÃ½' | 'KhÃ¡c';
 
 // Sprint 2 new types
 export type LeaveTypeRow = typeof leaveTypes.$inferSelect;
@@ -716,7 +716,7 @@ export type LeaveBalance = typeof leaveBalances.$inferSelect;
 export type NewLeaveBalance = typeof leaveBalances.$inferInsert;
 
 // ============================================================
-// SPRINT 3 – MONTHLY PAYROLL (BẢNG LƯƠNG THÁNG)
+// SPRINT 3 â€“ MONTHLY PAYROLL (Báº¢NG LÆ¯Æ NG THÃNG)
 // ============================================================
 
 export const monthlyPayroll = pgTable('monthly_payroll', {
@@ -725,11 +725,11 @@ export const monthlyPayroll = pgTable('monthly_payroll', {
   month:         integer('month').notNull(),    // 1-12
   year:          integer('year').notNull(),
 
-  // ── Snapshot lương tại thời điểm tính ────────────────────────────────────
+  // â”€â”€ Snapshot lÆ°Æ¡ng táº¡i thá»i Ä‘iá»ƒm tÃ­nh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   officialSalary:  numeric('official_salary', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
   basicSalary:     numeric('basic_salary', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
 
-  // ── Ngày/giờ công tổng hợp từ DailyCalculations ─────────────────────────
+  // â”€â”€ NgÃ y/giá» cÃ´ng tá»•ng há»£p tá»« DailyCalculations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   regularWorkedDays:        doublePrecision('regular_worked_days').notNull().default(0),
   paidLeaveDays:            doublePrecision('paid_leave_days').notNull().default(0),
   eveningOtHours:           doublePrecision('evening_ot_hours').notNull().default(0),
@@ -742,32 +742,32 @@ export const monthlyPayroll = pgTable('monthly_payroll', {
   unpaidLeaveDays:          doublePrecision('unpaid_leave_days').notNull().default(0),
   absentDays:               doublePrecision('absent_days').notNull().default(0),
 
-  // ── Phụ cấp chuyên cần ───────────────────────────────────────────────────
+  // â”€â”€ Phá»¥ cáº¥p chuyÃªn cáº§n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   attendanceAllowance:  numeric('attendance_allowance', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
   totalLateEarlyMins:   doublePrecision('total_late_early_mins').notNull().default(0),
 
-  // ── Kết quả tính toán ────────────────────────────────────────────────────
+  // â”€â”€ Káº¿t quáº£ tÃ­nh toÃ¡n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   grossEarnings:    numeric('gross_earnings', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
   totalDeductions:  numeric('total_deductions', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
   netSalary:        numeric('net_salary', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
   bhxhEmployee:     numeric('bhxh_employee', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
   bhxhEmployer:     numeric('bhxh_employer', { precision: 20, scale: 2, mode: 'number' }).notNull().default(0),
 
-  // ── Khấu trừ cụ thể ──────────────────────────────────────────────────────
+  // â”€â”€ Kháº¥u trá»« cá»¥ thá»ƒ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   advanceDeduction: doublePrecision('advance_deduction').notNull().default(0),
   otherDeductions:  doublePrecision('other_deductions').notNull().default(0),
 
-  // ── Chi tiết dòng lương (JSON array of PayrollLineItem) ──────────────────
-  lineItemsJson: jsonb('line_items_json'),    // PayrollLineItem[] — đầy đủ để audit
-  warningsJson:  jsonb('warnings_json'),      // string[] — cảnh báo OT, dữ liệu thiếu
+  // â”€â”€ Chi tiáº¿t dÃ²ng lÆ°Æ¡ng (JSON array of PayrollLineItem) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  lineItemsJson: jsonb('line_items_json'),    // PayrollLineItem[] â€” Ä‘áº§y Ä‘á»§ Ä‘á»ƒ audit
+  warningsJson:  jsonb('warnings_json'),      // string[] â€” cáº£nh bÃ¡o OT, dá»¯ liá»‡u thiáº¿u
 
-  // ── Trạng thái — CƠ CHẾ CÔNG BỐ ────────────────────────────────────────
-  // DRAFT     : HR vừa chạy tính lương — chỉ HR/Admin thấy (nhân viên không thấy)
-  // PUBLISHED : HR đã chốt sổ và công bố — nhân viên thấy trên phiếu lương cá nhân
+  // â”€â”€ Tráº¡ng thÃ¡i â€” CÆ  CHáº¾ CÃ”NG Bá» â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // DRAFT     : HR vá»«a cháº¡y tÃ­nh lÆ°Æ¡ng â€” chá»‰ HR/Admin tháº¥y (nhÃ¢n viÃªn khÃ´ng tháº¥y)
+  // PUBLISHED : HR Ä‘Ã£ chá»‘t sá»• vÃ  cÃ´ng bá»‘ â€” nhÃ¢n viÃªn tháº¥y trÃªn phiáº¿u lÆ°Æ¡ng cÃ¡ nhÃ¢n
   status: text('status').notNull().default('DRAFT'),
   // DRAFT | PUBLISHED
 
-  // ── Phê duyệt & Thanh toán ───────────────────────────────────────────────
+  // â”€â”€ PhÃª duyá»‡t & Thanh toÃ¡n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   publishedBy:  integer('published_by').references(() => users.id),
   publishedAt:  timestamp('published_at'),
   note:         text('note'),
@@ -787,29 +787,29 @@ export type NewMonthlyPayroll = typeof monthlyPayroll.$inferInsert;
 export type PayrollStatus     = 'DRAFT' | 'PUBLISHED';
 
 // ============================================================
-// SPRINT 3 – PAYSLIP DISPUTES (KHIẾU NẠI PHIẾU LƯƠNG)
+// SPRINT 3 â€“ PAYSLIP DISPUTES (KHIáº¾U Náº I PHIáº¾U LÆ¯Æ NG)
 // ============================================================
 export const payslipDisputes = pgTable('payslip_disputes', {
   id:         serial('id').primaryKey(),
 
-  // FK tới phiếu lương (1 phiếu lương → nhiều lần khiếu nại nếu CLOSED/RESOLVED cũ)
+  // FK tá»›i phiáº¿u lÆ°Æ¡ng (1 phiáº¿u lÆ°Æ¡ng â†’ nhiá»u láº§n khiáº¿u náº¡i náº¿u CLOSED/RESOLVED cÅ©)
   payrollId:  integer('payroll_id').notNull().references(() => monthlyPayroll.id, { onDelete: 'cascade' }),
-  // Denormalized để query nhanh theo nhân viên (không cần JOIN monthly_payroll)
+  // Denormalized Ä‘á»ƒ query nhanh theo nhÃ¢n viÃªn (khÃ´ng cáº§n JOIN monthly_payroll)
   employeeId: integer('employee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   month:      integer('month').notNull(),
   year:       integer('year').notNull(),
 
-  // Nội dung khiếu nại của nhân viên
+  // Ná»™i dung khiáº¿u náº¡i cá»§a nhÃ¢n viÃªn
   reason:     text('reason').notNull(),
 
   // State machine:
-  //   OPEN → HR xem xét → UNDER_REVIEW → giải quyết → RESOLVED hoặc CLOSED
-  //   RESOLVED: HR chấp thuận và sẽ điều chỉnh
-  //   CLOSED:   Bác bỏ / đã giải quyết xong
+  //   OPEN â†’ HR xem xÃ©t â†’ UNDER_REVIEW â†’ giáº£i quyáº¿t â†’ RESOLVED hoáº·c CLOSED
+  //   RESOLVED: HR cháº¥p thuáº­n vÃ  sáº½ Ä‘iá»u chá»‰nh
+  //   CLOSED:   BÃ¡c bá» / Ä‘Ã£ giáº£i quyáº¿t xong
   status:     text('status').notNull().default('OPEN'),
   // OPEN | UNDER_REVIEW | RESOLVED | CLOSED
 
-  // Phản hồi của HR
+  // Pháº£n há»“i cá»§a HR
   hrResponse:  text('hr_response'),
   reviewedBy:  integer('reviewed_by').references(() => users.id),
   reviewedAt:  timestamp('reviewed_at'),
@@ -824,78 +824,78 @@ export type DisputeStatus     = 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'CLOSED';
 
 
 // ============================================================
-// RBAC — MANAGER DEPARTMENTS (LÕI PHÂN QUYỀN)
-// Bất kỳ user nào có role MANAGER phải tra cứu bảng này
-// để biết họ được phép xem/duyệt phòng ban nào + ở cấp mấy
+// RBAC â€” MANAGER DEPARTMENTS (LÃ•I PHÃ‚N QUYá»€N)
+// Báº¥t ká»³ user nÃ o cÃ³ role MANAGER pháº£i tra cá»©u báº£ng nÃ y
+// Ä‘á»ƒ biáº¿t há» Ä‘Æ°á»£c phÃ©p xem/duyá»‡t phÃ²ng ban nÃ o + á»Ÿ cáº¥p máº¥y
 // ============================================================
 export const managerDepartments = pgTable('manager_departments', {
   id:              serial('id').primaryKey(),
   managerId:       integer('manager_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   departmentId:    integer('department_id').notNull().references(() => departments.id, { onDelete: 'cascade' }),
 
-  // Cấp quản lý trong phòng ban này — dùng khớp với currentApprovalLevel
+  // Cáº¥p quáº£n lÃ½ trong phÃ²ng ban nÃ y â€” dÃ¹ng khá»›p vá»›i currentApprovalLevel
   managementLevel: integer('management_level').notNull().default(1),
-  // 1 = Tổ trưởng / Trưởng nhóm (duyệt cấp 1 — trực tiếp)
-  // 2 = Quản đốc / Trưởng phòng  (duyệt cấp 2)
-  // 3 = Giám đốc / BGĐ            (duyệt cấp 3 nếu cần)
+  // 1 = Tá»• trÆ°á»Ÿng / TrÆ°á»Ÿng nhÃ³m (duyá»‡t cáº¥p 1 â€” trá»±c tiáº¿p)
+  // 2 = Quáº£n Ä‘á»‘c / TrÆ°á»Ÿng phÃ²ng  (duyá»‡t cáº¥p 2)
+  // 3 = GiÃ¡m Ä‘á»‘c / BGÄ            (duyá»‡t cáº¥p 3 náº¿u cáº§n)
 
-  canView:    boolean('can_view').notNull().default(true),    // Xem dữ liệu phòng
-  canApprove: boolean('can_approve').notNull().default(false), // Duyệt đơn từ phòng
-  canManage:  boolean('can_manage').notNull().default(false),  // Tạo/sửa/xóa (trưởng phòng)
+  canView:    boolean('can_view').notNull().default(true),    // Xem dá»¯ liá»‡u phÃ²ng
+  canApprove: boolean('can_approve').notNull().default(false), // Duyá»‡t Ä‘Æ¡n tá»« phÃ²ng
+  canManage:  boolean('can_manage').notNull().default(false),  // Táº¡o/sá»­a/xÃ³a (trÆ°á»Ÿng phÃ²ng)
 
   createdAt:  timestamp('created_at').defaultNow(),
-  // UNIQUE(manager_id, department_id) — enforced via migration
+  // UNIQUE(manager_id, department_id) â€” enforced via migration
 });
 
 
 // ============================================================
-// RBAC — DELEGATIONS (ỦY QUYỀN TẠM THỜI)
-// Manager ủy quyền cho SUPERVISOR trong thời gian có giới hạn
-// Nguyên tắc cứng: Delegate KHÔNG được re-delegate
+// RBAC â€” DELEGATIONS (á»¦Y QUYá»€N Táº M THá»œI)
+// Manager á»§y quyá»n cho SUPERVISOR trong thá»i gian cÃ³ giá»›i háº¡n
+// NguyÃªn táº¯c cá»©ng: Delegate KHÃ”NG Ä‘Æ°á»£c re-delegate
 // ============================================================
 export const delegations = pgTable('delegations', {
   id:            serial('id').primaryKey(),
   delegatorId:   integer('delegator_id').notNull().references(() => users.id),
-  // Người ủy quyền — phải là MANAGER
+  // NgÆ°á»i á»§y quyá»n â€” pháº£i lÃ  MANAGER
   delegateId:    integer('delegate_id').notNull().references(() => users.id),
-  // Người nhận ủy quyền — phải là SUPERVISOR
+  // NgÆ°á»i nháº­n á»§y quyá»n â€” pháº£i lÃ  SUPERVISOR
 
-  // Phạm vi quyền được ủy quyền
+  // Pháº¡m vi quyá»n Ä‘Æ°á»£c á»§y quyá»n
   scope:         text('scope').array().notNull(),
-  // Ví dụ: ['APPROVE_ATTENDANCE', 'APPROVE_LEAVE', 'APPROVE_OT']
+  // VÃ­ dá»¥: ['APPROVE_ATTENDANCE', 'APPROVE_LEAVE', 'APPROVE_OT']
 
-  // Phạm vi phòng ban — subset của phòng Manager quản lý
+  // Pháº¡m vi phÃ²ng ban â€” subset cá»§a phÃ²ng Manager quáº£n lÃ½
   departmentIds: integer('department_ids').array().notNull(),
 
   startAt:  timestamp('start_at').notNull(),
   endAt:    timestamp('end_at').notNull(),
-  reason:   text('reason'),           // 'Đi công tác Hà Nội 3 ngày'
+  reason:   text('reason'),           // 'Äi cÃ´ng tÃ¡c HÃ  Ná»™i 3 ngÃ y'
 
   isActive:  boolean('is_active').notNull().default(true),
-  revokedAt: timestamp('revoked_at'),  // Thời điểm thu hồi sớm (nếu có)
-  createdBy: integer('created_by').references(() => users.id), // Admin tạo
+  revokedAt: timestamp('revoked_at'),  // Thá»i Ä‘iá»ƒm thu há»“i sá»›m (náº¿u cÃ³)
+  createdBy: integer('created_by').references(() => users.id), // Admin táº¡o
   createdAt: timestamp('created_at').defaultNow(),
 });
 
 
 // ============================================================
-// RBAC — LEAVE APPROVALS (AUDIT TRAIL TỪNG CẤP DUYỆT)
-// Ghi lại ai duyệt gì ở cấp nào — không thể xóa/sửa
+// RBAC â€” LEAVE APPROVALS (AUDIT TRAIL Tá»ªNG Cáº¤P DUYá»†T)
+// Ghi láº¡i ai duyá»‡t gÃ¬ á»Ÿ cáº¥p nÃ o â€” khÃ´ng thá»ƒ xÃ³a/sá»­a
 // ============================================================
 export const leaveApprovals = pgTable('leave_approvals', {
   id:            serial('id').primaryKey(),
   requestId:     integer('request_id').notNull().references(() => leaveRequests.id, { onDelete: 'cascade' }),
   approverId:    integer('approver_id').notNull().references(() => users.id),
-  approvalLevel: integer('approval_level').notNull(),  // Cấp nào đã hành động (1, 2, 3)
+  approvalLevel: integer('approval_level').notNull(),  // Cáº¥p nÃ o Ä‘Ã£ hÃ nh Ä‘á»™ng (1, 2, 3)
   action:        text('action').notNull(),
   // 'APPROVED' | 'REJECTED' | 'DELEGATED_APPROVED' | 'DELEGATED_REJECTED'
   comment:       text('comment'),
   delegatedFor:  integer('delegated_for').references(() => users.id),
-  // Nếu là ủy quyền: ID của Manager gốc (approver đang thay mặt ai)
+  // Náº¿u lÃ  á»§y quyá»n: ID cá»§a Manager gá»‘c (approver Ä‘ang thay máº·t ai)
   approvedAt:    timestamp('approved_at').defaultNow(),
 });
 
-// Type exports — RBAC
+// Type exports â€” RBAC
 export type DepartmentRow    = typeof departments.$inferSelect;
 export type NewDepartmentRow = typeof departments.$inferInsert;
 export type ManagerDepartment    = typeof managerDepartments.$inferSelect;
@@ -945,7 +945,7 @@ export const positions = pgTable('positions', {
 });
 
 // ============================================================
-// P12 – DOCUMENT CENTER
+// P12 â€“ DOCUMENT CENTER
 // ============================================================
 export const documents = pgTable('documents', {
   id: serial('id').primaryKey(),
@@ -1683,7 +1683,7 @@ export const salesOrders = pgTable('sales_orders', {
 
 
 // ============================================================================
-// CRM ACTIVITIES — Lịch sử chăm sóc khách hàng
+// CRM ACTIVITIES â€” Lá»‹ch sá»­ chÄƒm sÃ³c khÃ¡ch hÃ ng
 // ============================================================================
 
 export const crmActivities = pgTable('crm_activities', {
@@ -1707,12 +1707,12 @@ export const crmActivities = pgTable('crm_activities', {
 });
 
 // ============================================================================
-// P2 THIẾT KẾ & KỸ THUẬT (ENGINEERING)
+// P2 THIáº¾T Káº¾ & Ká»¸ THUáº¬T (ENGINEERING)
 // ============================================================================
 
 export const surveys = pgTable('surveys', {
   id: serial('id').primaryKey(),
-  // opportunityId links to CRM (nullable — engineering surveys may link to project directly)
+  // opportunityId links to CRM (nullable â€” engineering surveys may link to project directly)
   opportunityId: integer('opportunity_id').references(() => opportunities.id, { onDelete: 'cascade' }),
   projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
   surveyDate: timestamp('survey_date'),
@@ -1801,7 +1801,7 @@ export const scrapLogs = pgTable('scrap_logs', {
   materialId: integer('material_id').notNull().references(() => materials.id), // If raw material
   productId: integer('product_id').references(() => materials.id), // If finished good scrap
   quantity: numeric('quantity', { precision: 18, scale: 4, mode: 'number' }).notNull(),
-  reason: text('reason').notNull(), // Phế liệu, Hỏng, Lỗi CNC, Sai kích thước, Lệch vân, v.v.
+  reason: text('reason').notNull(), // Pháº¿ liá»‡u, Há»ng, Lá»—i CNC, Sai kÃ­ch thÆ°á»›c, Lá»‡ch vÃ¢n, v.v.
   employeeId: integer('employee_id').references(() => users.id),
   userId: integer('user_id').references(() => users.id),
   photoUrl: text('photo_url'),
@@ -1886,7 +1886,7 @@ export const deliveryNoteItems = pgTable('delivery_note_items', {
 });
 
 // ============================================================================
-// PHASE 8: INSTALLATION & HANDOVER (Lắp đặt & Bàn giao)
+// PHASE 8: INSTALLATION & HANDOVER (Láº¯p Ä‘áº·t & BÃ n giao)
 // ============================================================================
 
 export const installations = pgTable('installations', {
@@ -1908,7 +1908,7 @@ export const installations = pgTable('installations', {
 export const installationChecklists = pgTable('installation_checklists', {
   id: serial('id').primaryKey(),
   installationId: integer('installation_id').notNull().references(() => installations.id, { onDelete: 'cascade' }),
-  itemTask: text('item_task').notNull(), // VD: "Kiểm tra bản lề", "Vệ sinh mặt kính"
+  itemTask: text('item_task').notNull(), // VD: "Kiá»ƒm tra báº£n lá»", "Vá»‡ sinh máº·t kÃ­nh"
   isCompleted: boolean('is_completed').default(false),
   checkedBy: integer('checked_by').references(() => users.id),
   checkedAt: timestamp('checked_at'),
@@ -1932,7 +1932,7 @@ export const kcsRecords = pgTable('kcs_records', {
 });
 
 // ============================================================================
-// PHASE 9: FINANCE & ACCOUNTING (Tài chính & Kế toán)
+// PHASE 9: FINANCE & ACCOUNTING (TÃ i chÃ­nh & Káº¿ toÃ¡n)
 // ============================================================================
 
 export const paymentVouchers = pgTable('payment_vouchers', {
@@ -1955,7 +1955,7 @@ export const paymentVouchers = pgTable('payment_vouchers', {
 export const debts = pgTable('debts', {
   id: serial('id').primaryKey(),
   code: text('code').notNull().unique(),
-  type: text('type').notNull(), // RECEIVABLE (Phải thu), PAYABLE (Phải trả)
+  type: text('type').notNull(), // RECEIVABLE (Pháº£i thu), PAYABLE (Pháº£i tráº£)
   partnerId: integer('partner_id'), // customer_id or supplier_id
   partnerType: text('partner_type').notNull(), // 'CUSTOMER', 'SUPPLIER', 'OTHER'
   totalAmount: numeric('total_amount', { precision: 18, scale: 4, mode: 'number' }).notNull(),
@@ -2085,11 +2085,11 @@ export const inventoryReservations = pgTable('inventory_reservations', {
 });
 
 // ============================================================
-// SOURCE DATA CENTER — LAYER 1
-// Kiến trúc 4 tầng: SOURCE → STAGING → MASTER → TRANSACTION
+// SOURCE DATA CENTER â€” LAYER 1
+// Kiáº¿n trÃºc 4 táº§ng: SOURCE â†’ STAGING â†’ MASTER â†’ TRANSACTION
 // ============================================================
 
-// TABLE 1: source_documents — registry bất biến của mọi file nguồn
+// TABLE 1: source_documents â€” registry báº¥t biáº¿n cá»§a má»i file nguá»“n
 export const sourceDocuments = pgTable('source_documents', {
   id:                      serial('id').primaryKey(),
   sourceId:                text('source_id').notNull().unique(),
@@ -2126,7 +2126,7 @@ export const sourceDocuments = pgTable('source_documents', {
   updatedAt:               timestamp('updated_at').notNull().defaultNow(),
 });
 
-// TABLE 2: source_document_lines — dòng dữ liệu phân tích từ source doc
+// TABLE 2: source_document_lines â€” dÃ²ng dá»¯ liá»‡u phÃ¢n tÃ­ch tá»« source doc
 export const sourceDocumentLines = pgTable('source_document_lines', {
   id:                serial('id').primaryKey(),
   lineId:            text('line_id').notNull().unique(),
@@ -2150,7 +2150,7 @@ export const sourceDocumentLines = pgTable('source_document_lines', {
   createdAt:         timestamp('created_at').notNull().defaultNow(),
 });
 
-// TABLE 3: source_versions — lịch sử phiên bản khi source thay đổi
+// TABLE 3: source_versions â€” lá»‹ch sá»­ phiÃªn báº£n khi source thay Ä‘á»•i
 export const sourceVersions = pgTable('source_versions', {
   id:            serial('id').primaryKey(),
   sourceDocId:   integer('source_doc_id').notNull().references(() => sourceDocuments.id),
@@ -2163,7 +2163,7 @@ export const sourceVersions = pgTable('source_versions', {
   snapshotPath:  text('snapshot_path'),
 });
 
-// TABLE 4: staging_records — vùng kiểm duyệt trước khi vào ERP
+// TABLE 4: staging_records â€” vÃ¹ng kiá»ƒm duyá»‡t trÆ°á»›c khi vÃ o ERP
 export const stagingRecords = pgTable('staging_records', {
   id:               serial('id').primaryKey(),
   stagingId:        text('staging_id').notNull().unique(),
@@ -2192,7 +2192,7 @@ export const stagingRecords = pgTable('staging_records', {
   updatedAt:        timestamp('updated_at').notNull().defaultNow(),
 });
 
-// TABLE 5: data_lineage — truy ngược ERP record về file nguồn gốc
+// TABLE 5: data_lineage â€” truy ngÆ°á»£c ERP record vá» file nguá»“n gá»‘c
 export const dataLineage = pgTable('data_lineage', {
   id:            serial('id').primaryKey(),
   lineageId:     text('lineage_id').notNull().unique(),
@@ -2206,7 +2206,7 @@ export const dataLineage = pgTable('data_lineage', {
   createdAt:     timestamp('created_at').notNull().defaultNow(),
 });
 
-// TABLE 6: source_audit_log — log bất biến mọi thao tác trên source
+// TABLE 6: source_audit_log â€” log báº¥t biáº¿n má»i thao tÃ¡c trÃªn source
 export const sourceAuditLog = pgTable('source_audit_log', {
   id:          serial('id').primaryKey(),
   action:      text('action').notNull(),
@@ -2224,7 +2224,7 @@ export const sourceAuditLog = pgTable('source_audit_log', {
 });
 
 // ============================================================
-// TYPE EXPORTS — Source Data Center
+// TYPE EXPORTS â€” Source Data Center
 // ============================================================
 export type SourceDocumentRow    = typeof sourceDocuments.$inferSelect;
 export type NewSourceDocumentRow = typeof sourceDocuments.$inferInsert;
@@ -2240,7 +2240,7 @@ export type SourceAuditLogRow    = typeof sourceAuditLog.$inferSelect;
 export type NewSourceAuditLogRow = typeof sourceAuditLog.$inferInsert;
 
 // ============================================================
-// BUSINESS DECISIONS — Per-project approval gate
+// BUSINESS DECISIONS â€” Per-project approval gate
 // ============================================================
 export const businessDecisions = pgTable('business_decisions', {
   id:               serial('id').primaryKey(),
@@ -2270,9 +2270,9 @@ export type NewBusinessDecisionRow = typeof businessDecisions.$inferInsert;
 
 
 // ============================================================
-// HQ-PWR — PERSONAL WORK & REPORTING SYSTEM
-// Module quản lý công việc cá nhân của Manager
-// Prefix: pwr_ — tránh conflict với tasks, work_logs hiện tại
+// HQ-PWR â€” PERSONAL WORK & REPORTING SYSTEM
+// Module quáº£n lÃ½ cÃ´ng viá»‡c cÃ¡ nhÃ¢n cá»§a Manager
+// Prefix: pwr_ â€” trÃ¡nh conflict vá»›i tasks, work_logs hiá»‡n táº¡i
 // ============================================================
 
 export type PwrStatus      = 'INBOX' | 'TODO' | 'IN_PROGRESS' | 'WAITING' | 'DEFERRED' | 'DONE' | 'CANCELLED';
@@ -2344,3 +2344,10 @@ export const pwrTaskAuditLog = pgTable('pwr_task_audit_log', {
 
 export type PwrTaskAuditLog    = typeof pwrTaskAuditLog.$inferSelect;
 export type NewPwrTaskAuditLog = typeof pwrTaskAuditLog.$inferInsert;
+
+export const pwrContacts = pgTable('pwr_contacts', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
