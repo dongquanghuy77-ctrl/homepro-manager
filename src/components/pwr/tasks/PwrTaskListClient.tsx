@@ -24,23 +24,29 @@ export default function PwrTaskListClient({ initialTasks }: PwrTaskListClientPro
   const [filterStatus,   setFilterStatus]   = useState(searchParams.get('status')   || '');
   const [filterCategory, setFilterCategory] = useState(searchParams.get('category') || '');
   const [filterPriority, setFilterPriority] = useState(searchParams.get('priority') || '');
+  const [filterOverdue,  setFilterOverdue]  = useState(searchParams.get('overdue')  === 'true');
   const [search,         setSearch]         = useState(searchParams.get('q')        || '');
 
-  // Sync filter state → URL (debounced via useEffect)
+  // Sync filter state → URL
   useEffect(() => {
     const params = new URLSearchParams();
     if (filterStatus)   params.set('status',   filterStatus);
     if (filterCategory) params.set('category', filterCategory);
     if (filterPriority) params.set('priority', filterPriority);
+    if (filterOverdue)  params.set('overdue',  'true');
     if (search)         params.set('q',        search);
     const qs = params.toString();
     router.replace(qs ? `/pwr/tasks?${qs}` : '/pwr/tasks', { scroll: false });
-  }, [filterStatus, filterCategory, filterPriority, search]);
+  }, [filterStatus, filterCategory, filterPriority, filterOverdue, search]);
+
+  const todayVN  = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
+  const TERMINAL = ['DONE', 'CANCELLED'];
 
   const filtered = tasks.filter(t => {
     if (filterStatus   && t.status   !== filterStatus)   return false;
     if (filterCategory && t.category !== filterCategory) return false;
     if (filterPriority && t.priority !== filterPriority) return false;
+    if (filterOverdue  && !(t.dueDate && t.dueDate < todayVN && !TERMINAL.includes(t.status))) return false;
     if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -93,7 +99,7 @@ export default function PwrTaskListClient({ initialTasks }: PwrTaskListClientPro
   // Summary counts (unfiltered)
   const inProgress = tasks.filter(t => t.status === 'IN_PROGRESS').length;
   const waiting    = tasks.filter(t => t.status === 'WAITING').length;
-  const hasActiveFilter = filterStatus || filterCategory || filterPriority || search;
+  const hasActiveFilter = filterStatus || filterCategory || filterPriority || filterOverdue || search;
 
   return (
     <div className="page-container">
@@ -156,10 +162,22 @@ export default function PwrTaskListClient({ initialTasks }: PwrTaskListClientPro
             <option key={k} value={k}>{v.icon} {v.label}</option>
           ))}
         </select>
+        <button
+          className="btn btn-sm"
+          style={{
+            background: filterOverdue ? 'rgba(239,68,68,0.15)' : 'var(--color-surface-2)',
+            color: filterOverdue ? '#EF4444' : 'var(--color-text-muted)',
+            border: filterOverdue ? '1px solid rgba(239,68,68,0.4)' : '1px solid transparent',
+            whiteSpace: 'nowrap',
+          }}
+          onClick={() => setFilterOverdue(v => !v)}
+        >
+          ⚠️ Quá hạn
+        </button>
         {hasActiveFilter && (
           <button
             className="btn btn-ghost btn-sm"
-            onClick={() => { setFilterStatus(''); setFilterCategory(''); setFilterPriority(''); setSearch(''); }}
+            onClick={() => { setFilterStatus(''); setFilterCategory(''); setFilterPriority(''); setFilterOverdue(false); setSearch(''); }}
           >
             Xóa lọc
           </button>

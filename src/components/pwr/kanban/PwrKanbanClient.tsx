@@ -39,7 +39,14 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
     } catch {}
   }
 
-  const columnTasks = (status: PwrStatus) => tasks.filter(t => t.status === status);
+  // DONE: last 14 days; CANCELLED: last 7 days; others: all
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const columnTasks = (status: PwrStatus) => {
+    const base = tasks.filter(t => t.status === status);
+    if (status === 'DONE')      return base.filter(t => t.completedAt && (Date.now() - new Date(t.completedAt).getTime()) < 14 * DAY_MS);
+    if (status === 'CANCELLED') return base.filter(t => t.updatedAt   && (Date.now() - new Date(t.updatedAt).getTime())   < 7  * DAY_MS);
+    return base;
+  };
 
   const colStyle = (status: PwrStatus): React.CSSProperties => ({
     flex: '0 0 220px',

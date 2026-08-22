@@ -260,6 +260,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
       { id: 'pwr-dashboard',      label: 'Dashboard',          icon: 'LayoutDashboard', href: '/pwr/dashboard',   sprint: 10 },
       { id: 'pwr-tasks',          label: 'Tất cả công việc',  icon: 'CheckSquare',  href: '/pwr/tasks',          sprint: 10 },
       { id: 'pwr-kanban',         label: 'Kanban Board',       icon: 'Columns',      href: '/pwr/kanban',         sprint: 10 },
+      { id: 'pwr-inbox',          label: 'Xử lý INBOX',        icon: 'Inbox',        href: '/pwr/inbox',          sprint: 10 },
       { id: 'pwr-rep-grp',        label: 'Báo cáo',           icon: '',             href: '#',                   sprint: 10, isGroupHeader: true },
       { id: 'pwr-report-daily',   label: 'Báo cáo ngày',      icon: 'FileText',     href: '/pwr/reports/daily',  sprint: 10 },
       { id: 'pwr-report-weekly',  label: 'Báo cáo tuần',      icon: 'Calendar',     href: '/pwr/reports/weekly', sprint: 10 },

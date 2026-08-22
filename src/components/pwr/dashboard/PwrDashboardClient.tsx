@@ -44,7 +44,7 @@ export default function PwrDashboardClient({ initialTasks }: Props) {
     { label: 'Đang chờ',   value: waiting.length,    color: '#8B5CF6', icon: '⏳', href: '/pwr/tasks?status=WAITING' },
     { label: 'Quá hạn',    value: overdue.length,    color: '#EF4444', icon: '🔴', href: '/pwr/tasks?overdue=true' },
     { label: 'Xong hôm nay', value: doneToday.length, color: '#10B981', icon: '✅', href: '/pwr/tasks?status=DONE' },
-    { label: 'Hộp thư',   value: inbox.length,       color: '#06B6D4', icon: '📥', href: '/pwr/tasks?status=INBOX' },
+    { label: 'INBOX',      value: inbox.length,       color: '#06B6D4', icon: '📥', href: '/pwr/inbox' },
   ];
 
   return (
