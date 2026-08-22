@@ -61,6 +61,9 @@ export default function AttendanceGatePage() {
     } catch (err: any) {
       setError(err.message);
       setStatus('IDLE');
+      if (err.message.includes('đã chấm công')) {
+        setTimeout(() => router.refresh(), 1500);
+      }
     } finally {
       setLoading(false);
     }

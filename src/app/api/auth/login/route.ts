@@ -185,7 +185,17 @@ export async function POST(req: NextRequest) {
            LIMIT 1`
         );
         const rows = (empRes as any).rows || [];
-        lastAttendanceDate = rows.length > 0 ? today : null;
+        
+        if (rows.length > 0) {
+          lastAttendanceDate = today;
+        } else {
+          // fallback check if user checks in directly with their user.id
+          const [attRecord] = await db
+            .select()
+            .from(attendance)
+            .where(and(eq(attendance.employeeId, user.id), eq(attendance.workDate, today)));
+          lastAttendanceDate = (attRecord && attRecord.checkIn) ? today : null;
+        }
       } catch {
         // fallback: also check attendance by employee_id=user.id
         const [attRecord] = await db

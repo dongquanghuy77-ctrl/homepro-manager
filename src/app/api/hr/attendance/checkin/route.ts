@@ -23,6 +23,16 @@ export async function POST(req: NextRequest) {
       .where(and(eq(attendance.employeeId, session.id), eq(attendance.workDate, today)));
 
     if (existing && existing.checkIn) {
+      await createSession({
+        id: session.id,
+        username: session.username,
+        name: session.name,
+        role: session.role,
+        departmentId: session.departmentId,
+        originalRole: session.originalRole,
+        requirePasswordChange: session.requirePasswordChange,
+        lastAttendanceDate: today
+      });
       const hhmm = existing.checkIn.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
       return NextResponse.json({ error: `Bạn đã chấm công vào lúc ${hhmm}` }, { status: 409 });
     }
