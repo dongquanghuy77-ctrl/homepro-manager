@@ -6,6 +6,7 @@ import type { PwrTask, PwrStatus } from '@/db/schema';
 import { PWR_CATEGORY, PWR_PRIORITY, PWR_STATUS, VALID_TRANSITIONS } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 import PwrContactsModal from '../contacts/PwrContactsModal';
+import PwrProjectsModal from '../projects/PwrProjectsModal';
 
 interface Props {
   task: PwrTask | null;
@@ -35,8 +36,12 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
   const [showContactsModal, setShowContactsModal] = useState(false);
   const [contacts, setContacts] = useState<{id: number; name: string}[]>([]);
 
+  const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [projects, setProjects] = useState<{id: number; name: string}[]>([]);
+
   useEffect(() => {
     fetchContacts();
+    fetchProjects();
   }, []);
 
   async function fetchContacts() {
@@ -46,6 +51,16 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
       if (data.contacts) setContacts(data.contacts);
     } catch (e) {
       console.error('Fetch contacts failed', e);
+    }
+  }
+
+  async function fetchProjects() {
+    try {
+      const res = await fetch('/api/pwr/projects');
+      const data = await res.json();
+      if (data.projects) setProjects(data.projects);
+    } catch (e) {
+      console.error('Fetch projects failed', e);
     }
   }
 
@@ -68,6 +83,19 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: assignedTo.trim() })
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Tự động lưu dự án mới nếu chưa có
+    if (projectRef.trim() && !projects.some(p => p.name.toLowerCase() === projectRef.trim().toLowerCase())) {
+      try {
+        await fetch('/api/pwr/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: projectRef.trim() })
         });
       } catch (err) {
         console.error(err);
@@ -332,19 +360,44 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
               onChanged={fetchContacts}
             />
           )}
+          {showProjectsModal && (
+            <PwrProjectsModal 
+              onClose={() => setShowProjectsModal(false)}
+              onChanged={fetchProjects}
+            />
+          )}
 
           {/* Project ref */}
+          {/* Project ref */}
           <div>
-            <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
-              Liên quan đến đơn/dự án
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block' }}>
+                Liên quan đến đơn/dự án
+              </label>
+              <button 
+                type="button" 
+                onClick={() => setShowProjectsModal(true)}
+                style={{ 
+                  background: 'none', border: 'none', color: 'var(--color-text-muted)', 
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11
+                }}
+              >
+                <Settings size={12} /> Cài đặt danh sách
+              </button>
+            </div>
             <input
               className="form-input"
               style={{ width: '100%' }}
+              list="projects-list"
               value={projectRef}
               onChange={e => setProjectRef(e.target.value)}
               placeholder="Tên đơn hàng hoặc dự án..."
             />
+            <datalist id="projects-list">
+              {projects.map(p => (
+                <option key={p.id} value={p.name} />
+              ))}
+            </datalist>
           </div>
 
           {/* Tags */}

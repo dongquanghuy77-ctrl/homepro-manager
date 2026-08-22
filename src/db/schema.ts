@@ -1,4 +1,4 @@
-﻿import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
 
 // ============================================================
@@ -2351,3 +2351,11 @@ export const pwrContacts = pgTable('pwr_contacts', {
   name: text('name').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+export const pwrProjects = pgTable('pwr_projects', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+export type PwrProject = typeof pwrProjects.$inferSelect;
