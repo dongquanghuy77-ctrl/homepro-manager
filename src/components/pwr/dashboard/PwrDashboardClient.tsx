@@ -56,6 +56,7 @@ export default function PwrDashboardClient({ initialTasks }: Props) {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-ghost btn-sm" onClick={refresh}>↻ Làm mới</button>
+          <Link href="/pwr/kanban" className="btn btn-ghost btn-sm">🗂️ Kanban</Link>
           <Link href="/pwr/tasks" className="btn btn-primary btn-sm">+ Tạo việc</Link>
         </div>
       </div>

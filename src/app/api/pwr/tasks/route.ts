@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const {
       title, category, priority, status, description,
       projectRef, dueDate, startDate, assignedTo,
-      relatedPerson, source, waitingFor, deferredTo,
+      relatedPerson, source, waitingFor, deferredTo, tags,
     } = body;
 
     if (!title?.trim()) {
@@ -108,6 +108,7 @@ export async function POST(request: Request) {
         source:        source    || 'SELF',
         waitingFor:    waitingFor || null,
         deferredTo:    deferredTo || null,
+        tags:          Array.isArray(tags) ? tags : [],
       })
       .returning();
 
