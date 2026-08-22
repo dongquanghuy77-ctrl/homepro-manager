@@ -33,7 +33,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const { role, lastAttendanceDate } = session;
-  const isDemoPwrOnly = session.username === 'quan.mai' || session.username === 'duy.le';
+  const isDemoPwrOnly = session.username === 'quan.mai' || session.username === 'duy.le' || session.username === 'alan';
 
   // GET TODAY VN (Edge compatible)
   const offset = 7 * 60 * 60 * 1000;

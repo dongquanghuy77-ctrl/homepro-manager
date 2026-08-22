@@ -82,15 +82,29 @@ export default function Sidebar() {
     setShowWorkspaceMenu(false);
   }, [pathname]);
 
+  // Demo user lockdown
+  useEffect(() => {
+    if (currentUser) {
+      const isDemoPwrOnly = currentUser.username === 'quan.mai' || currentUser.username === 'duy.le' || currentUser.username === 'alan';
+      if (isDemoPwrOnly && !pathname.startsWith('/pwr')) {
+        router.push('/pwr/dashboard');
+      }
+    }
+  }, [currentUser, pathname, router]);
+
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
     router.refresh();
   };
 
-  const activeWorkspace = getActiveWorkspace(pathname);
+  let activeWorkspace = getActiveWorkspace(pathname);
+  const isDemoPwrOnly = currentUser?.username === 'quan.mai' || currentUser?.username === 'duy.le' || currentUser?.username === 'alan';
+  
+  if (isDemoPwrOnly && activeWorkspace?.id !== 'pwr') {
+    activeWorkspace = WORKSPACES.find(w => w.id === 'pwr');
+  }
 
-  const isDemoPwrOnly = currentUser?.username === 'quan.mai' || currentUser?.username === 'duy.le';
   const visibleWorkspaces = WORKSPACES.filter(ws => {
     if (isDemoPwrOnly) return ws.id === 'pwr';
     return true;
