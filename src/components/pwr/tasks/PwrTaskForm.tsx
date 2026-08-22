@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import type { PwrTask, PwrStatus } from '@/db/schema';
-import { PWR_CATEGORY, PWR_PRIORITY, PWR_STATUS, VALID_TRANSITIONS } from '@/lib/pwr/constants';
+import { PWR_CATEGORY, PWR_PRIORITY, PWR_STATUS, VALID_TRANSITIONS, PWR_COMMON_PEOPLE } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 
 interface Props {
@@ -272,12 +272,18 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
               Người liên quan
             </label>
             <input
+              list="people-list"
               className="form-input"
               style={{ width: '100%' }}
               value={assignedTo}
               onChange={e => setAssignedTo(e.target.value)}
               placeholder="Tổ trưởng Minh, Khách hàng chị Hoa..."
             />
+            <datalist id="people-list">
+              {PWR_COMMON_PEOPLE.map(person => (
+                <option key={person} value={person} />
+              ))}
+            </datalist>
           </div>
 
           {/* Project ref */}
