@@ -33,6 +33,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const { role, lastAttendanceDate } = session;
+  const isDemoPwrOnly = session.username === 'quan.mai' || session.username === 'duy.le';
 
   // GET TODAY VN (Edge compatible)
   const offset = 7 * 60 * 60 * 1000;
@@ -45,12 +46,18 @@ export async function middleware(req: NextRequest) {
   }
   
   if (lastAttendanceDate === todayVN && pathname === '/attendance-gate') {
+    if (isDemoPwrOnly) return NextResponse.redirect(new URL('/pwr/dashboard', req.url));
     // Redirect away from gate if already checked in
     if (role === 'WORKER' || role === 'STAFF' || role === 'DESIGNER') return NextResponse.redirect(new URL('/nhan-vien', req.url));
     if (role === 'HR') return NextResponse.redirect(new URL('/hr', req.url));
     if (role === 'ACCOUNTANT') return NextResponse.redirect(new URL('/payroll', req.url));
     if (role === 'MANAGER') return NextResponse.redirect(new URL('/projects', req.url));
     return NextResponse.redirect(new URL('/', req.url));
+  }
+
+  // DEMO ISOLATION: quan.mai and duy.le can ONLY access /pwr
+  if (isDemoPwrOnly && !pathname.startsWith('/pwr') && pathname !== '/attendance-gate') {
+    return NextResponse.redirect(new URL('/pwr/dashboard', req.url));
   }
 
   // Restrict access to root dashboard (/)
@@ -66,7 +73,6 @@ export async function middleware(req: NextRequest) {
   if ((role === 'WORKER' || role === 'STAFF' || role === 'DESIGNER') && !pathname.startsWith('/nhan-vien') && !pathname.startsWith('/api') && !pathname.startsWith('/payslip') && pathname !== '/attendance-gate') {
     return NextResponse.redirect(new URL('/nhan-vien', req.url));
   }
-
   // ADMIN only for /admin routes
   if (pathname.startsWith('/admin') && role !== 'ADMIN') {
     return NextResponse.redirect(new URL('/', req.url));
