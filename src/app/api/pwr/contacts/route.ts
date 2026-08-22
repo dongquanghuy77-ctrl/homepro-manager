@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrContacts } from '@/db/schema';
-import { getSession } from '@/lib/session';
 import { eq, desc } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const session = await getSession();
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { session, error } = await requireAuth(req as any, ALL_ROLES);
+    if (error) return error;
 
     const contacts = await db.query.pwrContacts.findMany({
       where: eq(pwrContacts.userId, session.id),
@@ -17,16 +17,16 @@ export async function GET() {
     });
 
     return NextResponse.json({ contacts });
-  } catch (error) {
-    console.error('Error GET /api/pwr/contacts:', error);
+  } catch (err) {
+    console.error('Error GET /api/pwr/contacts:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const session = await getSession();
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { session, error } = await requireAuth(req as any, ALL_ROLES);
+    if (error) return error;
 
     const body = await req.json();
     if (!body.name?.trim()) return NextResponse.json({ error: 'Name required' }, { status: 400 });
@@ -37,8 +37,8 @@ export async function POST(req: Request) {
     }).returning();
 
     return NextResponse.json({ contact });
-  } catch (error) {
-    console.error('Error POST /api/pwr/contacts:', error);
+  } catch (err) {
+    console.error('Error POST /api/pwr/contacts:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

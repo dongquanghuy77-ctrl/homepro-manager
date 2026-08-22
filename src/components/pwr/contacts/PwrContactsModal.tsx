@@ -39,14 +39,22 @@ export default function PwrContactsModal({ onClose, onChanged }: Props) {
     if (!newName.trim()) return;
     setSubmitting(true);
     try {
-      await fetch('/api/pwr/contacts', {
+      const res = await fetch('/api/pwr/contacts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName.trim() })
       });
-      setNewName('');
-      await fetchContacts();
-      onChanged();
+      if (res.ok) {
+        setNewName('');
+        await fetchContacts();
+        onChanged();
+      } else {
+        const err = await res.json();
+        alert('Lỗi thêm danh bạ: ' + (err.error || 'Unknown error'));
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Lỗi kết nối máy chủ!');
     } finally {
       setSubmitting(false);
     }
