@@ -1,0 +1,54 @@
+# HomePro Manager — CI/CD Pipeline
+# Runs on every push to main and on PRs targeting main.
+# Build includes Next.js type-checking (tsc --noEmit equivalent via next build).
+# Vercel deployment is handled by the Vercel GitHub App integration:
+#   push → this CI runs → Vercel deploys automatically in parallel.
+# To block Vercel deploy until CI passes, enable "Wait for CI" in Vercel project settings
+# or add a branch protection rule requiring "ci / Build & Type Check" to pass.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true   # Cancel superseded runs on the same branch
+
+jobs:
+  build:
+    name: Build & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (includes TypeScript type check)
+        run: npm run build
+        env:
+          # Next.js reads this at boot, not at build time (all pages are force-dynamic).
+          # Provide a well-formed DSN so the import-time neon() call doesn't throw.
+          # Real DB is never queried during build.
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://ci:ci@localhost:5432/ci' }}
+          # Suppress Next.js telemetry in CI
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Report build size
+        if: success()
+        run: |
+          echo "✅ Build succeeded"
+          du -sh .next/ 2>/dev/null || true
