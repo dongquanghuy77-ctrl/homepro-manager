@@ -26,6 +26,7 @@ export type Confidence = 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
 
 export interface ExtractedLine {
   id: number;
+  sourceDocId?: number;
   lineId: string;
   lineNumber: number;
   rawValue: string;

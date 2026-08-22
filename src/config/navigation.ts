@@ -14,7 +14,8 @@ export type WorkspaceId =
   | 'engineering'
   | 'purchasing'
   | 'installation'
-  | 'approval-center';
+  | 'approval-center'
+  | 'pwr';
 
 export interface NavItem {
   id: string;
@@ -247,6 +248,21 @@ export const WORKSPACES: WorkspaceConfig[] = [
       { id: 'sys-grp', label: 'Hệ thống', icon: '', href: '#', sprint: 1, isGroupHeader: true },
       { id: 'users', label: 'Phân quyền & Users', icon: 'UserCheck', href: '/admin/users', sprint: 1, adminOnly: true },
       { id: 'settings', label: 'Cài đặt hệ thống', icon: 'Settings', href: '/settings', sprint: 5 },
+    ],
+  },
+  {
+    id: 'pwr',
+    label: 'Công việc cá nhân',
+    icon: 'ClipboardList',
+    routes: ['/pwr'],
+    navItems: [
+      { id: 'pwr-grp',            label: 'Công việc',         icon: '',             href: '#',                   sprint: 10, isGroupHeader: true },
+      { id: 'pwr-dashboard',      label: 'Dashboard',          icon: 'LayoutDashboard', href: '/pwr/dashboard',   sprint: 10 },
+      { id: 'pwr-tasks',          label: 'Tất cả công việc',  icon: 'CheckSquare',  href: '/pwr/tasks',          sprint: 10 },
+      { id: 'pwr-rep-grp',        label: 'Báo cáo',           icon: '',             href: '#',                   sprint: 10, isGroupHeader: true },
+      { id: 'pwr-report-daily',   label: 'Báo cáo ngày',      icon: 'FileText',     href: '/pwr/reports/daily',  sprint: 10 },
+      { id: 'pwr-report-weekly',  label: 'Báo cáo tuần',      icon: 'Calendar',     href: '/pwr/reports/weekly', sprint: 10 },
+      { id: 'pwr-report-monthly', label: 'Báo cáo tháng',     icon: 'BarChart2',    href: '/pwr/reports/monthly', sprint: 10 },
     ],
   },
 ];

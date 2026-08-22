@@ -11,6 +11,15 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 const EXPIRY = '7d';
 
+function isDynamicServerUsageError(err: unknown) {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'digest' in err &&
+    (err as { digest?: unknown }).digest === 'DYNAMIC_SERVER_USAGE'
+  );
+}
+
 export interface SessionPayload {
   id: number;
   username: string;
@@ -50,6 +59,7 @@ export async function getSession(): Promise<SessionPayload | null> {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     return payload as unknown as SessionPayload;
   } catch (err) {
+    if (isDynamicServerUsageError(err)) throw err;
     console.error("getSession ERROR:", err);
     return null;
   }

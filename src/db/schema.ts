@@ -2268,3 +2268,79 @@ export const businessDecisions = pgTable('business_decisions', {
 export type BusinessDecisionRow    = typeof businessDecisions.$inferSelect;
 export type NewBusinessDecisionRow = typeof businessDecisions.$inferInsert;
 
+
+// ============================================================
+// HQ-PWR — PERSONAL WORK & REPORTING SYSTEM
+// Module quản lý công việc cá nhân của Manager
+// Prefix: pwr_ — tránh conflict với tasks, work_logs hiện tại
+// ============================================================
+
+export type PwrStatus      = 'INBOX' | 'TODO' | 'IN_PROGRESS' | 'WAITING' | 'DEFERRED' | 'DONE' | 'CANCELLED';
+export type PwrCategory    = 'PRODUCTION' | 'MATERIAL' | 'EQUIPMENT' | 'PERSONNEL' | 'ORDER' | 'PROJECT' | 'ADMIN' | 'INCIDENT' | 'OTHER';
+export type PwrPriority    = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+export type PwrLogType     = 'PROGRESS_UPDATE' | 'ISSUE_LOG' | 'RESOLUTION_LOG' | 'HANDOFF_LOG' | 'COMPLETION_LOG' | 'NOTE' | 'SYSTEM';
+export type PwrAuditAction = 'CREATED' | 'STATUS_CHANGED' | 'FIELD_UPDATED' | 'DELETED' | 'RESTORED' | 'REOPENED';
+
+export const pwrTasks = pgTable('pwr_tasks', {
+  id:            serial('id').primaryKey(),
+  userId:        integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  title:         text('title').notNull(),
+  description:   text('description'),
+  category:      text('category').notNull().default('OTHER'),
+  projectRef:    text('project_ref'),
+  tags:          text('tags').array(),
+  priority:      text('priority').notNull().default('MEDIUM'),
+  status:        text('status').notNull().default('INBOX'),
+  startDate:     text('start_date'),
+  dueDate:       text('due_date'),
+  deferredTo:    text('deferred_to'),
+  completedAt:   timestamp('completed_at'),
+  deletedAt:     timestamp('deleted_at'),
+  waitingFor:    text('waiting_for'),
+  assignedTo:    text('assigned_to'),
+  relatedPerson: text('related_person'),
+  result:        text('result'),
+  cancelReason:  text('cancel_reason'),
+  source:        text('source').default('SELF'),
+  createdAt:     timestamp('created_at').defaultNow(),
+  updatedAt:     timestamp('updated_at').defaultNow(),
+});
+
+export type PwrTask    = typeof pwrTasks.$inferSelect;
+export type NewPwrTask = typeof pwrTasks.$inferInsert;
+
+export const pwrWorkLogs = pgTable('pwr_work_logs', {
+  id:              serial('id').primaryKey(),
+  taskId:          integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  userId:          integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  logType:         text('log_type').notNull().default('NOTE'),
+  content:         text('content').notNull(),
+  result:          text('result'),
+  issue:           text('issue'),
+  nextAction:      text('next_action'),
+  waitingFor:      text('waiting_for'),
+  durationMinutes: integer('duration_minutes'),
+  statusFrom:      text('status_from'),
+  statusTo:        text('status_to'),
+  isSystemLog:     boolean('is_system_log').notNull().default(false),
+  editedAt:        timestamp('edited_at'),
+  createdAt:       timestamp('created_at').defaultNow(),
+});
+
+export type PwrWorkLog    = typeof pwrWorkLogs.$inferSelect;
+export type NewPwrWorkLog = typeof pwrWorkLogs.$inferInsert;
+
+export const pwrTaskAuditLog = pgTable('pwr_task_audit_log', {
+  id:        serial('id').primaryKey(),
+  taskId:    integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'no action' }),
+  userId:    integer('user_id').notNull().references(() => users.id,    { onDelete: 'no action' }),
+  action:    text('action').notNull(),
+  fieldName: text('field_name'),
+  oldValue:  text('old_value'),
+  newValue:  text('new_value'),
+  reason:    text('reason'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export type PwrTaskAuditLog    = typeof pwrTaskAuditLog.$inferSelect;
+export type NewPwrTaskAuditLog = typeof pwrTaskAuditLog.$inferInsert;
