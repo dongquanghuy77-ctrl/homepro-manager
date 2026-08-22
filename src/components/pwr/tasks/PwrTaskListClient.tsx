@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import type { PwrTask, PwrStatus } from '@/db/schema';
-import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, TERMINAL_STATUSES } from '@/lib/pwr/constants';
+import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 import PwrTaskCard from './PwrTaskCard';
 import PwrTaskForm from './PwrTaskForm';
@@ -14,13 +15,27 @@ interface PwrTaskListClientProps {
 }
 
 export default function PwrTaskListClient({ initialTasks }: PwrTaskListClientProps) {
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+
   const [tasks,          setTasks]          = useState<PwrTask[]>(initialTasks);
   const [showForm,       setShowForm]       = useState(false);
   const [editTask,       setEditTask]       = useState<PwrTask | null>(null);
-  const [filterStatus,   setFilterStatus]   = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
-  const [filterPriority, setFilterPriority] = useState('');
-  const [search,         setSearch]         = useState('');
+  const [filterStatus,   setFilterStatus]   = useState(searchParams.get('status')   || '');
+  const [filterCategory, setFilterCategory] = useState(searchParams.get('category') || '');
+  const [filterPriority, setFilterPriority] = useState(searchParams.get('priority') || '');
+  const [search,         setSearch]         = useState(searchParams.get('q')        || '');
+
+  // Sync filter state → URL (debounced via useEffect)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filterStatus)   params.set('status',   filterStatus);
+    if (filterCategory) params.set('category', filterCategory);
+    if (filterPriority) params.set('priority', filterPriority);
+    if (search)         params.set('q',        search);
+    const qs = params.toString();
+    router.replace(qs ? `/pwr/tasks?${qs}` : '/pwr/tasks', { scroll: false });
+  }, [filterStatus, filterCategory, filterPriority, search]);
 
   const filtered = tasks.filter(t => {
     if (filterStatus   && t.status   !== filterStatus)   return false;

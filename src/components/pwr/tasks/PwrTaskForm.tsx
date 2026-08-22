@@ -29,6 +29,7 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
   const [projectRef,   setProjectRef]   = useState(task?.projectRef   ?? '');
   const [result,       setResult]       = useState(task?.result       ?? '');
   const [reason,       setReason]       = useState('');
+  const [tagsRaw,      setTagsRaw]      = useState((task?.tags ?? []).join(', '));
 
   // Status options — for edit: current + valid transitions; for create: all except terminal
   const statusOptions: PwrStatus[] = isEdit
@@ -42,6 +43,7 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
     setError('');
     setLoading(true);
     try {
+      const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
       const payload: Record<string, unknown> = {
         title,
         description: description || null,
@@ -54,6 +56,7 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
         waitingFor: waitingFor || null,
         deferredTo: deferredTo || null,
         result:     result     || null,
+        tags:       tags.length ? tags : [],
       };
       if (reopening) payload.reason = reason;
 
@@ -288,6 +291,20 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
               value={projectRef}
               onChange={e => setProjectRef(e.target.value)}
               placeholder="Tên đơn hàng hoặc dự án..."
+            />
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
+              🏷️ Tags (phân cách bằng dấu phẩy)
+            </label>
+            <input
+              className="form-input"
+              style={{ width: '100%' }}
+              value={tagsRaw}
+              onChange={e => setTagsRaw(e.target.value)}
+              placeholder="urgency, client, review..."
             />
           </div>
 

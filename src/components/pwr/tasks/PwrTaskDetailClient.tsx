@@ -120,6 +120,22 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
               <div style={{ color: '#10B981', fontWeight: 600 }}>✅ {task.result}</div>
             </div>
           )}
+          {task.tags && task.tags.length > 0 && (
+            <div style={{ gridColumn: '1 / -1' }}>
+              <span style={{ color: 'var(--color-text-muted)', fontSize: 11 }}>Tags</span>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 2 }}>
+                {task.tags.map(tag => (
+                  <span key={tag} style={{
+                    fontSize: 10, fontWeight: 600, padding: '2px 8px',
+                    borderRadius: 99, background: 'var(--color-surface-3)',
+                    color: 'var(--color-text-muted)',
+                  }}>
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Status transitions */}

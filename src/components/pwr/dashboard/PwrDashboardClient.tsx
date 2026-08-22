@@ -26,8 +26,13 @@ export default function PwrDashboardClient({ initialTasks }: Props) {
 
   async function refresh() {
     try {
-      const res = await fetch('/api/pwr/tasks');
-      if (res.ok) { const d = await res.json(); setTasks(d.tasks ?? []); }
+      const res = await fetch('/api/pwr/dashboard');
+      if (res.ok) {
+        const d = await res.json();
+        setTasks([...d.todayFocus, ...d.doneTodayTasks, ...d.overdueTasks, ...d.longWaitingTasks].filter(
+          (t: PwrTask, i: number, arr: PwrTask[]) => arr.findIndex(x => x.id === t.id) === i
+        ));
+      }
     } catch {}
   }
 

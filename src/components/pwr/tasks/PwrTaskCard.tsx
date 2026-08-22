@@ -1,6 +1,7 @@
 'use client';
 
 import { Pencil, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import type { PwrTask, PwrStatus } from '@/db/schema';
 import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, VALID_TRANSITIONS, getTodayVN } from '@/lib/pwr/constants';
 import PwrStatusBadge from './PwrStatusBadge';
@@ -36,8 +37,10 @@ export default function PwrTaskCard({ task, onEdit, onDelete, onStatusChange }: 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--color-text)' }}>
-            {task.title}
-          </span>
+              <Link href={`/pwr/tasks/${task.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                {task.title}
+              </Link>
+            </span>
           <PwrStatusBadge status={task.status as PwrStatus} />
           <PwrPriorityBadge priority={task.priority as any} />
           {category && (
@@ -69,6 +72,21 @@ export default function PwrTaskCard({ task, onEdit, onDelete, onStatusChange }: 
           )}
           {task.projectRef && <span>🏗️ {task.projectRef}</span>}
         </div>
+
+        {/* Tags */}
+        {task.tags && task.tags.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
+            {task.tags.map(tag => (
+              <span key={tag} style={{
+                fontSize: 10, fontWeight: 600, padding: '1px 6px',
+                borderRadius: 99, background: 'var(--color-surface-3)',
+                color: 'var(--color-text-muted)', letterSpacing: 0.3,
+              }}>
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Actions */}
