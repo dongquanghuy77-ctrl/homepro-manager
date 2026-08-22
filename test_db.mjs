@@ -1,6 +1,6 @@
-import 'dotenv/config';
-import { db } from './src/db';
-import { pwrContacts } from './src/db/schema';
+﻿import 'dotenv/config';
+import { db } from './src/db/index.js';
+import { pwrContacts } from './src/db/schema.js';
 
 async function test() {
   const contacts = await db.query.pwrContacts.findMany();
