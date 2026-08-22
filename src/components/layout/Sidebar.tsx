@@ -90,6 +90,11 @@ export default function Sidebar() {
 
   const activeWorkspace = getActiveWorkspace(pathname);
 
+  const isDemoPwrOnly = currentUser?.username === 'quan.mai' || currentUser?.username === 'duy.le';
+  const visibleWorkspaces = WORKSPACES.filter(ws => {
+    if (isDemoPwrOnly) return ws.id === 'pwr';
+    return true;
+  });
   // Filter items by role / sprint
   const activeItems = activeWorkspace?.navItems.filter(item => {
     if (item.sprint > ACTIVE_SPRINT) return false;
@@ -137,7 +142,7 @@ export default function Sidebar() {
         {showWorkspaceMenu && (
           <div style={{ position: 'absolute', top: 60, left: 12, right: 12, background: 'var(--color-surface-1)', border: '1px solid var(--color-border)', borderRadius: '8px', zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
             <div style={{ padding: '8px', fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Các Phân Hệ (Workspaces)</div>
-            {WORKSPACES.map(ws => {
+            {visibleWorkspaces.map(ws => {
               const WsIcon = iconMap[ws.icon as keyof typeof iconMap] || LayoutDashboard;
               return (
                 <Link

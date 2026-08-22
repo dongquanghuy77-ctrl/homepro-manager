@@ -27,6 +27,10 @@ export default async function MasterDashboardPage() {
     redirect('/login');
   }
 
+  if (session.username === 'quan.mai' || session.username === 'duy.le') {
+    redirect('/pwr/dashboard');
+  }
+
   const data = await getDashboardData(session);
   
   if (!data) {
