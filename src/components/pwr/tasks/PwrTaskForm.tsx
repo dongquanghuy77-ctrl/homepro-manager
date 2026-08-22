@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Settings } from 'lucide-react';
 import type { PwrTask, PwrStatus } from '@/db/schema';
-import { PWR_CATEGORY, PWR_PRIORITY, PWR_STATUS, VALID_TRANSITIONS, PWR_COMMON_PEOPLE } from '@/lib/pwr/constants';
+import { PWR_CATEGORY, PWR_PRIORITY, PWR_STATUS, VALID_TRANSITIONS } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 import PwrContactsModal from '../contacts/PwrContactsModal';
 
