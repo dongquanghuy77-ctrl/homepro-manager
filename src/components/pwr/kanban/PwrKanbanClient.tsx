@@ -18,7 +18,38 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
   const [tasks,    setTasks]    = useState<PwrTask[]>(initialTasks);
   const [editTask, setEditTask] = useState<PwrTask | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
   const todayVN = getTodayVN();
+
+  const handleDragStart = (e: React.DragEvent, id: number) => {
+    setDraggedTaskId(id);
+    e.dataTransfer.setData('text/plain', id.toString());
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, newStatus: string) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    if (!id) return;
+    
+    const task = tasks.find(t => t.id === Number(id));
+    if (!task) return;
+    if (task.status === newStatus) return;
+
+    // Validate transition
+    const valid = VALID_TRANSITIONS[task.status as PwrStatus] || [];
+    if (!valid.includes(newStatus as PwrStatus)) {
+      return;
+    }
+    
+    moveTask(task, newStatus);
+    setDraggedTaskId(null);
+  };
 
   async function refresh() {
     try {
@@ -92,7 +123,7 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
           {COLUMNS.map(status => {
             const cols = columnTasks(status);
             return (
-              <div key={status} style={colStyle(status)}>
+              <div key={status} style={colStyle(status)} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, status)}>
                 {/* Column header */}
                 <div style={headerStyle(status)}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: PWR_STATUS[status]?.color }}>
@@ -121,13 +152,16 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
                       <div
                         key={task.id}
                         className="card"
+                        draggable={true}
+                        onDragStart={(e) => handleDragStart(e, task.id)}
                         style={{
                           padding: '10px 12px',
-                          cursor: 'pointer',
+                          cursor: 'grab',
+                          opacity: draggedTaskId === task.id ? 0.5 : 1,
                           borderLeft: `3px solid ${isOverdue ? '#EF4444' : (PWR_STATUS[task.status as PwrStatus]?.color || '#374151')}`,
                         }}
                       >
-                        {/* Title → detail link */}
+                        {/* Title detail link */}
                         <Link
                           href={`/pwr/tasks/${task.id}`}
                           style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', textDecoration: 'none', display: 'block', marginBottom: 6 }}
@@ -151,7 +185,7 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
                         {task.tags && task.tags.length > 0 && (
                           <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', marginBottom: 6 }}>
                             {task.tags.map(tag => (
-                              <span key={tag} style={{ fontSize: 9, padding: '1px 5px', borderRadius: 99, background: 'var(--color-surface-3)', color: 'var(--color-text-muted)' }}>
+                              <span key={tag} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 99, background: '#374151', color: '#E5E7EB', border: '1px solid #4B5563', fontWeight: 500 }}>
                                 #{tag}
                               </span>
                             ))}
