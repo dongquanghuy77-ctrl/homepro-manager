@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Pencil, FileDown } from 'lucide-react';
+import { ArrowLeft, Pencil, FileDown, ClipboardCheck, Target, Activity, Flag, CalendarClock, Users, FolderOpen, Tags, AlignLeft, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { PwrTask, PwrWorkLog, PwrTaskAuditLog, PwrStatus, PwrPriority } from '@/db/schema';
 import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, VALID_TRANSITIONS, getTodayVN, PWR_LOG_TYPE } from '@/lib/pwr/constants';
@@ -206,9 +206,12 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
       <div id="task-pdf-template" style={{ display: 'none', width: '800px', padding: '40px', background: '#fff', color: '#111827', fontFamily: 'Arial, Helvetica, sans-serif' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1f2937', paddingBottom: 16, marginBottom: 24 }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#111827', letterSpacing: '-0.5px' }}>PHIẾU GIAO VIỆC</h2>
-            <p style={{ margin: '6px 0 0', fontSize: 14, color: '#4b5563' }}>Mã CV: <strong>#{task.id}</strong></p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <ClipboardCheck size={32} color="#1f2937" />
+            <div>
+              <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#111827', letterSpacing: '-0.5px' }}>PHIẾU GIAO VIỆC</h2>
+              <p style={{ margin: '6px 0 0', fontSize: 14, color: '#4b5563' }}>Mã CV: <strong>#{task.id}</strong></p>
+            </div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <p style={{ margin: 0, fontSize: 14, color: '#4b5563' }}>Ngày tạo: {task.createdAt ? new Date(task.createdAt).toLocaleDateString('vi-VN') : ''}</p>
@@ -217,14 +220,19 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
         
         {/* Task Title */}
         <div style={{ marginBottom: 24, padding: '16px 20px', background: '#f8fafc', borderLeft: `6px solid ${PWR_STATUS[task.status as PwrStatus]?.color || '#3b82f6'}`, borderRadius: '4px 8px 8px 4px' }}>
-          <h3 style={{ margin: 0, fontSize: 22, color: '#1e293b', lineHeight: 1.4 }}>{task.title}</h3>
+          <h3 style={{ margin: 0, fontSize: 22, color: '#1e293b', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <Target size={24} color={PWR_STATUS[task.status as PwrStatus]?.color || '#3b82f6'} style={{ flexShrink: 0, marginTop: 2 }} />
+            <span>{task.title}</span>
+          </h3>
         </div>
         
         {/* Metadata Table */}
         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 28, fontSize: 14, color: '#111827' }}>
           <tbody>
             <tr>
-              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, width: '25%', color: '#334155' }}>Trạng thái</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, width: '25%', color: '#334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Activity size={16} /> Trạng thái</div>
+              </td>
               <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: (PWR_STATUS[task.status as PwrStatus]?.color || '#94a3b8') + '20', color: PWR_STATUS[task.status as PwrStatus]?.color || '#475569', padding: '4px 10px', borderRadius: '99px', fontWeight: 700, fontSize: 13 }}>
                   {PWR_STATUS[task.status as PwrStatus]?.label}
@@ -232,30 +240,40 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
               </td>
             </tr>
             <tr>
-              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Độ ưu tiên</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Flag size={16} /> Độ ưu tiên</div>
+              </td>
               <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a' }}>
-                 <span style={{ display: 'inline-flex', alignItems: 'center', background: (PWR_PRIORITY[task.priority as PwrPriority]?.color || '#94a3b8') + '20', color: PWR_PRIORITY[task.priority as PwrPriority]?.color || '#475569', padding: '4px 10px', borderRadius: '99px', fontWeight: 700, fontSize: 13 }}>
+                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: (PWR_PRIORITY[task.priority as PwrPriority]?.color || '#94a3b8') + '20', color: PWR_PRIORITY[task.priority as PwrPriority]?.color || '#475569', padding: '4px 10px', borderRadius: '99px', fontWeight: 700, fontSize: 13 }}>
                   {PWR_PRIORITY[task.priority as PwrPriority]?.label}
                 </span>
               </td>
             </tr>
             <tr>
-              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Hạn chót (Deadline)</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><CalendarClock size={16} /> Hạn chót</div>
+              </td>
               <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: isOverdue ? '#ef4444' : '#0f172a', fontWeight: isOverdue ? 700 : 500 }}>
                 {task.dueDate || 'Không thời hạn'} {isOverdue && '(Đã quá hạn)'}
               </td>
             </tr>
             <tr>
-              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Người liên quan</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Users size={16} /> Người liên quan</div>
+              </td>
               <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a', fontWeight: 500 }}>{task.assignedTo || '-'}</td>
             </tr>
             <tr>
-              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Dự án / Đơn hàng</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><FolderOpen size={16} /> Dự án / Đơn hàng</div>
+              </td>
               <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a', fontWeight: 500 }}>{task.projectRef || '-'}</td>
             </tr>
             {task.tags && task.tags.length > 0 && (
               <tr>
-                <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Gắn thẻ (Tags)</td>
+                <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Tags size={16} /> Gắn thẻ (Tags)</div>
+                </td>
                 <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {task.tags.map(tag => (
@@ -270,8 +288,10 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
 
         {/* Description */}
         <div style={{ marginBottom: 24 }}>
-          <h4 style={{ margin: '0 0 8px 0', fontSize: 16, color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: 6 }}>Nội dung chi tiết</h4>
-          <div style={{ padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, minHeight: 100, whiteSpace: 'pre-wrap', fontSize: 14, color: '#1e293b', lineHeight: 1.6 }}>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: 16, color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AlignLeft size={18} /> Nội dung chi tiết
+          </h4>
+          <div style={{ padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, minHeight: 60, whiteSpace: 'pre-wrap', fontSize: 14, color: '#1e293b', lineHeight: 1.6 }}>
             {task.description || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Không có nội dung mô tả chi tiết.</span>}
           </div>
         </div>
@@ -279,7 +299,9 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
         {/* Result if any */}
         {task.result && (
           <div style={{ marginBottom: 24 }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: 16, color: '#166534', borderBottom: '2px solid #bbf7d0', paddingBottom: 6 }}>Kết quả thực hiện</h4>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: 16, color: '#166534', borderBottom: '2px solid #bbf7d0', paddingBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <CheckCircle2 size={18} /> Kết quả thực hiện
+            </h4>
             <div style={{ padding: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, minHeight: 60, whiteSpace: 'pre-wrap', fontSize: 14, color: '#166534', lineHeight: 1.6 }}>
               {task.result}
             </div>
@@ -289,8 +311,8 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
         {/* Work Logs */}
         {workLogs && workLogs.filter(l => !l.isSystemLog).length > 0 && (
           <div style={{ marginBottom: 24 }}>
-            <h4 style={{ margin: '0 0 12px 0', fontSize: 16, color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: 6 }}>
-              Nhật ký công việc
+            <h4 style={{ margin: '0 0 12px 0', fontSize: 16, color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Clock size={18} /> Nhật ký công việc
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {workLogs.filter(l => !l.isSystemLog).map(log => {
@@ -305,8 +327,8 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
                     borderLeftWidth: 4
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <strong style={{ fontSize: 13, color: typeCfg?.color || '#475569' }}>
-                        {typeCfg?.label || log.logType}
+                      <strong style={{ fontSize: 13, color: typeCfg?.color || '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <ArrowRight size={14} /> {typeCfg?.label || log.logType}
                       </strong>
                       <span style={{ fontSize: 12, color: '#64748b' }}>
                         {log.createdAt ? new Date(log.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : ''}
@@ -317,18 +339,21 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
                     </div>
                     
                     {log.result && (
-                      <div style={{ fontSize: 13, color: '#166534', marginTop: 4 }}>
-                        <strong>Kết quả: </strong>{log.result}
+                      <div style={{ fontSize: 13, color: '#166534', marginTop: 4, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                        <CheckCircle2 size={14} style={{ marginTop: 2, flexShrink: 0 }} />
+                        <div><strong>Kết quả: </strong>{log.result}</div>
                       </div>
                     )}
                     {log.issue && (
-                      <div style={{ fontSize: 13, color: '#b91c1c', marginTop: 4 }}>
-                        <strong>Vấn đề: </strong>{log.issue}
+                      <div style={{ fontSize: 13, color: '#b91c1c', marginTop: 4, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                        <AlertCircle size={14} style={{ marginTop: 2, flexShrink: 0 }} />
+                        <div><strong>Vấn đề: </strong>{log.issue}</div>
                       </div>
                     )}
                     {log.nextAction && (
-                      <div style={{ fontSize: 13, color: '#0369a1', marginTop: 4 }}>
-                        <strong>Tiếp theo: </strong>{log.nextAction}
+                      <div style={{ fontSize: 13, color: '#0369a1', marginTop: 4, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                        <ArrowRight size={14} style={{ marginTop: 2, flexShrink: 0 }} />
+                        <div><strong>Tiếp theo: </strong>{log.nextAction}</div>
                       </div>
                     )}
                   </div>
