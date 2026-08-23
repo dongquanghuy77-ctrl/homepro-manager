@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Pencil, FileDown } from 'lucide-react';
 import Link from 'next/link';
-import type { PwrTask, PwrWorkLog, PwrTaskAuditLog, PwrStatus } from '@/db/schema';
+import type { PwrTask, PwrWorkLog, PwrTaskAuditLog, PwrStatus, PwrPriority } from '@/db/schema';
 import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, VALID_TRANSITIONS, getTodayVN } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 import PwrStatusBadge from './PwrStatusBadge';
@@ -99,7 +99,7 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
               <PwrStatusBadge status={task.status as PwrStatus} />
-              <PwrPriorityBadge priority={task.priority as any} />
+              <PwrPriorityBadge priority={task.priority as PwrPriority} />
               {category && <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{category.icon} {category.label}</span>}
             </div>
             {task.description && (
@@ -206,7 +206,7 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
       <div id="task-pdf-template" style={{ display: 'none', width: '800px', padding: '40px', background: '#fff', color: '#000', fontFamily: 'sans-serif' }}>
         <div style={{ textAlign: 'center', marginBottom: 20, borderBottom: '2px solid #000', paddingBottom: 10 }}>
           <h2 style={{ margin: 0, fontSize: 24, textTransform: 'uppercase' }}>PHIẾU GIAO VIỆC</h2>
-          <p style={{ margin: '4px 0 0', fontSize: 14 }}>Mã CV: #{task.id} • Ngày tạo: {new Date(task.createdAt).toLocaleDateString('vi-VN')}</p>
+          <p style={{ margin: '4px 0 0', fontSize: 14 }}>Mã CV: #{task.id} • Ngày tạo: {task.createdAt ? new Date(task.createdAt).toLocaleDateString('vi-VN') : ''}</p>
         </div>
         
         <h3 style={{ fontSize: 20, marginBottom: 10 }}>{task.title}</h3>
@@ -219,7 +219,7 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
             </tr>
             <tr>
               <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Độ ưu tiên</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{PWR_PRIORITY[task.priority as any]?.label}</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{PWR_PRIORITY[task.priority as PwrPriority]?.label}</td>
             </tr>
             <tr>
               <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Hạn chót (Deadline)</td>
