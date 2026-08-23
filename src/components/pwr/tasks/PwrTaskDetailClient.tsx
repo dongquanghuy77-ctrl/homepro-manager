@@ -203,67 +203,100 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
       )}
 
       {/* Hidden PDF Template */}
-      <div id="task-pdf-template" style={{ display: 'none', width: '800px', padding: '40px', background: '#fff', color: '#000', fontFamily: 'sans-serif' }}>
-        <div style={{ textAlign: 'center', marginBottom: 20, borderBottom: '2px solid #000', paddingBottom: 10 }}>
-          <h2 style={{ margin: 0, fontSize: 24, textTransform: 'uppercase' }}>PHIẾU GIAO VIỆC</h2>
-          <p style={{ margin: '4px 0 0', fontSize: 14 }}>Mã CV: #{task.id} • Ngày tạo: {task.createdAt ? new Date(task.createdAt).toLocaleDateString('vi-VN') : ''}</p>
+      <div id="task-pdf-template" style={{ display: 'none', width: '800px', padding: '40px', background: '#fff', color: '#111827', fontFamily: 'Arial, Helvetica, sans-serif' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1f2937', paddingBottom: 16, marginBottom: 24 }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#111827', letterSpacing: '-0.5px' }}>PHIẾU GIAO VIỆC</h2>
+            <p style={{ margin: '6px 0 0', fontSize: 14, color: '#4b5563' }}>Mã CV: <strong>#{task.id}</strong></p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ margin: 0, fontSize: 14, color: '#4b5563' }}>Ngày tạo: {task.createdAt ? new Date(task.createdAt).toLocaleDateString('vi-VN') : ''}</p>
+          </div>
         </div>
         
-        <h3 style={{ fontSize: 20, marginBottom: 10 }}>{task.title}</h3>
+        {/* Task Title */}
+        <div style={{ marginBottom: 24, padding: '16px 20px', background: '#f8fafc', borderLeft: `6px solid ${PWR_STATUS[task.status as PwrStatus]?.color || '#3b82f6'}`, borderRadius: '4px 8px 8px 4px' }}>
+          <h3 style={{ margin: 0, fontSize: 22, color: '#1e293b', lineHeight: 1.4 }}>{task.title}</h3>
+        </div>
         
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 20, fontSize: 14 }}>
+        {/* Metadata Table */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 28, fontSize: 14, color: '#111827' }}>
           <tbody>
             <tr>
-              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', width: '30%' }}>Trạng thái</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{PWR_STATUS[task.status as PwrStatus]?.label}</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, width: '25%', color: '#334155' }}>Trạng thái</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: (PWR_STATUS[task.status as PwrStatus]?.color || '#94a3b8') + '20', color: PWR_STATUS[task.status as PwrStatus]?.color || '#475569', padding: '4px 10px', borderRadius: '99px', fontWeight: 700, fontSize: 13 }}>
+                  {PWR_STATUS[task.status as PwrStatus]?.label}
+                </span>
+              </td>
             </tr>
             <tr>
-              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Độ ưu tiên</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{PWR_PRIORITY[task.priority as PwrPriority]?.label}</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Độ ưu tiên</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a' }}>
+                 <span style={{ display: 'inline-flex', alignItems: 'center', background: (PWR_PRIORITY[task.priority as PwrPriority]?.color || '#94a3b8') + '20', color: PWR_PRIORITY[task.priority as PwrPriority]?.color || '#475569', padding: '4px 10px', borderRadius: '99px', fontWeight: 700, fontSize: 13 }}>
+                  {PWR_PRIORITY[task.priority as PwrPriority]?.label}
+                </span>
+              </td>
             </tr>
             <tr>
-              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Hạn chót (Deadline)</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd', color: isOverdue ? 'red' : 'inherit' }}>{task.dueDate || 'Không có'}</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Hạn chót (Deadline)</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: isOverdue ? '#ef4444' : '#0f172a', fontWeight: isOverdue ? 700 : 500 }}>
+                {task.dueDate || 'Không thời hạn'} {isOverdue && '(Đã quá hạn)'}
+              </td>
             </tr>
             <tr>
-              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Người liên quan</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{task.assignedTo || '-'}</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Người liên quan</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a', fontWeight: 500 }}>{task.assignedTo || '-'}</td>
             </tr>
             <tr>
-              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Dự án / Đơn hàng</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{task.projectRef || '-'}</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Dự án / Đơn hàng</td>
+              <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', color: '#0f172a', fontWeight: 500 }}>{task.projectRef || '-'}</td>
             </tr>
-            <tr>
-              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Gắn thẻ (Tags)</td>
-              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{task.tags?.join(', ') || '-'}</td>
-            </tr>
+            {task.tags && task.tags.length > 0 && (
+              <tr>
+                <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0', background: '#f1f5f9', fontWeight: 600, color: '#334155' }}>Gắn thẻ (Tags)</td>
+                <td style={{ padding: '12px 16px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {task.tags.map(tag => (
+                      <span key={tag} style={{ background: '#e2e8f0', color: '#334155', padding: '2px 8px', borderRadius: '4px', fontSize: 12, fontWeight: 600 }}>#{tag}</span>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
-        <div style={{ marginBottom: 20 }}>
-          <strong style={{ display: 'block', marginBottom: 8, fontSize: 16 }}>Nội dung chi tiết:</strong>
-          <div style={{ padding: 12, background: '#f9fafb', border: '1px solid #e5e7eb', minHeight: 80, whiteSpace: 'pre-wrap', fontSize: 14 }}>
-            {task.description || 'Không có nội dung mô tả.'}
+        {/* Description */}
+        <div style={{ marginBottom: 24 }}>
+          <h4 style={{ margin: '0 0 8px 0', fontSize: 16, color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: 6 }}>Nội dung chi tiết</h4>
+          <div style={{ padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, minHeight: 100, whiteSpace: 'pre-wrap', fontSize: 14, color: '#1e293b', lineHeight: 1.6 }}>
+            {task.description || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Không có nội dung mô tả chi tiết.</span>}
           </div>
         </div>
 
+        {/* Result if any */}
         {task.result && (
-          <div style={{ marginBottom: 20 }}>
-            <strong style={{ display: 'block', marginBottom: 8, fontSize: 16, color: 'green' }}>Kết quả thực hiện:</strong>
-            <div style={{ padding: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', minHeight: 60, whiteSpace: 'pre-wrap', fontSize: 14 }}>
+          <div style={{ marginBottom: 24 }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: 16, color: '#166534', borderBottom: '2px solid #bbf7d0', paddingBottom: 6 }}>Kết quả thực hiện</h4>
+            <div style={{ padding: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, minHeight: 60, whiteSpace: 'pre-wrap', fontSize: 14, color: '#166534', lineHeight: 1.6 }}>
               {task.result}
             </div>
           </div>
         )}
 
-        <div style={{ marginTop: 40, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+        {/* Signatures */}
+        <div style={{ marginTop: 60, display: 'flex', justifyContent: 'space-around', fontSize: 15, color: '#0f172a' }}>
           <div style={{ textAlign: 'center' }}>
-            <strong>Người giao việc</strong>
-            <p style={{ marginTop: 40 }}>(Ký và ghi rõ họ tên)</p>
+            <strong style={{ display: 'block' }}>Người giao việc</strong>
+            <span style={{ fontSize: 13, color: '#64748b' }}>(Ký và ghi rõ họ tên)</span>
+            <div style={{ marginTop: 80, borderBottom: '1px dashed #cbd5e1', width: 180, margin: '80px auto 0' }}></div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <strong>Người nhận việc</strong>
-            <p style={{ marginTop: 40 }}>(Ký và ghi rõ họ tên)</p>
+            <strong style={{ display: 'block' }}>Người nhận việc</strong>
+            <span style={{ fontSize: 13, color: '#64748b' }}>(Ký và ghi rõ họ tên)</span>
+            <div style={{ marginTop: 80, borderBottom: '1px dashed #cbd5e1', width: 180, margin: '80px auto 0' }}></div>
           </div>
         </div>
       </div>
