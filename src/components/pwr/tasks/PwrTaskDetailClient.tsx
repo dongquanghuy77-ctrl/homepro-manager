@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, Pencil, FileDown } from 'lucide-react';
 import Link from 'next/link';
 import type { PwrTask, PwrWorkLog, PwrTaskAuditLog, PwrStatus } from '@/db/schema';
 import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, VALID_TRANSITIONS, getTodayVN } from '@/lib/pwr/constants';
@@ -21,6 +21,35 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
   const [task,     setTask]     = useState(initialTask);
   const [workLogs, setWorkLogs] = useState(initialLogs);
   const [showEdit, setShowEdit] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  async function handleExportPDF() {
+    setIsExporting(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const pdfEl = document.getElementById('task-pdf-template');
+      if (!pdfEl) return;
+      
+      pdfEl.style.display = 'block';
+      const canvas = await html2canvas(pdfEl, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Phieu_Giao_Viec_${task.id}.pdf`);
+      
+      pdfEl.style.display = 'none';
+    } catch (err) {
+      console.error(err);
+      alert('Có lỗi khi xuất PDF');
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   const category = PWR_CATEGORY[task.category as keyof typeof PWR_CATEGORY];
   const todayVN  = getTodayVN();
@@ -77,9 +106,14 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
               <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>{task.description}</p>
             )}
           </div>
-          <button className="btn btn-ghost btn-icon" onClick={() => setShowEdit(true)} title="Chỉnh sửa">
-            <Pencil size={16} />
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-ghost btn-icon" onClick={handleExportPDF} title="Xuất PDF phiếu giao việc" disabled={isExporting}>
+              <FileDown size={16} />
+            </button>
+            <button className="btn btn-ghost btn-icon" onClick={() => setShowEdit(true)} title="Chỉnh sửa">
+              <Pencil size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Metadata grid */}
@@ -167,6 +201,72 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
           onSaved={refresh}
         />
       )}
+
+      {/* Hidden PDF Template */}
+      <div id="task-pdf-template" style={{ display: 'none', width: '800px', padding: '40px', background: '#fff', color: '#000', fontFamily: 'sans-serif' }}>
+        <div style={{ textAlign: 'center', marginBottom: 20, borderBottom: '2px solid #000', paddingBottom: 10 }}>
+          <h2 style={{ margin: 0, fontSize: 24, textTransform: 'uppercase' }}>PHIẾU GIAO VIỆC</h2>
+          <p style={{ margin: '4px 0 0', fontSize: 14 }}>Mã CV: #{task.id} • Ngày tạo: {new Date(task.createdAt).toLocaleDateString('vi-VN')}</p>
+        </div>
+        
+        <h3 style={{ fontSize: 20, marginBottom: 10 }}>{task.title}</h3>
+        
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 20, fontSize: 14 }}>
+          <tbody>
+            <tr>
+              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', width: '30%' }}>Trạng thái</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{PWR_STATUS[task.status as PwrStatus]?.label}</td>
+            </tr>
+            <tr>
+              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Độ ưu tiên</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{PWR_PRIORITY[task.priority as any]?.label}</td>
+            </tr>
+            <tr>
+              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Hạn chót (Deadline)</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd', color: isOverdue ? 'red' : 'inherit' }}>{task.dueDate || 'Không có'}</td>
+            </tr>
+            <tr>
+              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Người liên quan</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{task.assignedTo || '-'}</td>
+            </tr>
+            <tr>
+              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Dự án / Đơn hàng</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{task.projectRef || '-'}</td>
+            </tr>
+            <tr>
+              <td style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold' }}>Gắn thẻ (Tags)</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{task.tags?.join(', ') || '-'}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style={{ marginBottom: 20 }}>
+          <strong style={{ display: 'block', marginBottom: 8, fontSize: 16 }}>Nội dung chi tiết:</strong>
+          <div style={{ padding: 12, background: '#f9fafb', border: '1px solid #e5e7eb', minHeight: 80, whiteSpace: 'pre-wrap', fontSize: 14 }}>
+            {task.description || 'Không có nội dung mô tả.'}
+          </div>
+        </div>
+
+        {task.result && (
+          <div style={{ marginBottom: 20 }}>
+            <strong style={{ display: 'block', marginBottom: 8, fontSize: 16, color: 'green' }}>Kết quả thực hiện:</strong>
+            <div style={{ padding: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', minHeight: 60, whiteSpace: 'pre-wrap', fontSize: 14 }}>
+              {task.result}
+            </div>
+          </div>
+        )}
+
+        <div style={{ marginTop: 40, display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+          <div style={{ textAlign: 'center' }}>
+            <strong>Người giao việc</strong>
+            <p style={{ marginTop: 40 }}>(Ký và ghi rõ họ tên)</p>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <strong>Người nhận việc</strong>
+            <p style={{ marginTop: 40 }}>(Ký và ghi rõ họ tên)</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
