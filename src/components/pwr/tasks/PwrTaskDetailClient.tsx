@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ArrowLeft, Pencil, FileDown } from 'lucide-react';
 import Link from 'next/link';
 import type { PwrTask, PwrWorkLog, PwrTaskAuditLog, PwrStatus, PwrPriority } from '@/db/schema';
-import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, VALID_TRANSITIONS, getTodayVN } from '@/lib/pwr/constants';
+import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, VALID_TRANSITIONS, getTodayVN, PWR_LOG_TYPE } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 import PwrStatusBadge from './PwrStatusBadge';
 import PwrPriorityBadge from './PwrPriorityBadge';
@@ -282,6 +282,58 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
             <h4 style={{ margin: '0 0 8px 0', fontSize: 16, color: '#166534', borderBottom: '2px solid #bbf7d0', paddingBottom: 6 }}>Kết quả thực hiện</h4>
             <div style={{ padding: '16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, minHeight: 60, whiteSpace: 'pre-wrap', fontSize: 14, color: '#166534', lineHeight: 1.6 }}>
               {task.result}
+            </div>
+          </div>
+        )}
+
+        {/* Work Logs */}
+        {workLogs && workLogs.filter(l => !l.isSystemLog).length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: 16, color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: 6 }}>
+              Nhật ký công việc
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {workLogs.filter(l => !l.isSystemLog).map(log => {
+                const typeCfg = PWR_LOG_TYPE[log.logType as keyof typeof PWR_LOG_TYPE];
+                return (
+                  <div key={log.id} style={{
+                    padding: '12px 16px',
+                    borderLeft: `4px solid ${typeCfg?.color || '#94a3b8'}`,
+                    background: '#f8fafc',
+                    borderRadius: '4px 8px 8px 4px',
+                    border: '1px solid #f1f5f9',
+                    borderLeftWidth: 4
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <strong style={{ fontSize: 13, color: typeCfg?.color || '#475569' }}>
+                        {typeCfg?.label || log.logType}
+                      </strong>
+                      <span style={{ fontSize: 12, color: '#64748b' }}>
+                        {log.createdAt ? new Date(log.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : ''}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 14, color: '#1e293b', whiteSpace: 'pre-wrap', lineHeight: 1.5, marginBottom: log.result || log.issue || log.nextAction ? 8 : 0 }}>
+                      <strong style={{ color: '#475569' }}>Note: </strong>{log.content}
+                    </div>
+                    
+                    {log.result && (
+                      <div style={{ fontSize: 13, color: '#166534', marginTop: 4 }}>
+                        <strong>Kết quả: </strong>{log.result}
+                      </div>
+                    )}
+                    {log.issue && (
+                      <div style={{ fontSize: 13, color: '#b91c1c', marginTop: 4 }}>
+                        <strong>Vấn đề: </strong>{log.issue}
+                      </div>
+                    )}
+                    {log.nextAction && (
+                      <div style={{ fontSize: 13, color: '#0369a1', marginTop: 4 }}>
+                        <strong>Tiếp theo: </strong>{log.nextAction}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
