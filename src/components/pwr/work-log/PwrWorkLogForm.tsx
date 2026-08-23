@@ -115,7 +115,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="submit" className="btn btn-primary" disabled={loading || !content.trim()}>
+        <button type="submit" className="btn btn-primary" disabled={loading}>
           <Send size={14} />
           {loading ? 'Đang lưu...' : 'Ghi lại'}
         </button>
