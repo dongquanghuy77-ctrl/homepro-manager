@@ -16,6 +16,9 @@ export async function GET(request: Request) {
     const category     = searchParams.get('category');
     const overdueParam = searchParams.get('overdue');
     const q            = searchParams.get('q');
+    const dueDate      = searchParams.get('dueDate');
+    const assignedTo   = searchParams.get('assignedTo');
+    const projectRef   = searchParams.get('projectRef');
 
     // Build base conditions
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +28,9 @@ export async function GET(request: Request) {
     ];
     if (status)   conditions.push(eq(pwrTasks.status,   status));
     if (category) conditions.push(eq(pwrTasks.category, category));
+    if (dueDate)  conditions.push(eq(pwrTasks.dueDate,  dueDate));
+    if (assignedTo) conditions.push(eq(pwrTasks.assignedTo, assignedTo));
+    if (projectRef) conditions.push(eq(pwrTasks.projectRef, projectRef));
 
     let tasks = await db
       .select()

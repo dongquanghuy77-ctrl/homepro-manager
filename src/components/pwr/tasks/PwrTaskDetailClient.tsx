@@ -22,6 +22,73 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
   const [workLogs, setWorkLogs] = useState(initialLogs);
   const [showEdit, setShowEdit] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [reportTasks, setReportTasks] = useState<PwrTask[] | null>(null);
+  const [reportTitle, setReportTitle] = useState('');
+  const [reportDate, setReportDate] = useState('');
+
+  async function handleExportReport(type: 'BOARD' | 'DEADLINE' | 'ASSIGNEE' | 'PROJECT') {
+    setShowExportMenu(false);
+    
+    if (type === 'BOARD') {
+      return handleExportPDF();
+    }
+
+    setIsExporting(true);
+    try {
+      const selectedDate = task.dueDate || getTodayVN();
+      setReportDate(selectedDate);
+      
+      let query = '';
+      if (type === 'DEADLINE') {
+        setReportTitle('Báo cáo công việc theo Hạn chót');
+        query = '?dueDate=' + selectedDate;
+      } else if (type === 'ASSIGNEE') {
+        setReportTitle('Báo cáo công việc theo Người liên quan: ' + (task.assignedTo || 'Chưa gán'));
+        query = '?assignedTo=' + (task.assignedTo || '') + '&dueDate=' + selectedDate;
+      } else if (type === 'PROJECT') {
+        setReportTitle('Báo cáo công việc theo Dự án/Đơn hàng: ' + (task.projectRef || 'Không có'));
+        query = '?projectRef=' + (task.projectRef || '') + '&dueDate=' + selectedDate;
+      }
+
+      const res = await fetch('/api/pwr/tasks' + query);
+      const data = await res.json();
+      const fetchedTasks = data.tasks || [];
+      
+      setReportTasks(fetchedTasks);
+
+      // Wait for React to render the report template
+      setTimeout(async () => {
+        try {
+          const { jsPDF } = await import('jspdf');
+          const html2canvas = (await import('html2canvas')).default;
+          
+          const pdfEl = document.getElementById('report-pdf-template');
+          if (!pdfEl) return;
+          
+          pdfEl.style.display = 'block';
+          const canvas = await html2canvas(pdfEl, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+          pdfEl.style.display = 'none';
+          
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          pdf.save('bao-cao-cong-viec.pdf');
+        } catch(e) {
+          console.error(e);
+        } finally {
+          setIsExporting(false);
+        }
+      }, 500);
+
+    } catch (e) {
+      console.error(e);
+      setIsExporting(false);
+    }
+  }
 
   async function handleExportPDF() {
     setIsExporting(true);
@@ -106,11 +173,36 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
               <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>{task.description}</p>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost btn-icon" onClick={handleExportPDF} title="Xuất PDF phiếu giao việc" disabled={isExporting}>
-              <FileDown size={16} />
-            </button>
-            <button className="btn btn-ghost btn-icon" onClick={() => setShowEdit(true)} title="Chỉnh sửa">
+          
+            <div style={{ display: 'flex', gap: 8, position: 'relative' }}>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowExportMenu(!showExportMenu)} title="Xuất PDF" disabled={isExporting}>
+                <FileDown size={16} />
+              </button>
+              
+              {showExportMenu && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: 4,
+                  background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                  borderRadius: 6, padding: '4px 0', minWidth: 220, zIndex: 100,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}>
+                  <button onClick={() => handleExportReport('BOARD')} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 16px', background: 'transparent', border: 'none', color: 'var(--color-text)', cursor: 'pointer', fontSize: 13 }}>
+                    Xuất phiếu việc này
+                  </button>
+                  <button onClick={() => handleExportReport('DEADLINE')} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 16px', background: 'transparent', border: 'none', color: 'var(--color-text)', cursor: 'pointer', fontSize: 13 }}>
+                    Xuất theo Deadline
+                  </button>
+                  <button onClick={() => handleExportReport('ASSIGNEE')} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 16px', background: 'transparent', border: 'none', color: 'var(--color-text)', cursor: 'pointer', fontSize: 13 }}>
+                    Xuất theo Người liên quan
+                  </button>
+                  <button onClick={() => handleExportReport('PROJECT')} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 16px', background: 'transparent', border: 'none', color: 'var(--color-text)', cursor: 'pointer', fontSize: 13 }}>
+                    Xuất theo Dự án / Đơn hàng
+                  </button>
+                </div>
+              )}
+
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowEdit(true)} title="Chỉnh sửa">
+
               <Pencil size={16} />
             </button>
           </div>
@@ -375,8 +467,53 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
             <span style={{ fontSize: 13, color: '#64748b' }}>(Ký và ghi rõ họ tên)</span>
             <div style={{ marginTop: 80, borderBottom: '1px dashed #cbd5e1', width: 180, margin: '80px auto 0' }}></div>
           </div>
+        </div></div>
+      {/* Hidden Report PDF Template */}
+      <div id="report-pdf-template" style={{ display: 'none', width: '900px', padding: '40px', background: '#fff', color: '#111827', fontFamily: 'Arial, Helvetica, sans-serif' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1f2937', paddingBottom: 16, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <ClipboardCheck size={32} color="#1f2937" />
+            <div>
+              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: '#111827', textTransform: 'uppercase' }}>{reportTitle}</h2>
+              <p style={{ margin: '6px 0 0', fontSize: 14, color: '#4b5563' }}>Ngày báo cáo: <strong>{reportDate}</strong></p>
+            </div>
+          </div>
         </div>
+        
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, color: '#111827' }}>
+          <thead>
+            <tr style={{ background: '#f1f5f9' }}>
+              <th style={{ padding: '10px', border: '1px solid #e2e8f0', textAlign: 'left', width: '60px' }}>ID</th>
+              <th style={{ padding: '10px', border: '1px solid #e2e8f0', textAlign: 'left' }}>Tiêu đề công việc</th>
+              <th style={{ padding: '10px', border: '1px solid #e2e8f0', textAlign: 'left', width: '150px' }}>Người LH</th>
+              <th style={{ padding: '10px', border: '1px solid #e2e8f0', textAlign: 'center', width: '130px' }}>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(reportTasks || []).map(t => (
+              <tr key={t.id}>
+                <td style={{ padding: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>#{t.id}</td>
+                <td style={{ padding: '10px', border: '1px solid #e2e8f0' }}>
+                  <strong style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Target size={14} color={PWR_STATUS[t.status as PwrStatus]?.color || '#94a3b8'} /> {t.title}</strong>
+                  {t.projectRef && <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}><FolderOpen size={12} /> Dự án: {t.projectRef}</div>}
+                </td>
+                <td style={{ padding: '10px', border: '1px solid #e2e8f0' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Users size={12} /> {t.assignedTo || '-'}</div>
+                </td>
+                <td style={{ padding: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: (PWR_STATUS[t.status as PwrStatus]?.color || '#94a3b8') + '20', color: PWR_STATUS[t.status as PwrStatus]?.color || '#475569', padding: '4px 8px', borderRadius: '4px', fontWeight: 600, fontSize: 11 }}>
+                    {PWR_STATUS[t.status as PwrStatus]?.label}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {(!reportTasks || reportTasks.length === 0) && (
+              <tr><td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Không có công việc nào</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
+
 }
