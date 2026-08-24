@@ -15,10 +15,7 @@ export async function GET(request: Request) {
 
   try {
     const allTasks = await db.select().from(pwrTasks)
-      .where(and(
-        eq(pwrTasks.userId, parseInt(userId)),
-        isNull(pwrTasks.deletedAt)
-      ));
+      .where(isNull(pwrTasks.deletedAt));
 
     // Filter tasks for today: either dueDate is today, or it's active
     const todayTasks = allTasks.filter(t => {
