@@ -35,6 +35,36 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
   const [reason,       setReason]       = useState('');
   const [tagsRaw,      setTagsRaw]      = useState((task?.tags ?? []).join(', '));
   
+  const [historyTitles, setHistoryTitles] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/pwr/titles')
+      .then(res => res.json())
+      .then(data => { if (data.titles) setHistoryTitles(data.titles); })
+      .catch(() => {});
+  }, []);
+
+  const filteredTitles = historyTitles.filter(t => title ? t.toLowerCase().includes(title.toLowerCase()) && t !== title : false).slice(0, 5);
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || filteredTitles.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestion(p => (p < filteredTitles.length - 1 ? p + 1 : p));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestion(p => (p > 0 ? p - 1 : 0));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      setTitle(filteredTitles[activeSuggestion]);
+      setShowSuggestions(false);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+    }
+  };
+  
   const [showContactsModal, setShowContactsModal] = useState(false);
   const [contacts, setContacts] = useState<{id: number; name: string}[]>([]);
 
@@ -181,7 +211,7 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Title */}
-          <div>
+          <div style={{ position: 'relative' }}>
             <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
               Tiêu đề *
             </label>
@@ -189,10 +219,32 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
               className="form-input"
               style={{ width: '100%' }}
               value={title}
-              onChange={e => setTitle(e.target.value)}
+              onChange={e => {
+                setTitle(e.target.value);
+                setShowSuggestions(true);
+                setActiveSuggestion(0);
+              }}
+              onKeyDown={handleTitleKeyDown}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               placeholder="Tên công việc..."
               required
+              autoComplete="off"
             />
+            {showSuggestions && filteredTitles.length > 0 && title.length > 0 && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: 8, marginTop: 4, zIndex: 1000, boxShadow: '0 4px 12px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                {filteredTitles.map((t, i) => (
+                  <div
+                    key={t}
+                    onClick={() => { setTitle(t); setShowSuggestions(false); }}
+                    onMouseEnter={() => setActiveSuggestion(i)}
+                    style={{ padding: '10px 14px', cursor: 'pointer', background: i === activeSuggestion ? 'rgba(59,130,246,0.15)' : 'transparent', color: i === activeSuggestion ? '#3b82f6' : 'var(--color-text)', fontSize: 13, fontWeight: 500 }}
+                  >
+                    {t}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Category + Priority */}
