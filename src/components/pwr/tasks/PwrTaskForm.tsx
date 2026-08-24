@@ -262,41 +262,39 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
             </div>
           </div>
 
-          {/* Time picker — shows when dueDate is set */}
-          {dueDate && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
-                  ⏰ Giờ bắt đầu
-                </label>
-                <input
-                  type="time"
-                  className="filter-bar-select"
-                  style={{ width: '100%' }}
-                  value={startTime}
-                  onChange={e => {
-                    setStartTime(e.target.value);
-                    if (e.target.value) {
-                      const [h,m] = e.target.value.split(':').map(Number);
-                      setEndTime(String(Math.min(h+1,23)).padStart(2,'0')+':'+String(m).padStart(2,'0'));
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
-                  ⏱ Giờ kết thúc
-                </label>
-                <input
-                  type="time"
-                  className="filter-bar-select"
-                  style={{ width: '100%' }}
-                  value={endTime}
-                  onChange={e => setEndTime(e.target.value)}
-                />
-              </div>
+          {/* Time picker — always show */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
+                ⏰ Giờ bắt đầu
+              </label>
+              <input
+                type="time"
+                className="filter-bar-select"
+                style={{ width: '100%' }}
+                value={startTime}
+                onChange={e => {
+                  setStartTime(e.target.value);
+                  if (e.target.value) {
+                    const [h,m] = e.target.value.split(':').map(Number);
+                    setEndTime(String(Math.min(h+1,23)).padStart(2,'0')+':'+String(m).padStart(2,'0'));
+                  }
+                }}
+              />
             </div>
-          )}
+            <div>
+              <label style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'block', marginBottom: 4 }}>
+                ⏱ Giờ kết thúc
+              </label>
+              <input
+                type="time"
+                className="filter-bar-select"
+                style={{ width: '100%' }}
+                value={endTime}
+                onChange={e => setEndTime(e.target.value)}
+              />
+            </div>
+          </div>
 
           {/* Conditional: WAITING */}
           {status === 'WAITING' && (
