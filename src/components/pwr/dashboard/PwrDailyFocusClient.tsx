@@ -76,7 +76,7 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
               textShadow:'0 0 30px rgba(245,158,11,0.8), 0 0 60px rgba(245,158,11,0.4)',
               lineHeight:1, fontFamily:'inherit',
             }}>
-              SẶP
+              SếP
             </span>
             <span style={{
               fontSize:28, fontWeight:800, lineHeight:1,
