@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import PwrReportTabs from './PwrReportTabs';
 import type { MonthlyReport } from '@/lib/pwr/reporting';
 import { PWR_CATEGORY } from '@/lib/pwr/constants';
 
@@ -19,6 +20,7 @@ export default function PwrMonthlyReportClient({ report }: { report: MonthlyRepo
 
   return (
     <div className="page-container">
+      <PwrReportTabs />
       <div className="page-header">
         <div>
           <h1 className="page-title">Báo cáo tháng</h1>

@@ -257,16 +257,11 @@ export const WORKSPACES: WorkspaceConfig[] = [
     routes: ['/pwr'],
     navItems: [
       { id: 'pwr-grp',            label: 'Công việc',         icon: '',             href: '#',                   sprint: 1, isGroupHeader: true },
-      { id: 'pwr-dashboard',      label: 'Công việc cá nhân',  icon: 'LayoutDashboard', href: '/pwr/dashboard',   sprint: 1 },
-      { id: 'pwr-tasks',          label: 'Tất cả công việc',  icon: 'CheckSquare',  href: '/pwr/tasks',          sprint: 1 },
       { id: 'pwr-kanban',         label: 'My Work Center',     icon: 'Columns',      href: '/pwr/kanban',         sprint: 1 },
       { id: 'pwr-today',          label: 'Daily Focus',        icon: 'Sunrise',      href: '/pwr/today',          sprint: 2 },
       { id: 'pwr-calendar',       label: 'Lịch công việc',     icon: 'CalendarDays', href: '/pwr/calendar',       sprint: 2 },
-      { id: 'pwr-inbox',          label: 'Xử lý INBOX',        icon: 'Inbox',        href: '/pwr/inbox',          sprint: 1 },
       { id: 'pwr-rep-grp',        label: 'Báo cáo',           icon: '',             href: '#',                   sprint: 1, isGroupHeader: true },
-      { id: 'pwr-report-daily',   label: 'Báo cáo ngày',      icon: 'FileText',     href: '/pwr/reports/daily',  sprint: 1 },
-      { id: 'pwr-report-weekly',  label: 'Báo cáo tuần',      icon: 'Calendar',     href: '/pwr/reports/weekly', sprint: 1 },
-      { id: 'pwr-report-monthly', label: 'Báo cáo tháng',     icon: 'BarChart2',    href: '/pwr/reports/monthly', sprint: 1 },
+      { id: 'pwr-reports',        label: 'Báo cáo & Thống kê', icon: 'BarChart2',    href: '/pwr/reports/daily',  sprint: 1 },
     ],
   },
 ];

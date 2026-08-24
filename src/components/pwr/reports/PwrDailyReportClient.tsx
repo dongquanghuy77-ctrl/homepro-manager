@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import PwrReportTabs from './PwrReportTabs';
 import type { DailyReport } from '@/lib/pwr/reporting';
 import { PWR_CATEGORY } from '@/lib/pwr/constants';
 
@@ -31,6 +32,7 @@ export default function PwrDailyReportClient({ report }: { report: DailyReport }
 
   return (
     <div className="page-container">
+      <PwrReportTabs />
       <div className="page-header">
         <div>
           <h1 className="page-title">Báo cáo ngày</h1>
