@@ -40,7 +40,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
       });
       if (!res.ok) {
         const d = await res.json();
-        setError(d.error || 'L\u1ed7i');
+        setError(d.error || 'Lỗi');
         return;
       }
       setContent('');
@@ -51,7 +51,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
       setShowExtra(false);
       onCreated();
     } catch {
-      setError('Kh\u00f4ng th\u1ec3 ghi log. Th\u1eed l\u1ea1i.');
+      setError('Không thể ghi log. Thử lại.');
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,6 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
     { label: '3h',  value: '180' },
   ];
 
-  // Accept: "1h30", "1.5h", "90m", "90"
   function parseCustomInput(val: string): string {
     const h = val.match(/^(\d+(?:\.\d+)?)\s*h(?:ours?)?(?:\s*(\d+)\s*m?)?$/i);
     if (h) return String(Math.round(parseFloat(h[1]) * 60 + parseInt(h[2] || '0')));
@@ -78,7 +77,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
   function displayDuration(): string {
     const mins = parseInt(durationMinutes);
     if (!mins || isNaN(mins)) return '';
-    if (mins < 60) return mins + ' ph\u00fat';
+    if (mins < 60) return mins + ' phút';
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     return h + 'h' + (m > 0 ? m + 'm' : '');
@@ -87,7 +86,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
   const isPreset = PRESETS.some(p => p.value === durationMinutes);
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8, fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8, fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
       {error && (
         <div style={{ color: '#EF4444', fontSize: 12, padding: '4px 8px', background: 'rgba(239,68,68,0.1)', borderRadius: 4 }}>
           {error}
@@ -111,7 +110,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
         {/* Smart time picker */}
         <div style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'4px 8px' }}>
           <span style={{ fontSize:11, color:'#64748b', marginRight:2, whiteSpace:'nowrap' }}>
-            ⏱ Th\u1eddi gian:
+            ⏱ Thời gian:
           </span>
           {PRESETS.map(p => (
             <button
@@ -130,7 +129,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
           ))}
           <input
             type="text"
-            placeholder="kh\u00e1c..."
+            placeholder="khác..."
             value={isPreset ? '' : durationMinutes}
             onChange={e => setDurationMinutes(e.target.value)}
             onBlur={e  => setDurationMinutes(parseCustomInput(e.target.value))}
@@ -155,7 +154,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
           onClick={() => setShowExtra(v => !v)}
           style={{ whiteSpace: 'nowrap' }}
         >
-          {showExtra ? '▲ Thu g\u1ecdn' : '▼ Chi ti\u1ebft'}
+          {showExtra ? '▲ Thu gọn' : '▼ Chi tiết'}
         </button>
       </div>
 
@@ -163,23 +162,23 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
         className="form-input"
         value={content}
         onChange={e => setContent(e.target.value)}
-        placeholder="Ghi ch\u00fa c\u00f4ng vi\u1ec7c..."
+        placeholder="Ghi chú công việc..."
         style={{ minHeight: 72, resize: 'vertical' }}
         required
       />
 
       {showExtra && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <input className="form-input" value={result} onChange={e => setResult(e.target.value)} placeholder="K\u1ebft qu\u1ea3 \u0111\u1ea1t \u0111\u01b0\u1ee3c..." />
-          <input className="form-input" value={issue} onChange={e => setIssue(e.target.value)} placeholder="V\u1ea5n \u0111\u1ec1 g\u1eb7p ph\u1ea3i..." />
-          <input className="form-input" value={nextAction} onChange={e => setNextAction(e.target.value)} placeholder="Vi\u1ec7c c\u1ea7n l\u00e0m ti\u1ebfp theo..." />
+          <input className="form-input" value={result} onChange={e => setResult(e.target.value)} placeholder="Kết quả đạt được..." />
+          <input className="form-input" value={issue} onChange={e => setIssue(e.target.value)} placeholder="Vấn đề gặp phải..." />
+          <input className="form-input" value={nextAction} onChange={e => setNextAction(e.target.value)} placeholder="Việc cần làm tiếp theo..." />
         </div>
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button type="submit" className="btn btn-primary" disabled={loading}>
           <Send size={14} />
-          {loading ? 'Đang lưu...' : 'Ghi l\u1ea1i'}
+          {loading ? 'Đang lưu...' : 'Ghi lại'}
         </button>
       </div>
     </form>
