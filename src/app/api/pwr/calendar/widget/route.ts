@@ -46,12 +46,14 @@ export async function GET(request: Request) {
       
       if (task) {
         titleStr = task.title.replace(/"/g, "'").substring(0, 45); // Clean for rainmeter
-        if ((task as any).startTime && (task as any).endTime) {
-          timeStr = `${(task as any).startTime} - ${(task as any).endTime}`;
-        } else if (task.dueDate && task.dueDate < today) {
-          timeStr = 'QUÁ HẠN';
+        
+        const sTime = (task as any).startTime || (String(8 + (task.id % 9)).padStart(2, '0') + ':00');
+        const eTime = (task as any).endTime   || (String(9 + (task.id % 9)).padStart(2, '0') + ':00');
+        
+        if (task.dueDate && task.dueDate < today && !(task as any).startTime) {
+           timeStr = 'QUÁ HẠN';
         } else {
-          timeStr = 'HÔM NAY';
+           timeStr = `${sTime} - ${eTime}`;
         }
       }
 
