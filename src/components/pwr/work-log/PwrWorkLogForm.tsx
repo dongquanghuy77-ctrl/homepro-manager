@@ -87,7 +87,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
   const isPreset = PRESETS.some(p => p.value === durationMinutes);
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8, fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
       {error && (
         <div style={{ color: '#EF4444', fontSize: 12, padding: '4px 8px', background: 'rgba(239,68,68,0.1)', borderRadius: 4 }}>
           {error}
@@ -111,7 +111,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
         {/* Smart time picker */}
         <div style={{ display:'flex', alignItems:'center', gap:4, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'4px 8px' }}>
           <span style={{ fontSize:11, color:'#64748b', marginRight:2, whiteSpace:'nowrap' }}>
-            \u23f1 Th\u1eddi gian:
+            ⏱ Th\u1eddi gian:
           </span>
           {PRESETS.map(p => (
             <button
@@ -144,7 +144,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
           {durationMinutes && (
             <button type="button" onClick={() => setDurationMinutes('')}
               style={{ background:'none', border:'none', color:'#475569', cursor:'pointer', padding:'0 3px', fontSize:13, lineHeight:1 }}>
-              \u2715
+              ✕
             </button>
           )}
         </div>
@@ -155,7 +155,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
           onClick={() => setShowExtra(v => !v)}
           style={{ whiteSpace: 'nowrap' }}
         >
-          {showExtra ? '\u25b2 Thu g\u1ecdn' : '\u25bc Chi ti\u1ebft'}
+          {showExtra ? '▲ Thu g\u1ecdn' : '▼ Chi ti\u1ebft'}
         </button>
       </div>
 
@@ -179,7 +179,7 @@ export default function PwrWorkLogForm({ taskId, onCreated }: Props) {
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button type="submit" className="btn btn-primary" disabled={loading}>
           <Send size={14} />
-          {loading ? '\u0110ang l\u01b0u...' : 'Ghi l\u1ea1i'}
+          {loading ? 'Đang lưu...' : 'Ghi l\u1ea1i'}
         </button>
       </div>
     </form>

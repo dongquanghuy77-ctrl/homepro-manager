@@ -43,7 +43,7 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
   const dateStr   = new Date(Date.now()+7*3600000).toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
 
   return (
-    <div style={{ minHeight:'100vh', background:'radial-gradient(ellipse at 20% 20%,#1e3a5f 0%,#0f172a 45%,#0a0f1e 100%)', display:'flex', alignItems:'center', justifyContent:'center', padding:24, position:'relative', overflow:'hidden' }}>
+    <div style={{ minHeight:'100vh', background:'radial-gradient(ellipse at 20% 20%,#1e3a5f 0%,#0f172a 45%,#0a0f1e 100%)', display:'flex', alignItems:'center', justifyContent:'center', padding:24, position:'relative', overflow:'hidden', fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
       {/* Particles via CSS */}
       <div style={{ position:'absolute', inset:0, pointerEvents:'none' }}>
         {Array.from({length:30}).map((_,i) => (
