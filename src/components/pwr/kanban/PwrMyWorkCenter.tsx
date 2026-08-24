@@ -172,11 +172,7 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
 
       {/* Single Create Form Modal */}
       {showForm && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.75)', zIndex:50, display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
-          <div className="pwr-scalein" style={{ background:'#1e293b', borderRadius:16, padding:32, width:'100%', maxWidth:640, maxHeight:'90vh', overflowY:'auto', border:'1px solid rgba(255,255,255,0.08)' }}>
-            <PwrTaskForm task={null} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); refresh(); }}/>
-          </div>
-        </div>
+        <PwrTaskForm task={null} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); refresh(); }}/>
       )}
     </div>
   );
