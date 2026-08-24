@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { pwrTasks } from "@/db/schema";
+import { pwrTasks, users } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -11,6 +11,9 @@ export default async function PwrTodayPage() {
   if (!session) redirect("/login");
   const tasks = await db.select().from(pwrTasks)
     .where(and(eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)));
-  const name = (session as any).name || (session as any).username || "Bạn";
+  // Fetch name directly from DB to avoid session encoding issues
+  const [userRow] = await db.select({ name: users.name, username: users.username })
+    .from(users).where(eq(users.id, session.id));
+  const name = userRow?.name || userRow?.username || "Bạn";
   return <PwrDailyFocusClient tasks={tasks} userName={name} />;
 }

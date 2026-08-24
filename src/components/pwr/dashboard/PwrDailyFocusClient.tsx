@@ -63,15 +63,29 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
           <div style={{ fontSize:13, color:'#475569' }}>🕐 {time} • {dateStr}</div>
         </div>
 
-        {/* Greeting */}
+        {/* Greeting with SEP */}
         <div className="pwr-scalein" style={{ textAlign:'center', marginBottom:32 }}>
           <div style={{ fontSize:44 }}>{greetIcon}</div>
-          <h1 style={{ margin:'12px 0 8px', fontSize:30, fontWeight:800, color:'#f1f5f9', lineHeight:1.2 }}>
-            {greetText},&nbsp;
-            <span style={{ background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
+          <p style={{ margin:'10px 0 4px', fontSize:14, color:'#94a3b8', fontWeight:500, letterSpacing:1 }}>
+            {greetText},
+          </p>
+          <div style={{ display:'flex', alignItems:'baseline', justifyContent:'center', gap:14, flexWrap:'wrap', marginBottom:10 }}>
+            <span style={{
+              fontSize:54, fontWeight:900, letterSpacing:8,
+              color:'#f59e0b',
+              textShadow:'0 0 30px rgba(245,158,11,0.8), 0 0 60px rgba(245,158,11,0.4)',
+              lineHeight:1, fontFamily:'inherit',
+            }}>
+              SẶP
+            </span>
+            <span style={{
+              fontSize:28, fontWeight:800, lineHeight:1,
+              background:'linear-gradient(135deg,#60a5fa,#a78bfa)',
+              WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent',
+            }}>
               {userName}!
             </span>
-          </h1>
+          </div>
           <p style={{ margin:0, color:'#64748b', fontSize:14 }}>
             Hôm nay bạn có <strong style={{ color:'#94a3b8' }}>{todayTasks.length+overdue.length}</strong> công việc cần xử lý
           </p>
@@ -98,7 +112,7 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
         {top3.length > 0 && (
           <div className="pwr-fadein-5" style={{ marginBottom:28 }}>
             <div style={{ fontSize:11, fontWeight:700, color:'#f59e0b', textTransform:'uppercase', letterSpacing:1.5, marginBottom:12 }}>
-              ⭐ TOP 3 CÔNG VIỆC QUAN TRỌNG HÔM NAY
+              ⭐ TOP 3 CÔNG VIỆC QUAN TRỌỎNG HÔM NAY
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {top3.map((task,i) => {
@@ -109,14 +123,17 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
                     style={{ display:'flex', alignItems:'center', gap:12, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, padding:'12px 16px', textDecoration:'none', transition:'background 0.2s' }}
                     onMouseEnter={e=>(e.currentTarget.style.background='rgba(59,130,246,0.1)')}
                     onMouseLeave={e=>(e.currentTarget.style.background='rgba(255,255,255,0.04)')}>
-                    <span style={{ width:26, height:26, borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, flexShrink:0 }}>{nums[i]}</span>
+                    <span style={{ fontSize:20, flexShrink:0 }}>{nums[i]}</span>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:13, fontWeight:600, color:'#e2e8f0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{task.title}</div>
+                      <div style={{ fontSize:13, fontWeight:600, color:'#f1f5f9', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{task.title}</div>
                       <div style={{ fontSize:11, color:'#475569', marginTop:2 }}>
-                        {task.dueDate&&'Deadline '+task.dueDate} {task.projectRef&&'• '+task.projectRef}
+                        Deadline {task.dueDate}
+                        {task.projectRef && <span style={{ marginLeft:6 }}>• {task.projectRef}</span>}
                       </div>
                     </div>
-                    <span style={{ background:pr?.color+'20', color:pr?.color, fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:4, flexShrink:0, textTransform:'uppercase' }}>{pr?.label}</span>
+                    <span style={{ fontSize:10, fontWeight:700, color:pr?.color, background:(pr?.color||'#3b82f6')+'20', padding:'3px 8px', borderRadius:4, flexShrink:0, textTransform:'uppercase' }}>
+                      {pr?.label}
+                    </span>
                   </Link>
                 );
               })}
@@ -125,23 +142,17 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
         )}
 
         {/* CTA */}
-        <div className="pwr-fadein-6">
+        <div className="pwr-fadein-5" style={{ textAlign:'center' }}>
           {!started ? (
-            <button className="pwr-btn-glow"
-              onClick={()=>{ setStarted(true); setTimeout(()=>window.location.href='/pwr/kanban',600); }}
-              style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:12, background:'linear-gradient(135deg,#3b82f6 0%,#6366f1 100%)', color:'#fff', border:'none', borderRadius:12, padding:'17px', fontSize:16, fontWeight:700, cursor:'pointer', letterSpacing:0.5, transition:'transform 0.15s' }}
-              onMouseEnter={e=>(e.currentTarget.style.transform='scale(1.02)')}
-              onMouseLeave={e=>(e.currentTarget.style.transform='scale(1)')}>
-              <Play size={18} fill="white"/> BẮT ĐẦU NGÀY LÀM VIỆC
+            <button onClick={()=>setStarted(true)}
+              style={{ display:'inline-flex', alignItems:'center', gap:10, background:'linear-gradient(135deg,#3b82f6,#6366f1)', color:'#fff', border:'none', borderRadius:12, padding:'16px 40px', fontSize:15, fontWeight:700, cursor:'pointer', boxShadow:'0 8px 24px rgba(59,130,246,0.4)', letterSpacing:0.5 }}>
+              <Play size={18} fill="#fff"/> BẮt ĐẦU NGÀY LÀM VIỆC
             </button>
           ) : (
-            <div style={{ textAlign:'center', color:'#3b82f6', fontWeight:600, fontSize:15, padding:17 }}>
-              Đang chuyển đến My Work Center...
+            <div style={{ color:'#10b981', fontSize:14, fontWeight:600 }}>
+              ✅ Ngày làm việc đã bắt đầu! Hệ thống đã ghi lại thời gian bắt đầu làm việc của bạn.
             </div>
           )}
-          <p style={{ textAlign:'center', fontSize:11, color:'#334155', marginTop:10 }}>
-            Hệ thống sẽ bắt đầu theo dõi thời gian làm việc của bạn
-          </p>
         </div>
       </div>
     </div>

@@ -108,7 +108,7 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-ghost btn-sm" onClick={refresh}>↻ Làm mới</button>
           <Link href="/pwr/tasks" className="btn btn-ghost btn-sm">☰ Danh sách</Link>
-          <button className="btn btn-primary btn-sm" onClick={() => { setEditTask(null); setShowForm(true); }}>+ Tạo việc</button>
+
         </div>
       </div>
 
