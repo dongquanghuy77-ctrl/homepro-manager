@@ -5,6 +5,7 @@ import type { PwrTask, PwrStatus } from '@/db/schema';
 import { getTodayVN, TERMINAL_STATUSES } from '@/lib/pwr/constants';
 import PwrKanbanClient from './PwrKanbanClient';
 import PwrListView from './PwrListView';
+import PwrTaskForm from '../tasks/PwrTaskForm';
 
 const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
 
@@ -14,6 +15,7 @@ interface Props { initialTasks: PwrTask[] }
 export default function PwrMyWorkCenter({ initialTasks }: Props) {
   const [tasks, setTasks] = useState<PwrTask[]>(initialTasks);
   const [activeTab, setActiveTab] = useState<ViewTab>('KANBAN');
+  const [showForm, setShowForm] = useState(false);
   const [showBell, setShowBell] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
   const todayVN = getTodayVN();
@@ -124,11 +126,11 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
               )}
             </div>
 
-            {/* Single "Tao viec" button - redirects to /pwr/tasks */}
-            <a href="/pwr/tasks"
-              style={{ display:'flex', alignItems:'center', gap:7, background:'linear-gradient(135deg,#3b82f6,#6366f1)', color:'#fff', border:'none', borderRadius:8, padding:'9px 18px', fontSize:13, fontWeight:600, cursor:'pointer', boxShadow:'0 4px 14px rgba(59,130,246,0.35)', fontFamily:FONT, textDecoration:'none' }}>
+            {/* Single "Tao viec" button - opens modal */}
+            <button onClick={() => setShowForm(true)}
+              style={{ display:'flex', alignItems:'center', gap:7, background:'linear-gradient(135deg,#3b82f6,#6366f1)', color:'#fff', border:'none', borderRadius:8, padding:'9px 18px', fontSize:13, fontWeight:600, cursor:'pointer', boxShadow:'0 4px 14px rgba(59,130,246,0.35)', fontFamily:FONT }}>
               <Plus size={15}/> Tạo việc
-            </a>
+            </button>
           </div>
         </div>
 
@@ -168,6 +170,12 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
         {activeTab === 'LIST'   && <PwrListView tasks={tasks} />}
       </div>
 
+
+      
+      {/* Single Create Form Modal */}
+      {showForm && (
+        <PwrTaskForm task={null} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); refresh(); }}/>
+      )}
     </div>
   );
 }
