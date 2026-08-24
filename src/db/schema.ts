@@ -2359,3 +2359,25 @@ export const pwrProjects = pgTable('pwr_projects', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 export type PwrProject = typeof pwrProjects.$inferSelect;
+
+// PWR V2 — Checklist
+export const pwrChecklists = pgTable('pwr_checklists', {
+  id:        serial('id').primaryKey(),
+  taskId:    integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  content:   text('content').notNull(),
+  isDone:    boolean('is_done').notNull().default(false),
+  position:  integer('position').notNull().default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+export type PwrChecklist    = typeof pwrChecklists.$inferSelect;
+export type NewPwrChecklist = typeof pwrChecklists.$inferInsert;
+
+// PWR V2 — Task Dependencies
+export const pwrTaskDependencies = pgTable('pwr_task_dependencies', {
+  id:          serial('id').primaryKey(),
+  taskId:      integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  dependsOnId: integer('depends_on_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  depType:     text('dep_type').notNull().default('BLOCKED_BY'),
+  createdAt:   timestamp('created_at').defaultNow(),
+});
+export type PwrTaskDependency = typeof pwrTaskDependencies.$inferSelect;
