@@ -2302,6 +2302,8 @@ export const pwrTasks = pgTable('pwr_tasks', {
   result:        text('result'),
   cancelReason:  text('cancel_reason'),
   source:        text('source').default('SELF'),
+  startTime:     text('start_time'),
+  endTime:       text('end_time'),
   createdAt:     timestamp('created_at').defaultNow(),
   updatedAt:     timestamp('updated_at').defaultNow(),
 });

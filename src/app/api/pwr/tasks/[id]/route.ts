@@ -11,6 +11,7 @@ const MUTABLE_FIELDS = [
   'dueDate', 'startDate', 'assignedTo', 'relatedPerson',
   'projectRef', 'tags', 'waitingFor', 'deferredTo',
   'result', 'cancelReason', 'source',
+  'startTime', 'endTime',
 ] as const;
 
 const AUDITABLE_FIELD_MAP: Partial<Record<string, string>> = {
