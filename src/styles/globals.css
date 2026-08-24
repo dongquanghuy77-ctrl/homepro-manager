@@ -2870,3 +2870,40 @@ tbody tr:hover { background: var(--color-surface-2); }
     border: 1px solid #ddd !important;
   }
 }
+
+/* ===== PWR V2 Animations ===== */
+@keyframes pwr-fadein { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pwr-scalein { from { opacity:0; transform:scale(0.93); } to { opacity:1; transform:scale(1); } }
+@keyframes pwr-pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0.7} }
+@keyframes pwr-float { 0%,100%{opacity:0.08;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+@keyframes pwr-slide-right { from{transform:translateX(-8px);opacity:0} to{transform:translateX(0);opacity:1} }
+@keyframes pwr-progress { from{width:0} to{width:var(--pct)} }
+@keyframes pwr-glow { 0%,100%{box-shadow:0 8px 32px rgba(59,130,246,0.35)} 50%{box-shadow:0 8px 40px rgba(99,102,241,0.55)} }
+
+.pwr-fadein { animation: pwr-fadein 0.4s ease both; }
+.pwr-fadein-1 { animation: pwr-fadein 0.4s ease 0.1s both; }
+.pwr-fadein-2 { animation: pwr-fadein 0.4s ease 0.2s both; }
+.pwr-fadein-3 { animation: pwr-fadein 0.4s ease 0.3s both; }
+.pwr-fadein-4 { animation: pwr-fadein 0.4s ease 0.4s both; }
+.pwr-fadein-5 { animation: pwr-fadein 0.4s ease 0.5s both; }
+.pwr-fadein-6 { animation: pwr-fadein 0.4s ease 0.6s both; }
+.pwr-scalein { animation: pwr-scalein 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+.pwr-card:hover { transform: translateY(-2px) scale(1.02); transition: transform 0.18s ease; }
+.pwr-card { transition: transform 0.18s ease; }
+.pwr-btn-glow { animation: pwr-glow 2s ease-in-out infinite; }
+.pwr-particle { animation: pwr-float var(--dur,3s) ease-in-out var(--delay,0s) infinite; }
+.pwr-pulse { animation: pwr-pulse-dot 1.5s ease-in-out infinite; }
+
+/* react-big-calendar dark theme */
+.rbc-calendar { background:transparent !important; color:#94a3b8 !important; font-family:inherit !important; }
+.rbc-header { background:rgba(255,255,255,0.03) !important; color:#64748b !important; border-color:rgba(255,255,255,0.06) !important; padding:10px !important; font-size:11px !important; font-weight:700 !important; text-transform:uppercase; letter-spacing:.5px; }
+.rbc-time-gutter .rbc-label { color:#374151 !important; font-size:11px !important; }
+.rbc-timeslot-group, .rbc-time-slot, .rbc-day-slot .rbc-time-slot { border-color:rgba(255,255,255,0.04) !important; }
+.rbc-today { background:rgba(59,130,246,0.05) !important; }
+.rbc-toolbar { display:none !important; }
+.rbc-current-time-indicator { background:#ef4444 !important; height:2px !important; box-shadow:0 0 6px #ef4444; }
+.rbc-event { border-radius:6px !important; }
+.rbc-event:focus { outline:none !important; }
+.rbc-time-content, .rbc-time-view { border-color:rgba(255,255,255,0.06) !important; }
+.rbc-day-bg + .rbc-day-bg { border-color:rgba(255,255,255,0.05) !important; }
+.rbc-off-range-bg { background:rgba(0,0,0,0.15) !important; }

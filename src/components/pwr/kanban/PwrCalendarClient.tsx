@@ -4,7 +4,6 @@ import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
 import type { View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, LayoutDashboard, Sunrise } from 'lucide-react';
 import Link from 'next/link';
 import type { PwrTask, PwrStatus } from '@/db/schema';
@@ -60,8 +59,7 @@ export default function PwrCalendarClient({ initialTasks }: Props) {
 
   return (
     <div style={{ minHeight:'100vh', background:'#0f172a', padding:'20px 24px' }}>
-      {/* Topbar */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }} className="pwr-fadein">
         <div style={{ display:'flex', alignItems:'center', gap:16 }}>
           <Link href="/pwr/kanban" style={{ display:'flex', alignItems:'center', gap:6, color:'#64748b', fontSize:12, textDecoration:'none', padding:'6px 12px', border:'1px solid rgba(255,255,255,0.08)', borderRadius:7 }}>
             <LayoutDashboard size={14}/> Kanban
@@ -86,23 +84,7 @@ export default function PwrCalendarClient({ initialTasks }: Props) {
         </div>
       </div>
 
-      {/* Calendar */}
-      <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
-        style={{ background:'#1e293b', borderRadius:12, border:'1px solid rgba(255,255,255,0.07)', overflow:'hidden', padding:2 }}>
-        <style>{
-          `.rbc-calendar{background:transparent;color:#94a3b8;font-family:inherit}
-          .rbc-header{background:rgba(255,255,255,0.03);color:#64748b;border-color:rgba(255,255,255,0.06)!important;padding:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-          .rbc-time-gutter .rbc-label{color:#374151;font-size:11px}
-          .rbc-timeslot-group,.rbc-time-slot,.rbc-day-slot .rbc-time-slot{border-color:rgba(255,255,255,0.04)!important}
-          .rbc-today{background:rgba(59,130,246,0.05)!important}
-          .rbc-toolbar{display:none}
-          .rbc-current-time-indicator{background:#ef4444;height:2px;box-shadow:0 0 6px #ef4444}
-          .rbc-event{border-radius:6px!important}
-          .rbc-event:focus{outline:none}
-          .rbc-time-content,.rbc-time-view{border-color:rgba(255,255,255,0.06)!important}
-          .rbc-day-bg+.rbc-day-bg{border-color:rgba(255,255,255,0.05)!important}
-          .rbc-off-range-bg{background:rgba(0,0,0,0.15)}`
-        }</style>
+      <div className="pwr-fadein-1" style={{ background:'#1e293b', borderRadius:12, border:'1px solid rgba(255,255,255,0.07)', overflow:'hidden', padding:2 }}>
         <Calendar
           localizer={localizer}
           events={events}
@@ -121,7 +103,7 @@ export default function PwrCalendarClient({ initialTasks }: Props) {
           messages={{ noEventsInRange:'Không có công việc trong khoảng thời gian này' }}
           onSelectEvent={(event:CalEvent)=>{ window.location.href='/pwr/tasks/'+event.id; }}
         />
-      </motion.div>
+      </div>
     </div>
   );
 }
