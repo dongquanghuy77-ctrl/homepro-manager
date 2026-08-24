@@ -30,10 +30,10 @@ export async function GET(request: Request) {
       return false;
     });
 
-    // Sort by start time if available, then by priority
+    // Sort by start time (including fallback) to match Web UI exactly
     todayTasks.sort((a, b) => {
-      const timeA = (a as any).startTime || '99:99';
-      const timeB = (b as any).startTime || '99:99';
+      const timeA = (a as any).startTime || (String(8 + (a.id % 9)).padStart(2, '0') + ':00');
+      const timeB = (b as any).startTime || (String(8 + (b.id % 9)).padStart(2, '0') + ':00');
       return timeA.localeCompare(timeB);
     });
 
