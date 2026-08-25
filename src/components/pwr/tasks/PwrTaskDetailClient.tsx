@@ -10,14 +10,17 @@ import PwrStatusBadge from './PwrStatusBadge';
 import PwrPriorityBadge from './PwrPriorityBadge';
 import PwrTaskForm from './PwrTaskForm';
 import PwrWorkLogTimeline from '@/components/pwr/work-log/PwrWorkLogTimeline';
+import PwrChecklist from './PwrChecklist';
+import PwrDependencies from './PwrDependencies';
 
 interface Props {
-  task:     PwrTask;
-  workLogs: PwrWorkLog[];
-  auditLog: PwrTaskAuditLog[];
+  task:      PwrTask;
+  workLogs:  PwrWorkLog[];
+  auditLog:  PwrTaskAuditLog[];
+  allTasks:  PwrTask[];
 }
 
-export default function PwrTaskDetailClient({ task: initialTask, workLogs: initialLogs, auditLog: initialAudit }: Props) {
+export default function PwrTaskDetailClient({ task: initialTask, workLogs: initialLogs, auditLog: initialAudit, allTasks }: Props) {
   const [task,     setTask]     = useState(initialTask);
   const [workLogs, setWorkLogs] = useState(initialLogs);
   const [showEdit, setShowEdit] = useState(false);
@@ -282,8 +285,36 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
         )}
       </div>
 
+      {/* Checklist & Dependencies row */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: 20,
+        marginTop: 24,
+        marginBottom: 8,
+      }}>
+        {/* Phase 2: Checklist */}
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 12, padding: '20px 22px',
+        }}>
+          <PwrChecklist taskId={task.id} />
+        </div>
+
+        {/* Phase 3: Dependencies / Blockers */}
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 12, padding: '20px 22px',
+        }}>
+          <PwrDependencies taskId={task.id} allTasks={allTasks} />
+        </div>
+      </div>
+
       {/* Work Log Timeline */}
       <PwrWorkLogTimeline taskId={task.id} logs={workLogs} onRefresh={refresh} />
+
 
       {/* Edit modal */}
       {showEdit && (

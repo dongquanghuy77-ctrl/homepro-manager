@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { pwrTasks, pwrWorkLogs, pwrTaskAuditLog } from '@/db/schema';
-import { eq, and, isNull, asc } from 'drizzle-orm';
+import { eq, and, isNull, asc, desc } from 'drizzle-orm';
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import PwrTaskDetailClient from '@/components/pwr/tasks/PwrTaskDetailClient';
@@ -33,5 +33,10 @@ export default async function PwrTaskDetailPage({ params }: { params: { id: stri
     .where(eq(pwrTaskAuditLog.taskId, id))
     .orderBy(asc(pwrTaskAuditLog.createdAt));
 
-  return <PwrTaskDetailClient task={task} workLogs={workLogs} auditLog={auditLog} />;
+  // Fetch all non-deleted tasks for dependency selector
+  const allTasks = await db.select().from(pwrTasks)
+    .where(and(eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)))
+    .orderBy(desc(pwrTasks.createdAt));
+
+  return <PwrTaskDetailClient task={task} workLogs={workLogs} auditLog={auditLog} allTasks={allTasks} />;
 }

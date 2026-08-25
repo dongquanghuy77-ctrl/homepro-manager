@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { PwrTask, PwrStatus, PwrPriority } from '@/db/schema';
-import { ChevronRight, ChevronDown, FolderGit2, FolderOpen, CheckCircle2, Clock, AlertCircle, PlayCircle, Loader2 } from 'lucide-react';
+import { ChevronRight, ChevronDown, FolderGit2, FolderOpen, CheckCircle2, Clock, AlertCircle, PlayCircle, Loader2, Lock } from 'lucide-react';
 import { PWR_PRIORITY, PWR_STATUS, getTodayVN } from '@/lib/pwr/constants';
 import Link from 'next/link';
 
@@ -11,12 +11,32 @@ interface Props {
 export default function PwrWbsView({ tasks }: Props) {
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [blockedIds, setBlockedIds] = useState<Set<number>>(new Set());
 
   const toggleProject = (p: string) => setExpandedProjects(prev => ({ ...prev, [p]: !prev[p] }));
   const toggleCategory = (p: string, c: string) => {
     const key = `${p}-${c}`;
     setExpandedCategories(prev => ({ ...prev, [key]: !prev[key] }));
   };
+
+  // Fetch blocked status for all tasks from dependency API
+  useEffect(() => {
+    if (tasks.length === 0) return;
+    // Batch check: fetch deps for all non-done tasks
+    const nonDone = tasks.filter(t => !['DONE','CANCELLED'].includes(t.status));
+    Promise.all(
+      nonDone.map(t =>
+        fetch(`/api/pwr/tasks/${t.id}/dependencies`)
+          .then(r => r.json())
+          .then(d => ({ id: t.id, isBlocked: d.isBlocked }))
+          .catch(() => ({ id: t.id, isBlocked: false }))
+      )
+    ).then(results => {
+      const blocked = new Set<number>(results.filter(r => r.isBlocked).map(r => r.id));
+      setBlockedIds(blocked);
+    });
+  }, [tasks]);
+
 
   // 1. Group by Project
   const projectsMap: Record<string, PwrTask[]> = {};
@@ -133,9 +153,18 @@ export default function PwrWbsView({ tasks }: Props) {
                                   </div>
 
                                   <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontSize: 14, fontWeight: 500, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    <div style={{
+                                      fontSize: 14, fontWeight: 500,
+                                      color: blockedIds.has(task.id) ? '#64748b' : '#f8fafc',
+                                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                    }}>
                                       {task.title}
                                     </div>
+                                    {blockedIds.has(task.id) && (
+                                      <div style={{ fontSize: 10, color: '#ef4444', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <Lock size={9} /> Đang bị khóa — chờ điều kiện tiên quyết
+                                      </div>
+                                    )}
                                   </div>
 
                                   {/* Badges */}
