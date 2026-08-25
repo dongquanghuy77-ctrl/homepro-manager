@@ -14,7 +14,7 @@ export default function PwrWbsView({ tasks }: Props) {
 
   const toggleProject = (p: string) => setExpandedProjects(prev => ({ ...prev, [p]: !prev[p] }));
   const toggleCategory = (p: string, c: string) => {
-    const key = \`\${p}-\${c}\`;
+    const key = `${p}-${c}`;
     setExpandedCategories(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
