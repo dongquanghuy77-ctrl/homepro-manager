@@ -20,15 +20,13 @@ export async function GET(request: Request) {
     const assignedTo   = searchParams.get('assignedTo');
     const projectRef   = searchParams.get('projectRef');
 
-    // Build base conditions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const conditions: any[] = [
       eq(pwrTasks.userId, session.id),
       isNull(pwrTasks.deletedAt),
     ];
-    if (status)   conditions.push(eq(pwrTasks.status,   status));
-    if (category) conditions.push(eq(pwrTasks.category, category));
-    if (dueDate)  conditions.push(eq(pwrTasks.dueDate,  dueDate));
+    if (status)     conditions.push(eq(pwrTasks.status,     status));
+    if (category)   conditions.push(eq(pwrTasks.category,   category));
+    if (dueDate)    conditions.push(eq(pwrTasks.dueDate,    dueDate));
     if (assignedTo) conditions.push(eq(pwrTasks.assignedTo, assignedTo));
     if (projectRef) conditions.push(eq(pwrTasks.projectRef, projectRef));
 
@@ -38,7 +36,6 @@ export async function GET(request: Request) {
       .where(and(...conditions))
       .orderBy(desc(pwrTasks.createdAt));
 
-    // Client-side filters
     if (q) {
       tasks = tasks.filter(t => t.title.toLowerCase().includes(q.toLowerCase()));
     }
@@ -51,7 +48,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // Quick stats
     const allNonDeleted = await db
       .select()
       .from(pwrTasks)
@@ -104,16 +100,16 @@ export async function POST(request: Request) {
         title:         title.trim(),
         description:   description || null,
         category,
-        priority:      priority  || 'MEDIUM',
-        status:        status    || 'INBOX',
-        projectRef:    projectRef || null,
-        dueDate:       dueDate    || null,
-        startDate:     startDate  || null,
-        assignedTo:    assignedTo || null,
+        priority:      priority    || 'MEDIUM',
+        status:        status      || 'INBOX',
+        projectRef:    projectRef  || null,
+        dueDate:       dueDate     || null,
+        startDate:     startDate   || null,
+        assignedTo:    assignedTo  || null,
         relatedPerson: relatedPerson || null,
-        source:        source    || 'SELF',
-        waitingFor:    waitingFor || null,
-        deferredTo:    deferredTo || null,
+        source:        source      || 'SELF',
+        waitingFor:    waitingFor  || null,
+        deferredTo:    deferredTo  || null,
         tags:          Array.isArray(tags) ? tags : [],
       })
       .returning();
