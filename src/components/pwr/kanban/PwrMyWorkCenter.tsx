@@ -1,15 +1,16 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { LayoutDashboard, Calendar, List, Plus, Bell, AlertCircle, Clock, CheckCircle, Timer, X } from 'lucide-react';
+import { LayoutDashboard, Calendar, List, Plus, FolderGit2, Bell, AlertCircle, Clock, CheckCircle, Timer, X } from 'lucide-react';
 import type { PwrTask, PwrStatus } from '@/db/schema';
 import { getTodayVN, TERMINAL_STATUSES } from '@/lib/pwr/constants';
 import PwrKanbanClient from './PwrKanbanClient';
 import PwrListView from './PwrListView';
+import PwrWbsView from './PwrWbsView';
 import PwrTaskForm from '../tasks/PwrTaskForm';
 
 const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
 
-type ViewTab = 'KANBAN' | 'LIST';
+type ViewTab = 'KANBAN' | 'LIST' | 'WBS';
 interface Props { initialTasks: PwrTask[] }
 
 export default function PwrMyWorkCenter({ initialTasks }: Props) {
@@ -168,6 +169,7 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
       <div key={activeTab} className="pwr-fadein">
         {activeTab === 'KANBAN' && <PwrKanbanClient initialTasks={tasks} />}
         {activeTab === 'LIST'   && <PwrListView tasks={tasks} />}
+          {activeTab === 'WBS'    && <PwrWbsView tasks={tasks} />}
       </div>
 
 
