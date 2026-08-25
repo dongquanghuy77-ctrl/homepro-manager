@@ -53,6 +53,7 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
   const TABS = [
     { key:'KANBAN' as ViewTab, label:'KANBAN',    icon:<LayoutDashboard size={15}/> },
     { key:'LIST'   as ViewTab, label:'DANH SÁCH', icon:<List size={15}/> },
+    { key:'WBS'    as ViewTab, label:'CẤU TRÚC DỰ ÁN (WBS)', icon:<FolderGit2 size={15}/> },
   ];
 
   return (
