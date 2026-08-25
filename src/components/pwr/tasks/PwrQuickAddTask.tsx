@@ -33,7 +33,11 @@ export default function PwrQuickAddTask({ onCreated }: Props) {
     if (e) e.preventDefault();
     const t = overrideTitle || title;
     const c = overrideCat || category;
-    if (!t.trim()) return;
+    if (!projectRef.trim()) {
+      toast.error('Vui lòng chọn Dự án / Rổ Vận hành (Bắt buộc).');
+      return;
+    }
+    if (!title.trim()) return;
     
     setLoading(true);
     try {

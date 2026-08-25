@@ -122,6 +122,11 @@ export default function PwrTaskForm({ task, onClose, onSaved }: Props) {
     }
 
     // Tự động lưu dự án mới nếu chưa có
+    if (!projectRef.trim()) {
+      setError('Vui lòng nhập Tên Dự án hoặc Rổ Vận hành (bắt buộc).');
+      setLoading(false);
+      return;
+    }
     if (projectRef.trim() && !projects.some(p => p.name.toLowerCase() === projectRef.trim().toLowerCase())) {
       try {
         await fetch('/api/pwr/projects', {

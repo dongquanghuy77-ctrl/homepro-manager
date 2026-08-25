@@ -43,6 +43,9 @@ export default function PwrWbsView({ tasks }: Props) {
       {Object.keys(projectsMap).sort().map(projName => {
         const projTasks = projectsMap[projName];
         const isProjExp = expandedProjects[projName] !== false; // Default expanded
+        const isOp = projName.toUpperCase().includes('VẬN HÀNH');
+        const folderColor = isOp ? '#f97316' : '#3b82f6';
+        const folderBg = isOp ? 'rgba(249, 115, 22, 0.05)' : 'rgba(59, 130, 246, 0.05)';
 
         // 2. Group by Category within Project
         const catMap: Record<string, PwrTask[]> = {};
@@ -58,14 +61,14 @@ export default function PwrWbsView({ tasks }: Props) {
             {/* Level 1: Project Header */}
             <div 
               onClick={() => toggleProject(projName)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', cursor: 'pointer', background: isProjExp ? 'rgba(59, 130, 246, 0.05)' : 'transparent', transition: 'background 0.2s' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', cursor: 'pointer', background: isProjExp ? folderBg : 'transparent', transition: 'background 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-              onMouseLeave={e => e.currentTarget.style.background = isProjExp ? 'rgba(59, 130, 246, 0.05)' : 'transparent'}
+              onMouseLeave={e => e.currentTarget.style.background = isProjExp ? folderBg : 'transparent'}
             >
               <div style={{ color: '#94a3b8' }}>
                 {isProjExp ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
               </div>
-              <div style={{ color: '#3b82f6' }}>
+              <div style={{ color: folderColor }}>
                 {isProjExp ? <FolderOpen size={20} /> : <FolderGit2 size={20} />}
               </div>
               <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: 0.5 }}>
@@ -125,8 +128,8 @@ export default function PwrWbsView({ tasks }: Props) {
                                   {/* Horizontal tree branch */}
                                   <div style={{ position: 'absolute', left: -16, top: '50%', width: 16, height: 2, background: 'rgba(255,255,255,0.05)' }} />
 
-                                  <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', width: 20 }}>
-                                    {idx + 1}.
+                                  <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', width: 40 }}>
+                                    #{task.id}
                                   </div>
 
                                   <div style={{ flex: 1, minWidth: 0 }}>
