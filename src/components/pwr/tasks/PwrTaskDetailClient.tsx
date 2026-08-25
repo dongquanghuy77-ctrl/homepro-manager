@@ -299,7 +299,17 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
           border: '1px solid rgba(255,255,255,0.07)',
           borderRadius: 12, padding: '20px 22px',
         }}>
-          <PwrChecklist taskId={task.id} />
+          <PwrChecklist
+            taskId={task.id}
+            parentTask={{
+              id:         task.id,
+              title:      task.title,
+              category:   task.category,
+              priority:   task.priority,
+              projectRef: task.projectRef ?? null,
+              assignedTo: task.assignedTo ?? null,
+            }}
+          />
         </div>
 
         {/* Phase 3: Dependencies / Blockers */}

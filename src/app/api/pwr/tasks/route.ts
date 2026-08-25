@@ -78,6 +78,7 @@ export async function POST(request: Request) {
       title, category, priority, status, description,
       projectRef, dueDate, startDate, assignedTo,
       relatedPerson, source, waitingFor, deferredTo, tags,
+      sourceType, startTime, endTime,
     } = body;
 
     if (!title?.trim()) {
@@ -111,7 +112,10 @@ export async function POST(request: Request) {
         waitingFor:    waitingFor  || null,
         deferredTo:    deferredTo  || null,
         tags:          Array.isArray(tags) ? tags : [],
-      })
+        startTime:     startTime   || null,
+        endTime:       endTime     || null,
+        ...(sourceType ? { source_type: sourceType } as any : {}),
+      } as any)
       .returning();
 
     await db.insert(pwrTaskAuditLog).values({

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrTasks, pwrWorkLogs, pwrTaskAuditLog } from '@/db/schema';
+import { pwrTasks, pwrWorkLogs, pwrTaskAuditLog, pwrChecklists } from '@/db/schema';
 import { eq, and, isNull, asc } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { validateTransition, isReopen as checkReopen } from '@/lib/pwr/task-transitions';
@@ -119,6 +119,10 @@ export async function PATCH(
       if (newStatus === 'DONE') {
         updatePayload.completedAt = new Date();
         if (rest.result) updatePayload.result = rest.result;
+        // Sync: nếu task này được tạo từ việc con → tự động tick DONE cho việc con đó
+        await db.update(pwrChecklists)
+          .set({ isDone: true, status: 'DONE' } as any)
+          .where(eq((pwrChecklists as any).linked_task_id, id));
       }
       if (reopening) updatePayload.completedAt = null;
       if (newStatus === 'CANCELLED' && reason) updatePayload.cancelReason = reason;
@@ -187,6 +191,11 @@ export async function DELETE(
       .where(and(eq(pwrTasks.id, id), eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)));
 
     if (!existing) return NextResponse.json({ error: 'Không tìm thấy công việc' }, { status: 404 });
+
+    // Reset checklist item nếu task này được tạo từ việc con
+    await db.update(pwrChecklists)
+      .set({ isDone: false, status: 'UNDONE', linked_task_id: null } as any)
+      .where(eq((pwrChecklists as any).linked_task_id, id));
 
     await db.update(pwrTasks)
       .set({ deletedAt: new Date(), updatedAt: new Date() })

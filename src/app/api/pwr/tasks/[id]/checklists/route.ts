@@ -1,8 +1,20 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrChecklists } from '@/db/schema';
+import { pwrChecklists, pwrTasks } from '@/db/schema';
 import { eq, asc } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
+
+function mapItem(i: any) {
+  return {
+    id:            i.id,
+    taskId:        i.taskId,
+    title:         i.content,
+    isCompleted:   i.isDone,
+    orderIndex:    i.position,
+    status:        (i as any).status ?? (i.isDone ? 'DONE' : 'UNDONE'),
+    linkedTaskId:  (i as any).linked_task_id ?? null,
+  };
+}
 
 // GET: Lấy danh sách checklist của 1 task
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -16,14 +28,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     .where(eq(pwrChecklists.taskId, taskId))
     .orderBy(asc(pwrChecklists.position));
 
-  // Map to consistent frontend field names
-  return NextResponse.json(items.map(i => ({
-    id: i.id,
-    taskId: i.taskId,
-    title: i.content,
-    isCompleted: i.isDone,
-    orderIndex: i.position,
-  })));
+  return NextResponse.json(items.map(mapItem));
 }
 
 // POST: Thêm 1 checklist item mới
@@ -38,22 +43,15 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const { title } = body;
   if (!title?.trim()) return NextResponse.json({ error: 'Tên bước không được để trống' }, { status: 400 });
 
-  // Tính position tiếp theo
   const existing = await db.select().from(pwrChecklists).where(eq(pwrChecklists.taskId, taskId));
   const nextPos = existing.length;
 
   const [item] = await db.insert(pwrChecklists).values({
     taskId,
-    content: title.trim(),
-    isDone: false,
+    content:  title.trim(),
+    isDone:   false,
     position: nextPos,
-  }).returning();
+  } as any).returning();
 
-  return NextResponse.json({
-    id: item.id,
-    taskId: item.taskId,
-    title: item.content,
-    isCompleted: item.isDone,
-    orderIndex: item.position,
-  }, { status: 201 });
+  return NextResponse.json(mapItem(item), { status: 201 });
 }
