@@ -33,18 +33,14 @@ export default function PwrQuickAddTask({ onCreated }: Props) {
     if (e) e.preventDefault();
     const t = overrideTitle || title;
     const c = overrideCat || category;
-    if (!projectRef.trim()) {
-      toast.error('Vui lòng chọn Dự án / Rổ Vận hành (Bắt buộc).');
-      return;
-    }
-    if (!title.trim()) return;
+    if (!t.trim()) return;
     
     setLoading(true);
     try {
       await fetch('/api/pwr/tasks', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ title: t.trim(), category: c, status: 'INBOX', priority: 'MEDIUM' }),
+        body:    JSON.stringify({ title: t.trim(), category: c, status: 'INBOX', priority: 'MEDIUM', projectRef: '[VẬN HÀNH] HỘP THƯ ĐẾN' }),
       });
       setTitle('');
       onCreated();
