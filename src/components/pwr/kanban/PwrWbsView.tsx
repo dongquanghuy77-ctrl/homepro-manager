@@ -6,12 +6,13 @@ import {
   ChevronRight, ChevronDown, FolderOpen, FolderClosed,
   CheckCircle2, Clock, AlertCircle, PlayCircle, Loader2,
   Lock, ArrowRight, Zap, Package, Wrench, Users, ShoppingCart,
-  Briefcase, FileText, AlertTriangle, MoreHorizontal,
+  Briefcase, FileText, AlertTriangle, MoreHorizontal, FolderPlus,
 } from 'lucide-react';
 import { PWR_PRIORITY, PWR_STATUS } from '@/lib/pwr/constants';
 import Link from 'next/link';
+import PwrCreateProjectModal from './PwrCreateProjectModal';
 
-interface Props { tasks: PwrTask[] }
+interface Props { tasks: PwrTask[]; onRefresh?: () => void }
 
 // ─── Category Design System (Linear / Jira inspired) ─────────────────────────
 const CAT_STYLE: Record<string, { label: string; color: string; bg: string; Icon: React.ElementType }> = {
@@ -38,11 +39,13 @@ function StatusIcon({ status }: { status: string }) {
   }
 }
 
-export default function PwrWbsView({ tasks }: Props) {
+export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [expandedProjects,   setExpandedProjects]   = useState<Record<string, boolean>>({});
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [blockedIds,  setBlockedIds]  = useState<Set<number>>(new Set());
   const [checklistMap, setChecklistMap] = useState<Record<number, { total: number; done: number }>>({});
+  const [showModal, setShowModal] = useState(false);
+  const [toast, setToast]         = useState<string | null>(null);
 
   const toggleProject  = (p: string) => setExpandedProjects(prev => ({ ...prev, [p]: !(prev[p] ?? true) }));
   const toggleCategory = (p: string, c: string) => {
@@ -98,6 +101,56 @@ export default function PwrWbsView({ tasks }: Props) {
 
   return (
     <div style={{ padding: '8px 24px 60px', color: '#f8fafc', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
+
+      {/* ─── Header toolbar ─── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div style={{ fontSize: 13, color: '#64748b' }}>
+          {Object.keys((() => { const m: Record<string,boolean> = {}; tasks.forEach(t => { const p = t.projectRef?.trim() || 'NỘI BỘ'; m[p]=true; }); return m; })()).length} dự án · {tasks.length} task
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            padding: '8px 16px', borderRadius: 8,
+            border: '1px solid rgba(99,102,241,0.4)',
+            background: 'rgba(99,102,241,0.12)', color: '#a5b4fc',
+            cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background='rgba(99,102,241,0.25)'; e.currentTarget.style.color='#c7d2fe'; }}
+          onMouseLeave={e => { e.currentTarget.style.background='rgba(99,102,241,0.12)'; e.currentTarget.style.color='#a5b4fc'; }}
+        >
+          <FolderPlus size={15} /> + Tạo dự án mới
+        </button>
+      </div>
+
+      {/* ─── Toast ─── */}
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 24, right: 24, zIndex: 10000,
+          background: '#10b981', color: '#fff', padding: '12px 20px',
+          borderRadius: 10, fontWeight: 600, fontSize: 14,
+          boxShadow: '0 8px 24px rgba(16,185,129,0.4)',
+          animation: 'slideIn 0.3s ease',
+        }}>
+          ✅ {toast}
+        </div>
+      )}
+
+      {/* ─── Modal ─── */}
+      {showModal && (
+        <PwrCreateProjectModal
+          onClose={() => setShowModal(false)}
+          onCreated={(name, taskCount) => {
+            setShowModal(false);
+            const msg = taskCount > 0
+              ? `Đã tạo dự án "${name}" với ${taskCount} task`
+              : `Đã tạo dự án "${name}"`;
+            setToast(msg);
+            setTimeout(() => setToast(null), 4000);
+            onRefresh?.();
+          }}
+        />
+      )}
 
       {/* ─── Empty State ─── */}
       {!tasks.length && (
