@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import type { PwrTask, PwrStatus } from '@/db/schema';
+import type { PwrTask, PwrStatus, PwrPriority } from '@/db/schema';
 import { ChevronRight, ChevronDown, FolderGit2, FolderOpen, CheckCircle2, Clock, AlertCircle, PlayCircle, Loader2 } from 'lucide-react';
-import { PWR_PRIORITY, PWR_STATUSES } from '@/lib/pwr/constants';
+import { PWR_PRIORITY, PWR_STATUS, getTodayVN } from '@/lib/pwr/constants';
 import Link from 'next/link';
 
 interface Props {
@@ -81,7 +81,7 @@ export default function PwrWbsView({ tasks }: Props) {
               <div style={{ padding: '8px 0 16px 44px' }}>
                 {Object.keys(catMap).sort().map(catName => {
                   const catTasks = catMap[catName];
-                  const cKey = \`\${projName}-\${catName}\`;
+                  const cKey = `${projName}-${catName}`;
                   const isCatExp = expandedCategories[cKey] !== false;
 
                   return (
@@ -108,11 +108,11 @@ export default function PwrWbsView({ tasks }: Props) {
                       {isCatExp && (
                         <div style={{ paddingLeft: 24, marginTop: 4, display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {catTasks.sort((a,b) => a.id - b.id).map((task, idx) => {
-                            const statusDef = PWR_STATUSES.find(s => s.id === task.status);
+                            const statusDef = PWR_STATUS[task.status as PwrStatus];
                             const prioDef = PWR_PRIORITY[task.priority as PwrPriority];
 
                             return (
-                              <Link key={task.id} href={\`/pwr/tasks/\${task.id}\`} style={{ textDecoration: 'none' }}>
+                              <Link key={task.id} href={`/pwr/tasks/${task.id}`} style={{ textDecoration: 'none' }}>
                                 <div 
                                   style={{ 
                                     display: 'flex', alignItems: 'center', gap: 16, padding: '10px 16px', 
@@ -142,12 +142,12 @@ export default function PwrWbsView({ tasks }: Props) {
                                         {task.dueDate}
                                       </div>
                                     )}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: statusDef?.color, background: \`\${statusDef?.color}15\`, padding: '4px 10px', borderRadius: 20, border: \`1px solid \${statusDef?.color}30\` }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: statusDef?.color, background: `${statusDef?.color}15`, padding: '4px 10px', borderRadius: 20, border: `1px solid ${statusDef?.color}30` }}>
                                       {getStatusIcon(task.status as PwrStatus)}
                                       {statusDef?.label}
                                     </div>
                                     {prioDef && (
-                                      <div style={{ fontSize: 10, fontWeight: 700, color: prioDef.color, background: \`\${prioDef.color}15\`, padding: '4px 8px', borderRadius: 6, textTransform: 'uppercase' }}>
+                                      <div style={{ fontSize: 10, fontWeight: 700, color: prioDef.color, background: `${prioDef.color}15`, padding: '4px 8px', borderRadius: 6, textTransform: 'uppercase' }}>
                                         {prioDef.label}
                                       </div>
                                     )}
