@@ -35,6 +35,34 @@ interface UserState {
   permissions?: Record<string, boolean>;
 }
 
+
+const SEMANTIC_COLORS: Record<string, { text: string, bgActive: string, borderActive: string, glow: string }> = {
+  'pwr-today': {
+    text: '#f59e0b',
+    bgActive: 'linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%)',
+    borderActive: 'rgba(245, 158, 11, 0.4)',
+    glow: '0 0 15px rgba(245, 158, 11, 0.25)',
+  },
+  'pwr-kanban': {
+    text: '#818cf8',
+    bgActive: 'linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%)',
+    borderActive: 'rgba(99, 102, 241, 0.4)',
+    glow: '0 0 15px rgba(99, 102, 241, 0.25)',
+  },
+  'pwr-calendar': {
+    text: '#38bdf8',
+    bgActive: 'linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0.05) 100%)',
+    borderActive: 'rgba(56, 189, 248, 0.4)',
+    glow: '0 0 15px rgba(56, 189, 248, 0.25)',
+  },
+  'pwr-reports': {
+    text: '#34d399',
+    bgActive: 'linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)',
+    borderActive: 'rgba(16, 185, 129, 0.4)',
+    glow: '0 0 15px rgba(16, 185, 129, 0.25)',
+  }
+};
+
 const ACTIVE_SPRINT = 7;
 
 const ROLE_LABELS: Record<string, string> = {
@@ -209,14 +237,28 @@ export default function Sidebar() {
             const Icon = iconMap[item.icon as keyof typeof iconMap] || LayoutDashboard;
             const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             
+            const semantic = SEMANTIC_COLORS[item.id];
+            
             return (
               <Link
                 key={item.id}
                 href={item.href}
                 className={`sidebar-item ${active ? 'active' : ''}`}
                 onClick={() => setMobileOpen(false)}
+                style={
+                  semantic ? {
+                    ...(active ? {
+                      background: semantic.bgActive,
+                      borderColor: semantic.borderActive,
+                      boxShadow: semantic.glow,
+                    } : {})
+                  } : {}
+                }
               >
-                <span className="sidebar-item-icon">
+                <span 
+                  className="sidebar-item-icon"
+                  style={semantic ? { color: semantic.text } : {}}
+                >
                   <Icon size={16} />
                 </span>
                 <span className="sidebar-item-label">{item.label}</span>
