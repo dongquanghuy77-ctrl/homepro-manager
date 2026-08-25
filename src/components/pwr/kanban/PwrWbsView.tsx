@@ -21,7 +21,7 @@ export default function PwrWbsView({ tasks }: Props) {
   // 1. Group by Project
   const projectsMap: Record<string, PwrTask[]> = {};
   tasks.forEach(t => {
-    const p = t.projectRef || 'Dự án nội bộ / Khác';
+    const p = t.projectRef || '[VẬN HÀNH] NỘI BỘ / KHÁC';
     if (!projectsMap[p]) projectsMap[p] = [];
     projectsMap[p].push(t);
   });
