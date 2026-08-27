@@ -2301,11 +2301,16 @@ export const pwrTasks = pgTable('pwr_tasks', {
   relatedPerson: text('related_person'),
   result:        text('result'),
   cancelReason:  text('cancel_reason'),
-  source:        text('source').default('SELF'),
-  startTime:     text('start_time'),
-  endTime:       text('end_time'),
-  createdAt:     timestamp('created_at').defaultNow(),
-  updatedAt:     timestamp('updated_at').defaultNow(),
+  source:            text('source').default('SELF'),
+  startTime:         text('start_time'),
+  endTime:           text('end_time'),
+  estimatedMinutes:  integer('estimated_minutes'),
+  actualMinutes:     integer('actual_minutes'),
+  sourceType:        text('source_type').default('MANUAL'),    // MANUAL | FROM_CHECKLIST
+  taskType:          text('task_type').default('PROJECT_TASK'), // PROJECT_TASK | OPERATIONAL_TASK | GATE_CHECK
+  projectId:         integer('project_id'),  // FK to pwr_projects.id (enforced at DB level)
+  createdAt:         timestamp('created_at').defaultNow(),
+  updatedAt:         timestamp('updated_at').defaultNow(),
 });
 
 export type PwrTask    = typeof pwrTasks.$inferSelect;
@@ -2355,9 +2360,14 @@ export const pwrContacts = pgTable('pwr_contacts', {
 });
 
 export const pwrProjects = pgTable('pwr_projects', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull(),
-  name: text('name').notNull(),
+  id:        serial('id').primaryKey(),
+  userId:    integer('user_id').notNull(),
+  name:      text('name').notNull(),
+  customer:  text('customer'),
+  deadline:  text('deadline'),
+  status:    text('status').default('ACTIVE'),   // ACTIVE | COMPLETED | ON_HOLD | CANCELLED
+  notes:     text('notes'),
+  color:     text('color').default('BLUE'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 export type PwrProject = typeof pwrProjects.$inferSelect;
@@ -2375,11 +2385,72 @@ export type PwrChecklist    = typeof pwrChecklists.$inferSelect;
 export type NewPwrChecklist = typeof pwrChecklists.$inferInsert;
 
 // PWR V2 — Task Dependencies
+// depType: BLOCKED_BY | RESOURCE_LOCK | GATE | TRIGGER | PRECONDITION
+// time_window_days: if depType=GATE, blockerTask must be DONE within last N days
 export const pwrTaskDependencies = pgTable('pwr_task_dependencies', {
-  id:          serial('id').primaryKey(),
-  taskId:      integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
-  dependsOnId: integer('depends_on_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
-  depType:     text('dep_type').notNull().default('BLOCKED_BY'),
-  createdAt:   timestamp('created_at').defaultNow(),
+  id:             serial('id').primaryKey(),
+  taskId:         integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  dependsOnId:    integer('depends_on_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  depType:        text('dep_type').notNull().default('BLOCKED_BY'),
+  timeWindowDays: integer('time_window_days'),
+  createdAt:      timestamp('created_at').defaultNow(),
 });
 export type PwrTaskDependency = typeof pwrTaskDependencies.$inferSelect;
+
+// ─── PWR V3 — Vận Hành ↔ Dự Án Data Model ────────────────────────────────────
+
+// Recurring rules engine: generates operational tasks automatically
+// recurrence_type: DAILY | WEEKLY | MONTHLY | CUSTOM
+// recurrence_days_of_week: JSONB array e.g. [1,5] = Mon+Fri
+export const pwrRecurringRules = pgTable('pwr_recurring_rules', {
+  id:                    serial('id').primaryKey(),
+  userId:                integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  title:                 text('title').notNull(),
+  description:           text('description'),
+  category:              text('category').notNull().default('OTHER'),
+  priority:              text('priority').notNull().default('MEDIUM'),
+  taskType:              text('task_type').notNull().default('OPERATIONAL_TASK'),
+  projectId:             integer('project_id').references(() => pwrProjects.id, { onDelete: 'set null' }),
+  recurrenceType:        text('recurrence_type').notNull().default('WEEKLY'),
+  recurrenceInterval:    integer('recurrence_interval').notNull().default(1),
+  recurrenceDaysOfWeek:  text('recurrence_days_of_week'),  // JSON string: "[1,5]"
+  recurrenceDayOfMonth:  integer('recurrence_day_of_month'),
+  advanceDays:           integer('advance_days').notNull().default(1),
+  timeWindowDays:        integer('time_window_days'),    // gate validity window
+  isGate:                boolean('is_gate').notNull().default(false),
+  isActive:              boolean('is_active').notNull().default(true),
+  lastGeneratedDate:     text('last_generated_date'),
+  nextOccurrenceDate:    text('next_occurrence_date'),
+  createdAt:             timestamp('created_at').defaultNow(),
+  updatedAt:             timestamp('updated_at').defaultNow(),
+});
+export type PwrRecurringRule    = typeof pwrRecurringRules.$inferSelect;
+export type NewPwrRecurringRule = typeof pwrRecurringRules.$inferInsert;
+
+// Resources: machines, workers, spaces that tasks can be assigned to
+// resource_type: MACHINE | PERSON | SPACE | TOOL
+export const pwrResources = pgTable('pwr_resources', {
+  id:                  serial('id').primaryKey(),
+  userId:              integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name:                text('name').notNull(),
+  resourceType:        text('resource_type').notNull().default('MACHINE'),
+  capacityHoursPerDay: text('capacity_hours_per_day').default('8.0'),
+  notes:               text('notes'),
+  isActive:            boolean('is_active').notNull().default(true),
+  createdAt:           timestamp('created_at').defaultNow(),
+});
+export type PwrResource    = typeof pwrResources.$inferSelect;
+export type NewPwrResource = typeof pwrResources.$inferInsert;
+
+// Junction: task → resource assignment for conflict detection
+export const pwrTaskResources = pgTable('pwr_task_resources', {
+  id:             serial('id').primaryKey(),
+  taskId:         integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  resourceId:     integer('resource_id').notNull().references(() => pwrResources.id, { onDelete: 'cascade' }),
+  estimatedHours: text('estimated_hours'),
+  reservedDate:   text('reserved_date'),
+  createdAt:      timestamp('created_at').defaultNow(),
+});
+export type PwrTaskResource    = typeof pwrTaskResources.$inferSelect;
+export type NewPwrTaskResource = typeof pwrTaskResources.$inferInsert;
+
