@@ -7,10 +7,13 @@ import {
   CheckCircle2, Clock, AlertCircle, PlayCircle, Loader2,
   Lock, ArrowRight, Zap, Package, Wrench, Users, ShoppingCart,
   Briefcase, FileText, AlertTriangle, MoreHorizontal, FolderPlus,
+  Shield, Check, AlertOctagon,
 } from 'lucide-react';
 import { PWR_PRIORITY, PWR_STATUS } from '@/lib/pwr/constants';
 import Link from 'next/link';
-import PwrCreateProjectModal from './PwrCreateProjectModal';
+import PwrCreateProjectModal     from './PwrCreateProjectModal';
+import PwrVanHanhSection         from './PwrVanHanhSection';
+import PwrCreateOperationalModal from './PwrCreateOperationalModal';
 
 interface Props { tasks: PwrTask[]; onRefresh?: () => void }
 
@@ -44,8 +47,9 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [blockedIds,  setBlockedIds]  = useState<Set<number>>(new Set());
   const [checklistMap, setChecklistMap] = useState<Record<number, { total: number; done: number }>>({});
-  const [showModal, setShowModal] = useState(false);
-  const [toast, setToast]         = useState<string | null>(null);
+  const [showModal,    setShowModal]    = useState(false);
+  const [showOpModal,  setShowOpModal]  = useState(false);
+  const [toast, setToast]              = useState<string | null>(null);
 
   const toggleProject  = (p: string) => setExpandedProjects(prev => ({ ...prev, [p]: !(prev[p] ?? true) }));
   const toggleCategory = (p: string, c: string) => {
@@ -89,13 +93,27 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     });
   }, [tasks]);
 
-  // Group: Project → Category
+  // ── Split tasks: PROJECT_TASK vs OPERATIONAL_TASK ──────────────────────────
+  const projTasks = tasks.filter(t => (t as any).taskType !== 'OPERATIONAL_TASK' && t.projectRef);
+  const opTasks   = tasks.filter(t => (t as any).taskType === 'OPERATIONAL_TASK' || !t.projectRef);
+
+  // Group project tasks: Project → Category
   const projectsMap: Record<string, PwrTask[]> = {};
-  tasks.forEach(t => {
-    const p = t.projectRef?.trim() || '[VẬN HÀNH] NỘI BỘ / KHÁC';
+  projTasks.forEach(t => {
+    const p = t.projectRef?.trim() || '[NỘI BỘ]';
     if (!projectsMap[p]) projectsMap[p] = [];
     projectsMap[p].push(t);
   });
+
+  // ── Gate Health per project ────────────────────────────────────────────────
+  // Smart: check if any blocked tasks exist per project
+  function getGateHealth(pTasks: PwrTask[]): { status: 'GREEN'|'YELLOW'|'RED'; detail: string } {
+    const blocked  = pTasks.filter(t => blockedIds.has(t.id));
+    const overdue  = pTasks.filter(t => t.dueDate && t.dueDate < today && !['DONE','CANCELLED'].includes(t.status));
+    if (blocked.length >= 2 || overdue.length >= 3)  return { status: 'RED',    detail: `${blocked.length} bị chặn, ${overdue.length} quá hạn` };
+    if (blocked.length >= 1 || overdue.length >= 1)  return { status: 'YELLOW', detail: `${blocked.length} bị chặn, ${overdue.length} quá hạn` };
+    return { status: 'GREEN', detail: 'Không có vấn đề' };
+  }
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -103,24 +121,43 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     <div style={{ padding: '8px 24px 60px', color: '#f8fafc', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
 
       {/* ─── Header toolbar ─── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
         <div style={{ fontSize: 13, color: '#64748b' }}>
-          {Object.keys((() => { const m: Record<string,boolean> = {}; tasks.forEach(t => { const p = t.projectRef?.trim() || 'NỘI BỘ'; m[p]=true; }); return m; })()).length} dự án · {tasks.length} task
+          {Object.keys(projectsMap).length} dự án · {projTasks.length} task dự án
+          {opTasks.length > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>· {opTasks.length} việc vận hành</span>}
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 7,
-            padding: '8px 16px', borderRadius: 8,
-            border: '1px solid rgba(99,102,241,0.4)',
-            background: 'rgba(99,102,241,0.12)', color: '#a5b4fc',
-            cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background='rgba(99,102,241,0.25)'; e.currentTarget.style.color='#c7d2fe'; }}
-          onMouseLeave={e => { e.currentTarget.style.background='rgba(99,102,241,0.12)'; e.currentTarget.style.color='#a5b4fc'; }}
-        >
-          <FolderPlus size={15} /> + Tạo dự án mới
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {/* Tạo việc vận hành */}
+          <button
+            onClick={() => setShowOpModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '8px 14px', borderRadius: 8,
+              border: '1px solid rgba(249,115,22,0.4)',
+              background: 'rgba(249,115,22,0.1)', color: '#fb923c',
+              cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background='rgba(249,115,22,0.22)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background='rgba(249,115,22,0.1)'; }}
+          >
+            ⚙️ + Vận Hành
+          </button>
+          {/* Tạo dự án */}
+          <button
+            onClick={() => setShowModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '8px 16px', borderRadius: 8,
+              border: '1px solid rgba(99,102,241,0.4)',
+              background: 'rgba(99,102,241,0.12)', color: '#a5b4fc',
+              cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background='rgba(99,102,241,0.25)'; e.currentTarget.style.color='#c7d2fe'; }}
+            onMouseLeave={e => { e.currentTarget.style.background='rgba(99,102,241,0.12)'; e.currentTarget.style.color='#a5b4fc'; }}
+          >
+            <FolderPlus size={15} /> + Tạo dự án mới
+          </button>
+        </div>
       </div>
 
       {/* ─── Toast ─── */}
@@ -136,7 +173,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         </div>
       )}
 
-      {/* ─── Modal ─── */}
+      {/* ─── Modals ─── */}
       {showModal && (
         <PwrCreateProjectModal
           onClose={() => setShowModal(false)}
@@ -146,6 +183,17 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
               ? `Đã tạo dự án "${name}" với ${taskCount} task`
               : `Đã tạo dự án "${name}"`;
             setToast(msg);
+            setTimeout(() => setToast(null), 4000);
+            onRefresh?.();
+          }}
+        />
+      )}
+      {showOpModal && (
+        <PwrCreateOperationalModal
+          onClose={() => setShowOpModal(false)}
+          onCreated={(title) => {
+            setShowOpModal(false);
+            setToast(`Đã tạo việc vận hành: "${title}"`);
             setTimeout(() => setToast(null), 4000);
             onRefresh?.();
           }}
@@ -162,21 +210,24 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
       )}
 
       {Object.keys(projectsMap).sort().map(projName => {
-        const projTasks  = projectsMap[projName];
+        const pTasks     = projectsMap[projName];
         const isProjExp  = expandedProjects[projName] ?? true;
-        const isOp       = projName.toUpperCase().includes('VẬN HÀNH');
-        const folderClr  = isOp ? '#f97316' : '#60a5fa';
-        const folderBdr  = isOp ? 'rgba(249,115,22,0.18)' : 'rgba(96,165,250,0.18)';
-        const folderBg   = isOp ? 'rgba(249,115,22,0.05)' : 'rgba(96,165,250,0.05)';
+        const folderClr  = '#60a5fa';
+        const folderBdr  = 'rgba(96,165,250,0.18)';
+        const folderBg   = 'rgba(96,165,250,0.05)';
 
-        // Progress
-        const doneCount  = projTasks.filter(t => t.status === 'DONE').length;
-        const totalCount = projTasks.length;
+        // Progress (only PROJECT_TASK tasks count toward %)
+        const doneCount  = pTasks.filter(t => t.status === 'DONE').length;
+        const totalCount = pTasks.length;
         const pct        = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
         const pctColor   = pct === 100 ? '#10b981' : pct >= 50 ? '#3b82f6' : '#f59e0b';
 
+        // Gate health (smart: blocked + overdue analysis)
+        const gateHealth = getGateHealth(pTasks);
+        const gateColor  = gateHealth.status === 'GREEN' ? '#10b981' : gateHealth.status === 'YELLOW' ? '#f59e0b' : '#ef4444';
+
         const catMap: Record<string, PwrTask[]> = {};
-        projTasks.forEach(t => {
+        pTasks.forEach(t => {
           const c = t.category || 'OTHER';
           if (!catMap[c]) catMap[c] = [];
           catMap[c].push(t);
@@ -213,7 +264,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                 {isProjExp ? <FolderOpen size={22} /> : <FolderClosed size={22} />}
               </div>
 
-              {/* Project Name */}
+              {/* Project Name + Progress */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontSize: 15, fontWeight: 800, letterSpacing: 0.3,
@@ -237,9 +288,24 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                 </div>
               </div>
 
+              {/* Gate Health Badge — smart risk indicator */}
+              <div
+                title={gateHealth.detail}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700,
+                  color: gateColor, background: `${gateColor}15`,
+                  border: `1px solid ${gateColor}30`, flexShrink: 0,
+                }}
+              >
+                {gateHealth.status === 'GREEN' && <><Check size={10} /> OK</>}
+                {gateHealth.status === 'YELLOW' && <><AlertCircle size={10} /> Chú ý</>}
+                {gateHealth.status === 'RED'    && <><AlertOctagon size={10} /> Rủi ro</>}
+              </div>
+
               {/* Task Count Badge */}
               <div style={{
-                background: isOp ? 'rgba(249,115,22,0.15)' : 'rgba(96,165,250,0.15)',
+                background: 'rgba(96,165,250,0.15)',
                 color: folderClr, padding: '3px 10px', borderRadius: 99,
                 fontSize: 12, fontWeight: 700, flexShrink: 0,
                 border: `1px solid ${folderBdr}`,
@@ -422,6 +488,15 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
           </div>
         );
       })}
+
+      {/* ─── ZONE B: Vận Hành Nội Bộ ─── */}
+      <PwrVanHanhSection
+        tasks={opTasks}
+        blockedIds={blockedIds}
+        checklistMap={checklistMap}
+        onCreateTask={() => setShowOpModal(true)}
+      />
     </div>
   );
 }
+

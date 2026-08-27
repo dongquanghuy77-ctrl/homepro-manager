@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       title, category, priority, status, description,
       projectRef, dueDate, startDate, assignedTo,
       relatedPerson, source, waitingFor, deferredTo, tags,
-      sourceType, startTime, endTime,
+      sourceType, startTime, endTime, taskType, projectId,
     } = body;
 
     if (!title?.trim()) {
@@ -115,6 +115,8 @@ export async function POST(request: Request) {
         startTime:     startTime   || null,
         endTime:       endTime     || null,
         ...(sourceType ? { source_type: sourceType } as any : {}),
+        ...(taskType   ? { task_type:   taskType   } as any : {}),
+        ...(projectId  ? { project_id:  projectId  } as any : {}),
       } as any)
       .returning();
 
