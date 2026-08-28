@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { items, fileName, batchId, projectId, projectName } = body;
+    const { items, fileName, batchId, projectId, projectName, isNewProject, newProjectType } = body;
     const userId = session.id;
 
     if (!items || items.length === 0) {
@@ -19,9 +19,21 @@ export async function POST(req: NextRequest) {
     }
 
     let isShortageOut = false;
+    let finalProjectId = projectId;
+    let finalProjectName = projectName;
 
     // [UAT INDEPENDENT AUDIT] SỬ DỤNG TRANSACTION ĐỂ CHỐNG RACE-CONDITION
     await db.transaction(async (tx) => {
+      // 0. Tạo Dự án mới nếu được yêu cầu
+      if (isNewProject && finalProjectName) {
+        const [newProj] = await tx.insert(pwrProjects).values({
+          userId,
+          name: finalProjectName,
+          notes: `[TYPE:${newProjectType || 'PROJECT'}] Tự động tạo từ Trạm Nuốt File`,
+        }).returning();
+        finalProjectId = newProj.id;
+      }
+
       let materialIds = items.map((i: any) => i.dbMaterialId).filter(Boolean);
       let dbMats = materialIds.length > 0 
         ? await tx.select().from(pwrMaterials).where(inArray(pwrMaterials.id, materialIds))
@@ -84,7 +96,7 @@ export async function POST(req: NextRequest) {
       const totalVan = items.filter((i:any) => i.type === 'BOARD' || i.category === 'BOARD').reduce((sum:number, i:any) => sum + i.quantity, 0);
       const totalNep = Math.ceil(items.filter((i:any) => i.type === 'EDGE_BAND' || i.category === 'EDGE_BAND').reduce((sum:number, i:any) => sum + i.quantity, 0));
 
-      const commonProjectRef = projectName || `BATCH_${batchId}`; 
+      const commonProjectRef = finalProjectName || `BATCH_${batchId}`; 
       const batchTag = `BATCH_${batchId}`;
       const todayStr = new Date().toISOString().split('T')[0];
 
@@ -103,7 +115,7 @@ export async function POST(req: NextRequest) {
           priority: 'CRITICAL',
           status: 'TODO',
           projectRef: commonProjectRef,
-          projectId: projectId || null,
+          projectId: finalProjectId || null,
           taskType: 'PROJECT_TASK',
           tags: ['EXPLOSION', 'MUA_HANG', batchTag],
           source: 'SYSTEM_EXPLOSION'
@@ -121,7 +133,7 @@ export async function POST(req: NextRequest) {
         status: cncStatus,
         waitingFor: cncWaitingReason,
         projectRef: commonProjectRef,
-        projectId: projectId || null,
+        projectId: finalProjectId || null,
         taskType: 'PROJECT_TASK',
         tags: ['EXPLOSION', 'CNC', batchTag],
         source: 'SYSTEM_EXPLOSION'
@@ -160,7 +172,7 @@ export async function POST(req: NextRequest) {
         status: edgeStatus,
         waitingFor: edgeWaitingReason,
         projectRef: commonProjectRef,
-        projectId: projectId || null,
+        projectId: finalProjectId || null,
         taskType: 'PROJECT_TASK',
         tags: ['EXPLOSION', 'DAN_CANH', batchTag],
         source: 'SYSTEM_EXPLOSION'

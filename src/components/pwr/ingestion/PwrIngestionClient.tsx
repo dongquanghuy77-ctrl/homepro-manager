@@ -14,6 +14,11 @@ export default function PwrIngestionClient() {
   
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  
+  // New states for Smart Router
+  const [projectMode, setProjectMode] = useState<'NEW' | 'EXISTING'>('NEW');
+  const [newProjectName, setNewProjectName] = useState<string>('');
+  const [newProjectType, setNewProjectType] = useState<string>('CÔNG TRÌNH');
 
   useEffect(() => {
     fetch('/api/pwr/projects')
@@ -32,8 +37,8 @@ export default function PwrIngestionClient() {
 
   const handleUpload = async () => {
     if (!file) return;
-    if (!selectedProjectId) {
-      setError('Vui lòng chọn Dự Án trước khi tải file lên!');
+    if (projectMode === 'EXISTING' && !selectedProjectId) {
+      setError('Vui lòng chọn Dự án trước khi tải file lên!');
       return;
     }
     
@@ -80,13 +85,22 @@ export default function PwrIngestionClient() {
   const handleExecute = async () => {
     if (!parsedData) return;
     if (isUploading) return;
-    if (!selectedProjectId) {
-      alert('Vui lòng chọn Dự án!');
-      return;
+    
+    let finalProjectId = selectedProjectId;
+    let finalProjectName = newProjectName || parsedData.fileName.replace('.xlsx', '');
+    
+    if (projectMode === 'EXISTING') {
+      if (!selectedProjectId) {
+        alert('Vui lòng chọn Dự án!');
+        return;
+      }
+      const selectedProject = projects.find(p => p.id.toString() === selectedProjectId);
+      if (selectedProject) {
+        finalProjectName = selectedProject.name;
+      } else {
+        return;
+      }
     }
-
-    const selectedProject = projects.find(p => p.id.toString() === selectedProjectId);
-    if (!selectedProject) return;
 
     setIsUploading(true);
     try {
@@ -98,17 +112,19 @@ export default function PwrIngestionClient() {
           fileName: parsedData.fileName,
           items: parsedData.items,
           batchId: batchId,
-          projectId: selectedProject.id,
-          projectName: selectedProject.name
+          projectId: finalProjectId,
+          projectName: finalProjectName,
+          isNewProject: projectMode === 'NEW',
+          newProjectType: newProjectType
         })
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error);
       
       if (result.isShortage) {
-        alert(`⚠️ Tồn kho không đủ! Đã chuyển Task sang chế độ [Chờ Vật Tư] và tạo Yêu cầu mua hàng.\nDự Án: ${selectedProject.name}`);
+        alert(`🚨 Tồn kho không đủ ! Đã chuyển Task sang chế độ [Chờ Vật Tư] và tạo Yêu cầu mua hàng.\nDự án: ${finalProjectName}`);
       } else {
-        alert(`🚀 ĐÃ NỔ TASK THÀNH CÔNG!\nNhiệm vụ đã được đưa vào WBS của ${selectedProject.name}`);
+        alert(`💥 ĐÃ NỔ TASK THÀNH CÔNG!\nNhiệm vụ đã được đưa vào WBS của ${finalProjectName}`);
       }
       router.push(`/pwr/kanban?search=BATCH_${batchId}`);
     } catch (err: any) {
@@ -161,18 +177,62 @@ export default function PwrIngestionClient() {
                 <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, margin: 0 }}>Kéo thả file Excel hoặc click để chọn file</h3>
                 <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginBottom: 24 }}>Hỗ trợ: .xlsx, .xls • Tối đa 50MB • Tự động kiểm tra & xử lý dữ liệu</p>
                 
-                <div style={{ maxWidth: 320, margin: '0 auto 24px auto', textAlign: 'left' }}>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'var(--color-text)' }}>1. Chọn Dự Án (Bắt buộc):</label>
-                  <select 
-                    value={selectedProjectId}
-                    onChange={(e) => setSelectedProjectId(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', outline: 'none', fontSize: 14 }}
-                  >
-                    <option value="">-- Chọn dự án --</option>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
+                <div style={{ maxWidth: 400, margin: '0 auto 24px auto', textAlign: 'left' }}>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                    <button 
+                      onClick={() => setProjectMode('NEW')}
+                      style={{ flex: 1, padding: '8px 0', border: '1px solid', borderColor: projectMode === 'NEW' ? '#3b82f6' : 'var(--color-border)', background: projectMode === 'NEW' ? 'rgba(59,130,246,0.1)' : 'transparent', color: projectMode === 'NEW' ? '#3b82f6' : 'var(--color-text-muted)', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
+                    >
+                      + Tạo Dự Án Mới
+                    </button>
+                    <button 
+                      onClick={() => setProjectMode('EXISTING')}
+                      style={{ flex: 1, padding: '8px 0', border: '1px solid', borderColor: projectMode === 'EXISTING' ? '#3b82f6' : 'var(--color-border)', background: projectMode === 'EXISTING' ? 'rgba(59,130,246,0.1)' : 'transparent', color: projectMode === 'EXISTING' ? '#3b82f6' : 'var(--color-text-muted)', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
+                    >
+                      Bổ Sung Dự Án Cũ
+                    </button>
+                  </div>
+
+                  {projectMode === 'NEW' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--color-text-muted)' }}>Tên Dự Án Mới (Tự động lấy tên file nếu để trống):</label>
+                        <input 
+                          type="text" 
+                          placeholder="VD: Tủ bếp nhà anh A..."
+                          value={newProjectName}
+                          onChange={(e) => setNewProjectName(e.target.value)}
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', outline: 'none', fontSize: 14 }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--color-text-muted)' }}>Phân Loại Dự Án:</label>
+                        <select 
+                          value={newProjectType}
+                          onChange={(e) => setNewProjectType(e.target.value)}
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', outline: 'none', fontSize: 14 }}
+                        >
+                          <option value="CÔNG TRÌNH">Công Trình / Dự Án (B2B)</option>
+                          <option value="BÁN LẺ">Bán Lẻ / Đơn Hàng (B2C)</option>
+                          <option value="NỘI BỘ">Sản Xuất Nội Bộ / Mẫu</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'var(--color-text)' }}>Chọn Dự Án (Bắt buộc):</label>
+                      <select 
+                        value={selectedProjectId}
+                        onChange={(e) => setSelectedProjectId(e.target.value)}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', outline: 'none', fontSize: 14 }}
+                      >
+                        <option value="">-- Chọn dự án --</option>
+                        {projects.map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 <input type="file" id="file-upload" accept=".xlsx, .xls" onChange={handleFileChange} style={{ display: 'none' }} />
@@ -188,8 +248,8 @@ export default function PwrIngestionClient() {
                     </div>
                     <button 
                       onClick={handleUpload}
-                      disabled={isUploading || !selectedProjectId}
-                      style={{ width: '100%', background: (isUploading || !selectedProjectId) ? 'var(--color-border)' : '#10b981', color: '#fff', border: 'none', padding: '10px', borderRadius: 6, fontWeight: 600, cursor: (isUploading || !selectedProjectId) ? 'not-allowed' : 'pointer' }}
+                      disabled={isUploading || (projectMode === 'EXISTING' && !selectedProjectId)}
+                      style={{ width: '100%', background: (isUploading || (projectMode === 'EXISTING' && !selectedProjectId)) ? 'var(--color-border)' : '#10b981', color: '#fff', border: 'none', padding: '10px', borderRadius: 6, fontWeight: 600, cursor: (isUploading || (projectMode === 'EXISTING' && !selectedProjectId)) ? 'not-allowed' : 'pointer' }}
                     >
                       {isUploading ? 'Đang phân tích...' : 'Tiến hành Nuốt & Chuẩn hóa'}
                     </button>
