@@ -22,7 +22,7 @@ export default async function PwrInventoryPage() {
     balanceAfter: pwrMaterialTransactions.balanceAfter,
     notes: pwrMaterialTransactions.notes,
     createdAt: pwrMaterialTransactions.createdAt,
-    userFullName: users.fullName,
+    userFullName: users.name,
   })
     .from(pwrMaterialTransactions)
     .leftJoin(users, eq(pwrMaterialTransactions.userId, users.id))
