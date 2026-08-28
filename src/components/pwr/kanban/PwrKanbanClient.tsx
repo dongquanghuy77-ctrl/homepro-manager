@@ -163,7 +163,7 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
                       >
                         {/* Title detail link */}
                         <Link
-                          href={`/pwr/tasks/${task.id}`}
+                          href={`/pwr/tasks/${task.id}?from=kanban`}
                           style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', textDecoration: 'none', display: 'block', marginBottom: 6 }}
                         >
                           {task.title}

@@ -419,7 +419,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                             const isOverdue = task.dueDate && task.dueDate < today && !isDone;
 
                             return (
-                              <Link key={task.id} href={`/pwr/tasks/${task.id}`} style={{ textDecoration: 'none' }}>
+                              <Link key={task.id} href={`/pwr/tasks/${task.id}?from=wbs&project=${encodeURIComponent(projName)}`} style={{ textDecoration: 'none' }}>
                                 <div
                                   style={{
                                     display: 'flex', alignItems: 'center', gap: 12,

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { PwrTask, PwrStatus, PwrPriority } from "@/db/schema";
@@ -123,7 +123,7 @@ export default function PwrListView({ tasks, onRefresh }: Props) {
                 </td>
                 <td style={{ padding: "12px" }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <Link href={"/pwr/tasks/" + task.id} style={{ color: "#3b82f6", display: "flex", alignItems: "center" }}><ExternalLink size={14} /></Link>
+                    <Link href={"/pwr/tasks/" + task.id + "?from=list"} style={{ color: "#3b82f6", display: "flex", alignItems: "center" }}><ExternalLink size={14} /></Link>
                     <button onClick={() => deleteOne(task.id)} title="Xoa task"
                       style={{ background: "none", border: "none", cursor: "pointer", color: "#475569", display: "flex", alignItems: "center", padding: 0 }}
                       onMouseEnter={e => (e.currentTarget.style.color = "#ef4444")}

@@ -111,7 +111,7 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
                 const pr = PWR_PRIORITY[task.priority as PwrPriority];
                 const nums = ['①', '②', '③'];
                 return (
-                  <Link key={task.id} href={"/pwr/tasks/" + task.id}
+                  <Link key={task.id} href={"/pwr/tasks/" + task.id + "?from=focus"}
                     style={{ 
                       display: 'flex', alignItems: 'center', gap: 16, 
                       background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)',

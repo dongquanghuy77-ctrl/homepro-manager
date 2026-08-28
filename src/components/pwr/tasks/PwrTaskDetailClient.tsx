@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Pencil, FileDown, ClipboardCheck, Target, Activity, Flag, CalendarClock, Users, FolderOpen, Tags, AlignLeft, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import type { PwrTask, PwrWorkLog, PwrTaskAuditLog, PwrStatus, PwrPriority } from '@/db/schema';
 import { PWR_STATUS, PWR_CATEGORY, PWR_PRIORITY, VALID_TRANSITIONS, getTodayVN, PWR_LOG_TYPE } from '@/lib/pwr/constants';
 import { isReopen as checkReopen } from '@/lib/pwr/task-transitions';
@@ -29,6 +30,19 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
   const [reportTasks, setReportTasks] = useState<PwrTask[] | null>(null);
   const [reportTitle, setReportTitle] = useState('');
   const [reportDate, setReportDate] = useState('');
+
+  const searchParams = useSearchParams();
+  const fromParam   = searchParams.get('from');
+  const projectParam = searchParams.get('project');
+
+  let backHref  = task.projectRef ? '/pwr/kanban?tab=WBS' : '/pwr/tasks';
+  let backLabel = task.projectRef ? task.projectRef : 'Danh sách';
+
+  if (fromParam === 'wbs')      { backHref = '/pwr/kanban?tab=WBS'; backLabel = projectParam ? decodeURIComponent(projectParam) : (task.projectRef || 'Cấu trúc dự án'); }
+  else if (fromParam === 'kanban')  { backHref = '/pwr/kanban';        backLabel = 'Bảng Kanban'; }
+  else if (fromParam === 'focus')   { backHref = '/pwr/focus';         backLabel = 'Daily Focus'; }
+  else if (fromParam === 'calendar'){ backHref = '/pwr/calendar';      backLabel = 'Lịch công việc'; }
+  else if (fromParam === 'list')    { backHref = '/pwr/tasks';         backLabel = 'Danh sách'; }
 
   async function handleExportReport(type: 'BOARD' | 'DEADLINE' | 'ASSIGNEE' | 'PROJECT') {
     setShowExportMenu(false);
@@ -154,10 +168,23 @@ export default function PwrTaskDetailClient({ task: initialTask, workLogs: initi
     <div className="page-container">
       {/* Back */}
       <div style={{ marginBottom: 16 }}>
-        <Link href="/pwr/tasks" className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <ArrowLeft size={14} /> Danh sách
+        <Link href={backHref} className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <ArrowLeft size={14} /> {backLabel}
         </Link>
       </div>
+
+      {/* Breadcrumb trail */}
+      <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#475569', marginBottom: 16, flexWrap: 'wrap' }}>
+        <Link href="/pwr/kanban" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>Công việc cá nhân</Link>
+        {task.projectRef && (
+          <>
+            <span style={{ color: '#475569' }}>/</span>
+            <Link href="/pwr/kanban?tab=WBS" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 500 }}>{task.projectRef}</Link>
+          </>
+        )}
+        <span style={{ color: '#475569' }}>/</span>
+        <span style={{ color: '#94a3b8', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>{task.title}</span>
+      </nav>
 
       {/* Task Header Card */}
       <div className="card" style={{ padding: 20, marginBottom: 16, borderLeft: `4px solid ${PWR_STATUS[task.status as PwrStatus]?.color || '#374151'}` }}>

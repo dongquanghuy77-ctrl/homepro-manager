@@ -12,9 +12,10 @@ interface Props {
   onEdit: () => void;
   onDelete: () => void;
   onStatusChange: (newStatus: string) => void;
+  from?: string;
 }
 
-export default function PwrTaskCard({ task, onEdit, onDelete, onStatusChange }: Props) {
+export default function PwrTaskCard({ task, onEdit, onDelete, onStatusChange, from = 'list' }: Props) {
   const category   = PWR_CATEGORY[task.category as keyof typeof PWR_CATEGORY];
   const statusCfg  = PWR_STATUS[task.status as PwrStatus];
   const todayVN    = getTodayVN();
@@ -37,7 +38,7 @@ export default function PwrTaskCard({ task, onEdit, onDelete, onStatusChange }: 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--color-text)' }}>
-              <Link href={`/pwr/tasks/${task.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+              <Link href={`/pwr/tasks/${task.id}?from=${from}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                 {task.title}
               </Link>
             </span>
