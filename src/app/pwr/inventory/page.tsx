@@ -1,4 +1,4 @@
-import { requireAuth, ALL_ROLES } from '@/lib/auth';
+import { getSession } from '@/lib/session';
 import { db } from '@/db';
 import { pwrMaterials, pwrMaterialTransactions, users } from '@/db/schema';
 import { desc, eq } from 'drizzle-orm';
@@ -8,8 +8,8 @@ import { redirect } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 
 export default async function PwrInventoryPage() {
-  const authResult = await requireAuth(undefined, ALL_ROLES);
-  if (authResult.error) redirect('/login');
+  const session = await getSession();
+  if (!session) redirect('/login');
 
   const materials = await db.select().from(pwrMaterials).orderBy(pwrMaterials.id);
 
