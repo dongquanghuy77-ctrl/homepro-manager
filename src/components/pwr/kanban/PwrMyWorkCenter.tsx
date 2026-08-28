@@ -56,6 +56,11 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
     { key:'WBS'    as ViewTab, label:'CẤU TRÚC DỰ ÁN (WBS)', icon:<FolderGit2 size={15}/> },
   ];
 
+  const dueSoonCount = tasks.filter(t =>
+    !TERMINAL_STATUSES.includes(t.status as PwrStatus) && t.dueDate &&
+    t.dueDate <= nowStr && t.dueDate >= todayVN
+  ).length;
+
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(160deg,#0f172a 0%,#1a2440 50%,#0f172a 100%)', fontFamily:FONT }}>
       {/* Header */}
@@ -69,8 +74,11 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
             <p style={{ margin:'4px 0 0', fontSize:12, color:'#475569' }}>Trung tâm điều hành công việc cá nhân</p>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            <a href="/pwr/today" style={{ display:'flex', alignItems:'center', gap:6, color:'#64748b', fontSize:12, textDecoration:'none', padding:'7px 12px', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, fontFamily:FONT }}>
-              🌅 Daily Focus
+            <a href="/pwr/focus" style={{ display:'flex', alignItems:'center', gap:6, color:'#f59e0b', fontSize:12, textDecoration:'none', padding:'7px 12px', border:'1px solid rgba(245,158,11,0.3)', borderRadius:8, fontFamily:FONT, fontWeight:600 }}>
+              🎯 Daily Focus
+            </a>
+            <a href="/pwr/reports/projects" style={{ display:'flex', alignItems:'center', gap:6, color:'#64748b', fontSize:12, textDecoration:'none', padding:'7px 12px', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, fontFamily:FONT }}>
+              📊 Tiến Độ
             </a>
             <a href="/pwr/calendar" style={{ display:'flex', alignItems:'center', gap:6, color:'#64748b', fontSize:12, textDecoration:'none', padding:'7px 12px', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, fontFamily:FONT }}>
               <Calendar size={14}/> Lịch
@@ -122,7 +130,7 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
                     </div>
                   )}
                   <div style={{ padding:'8px 16px', borderTop:'1px solid rgba(255,255,255,0.06)', textAlign:'center' }}>
-                    <a href="/pwr/tasks" style={{ fontSize:11, color:'#3b82f6', textDecoration:'none', fontWeight:600 }}>Xem tất cả →</a>
+                    <a href="/pwr/focus" style={{ fontSize:11, color:'#f59e0b', textDecoration:'none', fontWeight:600 }}>🎯 Xem Daily Focus →</a>
                   </div>
                 </div>
               )}
@@ -135,6 +143,26 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
             </button>
           </div>
         </div>
+
+        {/* Due-soon alert banner */}
+        {(overdue.length > 0 || dueSoonCount > 0) && (
+          <div style={{
+            marginBottom:16, padding:'10px 16px', borderRadius:10,
+            background:'rgba(239,68,68,0.06)', border:'1px solid rgba(239,68,68,0.2)',
+            display:'flex', alignItems:'center', gap:12, flexWrap:'wrap',
+          }}>
+            <span style={{ fontSize:14 }}>⚠️</span>
+            <span style={{ fontSize:13, color:'#fca5a5', flex:1 }}>
+              {overdue.length > 0 && <><strong style={{ color:'#ef4444' }}>{overdue.length} task quá hạn</strong></>}
+              {overdue.length > 0 && dueSoonCount > 0 && ' · '}
+              {dueSoonCount > 0 && <><strong style={{ color:'#f59e0b' }}>{dueSoonCount} task đến hạn hôm nay</strong></>}
+              {' — Cần xử lý ngay'}
+            </span>
+            <a href="/pwr/focus" style={{ fontSize:12, fontWeight:700, color:'#f59e0b', textDecoration:'none', padding:'5px 12px', border:'1px solid rgba(245,158,11,0.3)', borderRadius:8 }}>
+              🎯 Xem Daily Focus
+            </a>
+          </div>
+        )}
 
         {/* Stat Cards */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>

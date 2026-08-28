@@ -105,14 +105,15 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     projectsMap[p].push(t);
   });
 
-  // ── Gate Health per project ────────────────────────────────────────────────
-  // Smart: check if any blocked tasks exist per project
+  // ── Gate Health per project ─────────────────────────────────────────────
+  // Based on overdue % — meaningful even without dependency data
   function getGateHealth(pTasks: PwrTask[]): { status: 'GREEN'|'YELLOW'|'RED'; detail: string } {
-    const blocked  = pTasks.filter(t => blockedIds.has(t.id));
-    const overdue  = pTasks.filter(t => t.dueDate && t.dueDate < today && !['DONE','CANCELLED'].includes(t.status));
-    if (blocked.length >= 2 || overdue.length >= 3)  return { status: 'RED',    detail: `${blocked.length} bị chặn, ${overdue.length} quá hạn` };
-    if (blocked.length >= 1 || overdue.length >= 1)  return { status: 'YELLOW', detail: `${blocked.length} bị chặn, ${overdue.length} quá hạn` };
-    return { status: 'GREEN', detail: 'Không có vấn đề' };
+    const active  = pTasks.filter(t => !['DONE','CANCELLED'].includes(t.status));
+    const overdue = active.filter(t => t.dueDate && t.dueDate < today);
+    const pct     = active.length > 0 ? Math.round((overdue.length / active.length) * 100) : 0;
+    if (overdue.length >= 3 || pct >= 30) return { status: 'RED',    detail: `${overdue.length} task quá hạn (${pct}%)` };
+    if (overdue.length >= 1)              return { status: 'YELLOW', detail: `${overdue.length} task quá hạn` };
+    return { status: 'GREEN', detail: 'Đúng tiến độ' };
   }
 
   const today = new Date().toISOString().slice(0, 10);

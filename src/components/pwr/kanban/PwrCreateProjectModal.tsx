@@ -9,43 +9,56 @@ interface Props {
 }
 
 const COLOR_OPTIONS = [
-  { value: 'BLUE',   label: 'Xanh dương', hex: '#3b82f6' },
+  { value: 'BLUE',   label: 'Xanh dÆ°Æ¡ng', hex: '#3b82f6' },
   { value: 'ORANGE', label: 'Cam',        hex: '#f97316' },
-  { value: 'GREEN',  label: 'Xanh lá',    hex: '#10b981' },
-  { value: 'PURPLE', label: 'Tím',        hex: '#8b5cf6' },
-  { value: 'RED',    label: 'Đỏ',         hex: '#ef4444' },
-  { value: 'YELLOW', label: 'Vàng',       hex: '#f59e0b' },
+  { value: 'GREEN',  label: 'Xanh lÃ¡',    hex: '#10b981' },
+  { value: 'PURPLE', label: 'TÃ­m',        hex: '#8b5cf6' },
+  { value: 'RED',    label: 'Äá»',         hex: '#ef4444' },
+  { value: 'YELLOW', label: 'VÃ ng',       hex: '#f59e0b' },
 ];
 
 export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
-  const [name,            setName]            = useState('');
-  const [customer,        setCustomer]        = useState('');
-  const [deadline,        setDeadline]        = useState('');
-  const [notes,           setNotes]           = useState('');
-  const [color,           setColor]           = useState('BLUE');
-  const [applyTemplate,   setApplyTemplate]   = useState(true);
-  const [saving,          setSaving]          = useState(false);
-  const [error,           setError]           = useState('');
+  const [name,         setName]         = useState('');
+  const [customer,     setCustomer]     = useState('');
+  const [deadline,     setDeadline]     = useState('');
+  const [notes,        setNotes]        = useState('');
+  const [color,        setColor]        = useState('BLUE');
+  const [templateType, setTemplateType] = useState<'NONE'|'LIGHT'|'STANDARD'|'FULL'>('STANDARD');
+  const [saving,       setSaving]       = useState(false);
+  const [error,        setError]        = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) { setError('Tên dự án không được để trống'); return; }
+    if (!name.trim()) { setError('TÃªn dá»± Ã¡n khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng'); return; }
     setSaving(true);
     setError('');
     try {
       const res = await fetch('/api/pwr/projects', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), customer: customer.trim(), deadline, notes: notes.trim(), color, applyTemplate }),
+        body: JSON.stringify({
+          name: name.trim(), customer: customer.trim(), deadline,
+          notes: notes.trim(), color,
+          templateType: templateType === 'NONE' ? null : templateType,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Lỗi tạo dự án'); return; }
+      if (!res.ok) { setError(data.error || 'Lá»—i táº¡o dá»± Ã¡n'); return; }
       onCreated(name.trim(), data.createdTasks ?? 0);
-    } catch { setError('Không thể kết nối server'); }
+    } catch { setError('KhÃ´ng thá»ƒ káº¿t ná»‘i server'); }
     finally { setSaving(false); }
   }
 
   const selectedColor = COLOR_OPTIONS.find(c => c.value === color)?.hex ?? '#3b82f6';
+
+  const TEMPLATE_OPTIONS: { value: 'NONE'|'LIGHT'|'STANDARD'|'FULL'; label: string; tasks: string; desc: string; color: string }[] = [
+    { value:'NONE',     label:'KhÃ´ng dÃ¹ng template', tasks:'0 task',  desc:'Tá»± táº¡o task thá»§ cÃ´ng',                         color:'#475569' },
+    { value:'LIGHT',    label:'Light â€” Dá»± Ã¡n nhá»',   tasks:'15 task', desc:'PhÃ²ng ngá»§, báº¿p, WC Â· < 50 triá»‡u',             color:'#10b981' },
+    { value:'STANDARD', label:'Standard â€” Dá»± Ã¡n vá»«a',tasks:'28 task', desc:'CÄƒn há»™, vÄƒn phÃ²ng nhá» Â· 50â€“200 triá»‡u',        color:'#3b82f6' },
+    { value:'FULL',     label:'Full â€” Dá»± Ã¡n lá»›n',    tasks:'41 task', desc:'Showroom, TAKASHIMAYA, cÃ´ng trÃ¬nh Â· > 200 triá»‡u', color:'#8b5cf6' },
+  ];
+
+  const taskCount = { NONE:0, LIGHT:15, STANDARD:28, FULL:41 }[templateType];
 
   return (
     <div style={{
@@ -55,7 +68,7 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
     }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div style={{
         background: '#0f172a', border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: 16, padding: '28px 32px', width: '100%', maxWidth: 520,
+        borderRadius: 16, padding: '28px 32px', width: '100%', maxWidth: 540,
         boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
       }}>
         {/* Header */}
@@ -64,8 +77,8 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
             <FolderPlus size={18} color={selectedColor} />
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 17, color: '#f1f5f9' }}>Tạo dự án mới</div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>Điền thông tin và chọn template</div>
+            <div style={{ fontWeight: 700, fontSize: 17, color: '#f1f5f9' }}>Táº¡o dá»± Ã¡n má»›i</div>
+            <div style={{ fontSize: 12, color: '#64748b' }}>Äiá»n thÃ´ng tin vÃ  chá»n template phÃ¹ há»£p</div>
           </div>
           <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: 4 }}>
             <X size={20} />
@@ -73,9 +86,9 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Tên dự án */}
+          {/* TÃªn dá»± Ã¡n */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Tên dự án *</label>
+            <label style={labelStyle}>TÃªn dá»± Ã¡n *</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -85,25 +98,25 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
             />
           </div>
 
-          {/* Khách hàng */}
+          {/* KhÃ¡ch hÃ ng */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}><Building2 size={13} /> Khách hàng</label>
+            <label style={labelStyle}><Building2 size={13} /> KhÃ¡ch hÃ ng</label>
             <input
               value={customer}
               onChange={e => setCustomer(e.target.value)}
-              placeholder="Tên công ty hoặc cá nhân"
+              placeholder="TÃªn cÃ´ng ty hoáº·c cÃ¡ nhÃ¢n"
               style={inputStyle}
             />
           </div>
 
-          {/* Deadline + Màu */}
+          {/* Deadline + MÃ u */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
             <div>
-              <label style={labelStyle}><Calendar size={13} /> Deadline bàn giao</label>
+              <label style={labelStyle}><Calendar size={13} /> Deadline bÃ n giao</label>
               <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle}><Palette size={13} /> Màu folder</label>
+              <label style={labelStyle}><Palette size={13} /> MÃ u folder</label>
               <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
                 {COLOR_OPTIONS.map(c => (
                   <button key={c.value} type="button" title={c.label}
@@ -119,48 +132,61 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
             </div>
           </div>
 
-          {/* Ghi chú */}
+          {/* Ghi chÃº */}
           <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}><StickyNote size={13} /> Ghi chú</label>
+            <label style={labelStyle}><StickyNote size={13} /> Ghi chÃº</label>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder="Yêu cầu đặc biệt, lưu ý..."
+              placeholder="YÃªu cáº§u Ä‘áº·c biá»‡t, lÆ°u Ã½..."
               rows={2}
               style={{ ...inputStyle, resize: 'none', lineHeight: 1.5 }}
             />
           </div>
 
-          {/* Template checkbox */}
-          <div style={{
-            background: applyTemplate ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.03)',
-            border: `1px solid ${applyTemplate ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
-            borderRadius: 10, padding: '14px 16px', marginBottom: 20,
-            cursor: 'pointer', transition: 'all 0.2s',
-          }} onClick={() => setApplyTemplate(p => !p)}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-              <div style={{
-                width: 20, height: 20, borderRadius: 5, marginTop: 1, flexShrink: 0,
-                background: applyTemplate ? '#6366f1' : 'transparent',
-                border: `2px solid ${applyTemplate ? '#6366f1' : '#475569'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {applyTemplate && <CheckSquare size={14} color="#fff" />}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 13.5, color: applyTemplate ? '#a5b4fc' : '#94a3b8' }}>
-                  Tự động tạo 41 task chuẩn cho dự án nội thất
-                </div>
-                <div style={{ fontSize: 12, color: '#64748b', marginTop: 3, lineHeight: 1.5 }}>
-                  6 giai đoạn: Tiếp nhận → Thiết kế → Chuẩn bị SX → Sản xuất → Bàn giao → Kết sổ
-                </div>
-              </div>
+          {/* Template selector â€” 4 options */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={labelStyle}><CheckSquare size={13} /> Template task tá»± Ä‘á»™ng</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {TEMPLATE_OPTIONS.map(opt => {
+                const isSelected = templateType === opt.value;
+                return (
+                  <div
+                    key={opt.value}
+                    onClick={() => setTemplateType(opt.value)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 14px', borderRadius: 9, cursor: 'pointer',
+                      background: isSelected ? `${opt.color}12` : 'rgba(255,255,255,0.02)',
+                      border: `1px solid ${isSelected ? `${opt.color}40` : 'rgba(255,255,255,0.06)'}`,
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <div style={{
+                      width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
+                      background: isSelected ? opt.color : 'transparent',
+                      border: `2px solid ${isSelected ? opt.color : '#475569'}`,
+                    }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: isSelected ? opt.color : '#94a3b8' }}>
+                        {opt.label}
+                        <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: isSelected ? opt.color : '#475569',
+                          background: isSelected ? `${opt.color}18` : 'rgba(255,255,255,0.04)',
+                          padding: '1px 7px', borderRadius: 20 }}>
+                          {opt.tasks}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>{opt.desc}</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {error && (
             <div style={{ color: '#ef4444', fontSize: 13, marginBottom: 12, background: 'rgba(239,68,68,0.1)', padding: '8px 12px', borderRadius: 8 }}>
-              ⚠ {error}
+              âš  {error}
             </div>
           )}
 
@@ -170,7 +196,7 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
               padding: '9px 20px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
               background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 14,
             }}>
-              Huỷ
+              Huá»·
             </button>
             <button type="submit" disabled={saving || !name.trim()} style={{
               padding: '9px 20px', borderRadius: 8, border: 'none', cursor: saving || !name.trim() ? 'default' : 'pointer',
@@ -180,7 +206,7 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
               transition: 'all 0.2s',
             }}>
               {saving ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <FolderPlus size={15} />}
-              {saving ? 'Đang tạo...' : `Tạo dự án${applyTemplate ? ' + 41 task' : ''}`}
+              {saving ? 'Äang táº¡o...' : taskCount > 0 ? `Táº¡o dá»± Ã¡n + ${taskCount} task` : 'Táº¡o dá»± Ã¡n'}
             </button>
           </div>
         </form>
@@ -200,5 +226,6 @@ const inputStyle: React.CSSProperties = {
   width: '100%', padding: '9px 12px', borderRadius: 8,
   border: '1px solid rgba(99,102,241,0.25)',
   background: 'rgba(255,255,255,0.04)', color: '#e2e8f0',
-  fontSize: 13.5, outline: 'none', boxSizing: 'border-box',
+  fontSize: 13.5, outline: 'none', boxSizing: 'border-box' as const,
 };
+

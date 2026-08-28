@@ -218,6 +218,7 @@ export async function buildMonthlyReport(userId: number, date?: string): Promise
   return {
     year: y, month: m,
     monthLabel: `${monthNames[m - 1]} ${y}`,
+
     doneThisMonth,
     createdThisMonth,
     stillActive,
@@ -235,3 +236,47 @@ export async function buildMonthlyReport(userId: number, date?: string): Promise
     },
   };
 }
+
+// ============================================================
+// FOCUS REPORT — Forward-looking daily priorities
+// ============================================================
+
+export interface FocusReport {
+  today:         string;
+  tomorrow:      string;
+  overdue:       PwrTask[];     // past-due, sorted by priority
+  dueToday:      PwrTask[];     // due today, sorted by priority
+  dueTomorrow:   PwrTask[];     // due tomorrow
+  active:        PwrTask[];     // IN_PROGRESS
+  equipmentCnc:  PwrTask[];     // EQUIPMENT or PRODUCTION category, not done
+  totalActive:   number;
+}
+
+const PRIO_ORDER: Record<string, number> = { URGENT: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+function sortByPriority(arr: PwrTask[]): PwrTask[] {
+  return [...arr].sort((a, b) => (PRIO_ORDER[a.priority ?? 'LOW'] ?? 9) - (PRIO_ORDER[b.priority ?? 'LOW'] ?? 9));
+}
+
+export async function buildFocusReport(userId: number): Promise<FocusReport> {
+  const today    = getTodayVN();
+  const tDate    = new Date(today + 'T00:00:00+07:00');
+  tDate.setUTCDate(tDate.getUTCDate() + 1);
+  const tomorrow = tDate.toISOString().split('T')[0];
+
+  const allTasks = await db.select().from(pwrTasks)
+    .where(and(eq(pwrTasks.userId, userId), isNull(pwrTasks.deletedAt)));
+
+  const active = allTasks.filter(t => !TERMINAL_STATUSES.includes(t.status as any));
+
+  return {
+    today,
+    tomorrow,
+    overdue:      sortByPriority(active.filter(t => t.dueDate && t.dueDate < today)),
+    dueToday:     sortByPriority(active.filter(t => t.dueDate === today)),
+    dueTomorrow:  sortByPriority(active.filter(t => t.dueDate === tomorrow)),
+    active:       active.filter(t => t.status === 'IN_PROGRESS'),
+    equipmentCnc: active.filter(t => ['EQUIPMENT','PRODUCTION'].includes(t.category ?? '')),
+    totalActive:  active.length,
+  };
+}
+
