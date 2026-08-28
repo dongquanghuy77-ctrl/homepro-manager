@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies } from '@/db/schema';
+import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources } from '@/db/schema';
 import { eq, sql, inArray } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
@@ -63,9 +63,14 @@ export async function POST(req: NextRequest) {
     const totalVan = items.filter((i:any) => i.type === 'VÁN').reduce((sum:number, i:any) => sum + i.quantity, 0);
     const totalNep = items.filter((i:any) => i.type === 'NẸP').reduce((sum:number, i:any) => sum + i.quantity, 0);
 
-    const commonProjectRef = `BATCH_${batchId}`; // Dùng để Hủy Nổ sau này (Rollback)
+    const commonProjectRef = `BATCH_${batchId}`; 
+    const todayStr = new Date().toISOString().split('T')[0];
 
-    // Task 1: Mua Hàng (Nếu thiếu vật tư)
+    // [TƯ DUY NGƯỢC] Lấy danh sách máy móc để phân bổ tải trọng
+    const machines = await db.select().from(pwrResources);
+    const cncMachine = machines.find((m:any) => m.name.includes('CNC')) || machines[0];
+    const edgeMachine = machines.find((m:any) => m.name.includes('Dán')) || machines[0];
+
     if (isShortage) {
       await db.insert(pwrTasks).values({
         userId,
@@ -79,11 +84,12 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Task 2: CNC Cắt Ván
     const [cncTask] = await db.insert(pwrTasks).values({
       userId,
       title: `[CNC] Cắt ${totalVan} Tấm ván - ${fileName.replace('.xlsx', '')}`,
-      description: `Lệnh xuất từ file Ingestion.\nTổng ván: ${totalVan} Tấm.\nYêu cầu quét mã vạch sau khi xong.`,
+      description: `Lệnh xuất từ file Ingestion.
+Tổng ván: ${totalVan} Tấm.
+Yêu cầu quét mã vạch sau khi xong.`,
       category: 'PRODUCTION',
       priority: 'HIGH',
       status: initialStatus,
@@ -93,24 +99,42 @@ export async function POST(req: NextRequest) {
       source: 'SYSTEM_EXPLOSION'
     }).returning();
 
-    // Task 3: Dán Cạnh
+    // Phân bổ Tải trọng Máy CNC (Quy đổi 1 Tấm = 0.15 Giờ ~ 9 phút)
+    if (cncMachine) {
+       await db.insert(pwrTaskResources).values({
+         taskId: cncTask.id,
+         resourceId: cncMachine.id,
+         estimatedHours: (totalVan * 0.15).toFixed(2),
+         reservedDate: todayStr
+       });
+    }
+
     const [edgeTask] = await db.insert(pwrTasks).values({
       userId,
       title: `[DÁN CẠNH] Dán ${totalNep} Mét nẹp - ${fileName.replace('.xlsx', '')}`,
       description: `Làm cuốn chiếu: Không cần đợi CNC xong 100%. CNC cắt được 20% là có thể tiến hành dán ngay.`,
       category: 'PRODUCTION',
       priority: 'HIGH',
-      status: 'TODO', // Dán cạnh luôn TODO nhưng bị Dependency cản
+      status: 'TODO',
       projectRef: commonProjectRef,
       tags: ['EXPLOSION', 'DÁN_CẠNH'],
       source: 'SYSTEM_EXPLOSION'
     }).returning();
 
-    // Thiết lập Ràng buộc Mềm (Soft Dependency)
+    // Phân bổ Tải trọng Dán Cạnh (Quy đổi 10 Mét = 0.1 Giờ ~ 6 phút)
+    if (edgeMachine) {
+       await db.insert(pwrTaskResources).values({
+         taskId: edgeTask.id,
+         resourceId: edgeMachine.id,
+         estimatedHours: ((totalNep / 10) * 0.1).toFixed(2),
+         reservedDate: todayStr
+       });
+    }
+
     await db.insert(pwrTaskDependencies).values({
       taskId: edgeTask.id,
       dependsOnId: cncTask.id,
-      depType: 'PRECONDITION', // PRECONDITION: Cho phép overlap cuốn chiếu, không khóa cứng như BLOCKED_BY
+      depType: 'PRECONDITION',
       timeWindowDays: 0
     });
 
