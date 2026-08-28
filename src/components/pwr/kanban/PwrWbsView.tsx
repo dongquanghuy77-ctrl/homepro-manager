@@ -43,6 +43,7 @@ function StatusIcon({ status }: { status: string }) {
 }
 
 export default function PwrWbsView({ tasks, onRefresh }: Props) {
+  const [localTasks,         setLocalTasks]         = useState<PwrTask[]>(tasks);
   const [expandedProjects,   setExpandedProjects]   = useState<Record<string, boolean>>({});
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [blockedIds,  setBlockedIds]  = useState<Set<number>>(new Set());
@@ -50,12 +51,57 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [showModal,    setShowModal]    = useState(false);
   const [showOpModal,  setShowOpModal]  = useState(false);
   const [toast, setToast]              = useState<string | null>(null);
+  const [pendingIds,   setPendingIds]   = useState<Set<number>>(new Set());
+
+  // Sync localTasks when parent refreshes tasks
+  useEffect(() => { setLocalTasks(tasks); }, [tasks]);
 
   const toggleProject  = (p: string) => setExpandedProjects(prev => ({ ...prev, [p]: !(prev[p] ?? true) }));
   const toggleCategory = (p: string, c: string) => {
     const k = `${p}||${c}`;
     setExpandedCategories(prev => ({ ...prev, [k]: !(prev[k] ?? true) }));
   };
+
+  // ── Sprint A: Quick toggle DONE / reopen ────────────────────────────────────
+  async function handleToggleDone(e: React.MouseEvent, task: PwrTask) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pendingIds.has(task.id)) return; // debounce
+
+    const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
+    const completedAt = newStatus === 'DONE' ? new Date().toISOString() : null;
+
+    // Optimistic update
+    setPendingIds(prev => new Set([...prev, task.id]));
+    setLocalTasks(prev => prev.map(t =>
+      t.id === task.id ? { ...t, status: newStatus as any, completedAt: newStatus === 'DONE' ? new Date() : null } : t
+    ));
+
+    try {
+      const res = await fetch(`/api/pwr/tasks/${task.id}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        // Rollback on error
+        setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
+        setToast('Lỗi cập nhật trạng thái');
+      } else {
+        const updated = await res.json();
+        setLocalTasks(prev => prev.map(t => t.id === task.id ? updated : t));
+        setToast(newStatus === 'DONE' ? `✅ Hoàn thành: ${task.title.substring(0, 40)}` : `↩ Mở lại: ${task.title.substring(0, 40)}`);
+      }
+    } catch {
+      setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
+      setToast('Lỗi kết nối');
+    } finally {
+      setTimeout(() => {
+        setPendingIds(prev => { const s = new Set(prev); s.delete(task.id); return s; });
+        setTimeout(() => setToast(null), 3000);
+      }, 400); // debounce 400ms
+    }
+  }
 
   // Batch fetch: blocker status + checklist counts
   useEffect(() => {
@@ -94,8 +140,8 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   }, [tasks]);
 
   // ── Split tasks: PROJECT_TASK vs OPERATIONAL_TASK ──────────────────────────
-  const projTasks = tasks.filter(t => (t as any).taskType !== 'OPERATIONAL_TASK' && t.projectRef);
-  const opTasks   = tasks.filter(t => (t as any).taskType === 'OPERATIONAL_TASK' || !t.projectRef);
+  const projTasks = localTasks.filter(t => (t as any).taskType !== 'OPERATIONAL_TASK' && t.projectRef);
+  const opTasks   = localTasks.filter(t => (t as any).taskType === 'OPERATIONAL_TASK' || !t.projectRef);
 
   // Group project tasks: Project → Category
   const projectsMap: Record<string, PwrTask[]> = {};
@@ -449,10 +495,32 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                                     e.currentTarget.style.transform = 'translateX(0)';
                                   }}
                                 >
-                                  {/* Status Icon */}
-                                  <div style={{ flexShrink: 0 }}>
+                                  {/* Status Icon — Sprint A: clickable quick-toggle */}
+                                  <button
+                                    onClick={e => handleToggleDone(e, task)}
+                                    disabled={pendingIds.has(task.id)}
+                                    title={isDone ? 'Bấm để mở lại task' : (isBlocked ? 'Task đang bị chặn bởi task khác' : 'Bấm để đánh dấu hoàn thành')}
+                                    style={{
+                                      background: 'none', border: 'none', cursor: isBlocked ? 'not-allowed' : 'pointer',
+                                      padding: 2, borderRadius: 99, flexShrink: 0,
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                      opacity: pendingIds.has(task.id) ? 0.4 : 1,
+                                      transform: pendingIds.has(task.id) ? 'scale(0.85)' : 'scale(1)',
+                                      transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => {
+                                      if (!isBlocked && !pendingIds.has(task.id)) {
+                                        (e.currentTarget as HTMLElement).style.transform = 'scale(1.25)';
+                                        (e.currentTarget as HTMLElement).style.filter = isDone ? 'drop-shadow(0 0 3px #10b981)' : 'drop-shadow(0 0 3px #6366f1)';
+                                      }
+                                    }}
+                                    onMouseLeave={e => {
+                                      (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
+                                      (e.currentTarget as HTMLElement).style.filter = 'none';
+                                    }}
+                                  >
                                     <StatusIcon status={task.status} />
-                                  </div>
+                                  </button>
 
                                   {/* ID */}
                                   <span style={{ fontSize: 11, fontWeight: 700, color: '#475569', width: 36, flexShrink: 0 }}>
