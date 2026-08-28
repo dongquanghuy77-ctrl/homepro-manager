@@ -55,8 +55,11 @@ export const PWR_LOG_TYPE: Record<PwrLogType, { label: string; color: string }> 
 // STATE MACHINE
 // ============================================================
 export const VALID_TRANSITIONS: Record<PwrStatus, PwrStatus[]> = {
-  INBOX:       ['TODO', 'CANCELLED'],
-  TODO:        ['IN_PROGRESS', 'DEFERRED', 'CANCELLED'],
+  // Personal task manager — allow direct DONE from early states.
+  // INBOX/TODO → DONE: task was done immediately without formal planning step.
+  // WAITING/DEFERRED → DONE: must re-activate first (enforces intentional flow).
+  INBOX:       ['TODO', 'CANCELLED', 'DONE'],
+  TODO:        ['IN_PROGRESS', 'DEFERRED', 'CANCELLED', 'DONE'],
   IN_PROGRESS: ['DONE', 'WAITING', 'DEFERRED', 'CANCELLED'],
   WAITING:     ['IN_PROGRESS', 'DONE', 'CANCELLED'],
   DEFERRED:    ['TODO', 'CANCELLED'],

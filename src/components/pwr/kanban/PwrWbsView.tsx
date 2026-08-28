@@ -50,7 +50,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [checklistMap, setChecklistMap] = useState<Record<number, { total: number; done: number }>>({});
   const [showModal,    setShowModal]    = useState(false);
   const [showOpModal,  setShowOpModal]  = useState(false);
-  const [toast, setToast]              = useState<string | null>(null);
+  const [toast, setToast]              = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [pendingIds,   setPendingIds]   = useState<Set<number>>(new Set());
 
   // Sync localTasks when parent refreshes tasks
@@ -83,15 +83,15 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
       });
       if (!res.ok) {
         setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
-        setToast('Lỗi cập nhật trạng thái');
+        setToast({ message: 'Lỗi cập nhật trạng thái — thử lại sau', type: 'error' });
       } else {
         const updated = await res.json();
         setLocalTasks(prev => prev.map(t => t.id === task.id ? updated : t));
-        setToast(newStatus === 'DONE' ? `✅ Hoàn thành: ${task.title.substring(0, 40)}` : `↩ Mở lại: ${task.title.substring(0, 40)}`);
+        setToast({ message: newStatus === 'DONE' ? `Hoàn thành: ${task.title.substring(0, 40)}` : `Mở lại: ${task.title.substring(0, 40)}`, type: 'success' });
       }
     } catch {
       setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
-      setToast('Lỗi kết nối');
+      setToast({ message: 'Lỗi kết nối — kiểm tra mạng', type: 'error' });
     } finally {
       setTimeout(() => {
         setPendingIds(prev => { const s = new Set(prev); s.delete(task.id); return s; });
@@ -107,7 +107,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
 
     // Sprint B — Gate 1: blocked task cannot be marked DONE
     if (task.status !== 'DONE' && blockedIds.has(task.id)) {
-      setToast('⛔ Task đang bị chặn bởi task tiền điều kiện chưa xong');
+      setToast({ message: 'Task đang bị chặn bởi task tiền điều kiện chưa xong', type: 'warning' });
       setTimeout(() => setToast(null), 3500);
       return;
     }
@@ -263,18 +263,27 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         </div>
       </div>
 
-      {/* ─── Toast ─── */}
-      {toast && (
-        <div style={{
-          position: 'fixed', top: 24, right: 24, zIndex: 10000,
-          background: '#10b981', color: '#fff', padding: '12px 20px',
-          borderRadius: 10, fontWeight: 600, fontSize: 14,
-          boxShadow: '0 8px 24px rgba(16,185,129,0.4)',
-          animation: 'slideIn 0.3s ease',
-        }}>
-          ✅ {toast}
-        </div>
-      )}
+      {/* ─── Toast — type-aware colors ─── */}
+      {toast && (() => {
+        const cfg = {
+          success: { bg: '#10b981', shadow: 'rgba(16,185,129,0.4)',  icon: '✅' },
+          error:   { bg: '#ef4444', shadow: 'rgba(239,68,68,0.4)',   icon: '❌' },
+          warning: { bg: '#f59e0b', shadow: 'rgba(245,158,11,0.4)',  icon: '⚠️' },
+        }[toast.type];
+        return (
+          <div style={{
+            position: 'fixed', top: 24, right: 24, zIndex: 10000,
+            background: cfg.bg, color: '#fff', padding: '12px 20px',
+            borderRadius: 10, fontWeight: 600, fontSize: 14,
+            boxShadow: `0 8px 24px ${cfg.shadow}`,
+            animation: 'slideIn 0.3s ease',
+            display: 'flex', alignItems: 'center', gap: 8, maxWidth: 380,
+          }}>
+            <span style={{ flexShrink: 0 }}>{cfg.icon}</span>
+            <span>{toast.message}</span>
+          </div>
+        );
+      })()}
 
       {/* ─── Modals ─── */}
       {showModal && (
@@ -285,7 +294,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
             const msg = taskCount > 0
               ? `Đã tạo dự án "${name}" với ${taskCount} task`
               : `Đã tạo dự án "${name}"`;
-            setToast(msg);
+            setToast({ message: msg, type: 'success' });
             setTimeout(() => setToast(null), 4000);
             onRefresh?.();
           }}
@@ -296,7 +305,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
           onClose={() => setShowOpModal(false)}
           onCreated={(title) => {
             setShowOpModal(false);
-            setToast(`Đã tạo việc vận hành: "${title}"`);
+            setToast({ message: `Đã tạo việc vận hành: "${title}"`, type: 'success' });
             setTimeout(() => setToast(null), 4000);
             onRefresh?.();
           }}
@@ -433,7 +442,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                         body: JSON.stringify({ ids: pTasks.map(t => t.id) }),
                       });
                     }
-                    setToast(`Đã archive dự án "${projName}"`);
+                    setToast({ message: `Đã archive dự án "${projName}"`, type: 'success' });
                     setTimeout(() => setToast(null), 3000);
                     onRefresh?.();
                   }}
@@ -455,7 +464,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                         body: JSON.stringify({ ids: pTasks.map(t => t.id) }),
                       });
                     }
-                    setToast(`Đã xóa dự án "${projName}" (${totalCount} task)`);
+                    setToast({ message: `Đã xóa dự án "${projName}" (${totalCount} task)`, type: 'success' });
                     setTimeout(() => setToast(null), 3000);
                     onRefresh?.();
                   }}
