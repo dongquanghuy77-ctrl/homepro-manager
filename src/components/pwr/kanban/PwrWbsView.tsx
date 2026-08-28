@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import type { PwrTask, PwrStatus, PwrPriority } from '@/db/schema';
 import {
   ChevronRight, ChevronDown, FolderOpen, FolderClosed,
@@ -25,9 +26,9 @@ const CAT_STYLE: Record<string, { label: string; color: string; bg: string; Icon
   PERSONNEL:  { label: 'Nhân sự',    color: '#ec4899', bg: 'rgba(236,72,153,0.12)',  Icon: Users },
   ORDER:      { label: 'Đơn hàng',   color: '#10b981', bg: 'rgba(16,185,129,0.12)',  Icon: ShoppingCart },
   PROJECT:    { label: 'Dự án',      color: '#6366f1', bg: 'rgba(99,102,241,0.12)',  Icon: Briefcase },
-  ADMIN:      { label: 'Hành chính', color: '#64748b', bg: 'rgba(100,116,139,0.12)', Icon: FileText },
+  ADMIN:      { label: 'Hành chính', color: 'var(--color-text-muted)', bg: 'rgba(100,116,139,0.12)', Icon: FileText },
   INCIDENT:   { label: 'Phát sinh',  color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   Icon: AlertTriangle },
-  OTHER:      { label: 'Khác',       color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', Icon: MoreHorizontal },
+  OTHER:      { label: 'Khác',       color: 'var(--color-text-secondary)', bg: 'rgba(148,163,184,0.12)', Icon: MoreHorizontal },
 };
 
 // ─── Status icon map ──────────────────────────────────────────────────────────
@@ -52,6 +53,20 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [showOpModal,  setShowOpModal]  = useState(false);
   const [toast, setToast]              = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [pendingIds,   setPendingIds]   = useState<Set<number>>(new Set());
+
+  const [theme, setTheme] = useState<'dark'|'light'>('dark');
+  useEffect(() => {
+    const t = localStorage.getItem('pwr-theme') || 'dark';
+    setTheme(t as 'dark'|'light');
+    document.documentElement.setAttribute('data-theme', t);
+  }, []);
+  const toggleTheme = () => {
+    const n = theme === 'dark' ? 'light' : 'dark';
+    setTheme(n);
+    localStorage.setItem('pwr-theme', n);
+    document.documentElement.setAttribute('data-theme', n);
+  };
+
 
   // Sync localTasks when parent refreshes tasks
   useEffect(() => { setLocalTasks(tasks); }, [tasks]);
@@ -205,19 +220,19 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                 <span style={{ fontSize: 28 }}>⚠️</span>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 16, color: '#f1f5f9' }}>Checklist chưa hoàn thành</div>
-                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 3 }}>Còn {cl ? cl.total - cl.done : '?'} việc con chưa xong</div>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--color-text)' }}>Checklist chưa hoàn thành</div>
+                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 3 }}>Còn {cl ? cl.total - cl.done : '?'} việc con chưa xong</div>
                 </div>
               </div>
-              <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 20, lineHeight: 1.6 }}>
-                Task <strong style={{ color: '#f1f5f9' }}>"{warnTask.title.substring(0, 50)}"</strong> có{' '}
+              <div style={{ fontSize: 14, color: 'var(--color-text-secondary)', marginBottom: 20, lineHeight: 1.6 }}>
+                Task <strong style={{ color: 'var(--color-text)' }}>"{warnTask.title.substring(0, 50)}"</strong> có{' '}
                 <strong style={{ color: '#fb923c' }}>{cl ? cl.done : 0}/{cl ? cl.total : 0}</strong> checklist hoàn thành.<br />
                 Bạn có chắc muốn đánh dấu task này là <strong style={{ color: '#10b981' }}>Hoàn thành</strong>?
               </div>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => setWarnTask(null)}
-                  style={{ padding: '9px 18px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#94a3b8', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+                  style={{ padding: '9px 18px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--color-text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
                 >
                   Hủy
                 </button>
@@ -235,7 +250,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
 
       {/* ─── Header toolbar ─── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-        <div style={{ fontSize: 13, color: '#64748b' }}>
+        <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
           {Object.keys(projectsMap).length} dự án · {projTasks.length} task dự án
           {opTasks.length > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>· {opTasks.length} việc vận hành</span>}
         </div>
@@ -322,9 +337,23 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         />
       )}
 
-      {/* ─── Empty State ─── */}
+      
+      {/* --- THEME TOGGLE --- */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button onClick={toggleTheme} style={{
+          display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px',
+          background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 8,
+          color: 'var(--color-text)', cursor: 'pointer', fontSize: 12, fontWeight: 600
+        }}>
+          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+          {theme === 'dark' ? 'Giao diện Sáng' : 'Giao diện Tối'}
+        </button>
+      </div>
+      
+      {/* Empty State */}
+
       {!tasks.length && (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: '#475569' }}>
+        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-muted)' }}>
           <Briefcase size={40} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
           <div style={{ fontSize: 16, fontWeight: 600 }}>Chưa có công việc nào</div>
           <div style={{ fontSize: 13, marginTop: 6 }}>Tạo việc đầu tiên để bắt đầu</div>
@@ -361,7 +390,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
             border: `1px solid ${folderBdr}`,
             borderRadius: 14,
             overflow: 'hidden',
-            background: 'rgba(15,23,42,0.6)',
+            background: 'var(--color-surface)',
             backdropFilter: 'blur(10px)',
           }}>
 
@@ -377,7 +406,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
               }}
             >
               {/* Chevron */}
-              <div style={{ color: '#475569', flexShrink: 0 }}>
+              <div style={{ color: 'var(--color-text-muted)', flexShrink: 0 }}>
                 {isProjExp ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
               </div>
 
@@ -387,7 +416,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
               </div>
 
               {/* Project Name + Progress */}
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
                 <div style={{
                   fontSize: 15, fontWeight: 800, letterSpacing: 0.3,
                   color: folderClr, textTransform: 'uppercase',
@@ -397,7 +426,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                 </div>
                 {/* Mini Progress Bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
-                  <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 99, overflow: 'hidden', maxWidth: 160 }}>
+                  <div style={{ flex: 1, height: 4, background: 'var(--color-border)', borderRadius: 99, overflow: 'hidden', maxWidth: 160 }}>
                     <div style={{
                       height: '100%', width: `${pct}%`,
                       background: pctColor,
@@ -456,9 +485,9 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                     setTimeout(() => setToast(null), 3000);
                     onRefresh?.();
                   }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(245,158,11,0.1)'; (e.currentTarget as HTMLElement).style.color = '#f59e0b'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = '#475569'; }}>
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}>
                   <Archive size={14} />
                 </button>
                 <button
@@ -478,9 +507,9 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                     setTimeout(() => setToast(null), 3000);
                     onRefresh?.();
                   }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = '#475569'; }}>
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}>
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -543,34 +572,36 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                               <Link key={task.id} href={`/pwr/tasks/${task.id}?from=wbs&project=${encodeURIComponent(projName)}`} style={{ textDecoration: 'none' }}>
                                 <div
                                   style={{
-                                    display: 'flex', alignItems: 'center', gap: 12,
-                                    padding: '9px 14px',
+                                    display: 'grid', gridTemplateColumns: 'minmax(200px, 4fr) 2fr 1fr 1fr 1fr', gap: 12, alignItems: 'center',
+                                    padding: '6px 14px',
                                     background: isBlocked
                                       ? 'rgba(239,68,68,0.04)'
                                       : isDone
                                         ? 'rgba(16,185,129,0.03)'
-                                        : 'rgba(255,255,255,0.025)',
+                                        : 'var(--color-surface-2)',
                                     border: `1px solid ${
                                       isBlocked ? 'rgba(239,68,68,0.15)' :
                                       isDone ? 'rgba(16,185,129,0.12)' :
-                                      'rgba(255,255,255,0.05)'
+                                      'var(--color-border)'
                                     }`,
                                     borderRadius: 9,
                                     opacity: isDone ? 0.6 : 1,
                                     transition: 'all 0.15s',
                                   }}
                                   onMouseEnter={e => {
-                                    e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                                    e.currentTarget.style.background = 'var(--color-surface-3)';
+                                    e.currentTarget.style.borderColor = 'var(--color-border-light)';
                                     e.currentTarget.style.transform = 'translateX(2px)';
                                   }}
                                   onMouseLeave={e => {
-                                    e.currentTarget.style.background = isBlocked ? 'rgba(239,68,68,0.04)' : isDone ? 'rgba(16,185,129,0.03)' : 'rgba(255,255,255,0.025)';
-                                    e.currentTarget.style.borderColor = isBlocked ? 'rgba(239,68,68,0.15)' : isDone ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.05)';
+                                    e.currentTarget.style.background = isBlocked ? 'rgba(239,68,68,0.04)' : isDone ? 'rgba(16,185,129,0.03)' : 'var(--color-surface-2)';
+                                    e.currentTarget.style.borderColor = isBlocked ? 'rgba(239,68,68,0.15)' : isDone ? 'rgba(16,185,129,0.12)' : 'var(--color-border)';
                                     e.currentTarget.style.transform = 'translateX(0)';
                                   }}
                                 >
                                   {/* Status Icon — Sprint A: clickable quick-toggle */}
+                                  {/* Column 1: Title Group */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
                                   <button
                                     onClick={e => handleToggleDone(e, task)}
                                     disabled={pendingIds.has(task.id)}
@@ -598,15 +629,15 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                                   </button>
 
                                   {/* ID */}
-                                  <span style={{ fontSize: 11, fontWeight: 700, color: '#475569', width: 36, flexShrink: 0 }}>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', width: 36, flexShrink: 0 }}>
                                     #{task.id}
                                   </span>
 
                                   {/* Title + Blocker label */}
-                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
                                     <div style={{
                                       fontSize: 13.5, fontWeight: isDone ? 400 : 500,
-                                      color: isBlocked ? '#64748b' : isDone ? '#94a3b8' : '#f1f5f9',
+                                      color: isBlocked ? 'var(--color-text-muted)' : isDone ? 'var(--color-text-secondary)' : 'var(--color-text)',
                                       textDecoration: isDone ? 'line-through' : 'none',
                                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                                     }}>
@@ -617,26 +648,27 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                                     {/* Checklist mini bar */}
                                     {hasChecklist && (
                                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                                        <div style={{ width: 60, height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
+                                        <div style={{ width: 60, height: 3, background: 'var(--color-border)', borderRadius: 99, overflow: 'hidden' }}>
                                           <div style={{
                                             height: '100%', width: `${clPct}%`,
                                             background: clPct === 100 ? '#10b981' : '#6366f1',
                                             borderRadius: 99, transition: 'width 0.3s',
                                           }} />
                                         </div>
-                                        <span style={{ fontSize: 10, color: clPct === 100 ? '#10b981' : '#64748b', fontWeight: 600 }}>
+                                        <span style={{ fontSize: 10, color: clPct === 100 ? '#10b981' : 'var(--color-text-muted)', fontWeight: 600 }}>
                                           ✓ {cl.done}/{cl.total}
                                         </span>
                                       </div>
                                     )}
                                   </div>
+                                  </div>
 
                                   {/* Right side badges */}
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                  <div style={{ display: 'contents' }}>
                                     {/* Due date */}
                                     {task.dueDate && (
                                       <span style={{
-                                        fontSize: 11, color: isOverdue ? '#ef4444' : '#475569',
+                                        fontSize: 11, color: isOverdue ? '#ef4444' : 'var(--color-text-muted)',
                                         fontWeight: isOverdue ? 700 : 400,
                                       }}>
                                         {isOverdue ? '⚠ ' : ''}{task.dueDate}

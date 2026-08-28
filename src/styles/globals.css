@@ -2907,3 +2907,26 @@ tbody tr:hover { background: var(--color-surface-2); }
 .rbc-time-content, .rbc-time-view { border-color:rgba(255,255,255,0.06) !important; }
 .rbc-day-bg + .rbc-day-bg { border-color:rgba(255,255,255,0.05) !important; }
 .rbc-off-range-bg { background:rgba(0,0,0,0.15) !important; }
+
+
+
+[data-theme='light'] {
+  --color-bg: #F3F4F6;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F9FAFB;
+  --color-surface-3: #E5E7EB;
+  --color-border: #E5E7EB;
+  --color-border-light: #D1D5DB;
+
+  --color-text: #111827;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #6B7280;
+  --color-text-disabled: #9CA3AF;
+
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: #E5E7EB;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.1);
+}
