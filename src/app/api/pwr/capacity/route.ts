@@ -4,6 +4,8 @@ import { pwrResources, pwrTaskResources, pwrTasks } from '@/db/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { addDays, format } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const today = new Date();
