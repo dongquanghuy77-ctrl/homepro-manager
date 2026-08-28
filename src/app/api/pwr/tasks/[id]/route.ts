@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrTasks, pwrWorkLogs, pwrTaskAuditLog, pwrChecklists, pwrTaskDependencies } from '@/db/schema';
-import { eq, and, isNull, asc, inArray } from 'drizzle-orm';
+import { pwrTasks, pwrWorkLogs, pwrTaskAuditLog, pwrChecklists, pwrTaskDependencies, pwrMaterials, pwrMaterialTransactions } from '@/db/schema';
+import { eq, and, isNull, asc, inArray, sql } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { validateTransition, isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 import type { PwrStatus } from '@/db/schema';
@@ -172,14 +172,74 @@ export async function PATCH(
           .set({ isDone: true })
           .where(eq(pwrChecklists.taskId, id));
 
+        // ========== AUTO-INVENTORY ENGINE ==========
+        const tags = existing.tags || [];
+        if (tags.includes('MUA_HANG')) {
+          // Khi Mua hàng DONE -> Tự động Cộng Kho thực tế từ các PENDING_IMPORT
+          const pendings = await db.select().from(pwrMaterialTransactions)
+            .where(and(eq(pwrMaterialTransactions.taskId, id), eq(pwrMaterialTransactions.transactionType, 'PENDING_IMPORT')));
+          
+          for (const t of pendings) {
+            const [mat] = await db.update(pwrMaterials)
+              .set({ stockLevel: sql`${pwrMaterials.stockLevel} + ${t.quantity}` })
+              .where(eq(pwrMaterials.id, t.materialId)).returning();
+              
+            await db.insert(pwrMaterialTransactions).values({
+              materialId: t.materialId,
+              userId: session.id,
+              taskId: id,
+              transactionType: 'IMPORT',
+              quantity: t.quantity,
+              balanceAfter: mat.stockLevel,
+              notes: `Auto-Engine: Nhập kho tự động khi Task Mua Hàng hoàn thành`
+            });
+            // Mark original pending as resolved
+            await db.update(pwrMaterialTransactions)
+              .set({ transactionType: 'IMPORT_RESOLVED' })
+              .where(eq(pwrMaterialTransactions.id, t.id));
+          }
+        }
+        
+        if (tags.includes('CNC')) {
+          // Khi CNC DONE -> Tự động Trừ Kho thực tế từ các RESERVE
+          const reserves = await db.select().from(pwrMaterialTransactions)
+            .where(and(eq(pwrMaterialTransactions.taskId, id), eq(pwrMaterialTransactions.transactionType, 'RESERVE')));
+          
+          for (const t of reserves) {
+            const [mat] = await db.update(pwrMaterials)
+              .set({ 
+                stockLevel: sql`${pwrMaterials.stockLevel} - ${t.quantity}`,
+                reservedLevel: sql`${pwrMaterials.reservedLevel} - ${t.quantity}`
+              })
+              .where(eq(pwrMaterials.id, t.materialId)).returning();
+              
+            await db.insert(pwrMaterialTransactions).values({
+              materialId: t.materialId,
+              userId: session.id,
+              taskId: id,
+              transactionType: 'EXPORT', // Or CONSUME
+              quantity: t.quantity,
+              balanceAfter: mat.stockLevel,
+              notes: `Auto-Engine: Xuất kho (Tiêu hao) tự động khi Task CNC hoàn thành`
+            });
+            // Mark original reserve as consumed
+            await db.update(pwrMaterialTransactions)
+              .set({ transactionType: 'RESERVE_CONSUMED' })
+              .where(eq(pwrMaterialTransactions.id, t.id));
+          }
+        }
+        // ===========================================
+      }
+
+      if (newStatus === 'DONE' || newStatus === 'CANCELLED') {
         // ========== AUTO-UNBLOCK ENGINE ==========
-        // Khi Task này DONE → tìm Task nào bị block bởi nó → tự động mở khóa
+        // Khi Task này DONE hoặc CANCELLED → tìm Task nào bị block bởi nó → tự động mở khóa
         const dependents = await db.select()
           .from(pwrTaskDependencies)
           .where(eq(pwrTaskDependencies.dependsOnId, id));
         
         for (const dep of dependents) {
-          // Kiểm tra task con còn blocker nào khác chưa DONE không
+          // Kiểm tra task con còn blocker nào khác chưa xong không
           const allDepsOfTarget = await db.select({
             depId: pwrTaskDependencies.dependsOnId,
             depStatus: pwrTasks.status,
@@ -203,12 +263,11 @@ export async function PATCH(
               .returning();
             
             if (unblocked) {
-              // Log hệ thống ghi nhận auto-unblock
               await db.insert(pwrWorkLogs).values({
                 taskId: dep.taskId,
                 userId: session.id,
                 logType: 'SYSTEM',
-                content: `🔓 Tự động mở khóa vì "${existing.title}" đã DONE`,
+                content: `🔓 Tự động mở khóa vì "${existing.title}" đã ${newStatus}`,
                 statusFrom: 'WAITING',
                 statusTo: 'TODO',
                 isSystemLog: true,

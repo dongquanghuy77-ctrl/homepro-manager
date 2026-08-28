@@ -418,8 +418,21 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                       {/* TASK ROWS */}
                       {isCatExp && (
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          {catTasks.sort((a, b) => a.id - b.id).map(task => {
-                            const statusDef = PWR_STATUS[task.status as PwrStatus];
+                          {(() => {
+                            const batchGroups: Record<string, PwrTask[]> = {};
+                            const noBatch: PwrTask[] = [];
+                            catTasks.forEach(task => {
+                              const batchTag = (task.tags || []).find((tag: string) => tag.startsWith('BATCH_'));
+                              if (batchTag) {
+                                if (!batchGroups[batchTag]) batchGroups[batchTag] = [];
+                                batchGroups[batchTag].push(task);
+                              } else {
+                                noBatch.push(task);
+                              }
+                            });
+
+                            const renderTaskRow = (task: PwrTask, isLastInBatch: boolean = false) => {
+                              const statusDef = PWR_STATUS[task.status as PwrStatus];
                             const prioDef   = PWR_PRIORITY[task.priority as PwrPriority];
                             const isBlocked = blockedMap[task.id] && blockedMap[task.id].length > 0;
                             const isDone    = task.status === 'DONE';
@@ -530,7 +543,31 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                                 </div>
                               </Link>
                             );
-                          })}
+                            };
+
+                            return (
+                              <>
+                                {Object.entries(batchGroups).map(([batchId, bTasks]) => (
+                                  <div key={batchId} style={{ borderBottom: '2px solid var(--color-border-light)', marginBottom: 12, paddingBottom: 12 }}>
+                                    <div style={{ padding: '8px 24px', background: 'rgba(59, 130, 246, 0.08)', fontSize: 13, fontWeight: 700, color: '#2563eb', display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+                                      📦 Lô: {batchId.replace('BATCH_', '')}
+                                    </div>
+                                    {bTasks.sort((a, b) => a.id - b.id).map((t, idx) => renderTaskRow(t, idx === bTasks.length - 1))}
+                                  </div>
+                                ))}
+                                {noBatch.length > 0 && (
+                                  <div style={{ marginBottom: 16 }}>
+                                    {Object.keys(batchGroups).length > 0 && (
+                                      <div style={{ padding: '8px 24px', background: 'var(--color-surface-2)', fontSize: 13, fontWeight: 700, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+                                        📋 Công việc chung
+                                      </div>
+                                    )}
+                                    {noBatch.sort((a, b) => a.id - b.id).map(t => renderTaskRow(t, false))}
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>

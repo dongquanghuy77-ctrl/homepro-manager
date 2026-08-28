@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
     // [UAT INDEPENDENT AUDIT] SỬ DỤNG TRANSACTION ĐỂ CHỐNG RACE-CONDITION
     await db.transaction(async (tx) => {
       const materialIds = items.map((i: any) => i.dbMaterialId);
-      // Dùng FOR UPDATE để khóa dòng (row-level lock) ngăn chặn đọc đồng thời (hiện tại sqlite/pg có thể cần raw sql, ta dùng tx cơ bản trước)
       const dbMats = await tx.select().from(pwrMaterials).where(inArray(pwrMaterials.id, materialIds));
       
       let isShortage = false;
@@ -32,32 +31,18 @@ export async function POST(req: NextRequest) {
       const reservationPlan = items.map((item: any) => {
         const mat = dbMats.find(m => m.id === item.dbMaterialId);
         const available = mat ? mat.stockLevel - mat.reservedLevel : 0;
-        if (available < item.quantity) {
+        const missing = available < item.quantity ? item.quantity - available : 0;
+        if (missing > 0) {
           isShortage = true;
-          shortageNotes.push(`${mat?.name} (Thiếu ${item.quantity - available} ${mat?.unit})`);
+          shortageNotes.push(`${mat?.name} (Thiếu ${missing} ${mat?.unit})`);
         }
-        return { ...item, material: mat };
+        return { ...item, material: mat, missing };
       });
       
       isShortageOut = isShortage;
 
       const initialStatus = isShortage ? 'WAITING' : 'TODO';
       const waitingReason = isShortage ? `Chờ Vật Tư: ${shortageNotes.join(', ')}` : null;
-
-      for (const plan of reservationPlan) {
-        await tx.update(pwrMaterials)
-          .set({ reservedLevel: sql`${pwrMaterials.reservedLevel} + ${plan.quantity}` })
-          .where(eq(pwrMaterials.id, plan.dbMaterialId));
-
-        await tx.insert(pwrMaterialTransactions).values({
-          materialId: plan.dbMaterialId,
-          userId: userId,
-          transactionType: 'RESERVE',
-          quantity: plan.quantity,
-          balanceAfter: plan.material.stockLevel, 
-          notes: `Giam lỏng (Reserve) cho Batch Nổ: ${batchId} - File: ${fileName}`
-        });
-      }
 
       const totalVan = items.filter((i:any) => i.type === 'VÁN').reduce((sum:number, i:any) => sum + i.quantity, 0);
       const totalNep = items.filter((i:any) => i.type === 'NẸP').reduce((sum:number, i:any) => sum + i.quantity, 0);
@@ -70,6 +55,7 @@ export async function POST(req: NextRequest) {
       const cncMachine = machines.find((m:any) => m.name.includes('CNC')) || machines[0];
       const edgeMachine = machines.find((m:any) => m.name.includes('Dán')) || machines[0];
 
+      // 1. TẠO TASK MUA HÀNG (Nếu thiếu)
       let purchaseTask = null;
       if (isShortage) {
         const [pt] = await tx.insert(pwrTasks).values({
@@ -88,6 +74,7 @@ export async function POST(req: NextRequest) {
         purchaseTask = pt;
       }
 
+      // 2. TẠO TASK CNC
       const [cncTask] = await tx.insert(pwrTasks).values({
         userId,
         title: `[CNC] Cắt ${totalVan} Tấm ván - ${fileName.replace('.xlsx', '')}`,
@@ -103,7 +90,7 @@ export async function POST(req: NextRequest) {
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
-      // [CRITICAL FIX] Nối dây Dependency từ Mua Hàng sang CNC để Auto-Unblock hoạt động
+      // Nối dây Dependency từ Mua Hàng sang CNC để Auto-Unblock hoạt động
       if (purchaseTask) {
         await tx.insert(pwrTaskDependencies).values({
           taskId: cncTask.id,
@@ -122,13 +109,15 @@ export async function POST(req: NextRequest) {
          });
       }
 
+      // 3. TẠO TASK DÁN CẠNH (Hoặc hủy nếu không có nẹp)
+      const isNoEdgeBanding = totalNep <= 0;
       const [edgeTask] = await tx.insert(pwrTasks).values({
         userId,
-        title: `[DÁN CẠNH] Dán ${totalNep} Mét nẹp - ${fileName.replace('.xlsx', '')}`,
-        description: `Làm cuốn chiếu: Không cần đợi CNC xong 100%. CNC cắt được 20% là có thể tiến hành dán ngay.`,
+        title: isNoEdgeBanding ? `[DÁN CẠNH] Bỏ qua (Lô không có nẹp)` : `[DÁN CẠNH] Dán ${totalNep} Mét nẹp - ${fileName.replace('.xlsx', '')}`,
+        description: isNoEdgeBanding ? `Hệ thống tự động bỏ qua vì file Excel không có mét nẹp nào.` : `Làm cuốn chiếu: Không cần đợi CNC xong 100%. CNC cắt được 20% là có thể tiến hành dán ngay.`,
         category: 'PRODUCTION',
-        priority: 'HIGH',
-        status: 'TODO',
+        priority: isNoEdgeBanding ? 'LOW' : 'HIGH',
+        status: isNoEdgeBanding ? 'DONE' : 'TODO', // Tự động DONE nếu không có nẹp để luồng trơn tru
         projectRef: commonProjectRef,
         projectId: projectId || null,
         taskType: 'PROJECT_TASK',
@@ -136,7 +125,7 @@ export async function POST(req: NextRequest) {
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
-      if (edgeMachine) {
+      if (edgeMachine && !isNoEdgeBanding) {
          await tx.insert(pwrTaskResources).values({
            taskId: edgeTask.id,
            resourceId: edgeMachine.id,
@@ -151,6 +140,39 @@ export async function POST(req: NextRequest) {
         depType: 'PRECONDITION',
         timeWindowDays: 0
       });
+
+      // 4. CẬP NHẬT KHO & TẠO PENDING TRANSACTIONS (Auto-Inventory Engine)
+      for (const plan of reservationPlan) {
+        // Giam lỏng tồn kho
+        await tx.update(pwrMaterials)
+          .set({ reservedLevel: sql`${pwrMaterials.reservedLevel} + ${plan.quantity}` })
+          .where(eq(pwrMaterials.id, plan.dbMaterialId));
+
+        // Tạo Transaction Reserve link với CNC Task
+        await tx.insert(pwrMaterialTransactions).values({
+          materialId: plan.dbMaterialId,
+          userId: userId,
+          taskId: cncTask.id, // Link với CNC
+          transactionType: 'RESERVE',
+          quantity: plan.quantity,
+          balanceAfter: plan.material.stockLevel, 
+          notes: `Giam lỏng (Reserve) cho Batch Nổ: ${batchId} - File: ${fileName}`
+        });
+
+        // Tạo Transaction PENDING_IMPORT link với Mua Hàng Task (nếu thiếu vật tư)
+        if (plan.missing > 0 && purchaseTask) {
+          await tx.insert(pwrMaterialTransactions).values({
+            materialId: plan.dbMaterialId,
+            userId: userId,
+            taskId: purchaseTask.id, // Link với Mua Hàng
+            transactionType: 'PENDING_IMPORT',
+            quantity: plan.missing,
+            balanceAfter: plan.material.stockLevel, // Chưa cộng thật
+            notes: `Auto-Engine: Chờ nhập kho khi Task Mua Hàng hoàn thành`
+          });
+        }
+      }
+
     });
 
     return NextResponse.json({ 
