@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources } from '@/db/schema';
+import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources, pwrProjects } from '@/db/schema';
 import { eq, sql, inArray } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
