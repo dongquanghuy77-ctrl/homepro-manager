@@ -46,7 +46,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [localTasks,         setLocalTasks]         = useState<PwrTask[]>(tasks);
   const [expandedProjects,   setExpandedProjects]   = useState<Record<string, boolean>>({});
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [blockedIds,  setBlockedIds]  = useState<Set<number>>(new Set());
+  const [blockedMap, setBlockedMap] = useState<Record<number, string[]>>({});
   const [checklistMap, setChecklistMap] = useState<Record<number, { total: number; done: number }>>({});
   const [showModal,    setShowModal]    = useState(false);
   const [showOpModal,  setShowOpModal]  = useState(false);
@@ -106,9 +106,10 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     if (pendingIds.has(task.id)) return; // debounce
 
     // Sprint B — Gate 1: blocked task cannot be marked DONE
-    if (task.status !== 'DONE' && blockedIds.has(task.id)) {
-      setToast({ message: 'Task đang bị chặn bởi task tiền điều kiện chưa xong', type: 'warning' });
-      setTimeout(() => setToast(null), 3500);
+    const blockers = blockedMap[task.id];
+    if (task.status !== 'DONE' && blockers && blockers.length > 0) {
+      setToast({ message: `Chưa thể hoàn thành. Bạn cần làm xong: ${blockers.join(', ')}`, type: 'warning' });
+      setTimeout(() => setToast(null), 4000);
       return;
     }
 
@@ -127,16 +128,25 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     if (!tasks.length) return;
     const nonDone = tasks.filter(t => !['DONE','CANCELLED'].includes(t.status));
 
-    // 1. Blocked status
+    // 1. Blocked status (with names)
     Promise.all(
       nonDone.map(t =>
         fetch(`/api/pwr/tasks/${t.id}/dependencies`)
           .then(r => r.json())
-          .then(d => ({ id: t.id, isBlocked: !!d.isBlocked }))
-          .catch(() => ({ id: t.id, isBlocked: false }))
+          .then(d => {
+            const blockers = (d.blockedBy || [])
+              .filter((b: any) => !['DONE', 'CANCELLED'].includes(b.task.status))
+              .map((b: any) => b.task.title);
+            return { id: t.id, blockers };
+          })
+          .catch(() => ({ id: t.id, blockers: [] }))
       )
     ).then(res => {
-      setBlockedIds(new Set(res.filter(r => r.isBlocked).map(r => r.id)));
+      const bMap: Record<number, string[]> = {};
+      res.forEach(r => {
+        if (r.blockers.length > 0) bMap[r.id] = r.blockers;
+      });
+      setBlockedMap(bMap);
     });
 
     // 2. Checklist counts (all tasks, not just non-done)
@@ -522,7 +532,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                           {catTasks.sort((a, b) => a.id - b.id).map(task => {
                             const statusDef = PWR_STATUS[task.status as PwrStatus];
                             const prioDef   = PWR_PRIORITY[task.priority as PwrPriority];
-                            const isBlocked = blockedIds.has(task.id);
+                            const isBlocked = blockedMap[task.id] && blockedMap[task.id].length > 0;
                             const isDone    = task.status === 'DONE';
                             const cl        = checklistMap[task.id];
                             const hasChecklist = cl && cl.total > 0;

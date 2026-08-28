@@ -119,10 +119,10 @@ export async function PATCH(
       if (newStatus === 'DONE') {
         updatePayload.completedAt = new Date();
         if (rest.result) updatePayload.result = rest.result;
-        // Sync: nếu task này được tạo từ việc con → tự động tick DONE cho việc con đó
+        // Tự động tick DONE toàn bộ checklist của task này khi task chính được mark DONE
         await db.update(pwrChecklists)
-          .set({ isDone: true, status: 'DONE' } as any)
-          .where(eq((pwrChecklists as any).linked_task_id, id));
+          .set({ isDone: true })
+          .where(eq(pwrChecklists.taskId, id));
       }
       if (reopening) updatePayload.completedAt = null;
       if (newStatus === 'CANCELLED' && reason) updatePayload.cancelReason = reason;
@@ -192,10 +192,7 @@ export async function DELETE(
 
     if (!existing) return NextResponse.json({ error: 'Không tìm thấy công việc' }, { status: 404 });
 
-    // Reset checklist item nếu task này được tạo từ việc con
-    await db.update(pwrChecklists)
-      .set({ isDone: false, status: 'UNDONE', linked_task_id: null } as any)
-      .where(eq((pwrChecklists as any).linked_task_id, id));
+
 
     await db.update(pwrTasks)
       .set({ deletedAt: new Date(), updatedAt: new Date() })
