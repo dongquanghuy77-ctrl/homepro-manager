@@ -70,8 +70,9 @@ export async function POST(req: NextRequest) {
       const cncMachine = machines.find((m:any) => m.name.includes('CNC')) || machines[0];
       const edgeMachine = machines.find((m:any) => m.name.includes('Dán')) || machines[0];
 
+      let purchaseTask = null;
       if (isShortage) {
-        await tx.insert(pwrTasks).values({
+        const [pt] = await tx.insert(pwrTasks).values({
           userId,
           title: `🔴 YÊU CẦU MUA HÀNG KHẨN CẤP: Lô ${fileName}`,
           description: `Hệ thống tự động phát hiện thiếu vật tư khi nổ Task:\n${shortageNotes.join('\n')}`,
@@ -83,7 +84,8 @@ export async function POST(req: NextRequest) {
           taskType: 'PROJECT_TASK',
           tags: ['EXPLOSION', 'MUA_HANG', batchTag],
           source: 'SYSTEM_EXPLOSION'
-        });
+        }).returning();
+        purchaseTask = pt;
       }
 
       const [cncTask] = await tx.insert(pwrTasks).values({
@@ -100,6 +102,16 @@ export async function POST(req: NextRequest) {
         tags: ['EXPLOSION', 'CNC', batchTag],
         source: 'SYSTEM_EXPLOSION'
       }).returning();
+
+      // [CRITICAL FIX] Nối dây Dependency từ Mua Hàng sang CNC để Auto-Unblock hoạt động
+      if (purchaseTask) {
+        await tx.insert(pwrTaskDependencies).values({
+          taskId: cncTask.id,
+          dependsOnId: purchaseTask.id,
+          depType: 'PRECONDITION',
+          timeWindowDays: 0
+        });
+      }
 
       if (cncMachine) {
          await tx.insert(pwrTaskResources).values({
