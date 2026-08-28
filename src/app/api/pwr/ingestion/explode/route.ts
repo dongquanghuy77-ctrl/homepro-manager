@@ -49,7 +49,12 @@ export async function POST(req: NextRequest) {
       }
       
       let isShortage = false;
-      let shortageNotes: string[] = [];
+      let isBoardShortage = false;
+      let isEdgeShortage = false;
+      
+      let allShortageNotes: string[] = [];
+      let boardShortageNotes: string[] = [];
+      let edgeShortageNotes: string[] = [];
 
       const reservationPlan = items.map((item: any) => {
         const mat = dbMats.find(m => m.id === item.dbMaterialId);
@@ -57,18 +62,27 @@ export async function POST(req: NextRequest) {
         const missing = available < item.quantity ? item.quantity - available : 0;
         if (missing > 0) {
           isShortage = true;
-          shortageNotes.push(`${mat?.name} (Thiếu ${missing} ${mat?.unit})`);
+          const note = `${mat?.name} (Thiếu ${missing} ${mat?.unit})`;
+          allShortageNotes.push(note);
+          
+          if (mat?.category === 'BOARD') {
+            isBoardShortage = true;
+            boardShortageNotes.push(note);
+          } else if (mat?.category === 'EDGE_BAND') {
+            isEdgeShortage = true;
+            edgeShortageNotes.push(note);
+          }
         }
         return { ...item, material: mat, missing };
       });
       
       isShortageOut = isShortage;
 
-      const initialStatus = isShortage ? 'WAITING' : 'TODO';
-      const waitingReason = isShortage ? `Chờ Vật Tư: ${shortageNotes.join(', ')}` : null;
+      const cncStatus = isBoardShortage ? 'WAITING' : 'TODO';
+      const cncWaitingReason = isBoardShortage ? `Chờ Ván: ${boardShortageNotes.join(', ')}` : null;
 
-      const totalVan = items.filter((i:any) => i.type === 'BOARD').reduce((sum:number, i:any) => sum + i.quantity, 0);
-      const totalNep = items.filter((i:any) => i.type === 'EDGE_BAND').reduce((sum:number, i:any) => sum + i.quantity, 0);
+      const totalVan = items.filter((i:any) => i.type === 'BOARD' || i.category === 'BOARD').reduce((sum:number, i:any) => sum + i.quantity, 0);
+      const totalNep = Math.ceil(items.filter((i:any) => i.type === 'EDGE_BAND' || i.category === 'EDGE_BAND').reduce((sum:number, i:any) => sum + i.quantity, 0));
 
       const commonProjectRef = projectName || `BATCH_${batchId}`; 
       const batchTag = `BATCH_${batchId}`;
@@ -78,13 +92,13 @@ export async function POST(req: NextRequest) {
       const cncMachine = machines.find((m:any) => m.name.includes('CNC')) || machines[0];
       const edgeMachine = machines.find((m:any) => m.name.includes('Dán')) || machines[0];
 
-      // 1. TẠO TASK MUA HÀNG (Nếu thiếu)
+      // 1. TẠO TASK MUA HÀNG (Nếu thiếu bất kỳ vật tư nào)
       let purchaseTask = null;
       if (isShortage) {
         const [pt] = await tx.insert(pwrTasks).values({
           userId,
-          title: `🔴 YÊU CẦU MUA HÀNG KHẨN CẤP: Lô ${fileName}`,
-          description: `Hệ thống tự động phát hiện thiếu vật tư khi nổ Task:\n${shortageNotes.join('\n')}`,
+          title: `🚨 YÊU CẦU MUA HÀNG KHẨN CẤP: Lô ${fileName}`,
+          description: `Hệ thống tự động phát hiện thiếu vật tư khi nổ Task:\n${allShortageNotes.join('\n')}`,
           category: 'MATERIAL',
           priority: 'CRITICAL',
           status: 'TODO',
@@ -104,8 +118,8 @@ export async function POST(req: NextRequest) {
         description: `Lệnh xuất từ file Ingestion.\nTổng ván: ${totalVan} Tấm.\nYêu cầu quét mã vạch sau khi xong.`,
         category: 'PRODUCTION',
         priority: 'HIGH',
-        status: initialStatus,
-        waitingFor: waitingReason,
+        status: cncStatus,
+        waitingFor: cncWaitingReason,
         projectRef: commonProjectRef,
         projectId: projectId || null,
         taskType: 'PROJECT_TASK',
@@ -113,8 +127,8 @@ export async function POST(req: NextRequest) {
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
-      // Nối dây Dependency từ Mua Hàng sang CNC để Auto-Unblock hoạt động
-      if (purchaseTask) {
+      // Nối dây Dependency từ Mua Hàng sang CNC ĐỂ Auto-Unblock (Chỉ nối khi thiếu Ván)
+      if (purchaseTask && isBoardShortage) {
         await tx.insert(pwrTaskDependencies).values({
           taskId: cncTask.id,
           dependsOnId: purchaseTask.id,
@@ -132,19 +146,23 @@ export async function POST(req: NextRequest) {
          });
       }
 
-      // 3. TẠO TASK DÁN CẠNH (Hoặc hủy nếu không có nẹp)
+      // 3. TẠO TASK DÁN CẠNH
       const isNoEdgeBanding = totalNep <= 0;
+      const edgeStatus = isNoEdgeBanding ? 'DONE' : 'TODO';
+      const edgeWaitingReason = (!isNoEdgeBanding && isEdgeShortage) ? `Chờ Nẹp: ${edgeShortageNotes.join(', ')}` : null;
+
       const [edgeTask] = await tx.insert(pwrTasks).values({
         userId,
         title: isNoEdgeBanding ? `[DÁN CẠNH] Bỏ qua (Lô không có nẹp)` : `[DÁN CẠNH] Dán ${totalNep} Mét nẹp - ${fileName.replace('.xlsx', '')}`,
         description: isNoEdgeBanding ? `Hệ thống tự động bỏ qua vì file Excel không có mét nẹp nào.` : `Làm cuốn chiếu: Không cần đợi CNC xong 100%. CNC cắt được 20% là có thể tiến hành dán ngay.`,
         category: 'PRODUCTION',
         priority: isNoEdgeBanding ? 'LOW' : 'HIGH',
-        status: isNoEdgeBanding ? 'DONE' : 'TODO', // Tự động DONE nếu không có nẹp để luồng trơn tru
+        status: edgeStatus,
+        waitingFor: edgeWaitingReason,
         projectRef: commonProjectRef,
         projectId: projectId || null,
         taskType: 'PROJECT_TASK',
-        tags: ['EXPLOSION', 'DÁN_CẠNH', batchTag],
+        tags: ['EXPLOSION', 'DAN_CANH', batchTag],
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
@@ -157,12 +175,23 @@ export async function POST(req: NextRequest) {
          });
       }
 
+      // Dán cạnh phụ thuộc CNC
       await tx.insert(pwrTaskDependencies).values({
         taskId: edgeTask.id,
         dependsOnId: cncTask.id,
         depType: 'PRECONDITION',
         timeWindowDays: 0
       });
+
+      // Nếu thiếu nẹp, Dán cạnh còn phụ thuộc Mua Hàng
+      if (purchaseTask && isEdgeShortage && !isNoEdgeBanding) {
+        await tx.insert(pwrTaskDependencies).values({
+          taskId: edgeTask.id,
+          dependsOnId: purchaseTask.id,
+          depType: 'PRECONDITION',
+          timeWindowDays: 0
+        });
+      }
 
       // 4. CẬP NHẬT KHO & TẠO PENDING TRANSACTIONS (Auto-Inventory Engine)
       for (const plan of reservationPlan) {
