@@ -78,9 +78,10 @@ export default function PwrIngestionClient() {
   };
 
   const handleExecute = async () => {
-    if (!parsedData || parsedData.totalMissing > 0) return;
+    if (!parsedData) return;
+    if (isUploading) return;
     if (!selectedProjectId) {
-      alert('Vui lòng chọn Dự Án!');
+      alert('Vui lòng chọn Dự án!');
       return;
     }
 
@@ -275,17 +276,17 @@ export default function PwrIngestionClient() {
                 </div>
                 <button 
                   onClick={handleExecute}
-                  disabled={parsedData.totalMissing > 0}
-                  style={{ background: parsedData.totalMissing > 0 ? 'var(--color-surface-2)' : '#10b981', color: parsedData.totalMissing > 0 ? 'var(--color-text-muted)' : '#fff', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 700, cursor: parsedData.totalMissing > 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}
+                  disabled={isUploading}
+                  style={{ background: isUploading ? 'var(--color-surface-2)' : '#10b981', color: isUploading ? 'var(--color-text-muted)' : '#fff', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 700, cursor: isUploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}
                 >
-                  Phát Lệnh Nổ Task <ArrowRight size={18} />
+                  {isUploading ? 'ĐANG XỬ LÝ...' : 'Phát Lệnh Nổ Task'} <ArrowRight size={18} />
                 </button>
               </div>
               
               {parsedData.totalMissing > 0 && (
-                <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', padding: 16, borderRadius: 8, marginBottom: 20, color: '#ef4444', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', padding: 16, borderRadius: 8, marginBottom: 20, color: '#3b82f6', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <AlertCircle size={20} />
-                  BỘ LY HỢP KHÓA CỨNG: Phát hiện vật tư ngoại lai. Không thể phát lệnh nổ Task. Vui lòng bổ sung vào Từ Điển.
+                  TỰ ĐỘNG TẠO MÃ (AUTO-MASTER DATA): Các vật tư ngoại lai sẽ tự động được thêm vào Từ Điển và phát lệnh mua hàng khi Nổ Task.
                 </div>
               )}
 
@@ -415,7 +416,7 @@ export default function PwrIngestionClient() {
               <Info size={16} /> Mẹo & lưu ý
             </h3>
             <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-              Vật tư ngoại lai (Đỏ) sẽ kích hoạt Bộ Ly Hợp ngăn chặn việc Nổ Task. Hãy thêm nhanh vào Từ Điển để đồng bộ trước khi tiếp tục.
+              Tính năng Auto-Master Data đã được kích hoạt. Vật tư ngoại lai (Đỏ) sẽ không còn làm kẹt quy trình. Hệ thống sẽ tự động thêm mới vào Từ Điển và kích hoạt luồng đi mua hàng bổ sung.
             </p>
           </div>
 
