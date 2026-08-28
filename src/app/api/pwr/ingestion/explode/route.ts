@@ -22,8 +22,32 @@ export async function POST(req: NextRequest) {
 
     // [UAT INDEPENDENT AUDIT] SỬ DỤNG TRANSACTION ĐỂ CHỐNG RACE-CONDITION
     await db.transaction(async (tx) => {
-      const materialIds = items.map((i: any) => i.dbMaterialId);
-      const dbMats = await tx.select().from(pwrMaterials).where(inArray(pwrMaterials.id, materialIds));
+      let materialIds = items.map((i: any) => i.dbMaterialId).filter(Boolean);
+      let dbMats = materialIds.length > 0 
+        ? await tx.select().from(pwrMaterials).where(inArray(pwrMaterials.id, materialIds))
+        : [];
+      
+      // AUTO-MASTER DATA (Phương án B): Tự động tạo mã vật tư nếu chưa có trong DB
+      const uniqueMissingMap = new Map();
+      for (const item of items) {
+        if (!item.dbMaterialId) {
+          const key = (item.parsedName || item.rawName || 'Unknown').toLowerCase();
+          if (!uniqueMissingMap.has(key)) {
+            const [newMat] = await tx.insert(pwrMaterials).values({
+              name: item.parsedName || item.rawName || 'Vật tư không tên',
+              type: item.type || 'OTHER',
+              unit: item.unit || 'Cái',
+              stockLevel: 0,
+              reservedLevel: 0,
+              skuCode: `AUTO_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+              description: `Auto-generated from Ingestion: ${fileName}`
+            }).returning();
+            uniqueMissingMap.set(key, newMat);
+            dbMats.push(newMat);
+          }
+          item.dbMaterialId = uniqueMissingMap.get(key).id;
+        }
+      }
       
       let isShortage = false;
       let shortageNotes: string[] = [];
