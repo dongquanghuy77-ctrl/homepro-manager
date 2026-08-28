@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { UploadCloud, CheckCircle2, AlertCircle, Plus, FileText, ArrowRight, Server, ShieldAlert, Clock, XCircle, Info, Bell, Book, History, Download, MoreVertical } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { UploadCloud, CheckCircle2, AlertCircle, Plus, FileText, ArrowRight, Server, ShieldAlert, Clock, XCircle, Info, Bell, Book, History, Download, MoreVertical, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -19,6 +19,7 @@ export default function PwrIngestionClient() {
   const [projectMode, setProjectMode] = useState<'NEW' | 'EXISTING'>('NEW');
   const [newProjectName, setNewProjectName] = useState<string>('');
   const [newProjectType, setNewProjectType] = useState<string>('CÔNG TRÌNH');
+  const [showProjectHelp, setShowProjectHelp] = useState<boolean>(true);
 
   useEffect(() => {
     fetch('/api/pwr/projects')
@@ -206,7 +207,15 @@ export default function PwrIngestionClient() {
                         />
                       </div>
                       <div>
-                        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--color-text-muted)' }}>Phân Loại Dự Án:</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)' }}>Phân Loại Dự Án:</label>
+                          <button 
+                            onClick={() => setShowProjectHelp(!showProjectHelp)}
+                            style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}
+                          >
+                            <HelpCircle size={14} /> {showProjectHelp ? 'Ẩn bảng hướng dẫn' : 'Xem bảng phân loại'}
+                          </button>
+                        </div>
                         <select 
                           value={newProjectType}
                           onChange={(e) => setNewProjectType(e.target.value)}
@@ -216,6 +225,44 @@ export default function PwrIngestionClient() {
                           <option value="BÁN LẺ">Bán Lẻ / Đơn Hàng (B2C)</option>
                           <option value="NỘI BỘ">Sản Xuất Nội Bộ / Mẫu</option>
                         </select>
+                        
+                        {showProjectHelp && (
+                          <div style={{ marginTop: 12, background: 'var(--color-surface)', border: '1px solid #3b82f6', borderRadius: 8, overflow: 'hidden' }}>
+                            <div style={{ background: 'rgba(59,130,246,0.1)', padding: '8px 12px', fontSize: 12, fontWeight: 700, color: '#3b82f6', borderBottom: '1px solid rgba(59,130,246,0.2)' }}>
+                              BẢNG TỔNG HỢP KIỂM TRA NHANH
+                            </div>
+                            <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse', textAlign: 'left' }}>
+                              <thead>
+                                <tr style={{ background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)' }}>
+                                  <th style={{ padding: '8px', fontWeight: 600, color: 'var(--color-text-muted)' }}>Tiêu chí</th>
+                                  <th style={{ padding: '8px', fontWeight: 600 }}>Công Trình</th>
+                                  <th style={{ padding: '8px', fontWeight: 600 }}>Bán Lẻ</th>
+                                  <th style={{ padding: '8px', fontWeight: 600 }}>Nội Bộ</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                  <td style={{ padding: '8px', fontWeight: 600, color: 'var(--color-text-muted)' }}>Quy mô</td>
+                                  <td style={{ padding: '8px' }}>Nhiều đợt</td>
+                                  <td style={{ padding: '8px' }}>1 đợt</td>
+                                  <td style={{ padding: '8px' }}>Ít món</td>
+                                </tr>
+                                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                  <td style={{ padding: '8px', fontWeight: 600, color: 'var(--color-text-muted)' }}>Lắp đặt?</td>
+                                  <td style={{ padding: '8px' }}>Bắt buộc</td>
+                                  <td style={{ padding: '8px' }}>Không</td>
+                                  <td style={{ padding: '8px' }}>Không</td>
+                                </tr>
+                                <tr>
+                                  <td style={{ padding: '8px', fontWeight: 600, color: 'var(--color-text-muted)' }}>Doanh thu</td>
+                                  <td style={{ padding: '8px' }}>Có</td>
+                                  <td style={{ padding: '8px' }}>Có</td>
+                                  <td style={{ padding: '8px', color: '#ef4444', fontWeight: 600 }}>Chi phí</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
