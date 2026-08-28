@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources } from '@/db/schema';
 import { eq, sql, inArray } from 'drizzle-orm';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
+  const authResult = await requireAuth(req as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+  const { session } = authResult;
+
   try {
     const body = await req.json();
     const { items, fileName, batchId } = body;
-    const userId = 1;
+    const userId = session.id; // Use actual logged-in user instead of hardcoded 1
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Không có vật tư để Nổ Task' }, { status: 400 });
