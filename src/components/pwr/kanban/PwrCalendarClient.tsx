@@ -206,7 +206,7 @@ export default function PwrCalendarClient({ initialTasks }: Props) {
               <CalendarX size={13}/> CHƯA LÊN LỊCH ({unscheduled.length})
             </div>
             <p style={{ fontSize:11, color:'#475569', marginBottom:12, lineHeight:1.5 }}>
-              Bấm “Lên lịch” để xếp giờ vào lịch.
+              Bấm "Lên lịch" để xếp giờ vào lịch.
             </p>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {unscheduled.map(task => {

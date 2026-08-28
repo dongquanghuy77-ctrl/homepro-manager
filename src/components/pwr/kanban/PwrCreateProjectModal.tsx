@@ -9,12 +9,12 @@ interface Props {
 }
 
 const COLOR_OPTIONS = [
-  { value: 'BLUE',   label: 'Xanh dÆ°Æ¡ng', hex: '#3b82f6' },
+  { value: 'BLUE',   label: 'Xanh dương', hex: '#3b82f6' },
   { value: 'ORANGE', label: 'Cam',        hex: '#f97316' },
-  { value: 'GREEN',  label: 'Xanh lÃ¡',    hex: '#10b981' },
-  { value: 'PURPLE', label: 'TÃ­m',        hex: '#8b5cf6' },
-  { value: 'RED',    label: 'Äá»',         hex: '#ef4444' },
-  { value: 'YELLOW', label: 'VÃ ng',       hex: '#f59e0b' },
+  { value: 'GREEN',  label: 'Xanh lá',    hex: '#10b981' },
+  { value: 'PURPLE', label: 'Tím',        hex: '#8b5cf6' },
+  { value: 'RED',    label: 'Đỏ',         hex: '#ef4444' },
+  { value: 'YELLOW', label: 'Vàng',       hex: '#f59e0b' },
 ];
 
 export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
@@ -29,7 +29,7 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) { setError('TÃªn dá»± Ã¡n khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng'); return; }
+    if (!name.trim()) { setError('Tên dự án không được để trống'); return; }
     setSaving(true);
     setError('');
     try {
@@ -43,19 +43,19 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Lá»—i táº¡o dá»± Ã¡n'); return; }
+      if (!res.ok) { setError(data.error || 'Lỗi tạo dự án'); return; }
       onCreated(name.trim(), data.createdTasks ?? 0);
-    } catch { setError('KhÃ´ng thá»ƒ káº¿t ná»‘i server'); }
+    } catch { setError('Không thể kết nối server'); }
     finally { setSaving(false); }
   }
 
   const selectedColor = COLOR_OPTIONS.find(c => c.value === color)?.hex ?? '#3b82f6';
 
   const TEMPLATE_OPTIONS: { value: 'NONE'|'LIGHT'|'STANDARD'|'FULL'; label: string; tasks: string; desc: string; color: string }[] = [
-    { value:'NONE',     label:'KhÃ´ng dÃ¹ng template', tasks:'0 task',  desc:'Tá»± táº¡o task thá»§ cÃ´ng',                         color:'#475569' },
-    { value:'LIGHT',    label:'Light â€” Dá»± Ã¡n nhá»',   tasks:'15 task', desc:'PhÃ²ng ngá»§, báº¿p, WC Â· < 50 triá»‡u',             color:'#10b981' },
-    { value:'STANDARD', label:'Standard â€” Dá»± Ã¡n vá»«a',tasks:'28 task', desc:'CÄƒn há»™, vÄƒn phÃ²ng nhá» Â· 50â€“200 triá»‡u',        color:'#3b82f6' },
-    { value:'FULL',     label:'Full â€” Dá»± Ã¡n lá»›n',    tasks:'41 task', desc:'Showroom, TAKASHIMAYA, cÃ´ng trÃ¬nh Â· > 200 triá»‡u', color:'#8b5cf6' },
+    { value:'NONE',     label:'Không dùng template', tasks:'0 task',  desc:'Tự tạo task thủ công',                         color:'#475569' },
+    { value:'LIGHT',    label:'Light — Dự án nhỏ',   tasks:'15 task', desc:'Phòng ngủ, bếp, WC · < 50 triệu',             color:'#10b981' },
+    { value:'STANDARD', label:'Standard — Dự án vừa',tasks:'28 task', desc:'Căn hộ, văn phòng nhỏ · 50–200 triệu',        color:'#3b82f6' },
+    { value:'FULL',     label:'Full — Dự án lớn',    tasks:'41 task', desc:'Showroom, TAKASHIMAYA, công trình · > 200 triệu', color:'#8b5cf6' },
   ];
 
   const taskCount = { NONE:0, LIGHT:15, STANDARD:28, FULL:41 }[templateType];
@@ -77,8 +77,8 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
             <FolderPlus size={18} color={selectedColor} />
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 17, color: '#f1f5f9' }}>Táº¡o dá»± Ã¡n má»›i</div>
-            <div style={{ fontSize: 12, color: '#64748b' }}>Äiá»n thÃ´ng tin vÃ  chá»n template phÃ¹ há»£p</div>
+            <div style={{ fontWeight: 700, fontSize: 17, color: '#f1f5f9' }}>Tạo dự án mới</div>
+            <div style={{ fontSize: 12, color: '#64748b' }}>Điền thông tin và chọn template phù hợp</div>
           </div>
           <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: 4 }}>
             <X size={20} />
@@ -86,9 +86,9 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* TÃªn dá»± Ã¡n */}
+          {/* Tên dự án */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>TÃªn dá»± Ã¡n *</label>
+            <label style={labelStyle}>Tên dự án *</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
@@ -98,25 +98,25 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
             />
           </div>
 
-          {/* KhÃ¡ch hÃ ng */}
+          {/* Khách hàng */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}><Building2 size={13} /> KhÃ¡ch hÃ ng</label>
+            <label style={labelStyle}><Building2 size={13} /> Khách hàng</label>
             <input
               value={customer}
               onChange={e => setCustomer(e.target.value)}
-              placeholder="TÃªn cÃ´ng ty hoáº·c cÃ¡ nhÃ¢n"
+              placeholder="Tên công ty hoặc cá nhân"
               style={inputStyle}
             />
           </div>
 
-          {/* Deadline + MÃ u */}
+          {/* Deadline + Màu */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
             <div>
-              <label style={labelStyle}><Calendar size={13} /> Deadline bÃ n giao</label>
+              <label style={labelStyle}><Calendar size={13} /> Deadline bàn giao</label>
               <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle}><Palette size={13} /> MÃ u folder</label>
+              <label style={labelStyle}><Palette size={13} /> Màu folder</label>
               <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
                 {COLOR_OPTIONS.map(c => (
                   <button key={c.value} type="button" title={c.label}
@@ -132,21 +132,21 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
             </div>
           </div>
 
-          {/* Ghi chÃº */}
+          {/* Ghi chú */}
           <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}><StickyNote size={13} /> Ghi chÃº</label>
+            <label style={labelStyle}><StickyNote size={13} /> Ghi chú</label>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder="YÃªu cáº§u Ä‘áº·c biá»‡t, lÆ°u Ã½..."
+              placeholder="Yêu cầu đặc biệt, lưu ý..."
               rows={2}
               style={{ ...inputStyle, resize: 'none', lineHeight: 1.5 }}
             />
           </div>
 
-          {/* Template selector â€” 4 options */}
+          {/* Template selector — 4 options */}
           <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}><CheckSquare size={13} /> Template task tá»± Ä‘á»™ng</label>
+            <label style={labelStyle}><CheckSquare size={13} /> Template task tự động</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {TEMPLATE_OPTIONS.map(opt => {
                 const isSelected = templateType === opt.value;
@@ -206,7 +206,7 @@ export default function PwrCreateProjectModal({ onClose, onCreated }: Props) {
               transition: 'all 0.2s',
             }}>
               {saving ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <FolderPlus size={15} />}
-              {saving ? 'Äang táº¡o...' : taskCount > 0 ? `Táº¡o dá»± Ã¡n + ${taskCount} task` : 'Táº¡o dá»± Ã¡n'}
+              {saving ? 'Đang tạo...' : taskCount > 0 ? `Tạo dự án + ${taskCount} task` : 'Tạo dự án'}
             </button>
           </div>
         </form>
