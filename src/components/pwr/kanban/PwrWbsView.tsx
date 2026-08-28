@@ -687,7 +687,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
       {/* ─── ZONE B: Vận Hành Nội Bộ ─── */}
       <PwrVanHanhSection
         tasks={opTasks}
-        blockedIds={blockedIds}
+        blockedIds={new Set(Object.keys(blockedMap).map(Number))}
         checklistMap={checklistMap}
         onCreateTask={() => setShowOpModal(true)}
       />
