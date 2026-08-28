@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, pwrTasks } from '@/db/schema';
+import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskResources, pwrTaskDependencies } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
@@ -45,10 +45,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Xóa sổ các Task đã tạo
+    // 3. Xóa phân bổ tải trọng máy (pwrTaskResources) cho các Task trong Lô
+    const taskIds = tasks.map(t => t.id);
+    for (const taskId of taskIds) {
+      await db.delete(pwrTaskResources).where(eq(pwrTaskResources.taskId, taskId));
+    }
+
+    // 4. Xóa dependencies giữa các Task trong Lô
+    for (const taskId of taskIds) {
+      await db.delete(pwrTaskDependencies).where(eq(pwrTaskDependencies.taskId, taskId));
+      await db.delete(pwrTaskDependencies).where(eq(pwrTaskDependencies.dependsOnId, taskId));
+    }
+
+    // 5. Xóa sổ các Task đã tạo
     await db.delete(pwrTasks).where(eq(pwrTasks.projectRef, commonProjectRef));
 
-    return NextResponse.json({ success: true, message: 'Đã hủy nổ, thu hồi Task và hoàn vật tư thành công!' });
+    return NextResponse.json({ success: true, message: 'Đã hủy nổ hoàn toàn! Task + Vật tư + Tải trọng máy đã được giải phóng.' });
 
   } catch (error: any) {
     console.error('ROLLBACK ERR:', error);
