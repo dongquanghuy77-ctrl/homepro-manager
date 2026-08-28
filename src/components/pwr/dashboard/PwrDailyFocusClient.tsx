@@ -77,6 +77,40 @@ export default function PwrDailyFocusClient({ tasks, userName }: Props) {
           </p>
         </div>
 
+        {/* ── Sprint C: Daily Productivity Score ── */}
+        {(() => {
+          const doneToday   = tasks.filter(t => t.status === 'DONE' && t.completedAt && new Date(t.completedAt).toISOString().split('T')[0].localeCompare(todayVN) === 0).length;
+          const activeToday = tasks.filter(t => !TERMINAL_STATUSES.includes(t.status as PwrStatus) || (t.status === 'DONE' && t.completedAt && new Date(t.completedAt).toISOString().split('T')[0].localeCompare(todayVN) === 0)).filter(t => t.dueDate && t.dueDate <= todayVN).length;
+          const totalDue    = Math.max(activeToday, 1); // avoid 0/0
+          const pctScore    = activeToday > 0 ? Math.round((doneToday / totalDue) * 100) : 0;
+          const scoreColor  = pctScore >= 80 ? '#10b981' : pctScore >= 50 ? '#f59e0b' : '#ef4444';
+          const scoreEmoji  = pctScore >= 80 ? '🔥' : pctScore >= 50 ? '📈' : pctScore > 0 ? '⚡' : '🎯';
+          const scoreLabel  = pctScore >= 80 ? 'Xuất sắc!' : pctScore >= 50 ? 'Đang tốt' : pctScore > 0 ? 'Cần cố lên' : 'Bắt đầu nào!';
+          return (
+            <div className="pwr-fadein-2" style={{ marginBottom: 28, background: 'rgba(255,255,255,0.03)', border: `1px solid ${scoreColor}30`, borderRadius: 16, padding: '20px 24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: scoreColor, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 4 }}>
+                    {scoreEmoji} NĂNG SUẤT HÔM NAY
+                  </div>
+                  <div style={{ fontSize: 13, color: '#94a3b8' }}>
+                    Đã hoàn thành <strong style={{ color: '#f1f5f9' }}>{doneToday}</strong>{' '}
+                    trong số <strong style={{ color: '#f1f5f9' }}>{activeToday}</strong> việc đến hạn hôm nay
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 42, fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{pctScore}<span style={{ fontSize: 20 }}>%</span></div>
+                  <div style={{ fontSize: 12, color: scoreColor, fontWeight: 600, marginTop: 2 }}>{scoreLabel}</div>
+                </div>
+              </div>
+              {/* Progress bar */}
+              <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${pctScore}%`, background: scoreColor, borderRadius: 99, transition: 'width 0.6s ease' }} />
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Stats Glassmorphism Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 36 }}>
           {[

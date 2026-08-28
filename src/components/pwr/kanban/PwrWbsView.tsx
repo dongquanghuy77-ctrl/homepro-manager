@@ -62,14 +62,12 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     setExpandedCategories(prev => ({ ...prev, [k]: !(prev[k] ?? true) }));
   };
 
-  // ── Sprint A: Quick toggle DONE / reopen ────────────────────────────────────
-  async function handleToggleDone(e: React.MouseEvent, task: PwrTask) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (pendingIds.has(task.id)) return; // debounce
+  // ── Sprint B: Checklist warning modal state ─────────────────────────────────
+  const [warnTask, setWarnTask] = useState<PwrTask | null>(null);
 
+  // ── Sprint A+B: Quick toggle DONE / reopen ───────────────────────────────────
+  async function executeToggleDone(task: PwrTask) {
     const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
-    const completedAt = newStatus === 'DONE' ? new Date().toISOString() : null;
 
     // Optimistic update
     setPendingIds(prev => new Set([...prev, task.id]));
@@ -84,7 +82,6 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         body:    JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) {
-        // Rollback on error
         setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
         setToast('Lỗi cập nhật trạng thái');
       } else {
@@ -99,8 +96,30 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
       setTimeout(() => {
         setPendingIds(prev => { const s = new Set(prev); s.delete(task.id); return s; });
         setTimeout(() => setToast(null), 3000);
-      }, 400); // debounce 400ms
+      }, 400);
     }
+  }
+
+  async function handleToggleDone(e: React.MouseEvent, task: PwrTask) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pendingIds.has(task.id)) return; // debounce
+
+    // Sprint B — Gate 1: blocked task cannot be marked DONE
+    if (task.status !== 'DONE' && blockedIds.has(task.id)) {
+      setToast('⛔ Task đang bị chặn bởi task tiền điều kiện chưa xong');
+      setTimeout(() => setToast(null), 3500);
+      return;
+    }
+
+    // Sprint B — Gate 2: checklist incomplete → show warning modal
+    const cl = checklistMap[task.id];
+    if (task.status !== 'DONE' && cl && cl.total > 0 && cl.done < cl.total) {
+      setWarnTask(task);
+      return;
+    }
+
+    await executeToggleDone(task);
   }
 
   // Batch fetch: blocker status + checklist counts
@@ -166,6 +185,43 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
 
   return (
     <div style={{ padding: '8px 24px 60px', color: '#f8fafc', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
+
+      {/* ── Sprint B: Checklist Warning Modal ── */}
+      {warnTask && (() => {
+        const cl = checklistMap[warnTask.id];
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: '#1e293b', border: '1px solid rgba(251,146,60,0.4)', borderRadius: 14, padding: '28px 32px', maxWidth: 420, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <span style={{ fontSize: 28 }}>⚠️</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: '#f1f5f9' }}>Checklist chưa hoàn thành</div>
+                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 3 }}>Còn {cl ? cl.total - cl.done : '?'} việc con chưa xong</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 20, lineHeight: 1.6 }}>
+                Task <strong style={{ color: '#f1f5f9' }}>"{warnTask.title.substring(0, 50)}"</strong> có{' '}
+                <strong style={{ color: '#fb923c' }}>{cl ? cl.done : 0}/{cl ? cl.total : 0}</strong> checklist hoàn thành.<br />
+                Bạn có chắc muốn đánh dấu task này là <strong style={{ color: '#10b981' }}>Hoàn thành</strong>?
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setWarnTask(null)}
+                  style={{ padding: '9px 18px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#94a3b8', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={async () => { const t = warnTask; setWarnTask(null); await executeToggleDone(t); }}
+                  style={{ padding: '9px 18px', borderRadius: 8, background: '#10b981', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
+                >
+                  ✓ Vẫn đánh dấu xong
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ─── Header toolbar ─── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
