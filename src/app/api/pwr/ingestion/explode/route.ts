@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
       const initialStatus = isShortage ? 'WAITING' : 'TODO';
       const waitingReason = isShortage ? `Chờ Vật Tư: ${shortageNotes.join(', ')}` : null;
 
-      const totalVan = items.filter((i:any) => i.type === 'VÁN').reduce((sum:number, i:any) => sum + i.quantity, 0);
-      const totalNep = items.filter((i:any) => i.type === 'NẸP').reduce((sum:number, i:any) => sum + i.quantity, 0);
+      const totalVan = items.filter((i:any) => i.type === 'BOARD').reduce((sum:number, i:any) => sum + i.quantity, 0);
+      const totalNep = items.filter((i:any) => i.type === 'EDGE_BAND').reduce((sum:number, i:any) => sum + i.quantity, 0);
 
       const commonProjectRef = projectName || `BATCH_${batchId}`; 
       const batchTag = `BATCH_${batchId}`;

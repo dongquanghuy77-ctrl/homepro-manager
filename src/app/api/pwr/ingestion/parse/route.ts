@@ -9,20 +9,35 @@ function normalize(str: string) {
   return str.toString().replace(/\s+/g, '').toUpperCase();
 }
 
-// Hàm cố gắng phân tích loại (Ván vs Nẹp) và Tên vật tư
-function parseItemName(rawName: string) {
+// Phân loại vật tư dựa trên Đơn vị tính (unit) hoặc Tên
+function parseItemName(rawName: string, rawUnit: string) {
   let name = rawName.toString();
-  let type = 'VÁN'; // Default
+  let type = 'OTHER';
+  const unit = (rawUnit || '').toLowerCase().trim();
+  
+  if (unit === 'tấm' || unit === 'tam') {
+    type = 'BOARD';
+  } else if (unit === 'm' || unit === 'mét' || unit === 'met') {
+    type = 'EDGE_BAND';
+  } else if (unit === 'cái' || unit === 'bộ' || unit === 'chiếc') {
+    type = 'HARDWARE';
+  }
   
   // Xử lý nẹp (ví dụ: Nẹp dán cạnh~AC 631 17.5~Chỉ 2P)
   if (name.toLowerCase().includes('nẹp') || name.includes('~')) {
-    type = 'NẸP';
+    type = 'EDGE_BAND';
     // Bóc tách tên thật của Nẹp, ví dụ lấy phần ở giữa
     const parts = name.split('~');
     if (parts.length >= 2) {
       name = parts[1].trim(); // AC 631 17.5
     }
   }
+
+  // Fallback nếu không có ĐVT rõ ràng nhưng tên có chữ Ván
+  if (type === 'OTHER' && (name.toLowerCase().includes('ván') || name.toLowerCase().includes('mdf') || name.toLowerCase().includes('mfc'))) {
+    type = 'BOARD';
+  }
+
   return { name, type };
 }
 
@@ -88,7 +103,7 @@ export async function POST(req: NextRequest) {
       const rawQty = row[colQtyIdx] ? parseFloat(String(row[colQtyIdx])) : 0;
       const rawUnit = row[colUnitIdx] ? String(row[colUnitIdx]).trim() : '';
       
-      const { name, type } = parseItemName(rawItemName);
+      const { name, type } = parseItemName(rawItemName, rawUnit);
       const normalizedName = normalize(name);
 
       // Thuật toán đối chiếu (Fuzzy Match cơ bản)
