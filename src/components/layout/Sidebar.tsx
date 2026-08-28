@@ -55,6 +55,12 @@ const SEMANTIC_COLORS: Record<string, { text: string, bgActive: string, borderAc
     borderActive: 'rgba(56, 189, 248, 0.4)',
     glow: '0 0 15px rgba(56, 189, 248, 0.25)',
   },
+  'pwr-progress': {
+    text: '#10b981',
+    bgActive: 'linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)',
+    borderActive: 'rgba(16, 185, 129, 0.4)',
+    glow: '0 0 15px rgba(16, 185, 129, 0.25)',
+  },
   'pwr-reports': {
     text: '#34d399',
     bgActive: 'linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)',

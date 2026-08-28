@@ -133,3 +133,63 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Không thể tạo công việc' }, { status: 500 });
   }
 }
+
+// ─── DELETE: Soft-delete 1 hoặc nhiều task (bulk) ────────────────────────────
+// Body: { ids: number[] }  OR  query: ?id=123
+// Action: CANCEL = chuyển sang CANCELLED (giữ trong DB, ẩn khỏi active view)
+// Action: DELETE = đánh dấu deletedAt (soft delete, ẩn hoàn toàn)
+export async function DELETE(request: Request) {
+  const authResult = await requireAuth(request as any, ALL_ROLES);
+  if (authResult.error) return authResult.error;
+  const { session } = authResult;
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const singleId = searchParams.get('id');
+    const action   = (searchParams.get('action') ?? 'delete') as 'cancel' | 'delete';
+
+    let ids: number[] = [];
+
+    if (singleId) {
+      ids = [parseInt(singleId, 10)];
+    } else {
+      const body = await request.json().catch(() => ({}));
+      ids = Array.isArray(body.ids) ? body.ids.map(Number).filter(Boolean) : [];
+    }
+
+    if (ids.length === 0) {
+      return NextResponse.json({ error: 'Không có task nào được chọn' }, { status: 400 });
+    }
+
+    // Security: chỉ được xóa task của chính mình
+    const { inArray } = await import('drizzle-orm');
+    const ownedTasks = await db
+      .select({ id: pwrTasks.id })
+      .from(pwrTasks)
+      .where(and(eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt), inArray(pwrTasks.id, ids)));
+
+    const ownedIds = ownedTasks.map(t => t.id);
+    if (ownedIds.length === 0) {
+      return NextResponse.json({ error: 'Không tìm thấy task hợp lệ' }, { status: 404 });
+    }
+
+    const now = new Date();
+
+    if (action === 'cancel') {
+      // Cancel = chuyển sang CANCELLED, giữ trong DB cho lịch sử
+      await db.update(pwrTasks)
+        .set({ status: 'CANCELLED', updatedAt: now } as any)
+        .where(and(eq(pwrTasks.userId, session.id), inArray(pwrTasks.id, ownedIds)));
+    } else {
+      // Delete = soft delete — đánh dấu deletedAt
+      await db.update(pwrTasks)
+        .set({ deletedAt: now, updatedAt: now } as any)
+        .where(and(eq(pwrTasks.userId, session.id), inArray(pwrTasks.id, ownedIds)));
+    }
+
+    return NextResponse.json({ deleted: ownedIds.length, ids: ownedIds, action });
+  } catch (error) {
+    console.error('[DELETE /api/pwr/tasks]', error);
+    return NextResponse.json({ error: 'Không thể xóa task' }, { status: 500 });
+  }
+}

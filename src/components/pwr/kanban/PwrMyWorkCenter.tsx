@@ -197,7 +197,7 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
       {/* Content */}
       <div key={activeTab} className="pwr-fadein">
         {activeTab === 'KANBAN' && <PwrKanbanClient initialTasks={tasks} />}
-        {activeTab === 'LIST'   && <PwrListView tasks={tasks} />}
+        {activeTab === 'LIST'   && <PwrListView tasks={tasks} onRefresh={refresh} />}
           {activeTab === 'WBS'    && <PwrWbsView tasks={tasks} onRefresh={refresh} />}
       </div>
 

@@ -7,7 +7,7 @@ import {
   CheckCircle2, Clock, AlertCircle, PlayCircle, Loader2,
   Lock, ArrowRight, Zap, Package, Wrench, Users, ShoppingCart,
   Briefcase, FileText, AlertTriangle, MoreHorizontal, FolderPlus,
-  Shield, Check, AlertOctagon,
+  Shield, Check, AlertOctagon, Archive, Trash2,
 } from 'lucide-react';
 import { PWR_PRIORITY, PWR_STATUS } from '@/lib/pwr/constants';
 import Link from 'next/link';
@@ -313,12 +313,63 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
               }}>
                 {totalCount} việc
               </div>
+
+              {/* Archive & Delete buttons — stop propagation so expand doesn't trigger */}
+              <div style={{ display: 'flex', gap: 4, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                <button
+                  title="Archive dự án (ẩn khỏi active view, giữ dữ liệu)"
+                  onClick={async () => {
+                    if (!confirm(`Archive dự án "${projName}"? Dự án sẽ bị ẩn nhưng dữ liệu vẫn được giữ.`)) return;
+                    // Find project id from tasks
+                    const projId = (pTasks[0] as any)?.projectId;
+                    if (projId) {
+                      await fetch(`/api/pwr/projects/${projId}?action=archive`, { method: 'DELETE' });
+                    } else {
+                      // Fallback: cancel all tasks of this project by projectRef
+                      await fetch('/api/pwr/tasks?action=cancel', {
+                        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids: pTasks.map(t => t.id) }),
+                      });
+                    }
+                    setToast(`Đã archive dự án "${projName}"`);
+                    setTimeout(() => setToast(null), 3000);
+                    onRefresh?.();
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(245,158,11,0.1)'; (e.currentTarget as HTMLElement).style.color = '#f59e0b'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = '#475569'; }}>
+                  <Archive size={14} />
+                </button>
+                <button
+                  title="Xóa dự án + toàn bộ task (soft delete)"
+                  onClick={async () => {
+                    if (!confirm(`XÓA dự án "${projName}" và ${totalCount} task?\n\nDữ liệu sẽ bị ẩn hoàn toàn. Có thể phục hồi trong 30 ngày.`)) return;
+                    const projId = (pTasks[0] as any)?.projectId;
+                    if (projId) {
+                      await fetch(`/api/pwr/projects/${projId}?action=delete&deleteTasks=true`, { method: 'DELETE' });
+                    } else {
+                      await fetch('/api/pwr/tasks?action=delete', {
+                        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids: pTasks.map(t => t.id) }),
+                      });
+                    }
+                    setToast(`Đã xóa dự án "${projName}" (${totalCount} task)`);
+                    setTimeout(() => setToast(null), 3000);
+                    onRefresh?.();
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = '#475569'; }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
 
             {/* ── Level 2 & 3 ── */}
             {isProjExp && (
               <div style={{ padding: '12px 16px 16px' }}>
                 {Object.keys(catMap).sort().map(catKey => {
+
                   const catTasks = catMap[catKey];
                   const catStyle = CAT_STYLE[catKey] || CAT_STYLE.OTHER;
                   const CatIcon  = catStyle.Icon;
