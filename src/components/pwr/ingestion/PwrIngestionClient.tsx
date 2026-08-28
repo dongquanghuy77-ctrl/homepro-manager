@@ -130,13 +130,13 @@ export default function PwrIngestionClient() {
           </h1>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <button style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+          <button onClick={() => alert('Tài liệu hướng dẫn chi tiết đang được cập nhật.')} style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
             <Book size={16} /> Tài liệu hướng dẫn
           </button>
-          <button style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+          <button onClick={() => alert('Tính năng xem toàn bộ Lịch sử xử lý đang được phát triển.')} style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
             <History size={16} /> Lịch sử xử lý
           </button>
-          <button style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', position: 'relative' }}>
+          <button onClick={() => alert('Bạn có 3 thông báo mới chưa đọc. Trung tâm thông báo đang được nâng cấp.')} style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', position: 'relative' }}>
             <Bell size={18} />
             <span style={{ position: 'absolute', top: -4, right: -4, background: '#ef4444', color: '#fff', fontSize: 10, width: 16, height: 16, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>3</span>
           </button>
