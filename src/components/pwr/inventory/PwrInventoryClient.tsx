@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Package, Activity, AlertCircle, ArrowUpRight, ArrowDownRight, Lock, CheckCircle2, ChevronDown, ChevronRight, Briefcase, Calendar } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Package, Activity, AlertCircle, ArrowUpRight, ArrowDownRight, Lock, CheckCircle2, ChevronDown, ChevronRight, Briefcase, Download, FileText, FileSpreadsheet, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -12,6 +12,19 @@ type PwrTask = any;
 export default function PwrInventoryClient({ materials, transactions, tasks }: { materials: PwrMaterial[], transactions: PwrTransaction[], tasks: PwrTask[] }) {
   const [activeTab, setActiveTab] = useState<'STOCK' | 'HISTORY'>('STOCK');
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Đóng menu khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const toggleRow = (id: number) => {
     const next = new Set(expandedRows);
@@ -32,11 +45,9 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
     return map;
   }, [tasks]);
 
-  // 2. Compute 3-Level Allocation: allocation[materialId][projectName][batchName]
+  // 2. Compute 3-Level Allocation
   const allocation = useMemo(() => {
-    // format: { materialId: { projectName: { batchName: { activeReserve: 0, pendingImport: 0, totalImported: 0, totalExported: 0, lastImportDate: null } } } }
     const alloc: Record<number, Record<string, Record<string, any>>> = {};
-    
     materials.forEach(m => { alloc[m.id] = {}; });
 
     transactions.forEach(tx => {
@@ -59,20 +70,16 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
       if (tx.transactionType === 'EXPORT') bAlloc.totalExported += tx.quantity;
       if (tx.transactionType === 'IMPORT') {
         bAlloc.totalImported += tx.quantity;
-        // Update last import date
         if (!bAlloc.lastImportDate || new Date(tx.createdAt) > new Date(bAlloc.lastImportDate)) {
           bAlloc.lastImportDate = tx.createdAt;
         }
       }
     });
-
     return alloc;
   }, [materials, transactions, taskToProjectBatch]);
 
-  // 3. Group Materials by Functional Zone
   const boardMaterials = materials.filter(m => m.type === 'BOARD' || m.type === 'VÁN' || m.unit?.toLowerCase() === 'tấm').sort((a,b) => a.name.localeCompare(b.name));
   const edgeMaterials = materials.filter(m => m.type === 'EDGE_BAND' || m.type === 'NẸP' || m.unit?.toLowerCase() === 'm' || m.unit?.toLowerCase() === 'mét').sort((a,b) => a.name.localeCompare(b.name));
-  // anything else is hardware
   const hardwareMaterials = materials.filter(m => !boardMaterials.includes(m) && !edgeMaterials.includes(m)).sort((a,b) => a.name.localeCompare(b.name));
 
   const getTransactionIcon = (type: string) => {
@@ -111,6 +118,52 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
     }
   };
 
+  // --- LOGIC XUẤT BÁO CÁO (EXPORT) ---
+  const downloadCSV = (csvContent: string, filename: string) => {
+    const bom = '\uFEFF'; // BOM for UTF-8 Excel support
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportStock = () => {
+    let csv = "Mã VT,Tên Vật Tư,Loại (Phân khu),Tồn Tổng,Giam lỏng,Khả dụng,ĐVT\n";
+    materials.forEach(mat => {
+        const available = mat.stockLevel - mat.reservedLevel;
+        // Escape quotes if needed
+        const name = mat.name.replace(/"/g, '""');
+        csv += `"${mat.id}","${name}","${mat.type}",${mat.stockLevel},${mat.reservedLevel},${available},"${mat.unit}"\n`;
+    });
+    downloadCSV(csv, `TonKho_VanHanh_${format(new Date(), 'ddMMyyyy')}.csv`);
+    setShowExportMenu(false);
+  };
+
+  const handleExportHistory = () => {
+    let csv = "Thời gian,Loại Giao dịch,Mã VT,Tên Vật tư,Số lượng,Dự án,Lô\n";
+    transactions.forEach(t => {
+        const mat = materials.find(m => m.id === t.materialId);
+        const time = format(new Date(t.createdAt), 'dd/MM/yyyy HH:mm');
+        const taskInfo = t.taskId ? taskToProjectBatch[t.taskId] : { projectName: 'Hệ thống', batchName: 'Hệ thống' };
+        const sign = (t.transactionType === 'EXPORT' || t.transactionType === 'RESERVE') ? '-' : '+';
+        const name = (mat?.name || '').replace(/"/g, '""');
+        csv += `"${time}","${getTransactionLabel(t.transactionType)}","${t.materialId}","${name}","${sign}${t.quantity}","${taskInfo.projectName}","${taskInfo.batchName}"\n`;
+    });
+    downloadCSV(csv, `LichSuGiaoDich_KeToan_${format(new Date(), 'ddMMyyyy')}.csv`);
+    setShowExportMenu(false);
+  };
+
+  const handlePrintPDF = () => {
+    setShowExportMenu(false);
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
+
+  // --- RENDER COMPONENT ---
   const renderMaterialGroup = (title: string, icon: string, groupMats: PwrMaterial[]) => {
     if (groupMats.length === 0) return null;
     return (
@@ -125,21 +178,18 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
           const isExp = expandedRows.has(mat.id);
           const matAlloc = allocation[mat.id] || {};
           
-          // Check if any project has active batches
           let hasActiveBatches = false;
           Object.keys(matAlloc).forEach(proj => {
             Object.keys(matAlloc[proj]).forEach(batch => {
               const b = matAlloc[proj][batch];
-              if (b.activeReserve > 0 || b.pendingImport > 0 || b.totalImported > 0 || b.totalExported > 0) {
-                hasActiveBatches = true;
-              }
+              if (b.activeReserve > 0 || b.pendingImport > 0 || b.totalImported > 0 || b.totalExported > 0) hasActiveBatches = true;
             });
           });
 
           return (
             <React.Fragment key={mat.id}>
-              <tr style={{ borderBottom: '1px solid var(--color-border)', cursor: hasActiveBatches ? 'pointer' : 'default', background: isExp ? 'var(--color-surface-2)' : 'transparent' }} onClick={() => hasActiveBatches && toggleRow(mat.id)}>
-                <td style={{ padding: '16px 0 16px 24px', color: 'var(--color-text-muted)' }}>
+              <tr className="hover-row" style={{ borderBottom: '1px solid var(--color-border)', cursor: hasActiveBatches ? 'pointer' : 'default', background: isExp ? 'var(--color-surface-2)' : 'transparent' }} onClick={() => hasActiveBatches && toggleRow(mat.id)}>
+                <td className="no-print" style={{ padding: '16px 0 16px 24px', color: 'var(--color-text-muted)' }}>
                   {hasActiveBatches ? (isExp ? <ChevronDown size={18} /> : <ChevronRight size={18} />) : <div style={{ width: 18 }}/>}
                 </td>
                 <td style={{ padding: '16px 8px', color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>#{mat.id}</td>
@@ -168,7 +218,7 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
                 return (
                   <React.Fragment key={`${mat.id}-${projName}`}>
                     <tr style={{ background: 'rgba(59,130,246,0.05)' }}>
-                      <td></td>
+                      <td className="no-print"></td>
                       <td></td>
                       <td colSpan={6} style={{ padding: '8px 24px', fontWeight: 700, color: '#1e40af', fontSize: 13, borderBottom: '1px solid rgba(59,130,246,0.1)' }}>
                         🏢 Dự án: {projName.toUpperCase()}
@@ -178,7 +228,7 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
                       const b = matAlloc[projName][batchName];
                       return (
                         <tr key={`${mat.id}-${projName}-${batchName}`} style={{ background: 'rgba(59,130,246,0.02)', borderBottom: '1px solid var(--color-border-light)' }}>
-                          <td></td>
+                          <td className="no-print"></td>
                           <td></td>
                           <td colSpan={6} style={{ padding: '12px 24px 12px 48px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13 }}>
@@ -223,127 +273,180 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto', fontFamily: 'var(--font-sans)', color: 'var(--color-text)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-          <Package size={24} />
-        </div>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>Kho 2 Chiều Nâng Cao (3-Level 2D Inventory)</h1>
-          <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-secondary)', fontSize: 14 }}>
-            Phân khu Khoa học • Cấu trúc Đa Dự Án / Đa Lô • Truy vết Kế toán
-          </p>
-        </div>
-      </div>
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          @page { size: landscape; margin: 1cm; }
+          body * { visibility: hidden; }
+          #print-area, #print-area * { visibility: visible; }
+          #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+          .no-print { display: none !important; }
+          .hover-row { background: transparent !important; }
+          .hover-row:hover { background: transparent !important; }
+        }
+      `}} />
+      <div id="print-area" style={{ padding: 24, maxWidth: 1200, margin: '0 auto', fontFamily: 'var(--font-sans)', color: 'var(--color-text)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="no-print" style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+              <Package size={24} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>Kho 2 Chiều Nâng Cao (3-Level 2D Inventory)</h1>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-secondary)', fontSize: 14 }}>
+                Phân khu Khoa học • Cấu trúc Đa Dự Án / Đa Lô • Truy vết Kế toán
+              </p>
+            </div>
+          </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, borderBottom: '1px solid var(--color-border)', paddingBottom: 16 }}>
-        <button
-          onClick={() => setActiveTab('STOCK')}
-          style={{
-            padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
-            background: activeTab === 'STOCK' ? 'var(--color-primary)' : 'transparent',
-            color: activeTab === 'STOCK' ? 'white' : 'var(--color-text-secondary)',
-          }}
-        >
-          Danh sách Tồn Kho Nâng Cao
-        </button>
-        <button
-          onClick={() => setActiveTab('HISTORY')}
-          style={{
-            padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
-            background: activeTab === 'HISTORY' ? 'var(--color-primary)' : 'transparent',
-            color: activeTab === 'HISTORY' ? 'white' : 'var(--color-text-secondary)',
-          }}
-        >
-          Lịch sử Giao dịch
-        </button>
-      </div>
+          <div className="no-print" style={{ position: 'relative' }} ref={menuRef}>
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#10b981', color: 'white', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(16,185,129,0.2)' }}
+            >
+              <Download size={18} /> Xuất Báo Cáo
+            </button>
 
-      {activeTab === 'STOCK' && (
-        <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
-            <thead style={{ background: 'var(--color-surface-2)', borderBottom: '2px solid var(--color-border)' }}>
-              <tr>
-                <th style={{ padding: '16px 24px', width: 40 }}></th>
-                <th style={{ padding: '16px 8px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Mã VT</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Tên Vật Tư</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Loại</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Tồn Tổng</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Giam lỏng</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Khả dụng</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>ĐVT</th>
-              </tr>
-            </thead>
-            <tbody>
-              {renderMaterialGroup('PHÂN KHU VÁN (BOARDS)', '🪚', boardMaterials)}
-              {renderMaterialGroup('PHÂN KHU NẸP (EDGE BANDING)', '🎗️', edgeMaterials)}
-              {renderMaterialGroup('PHÂN KHU PHỤ KIỆN (HARDWARE)', '🔩', hardwareMaterials)}
-
-              {materials.length === 0 && (
-                <tr>
-                  <td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)' }}>Kho hiện đang trống.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {activeTab === 'HISTORY' && (
-        <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
-            <thead style={{ background: 'var(--color-surface-2)', borderBottom: '2px solid var(--color-border)' }}>
-              <tr>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Thời gian</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Giao dịch</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Vật tư</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Số lượng</th>
-                <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Dự án / Lô</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map(t => {
-                const mat = materials.find(m => m.id === t.materialId);
-                const color = getTransactionColor(t.transactionType);
-                const taskInfo = t.taskId ? taskToProjectBatch[t.taskId] : { projectName: 'Hệ thống', batchName: 'Hệ thống' };
+            {showExportMenu && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.2)', width: 260, zIndex: 100, overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Hệ thống Báo cáo 3 Tầng</span>
+                </div>
                 
-                return (
-                  <tr key={t.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                    <td style={{ padding: '16px 24px', color: 'var(--color-text-secondary)', fontSize: 13 }}>
-                      {format(new Date(t.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi })}
-                    </td>
-                    <td style={{ padding: '16px 24px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color, fontWeight: 600 }}>
-                        {getTransactionIcon(t.transactionType)}
-                        {getTransactionLabel(t.transactionType)}
-                      </div>
-                    </td>
-                    <td style={{ padding: '16px 24px', fontWeight: 500 }}>
-                      {mat?.name || `Vật tư #${t.materialId}`}
-                    </td>
-                    <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color }}>
-                      {t.transactionType === 'EXPORT' || t.transactionType === 'RESERVE' ? '-' : '+'}{t.quantity}
-                    </td>
-                    <td style={{ padding: '16px 24px', color: 'var(--color-text-secondary)', fontSize: 13, maxWidth: 300 }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <span style={{ fontWeight: 700, color: '#1e40af' }}>{taskInfo.projectName}</span>
-                        <span style={{ display: 'inline-block', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', padding: '2px 6px', borderRadius: 4, fontWeight: 600, width: 'fit-content' }}>
-                          Lô: {taskInfo.batchName}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {transactions.length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)' }}>Chưa có giao dịch nào.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                <button onClick={handlePrintPDF} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', borderBottom: '1px solid var(--color-border)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
+                    <Printer size={16} color="#ef4444" /> Tầng 1: Góc nhìn Quản lý
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>In PDF A4 Ngang - Bức tranh toàn cảnh kho.</div>
+                </button>
+
+                <button onClick={handleExportStock} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', borderBottom: '1px solid var(--color-border)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
+                    <FileSpreadsheet size={16} color="#10b981" /> Tầng 2: Vận hành Kho
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>Xuất Excel Tồn kho - Phục vụ lọc và tính toán.</div>
+                </button>
+
+                <button onClick={handleExportHistory} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
+                    <FileText size={16} color="#3b82f6" /> Tầng 3: Đối soát Kế toán
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>Xuất CSV Giao dịch - Truy vết ngày nhập/xuất.</div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+
+        <div className="no-print" style={{ display: 'flex', gap: 8, marginBottom: 24, borderBottom: '1px solid var(--color-border)', paddingBottom: 16 }}>
+          <button
+            onClick={() => setActiveTab('STOCK')}
+            style={{
+              padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+              background: activeTab === 'STOCK' ? 'var(--color-primary)' : 'transparent',
+              color: activeTab === 'STOCK' ? 'white' : 'var(--color-text-secondary)',
+            }}
+          >
+            Danh sách Tồn Kho Nâng Cao
+          </button>
+          <button
+            onClick={() => setActiveTab('HISTORY')}
+            style={{
+              padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+              background: activeTab === 'HISTORY' ? 'var(--color-primary)' : 'transparent',
+              color: activeTab === 'HISTORY' ? 'white' : 'var(--color-text-secondary)',
+            }}
+          >
+            Lịch sử Giao dịch
+          </button>
+        </div>
+
+        {activeTab === 'STOCK' && (
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
+              <thead style={{ background: 'var(--color-surface-2)', borderBottom: '2px solid var(--color-border)' }}>
+                <tr>
+                  <th className="no-print" style={{ padding: '16px 24px', width: 40 }}></th>
+                  <th style={{ padding: '16px 8px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Mã VT</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Tên Vật Tư</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Loại</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Tồn Tổng</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Giam lỏng</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Khả dụng</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>ĐVT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {renderMaterialGroup('PHÂN KHU VÁN (BOARDS)', '🪚', boardMaterials)}
+                {renderMaterialGroup('PHÂN KHU NẸP (EDGE BANDING)', '🎗️', edgeMaterials)}
+                {renderMaterialGroup('PHÂN KHU PHỤ KIỆN (HARDWARE)', '🔩', hardwareMaterials)}
+
+                {materials.length === 0 && (
+                  <tr>
+                    <td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)' }}>Kho hiện đang trống.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === 'HISTORY' && (
+          <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
+              <thead style={{ background: 'var(--color-surface-2)', borderBottom: '2px solid var(--color-border)' }}>
+                <tr>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Thời gian</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Giao dịch</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Vật tư</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)', textAlign: 'right' }}>Số lượng</th>
+                  <th style={{ padding: '16px 24px', fontWeight: 700, color: 'var(--color-text-secondary)' }}>Dự án / Lô</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map(t => {
+                  const mat = materials.find(m => m.id === t.materialId);
+                  const color = getTransactionColor(t.transactionType);
+                  const taskInfo = t.taskId ? taskToProjectBatch[t.taskId] : { projectName: 'Hệ thống', batchName: 'Hệ thống' };
+                  
+                  return (
+                    <tr key={t.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                      <td style={{ padding: '16px 24px', color: 'var(--color-text-secondary)', fontSize: 13 }}>
+                        {format(new Date(t.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi })}
+                      </td>
+                      <td style={{ padding: '16px 24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color, fontWeight: 600 }}>
+                          {getTransactionIcon(t.transactionType)}
+                          {getTransactionLabel(t.transactionType)}
+                        </div>
+                      </td>
+                      <td style={{ padding: '16px 24px', fontWeight: 500 }}>
+                        {mat?.name || `Vật tư #${t.materialId}`}
+                      </td>
+                      <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color }}>
+                        {t.transactionType === 'EXPORT' || t.transactionType === 'RESERVE' ? '-' : '+'}{t.quantity}
+                      </td>
+                      <td style={{ padding: '16px 24px', color: 'var(--color-text-secondary)', fontSize: 13, maxWidth: 300 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <span style={{ fontWeight: 700, color: '#1e40af' }}>{taskInfo.projectName}</span>
+                          <span style={{ display: 'inline-block', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', padding: '2px 6px', borderRadius: 4, fontWeight: 600, width: 'fit-content' }}>
+                            Lô: {taskInfo.batchName}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {transactions.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)' }}>Chưa có giao dịch nào.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
