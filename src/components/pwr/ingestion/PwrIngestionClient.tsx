@@ -87,7 +87,8 @@ Mã Lô: ${batchId}`);
 Vật tư đã được giam lỏng. Task CNC và Dán Cạnh đã được đưa vào màn hình Kanban.
 Mã Lô: ${batchId}`);
       }
-      router.push('/pwr/tasks');
+      // REDIRECT: Nhảy thẳng đến Kanban, lọc theo Batch vừa Nổ → Task mới hiện đầu tiên
+      router.push(`/pwr/kanban?search=BATCH_${batchId}`);
     } catch (err: any) {
       alert("Lỗi Nổ Task: " + err.message);
     } finally {
