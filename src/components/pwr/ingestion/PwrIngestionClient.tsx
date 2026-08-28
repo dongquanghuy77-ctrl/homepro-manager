@@ -63,8 +63,36 @@ export default function PwrIngestionClient() {
   };
 
   const handleExecute = async () => {
-    alert("🚀 Giai đoạn 4: Đã nổ Task và Trừ Tồn Kho Thành Công (Mô phỏng)!");
-    router.push('/pwr/tasks');
+    if (!parsedData || parsedData.totalMissing > 0) return;
+    setIsUploading(true);
+    try {
+      const batchId = Date.now().toString();
+      const res = await fetch('/api/pwr/ingestion/explode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: parsedData.fileName,
+          items: parsedData.items,
+          batchId: batchId
+        })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error);
+      
+      if (result.isShortage) {
+        alert(`⚠️ Tồn kho không đủ! Đã chuyển Task sang chế độ [Chờ Vật Tư] và tạo tự động Yêu cầu mua hàng.
+Mã Lô: ${batchId}`);
+      } else {
+        alert(`🚀 ĐÃ NỔ TASK THÀNH CÔNG!
+Vật tư đã được giam lỏng. Task CNC và Dán Cạnh đã được đưa vào màn hình Kanban.
+Mã Lô: ${batchId}`);
+      }
+      router.push('/pwr/tasks');
+    } catch (err: any) {
+      alert("Lỗi Nổ Task: " + err.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
