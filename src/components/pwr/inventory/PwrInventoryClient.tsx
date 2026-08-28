@@ -78,8 +78,8 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
     return alloc;
   }, [materials, transactions, taskToProjectBatch]);
 
-  const boardMaterials = materials.filter(m => m.type === 'BOARD' || m.type === 'VÁN' || m.unit?.toLowerCase() === 'tấm').sort((a,b) => a.name.localeCompare(b.name));
-  const edgeMaterials = materials.filter(m => m.type === 'EDGE_BAND' || m.type === 'NẸP' || m.unit?.toLowerCase() === 'm' || m.unit?.toLowerCase() === 'mét').sort((a,b) => a.name.localeCompare(b.name));
+  const boardMaterials = materials.filter(m => m.category === 'BOARD' || m.category === 'VÁN' || m.unit?.toLowerCase() === 'tấm').sort((a,b) => a.name.localeCompare(b.name));
+  const edgeMaterials = materials.filter(m => m.category === 'EDGE_BAND' || m.category === 'NẸP' || m.unit?.toLowerCase() === 'm' || m.unit?.toLowerCase() === 'mét').sort((a,b) => a.name.localeCompare(b.name));
   const hardwareMaterials = materials.filter(m => !boardMaterials.includes(m) && !edgeMaterials.includes(m)).sort((a,b) => a.name.localeCompare(b.name));
 
   const getTransactionIcon = (type: string) => {
@@ -136,7 +136,7 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
         const available = mat.stockLevel - mat.reservedLevel;
         // Escape quotes if needed
         const name = mat.name.replace(/"/g, '""');
-        csv += `"${mat.id}","${name}","${mat.type}",${mat.stockLevel},${mat.reservedLevel},${available},"${mat.unit}"\n`;
+        csv += `"${mat.id}","${name}","${mat.category || 'OTHER'}",${mat.stockLevel},${mat.reservedLevel},${available},"${mat.unit}"\n`;
     });
     downloadCSV(csv, `TonKho_VanHanh_${format(new Date(), 'ddMMyyyy')}.csv`);
     setShowExportMenu(false);
@@ -196,7 +196,7 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
                 <td style={{ padding: '16px 24px', fontWeight: 700 }}>{mat.name}</td>
                 <td style={{ padding: '16px 24px' }}>
                   <span style={{ padding: '4px 8px', background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 6, fontSize: 12, fontWeight: 600 }}>
-                    {mat.type}
+                    {mat.category || 'OTHER'}
                   </span>
                 </td>
                 <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color: '#3b82f6', fontSize: 15 }}>{mat.stockLevel}</td>
