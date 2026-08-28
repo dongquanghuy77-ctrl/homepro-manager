@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { Activity, CalendarDays, AlertTriangle, Battery, BatteryFull, BatteryMedium, BatteryWarning } from 'lucide-react';
 
 export default function PwrCapacityClient() {
+  const [showRollback, setShowRollback] = useState(false);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [isRollingBack, setIsRollingBack] = useState(false);
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -15,6 +18,46 @@ export default function PwrCapacityClient() {
         setIsLoading(false);
       });
   }, []);
+
+
+  const loadBatches = async () => {
+    try {
+      const res = await fetch('/api/pwr/tasks?source=SYSTEM_EXPLOSION');
+      const tasks = await res.json();
+      // Group by projectRef (BATCH_xxx)
+      const batchMap: Record<string, any> = {};
+      (tasks.tasks || tasks || []).forEach((t: any) => {
+        if (t.projectRef && t.projectRef.startsWith('BATCH_')) {
+          if (!batchMap[t.projectRef]) {
+            batchMap[t.projectRef] = { batchId: t.projectRef.replace('BATCH_', ''), tasks: [], title: '' };
+          }
+          batchMap[t.projectRef].tasks.push(t);
+          if (t.title.includes('CNC')) batchMap[t.projectRef].title = t.title;
+        }
+      });
+      setBatches(Object.values(batchMap));
+    } catch (e) { console.error(e); }
+  };
+
+  const handleRollback = async (batchId: string) => {
+    if (!confirm(`⚠️ XÁC NHẬN HỦY NỔ\n\nBạn có chắc muốn hủy toàn bộ Lô ${batchId}?\n- Tất cả Task CNC/Dán Cạnh sẽ bị XÓA\n- Vật tư đã giam lỏng sẽ được HOÀN TRẢ\n- Tải trọng máy sẽ được GIẢI PHÓNG`)) return;
+    setIsRollingBack(true);
+    try {
+      const res = await fetch('/api/pwr/ingestion/rollback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batchId })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error);
+      alert(`✅ ${result.message}`);
+      window.location.reload(); // Reload to refresh capacity data
+    } catch (err: any) {
+      alert('Lỗi Rollback: ' + err.message);
+    } finally {
+      setIsRollingBack(false);
+    }
+  };
 
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-text-muted)' }}>Đang tính toán Tải Trọng Máy Móc...</div>;
 
@@ -30,7 +73,44 @@ export default function PwrCapacityClient() {
             <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-muted)' }}>Mô phỏng thời gian thực lượng giờ máy đang bị chiếm dụng</p>
           </div>
         </div>
+        <button
+          onClick={() => { setShowRollback(!showRollback); if (!showRollback) loadBatches(); }}
+          style={{ background: showRollback ? '#ef4444' : 'rgba(239,68,68,0.1)', color: showRollback ? '#fff' : '#ef4444', border: '1px solid #ef4444', padding: '8px 16px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}
+        >
+          {showRollback ? '✕ Đóng' : '🔄 Hủy Nổ / Sửa Sai'}
+        </button>
       </div>
+
+      {/* Rollback Panel */}
+      {showRollback && (
+        <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: 20, marginBottom: 24 }}>
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: '#ef4444' }}>🔄 Hủy Nổ Khẩn Cấp — Chọn Lô cần xóa</h3>
+          <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--color-text-muted)' }}>
+            Nếu anh nhập sai file Excel hoặc số lượng sai, bấm &quot;Hủy Nổ&quot; bên cạnh Lô tương ứng. Hệ thống sẽ tự động: Xóa Task + Hoàn trả vật tư + Giải phóng tải trọng máy.
+          </p>
+          {batches.length === 0 ? (
+            <div style={{ padding: 16, textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 13 }}>Không có Lô nào đang hoạt động (hoặc tất cả đã được xử lý)</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {batches.map((b: any) => (
+                <div key={b.batchId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface)', padding: '12px 16px', borderRadius: 8, border: '1px solid var(--color-border)' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>Lô: {b.batchId}</div>
+                    <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>{b.tasks.length} Task — {b.title || 'Chưa xác định'}</div>
+                  </div>
+                  <button
+                    onClick={() => handleRollback(b.batchId)}
+                    disabled={isRollingBack}
+                    style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: 6, fontWeight: 700, cursor: isRollingBack ? 'not-allowed' : 'pointer', fontSize: 12, opacity: isRollingBack ? 0.5 : 1 }}
+                  >
+                    {isRollingBack ? 'Đang hủy...' : '💥 Hủy Nổ'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Heatmap Matrix */}
       <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
