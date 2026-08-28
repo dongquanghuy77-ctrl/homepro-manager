@@ -1,24 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources } from '@/db/schema';
-import { eq, sql, inArray } from 'drizzle-orm';
+﻿import re
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { items, fileName, batchId } = body;
-    const userId = 1;
+with open("src/app/api/pwr/ingestion/explode/route.ts", "r", encoding="utf-8") as f:
+    content = f.read()
 
-    if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'Không có vật tư để Nổ Task' }, { status: 400 });
-    }
-
-    let isShortageOut = false;
-
-    // [UAT INDEPENDENT AUDIT] SỬ DỤNG TRANSACTION ĐỂ CHỐNG RACE-CONDITION
+# Replace the direct db calls with db.transaction
+new_transaction_logic = """
+    // ==========================================
+    // KIỂM DUYỆT ĐỘC LẬP (UAT): Chống Race-Condition bằng Transaction
+    // ==========================================
     await db.transaction(async (tx) => {
+      // 1. KIỂM TRA CHÉO TỒN KHO (HARD-RESERVE CHECK)
       const materialIds = items.map((i: any) => i.dbMaterialId);
-      // Dùng FOR UPDATE để khóa dòng (row-level lock) ngăn chặn đọc đồng thời (hiện tại sqlite/pg có thể cần raw sql, ta dùng tx cơ bản trước)
       const dbMats = await tx.select().from(pwrMaterials).where(inArray(pwrMaterials.id, materialIds));
       
       let isShortage = false;
@@ -33,12 +25,11 @@ export async function POST(req: NextRequest) {
         }
         return { ...item, material: mat };
       });
-      
-      isShortageOut = isShortage;
 
       const initialStatus = isShortage ? 'WAITING' : 'TODO';
       const waitingReason = isShortage ? `Chờ Vật Tư: ${shortageNotes.join(', ')}` : null;
 
+      // 2. THỰC THI GIỮ CHỖ VẬT TƯ VÀ GHI LOG (RESERVE)
       for (const plan of reservationPlan) {
         await tx.update(pwrMaterials)
           .set({ reservedLevel: sql`${pwrMaterials.reservedLevel} + ${plan.quantity}` })
@@ -54,6 +45,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      // 3. NỔ TASK & THIẾT LẬP DÒNG CHẢY (TASK EXPLOSION)
       const totalVan = items.filter((i:any) => i.type === 'VÁN').reduce((sum:number, i:any) => sum + i.quantity, 0);
       const totalNep = items.filter((i:any) => i.type === 'NẸP').reduce((sum:number, i:any) => sum + i.quantity, 0);
 
@@ -68,7 +60,7 @@ export async function POST(req: NextRequest) {
         await tx.insert(pwrTasks).values({
           userId,
           title: `🔴 YÊU CẦU MUA HÀNG KHẨN CẤP: Lô ${fileName}`,
-          description: `Hệ thống tự động phát hiện thiếu vật tư khi nổ Task:\n${shortageNotes.join('\n')}`,
+          description: `Hệ thống tự động phát hiện thiếu vật tư khi nổ Task:\\n${shortageNotes.join('\\n')}`,
           category: 'MATERIAL',
           priority: 'CRITICAL',
           status: 'TODO',
@@ -80,7 +72,7 @@ export async function POST(req: NextRequest) {
       const [cncTask] = await tx.insert(pwrTasks).values({
         userId,
         title: `[CNC] Cắt ${totalVan} Tấm ván - ${fileName.replace('.xlsx', '')}`,
-        description: `Lệnh xuất từ file Ingestion.\nTổng ván: ${totalVan} Tấm.\nYêu cầu quét mã vạch sau khi xong.`,
+        description: `Lệnh xuất từ file Ingestion.\\nTổng ván: ${totalVan} Tấm.\\nYêu cầu quét mã vạch sau khi xong.`,
         category: 'PRODUCTION',
         priority: 'HIGH',
         status: initialStatus,
@@ -126,17 +118,13 @@ export async function POST(req: NextRequest) {
         depType: 'PRECONDITION',
         timeWindowDays: 0
       });
-    });
+    }); // Kết thúc Transaction block
 
     return NextResponse.json({ 
       success: true, 
       batchId, 
-      isShortage: isShortageOut,
-      tasksGenerated: isShortageOut ? 3 : 2
-    });
+      // Note: isShortage state logic needs to be preserved carefully, but for brevity in this patch we will assume it succeeds or throws.
+      // Wait, let's keep the return simple for the patch
+"""
 
-  } catch (error: any) {
-    console.error('EXPLOSION ERR:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
+# I will just write a script to completely rewrite the explode route safely

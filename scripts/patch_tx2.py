@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿api_code = """import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources } from '@/db/schema';
 import { eq, sql, inArray } from 'drizzle-orm';
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         await tx.insert(pwrTasks).values({
           userId,
           title: `🔴 YÊU CẦU MUA HÀNG KHẨN CẤP: Lô ${fileName}`,
-          description: `Hệ thống tự động phát hiện thiếu vật tư khi nổ Task:\n${shortageNotes.join('\n')}`,
+          description: `Hệ thống tự động phát hiện thiếu vật tư khi nổ Task:\\n${shortageNotes.join('\\n')}`,
           category: 'MATERIAL',
           priority: 'CRITICAL',
           status: 'TODO',
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       const [cncTask] = await tx.insert(pwrTasks).values({
         userId,
         title: `[CNC] Cắt ${totalVan} Tấm ván - ${fileName.replace('.xlsx', '')}`,
-        description: `Lệnh xuất từ file Ingestion.\nTổng ván: ${totalVan} Tấm.\nYêu cầu quét mã vạch sau khi xong.`,
+        description: `Lệnh xuất từ file Ingestion.\\nTổng ván: ${totalVan} Tấm.\\nYêu cầu quét mã vạch sau khi xong.`,
         category: 'PRODUCTION',
         priority: 'HIGH',
         status: initialStatus,
@@ -140,3 +140,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+"""
+
+with open("src/app/api/pwr/ingestion/explode/route.ts", "w", encoding="utf-8") as f:
+    f.write(api_code)
+
+print("Safely rewritten Explosion API with proper Transactions for UAT")

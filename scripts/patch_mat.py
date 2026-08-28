@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿api_code = """import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrMaterials } from '@/db/schema';
 import { eq, or } from 'drizzle-orm';
@@ -27,3 +27,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+"""
+
+with open("src/app/api/pwr/materials/route.ts", "w", encoding="utf-8") as f:
+    f.write(api_code)
+
+print("Safely rewritten Materials API to prevent duplication")
