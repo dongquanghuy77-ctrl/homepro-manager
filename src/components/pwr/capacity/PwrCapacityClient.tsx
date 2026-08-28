@@ -25,15 +25,16 @@ export default function PwrCapacityClient() {
       const res = await fetch('/api/pwr/tasks');
       const result = await res.json();
       const allTasks = result.tasks || result || [];
-      // Group by projectRef (BATCH_xxx) - only tasks from Explosion
+      // Group by BATCH_xxx tag - tasks from Explosion have BATCH_ in tags
       const batchMap: Record<string, any> = {};
       allTasks.forEach((t: any) => {
-        if (t.projectRef && t.projectRef.startsWith('BATCH_') && t.status !== 'CANCELLED' && !t.deletedAt) {
-          if (!batchMap[t.projectRef]) {
-            batchMap[t.projectRef] = { batchId: t.projectRef.replace('BATCH_', ''), tasks: [], title: '' };
+        const batchTag = (t.tags || []).find((tag: string) => tag.startsWith('BATCH_'));
+        if (batchTag && t.source === 'SYSTEM_EXPLOSION' && t.status !== 'CANCELLED' && !t.deletedAt) {
+          if (!batchMap[batchTag]) {
+            batchMap[batchTag] = { batchId: batchTag.replace('BATCH_', ''), tasks: [], title: '', project: t.projectRef || '' };
           }
-          batchMap[t.projectRef].tasks.push(t);
-          if (t.title && t.title.includes('CNC')) batchMap[t.projectRef].title = t.title;
+          batchMap[batchTag].tasks.push(t);
+          if (t.title && t.title.includes('CNC')) batchMap[batchTag].title = t.title;
         }
       });
       setBatches(Object.values(batchMap));

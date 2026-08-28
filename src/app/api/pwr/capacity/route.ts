@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
       estimatedHours: pwrTaskResources.estimatedHours,
       reservedDate: pwrTaskResources.reservedDate,
       taskTitle: pwrTasks.title,
-      taskStatus: pwrTasks.status
+      taskStatus: pwrTasks.status,
+      projectRef: pwrTasks.projectRef
     })
     .from(pwrTaskResources)
     .innerJoin(pwrTasks, eq(pwrTaskResources.taskId, pwrTasks.id))

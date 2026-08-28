@@ -6,10 +6,12 @@ import { eq, sql } from 'drizzle-orm';
 export async function POST(req: NextRequest) {
   try {
     const { batchId } = await req.json();
-    const commonProjectRef = `BATCH_${batchId}`;
+    const batchTag = `BATCH_${batchId}`;
     
     // 1. Kiểm tra xem có Task nào đã In Progress chưa
-    const tasks = await db.select().from(pwrTasks).where(eq(pwrTasks.projectRef, commonProjectRef));
+    // Tìm theo tag BATCH_xxx (vì projectRef bây giờ lưu tên Dự Án)
+    const allTasks = await db.select().from(pwrTasks);
+    const tasks = allTasks.filter(t => t.tags && t.tags.includes(batchTag));
     if (tasks.length === 0) return NextResponse.json({ error: 'Không tìm thấy Lô này' }, { status: 404 });
     
     const hasStarted = tasks.some(t => t.status !== 'TODO' && t.status !== 'INBOX' && t.status !== 'WAITING');
@@ -57,8 +59,10 @@ export async function POST(req: NextRequest) {
       await db.delete(pwrTaskDependencies).where(eq(pwrTaskDependencies.dependsOnId, taskId));
     }
 
-    // 5. Xóa sổ các Task đã tạo
-    await db.delete(pwrTasks).where(eq(pwrTasks.projectRef, commonProjectRef));
+    // 5. Xóa sổ các Task đã tạo (theo ID, không phải projectRef)
+    for (const taskId of taskIds) {
+      await db.delete(pwrTasks).where(eq(pwrTasks.id, taskId));
+    }
 
     return NextResponse.json({ success: true, message: 'Đã hủy nổ hoàn toàn! Task + Vật tư + Tải trọng máy đã được giải phóng.' });
 

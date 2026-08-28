@@ -171,6 +171,52 @@ export async function PATCH(
         await db.update(pwrChecklists)
           .set({ isDone: true })
           .where(eq(pwrChecklists.taskId, id));
+
+        // ========== AUTO-UNBLOCK ENGINE ==========
+        // Khi Task này DONE → tìm Task nào bị block bởi nó → tự động mở khóa
+        const dependents = await db.select()
+          .from(pwrTaskDependencies)
+          .where(eq(pwrTaskDependencies.dependsOnId, id));
+        
+        for (const dep of dependents) {
+          // Kiểm tra task con còn blocker nào khác chưa DONE không
+          const allDepsOfTarget = await db.select({
+            depId: pwrTaskDependencies.dependsOnId,
+            depStatus: pwrTasks.status,
+          })
+            .from(pwrTaskDependencies)
+            .innerJoin(pwrTasks, eq(pwrTaskDependencies.dependsOnId, pwrTasks.id))
+            .where(eq(pwrTaskDependencies.taskId, dep.taskId));
+          
+          const hasRemainingBlockers = allDepsOfTarget.some(
+            d => d.depId !== id && d.depStatus !== 'DONE' && d.depStatus !== 'CANCELLED'
+          );
+          
+          if (!hasRemainingBlockers) {
+            // Mở khóa: WAITING → TODO
+            const [unblocked] = await db.update(pwrTasks)
+              .set({ status: 'TODO', waitingFor: null, updatedAt: new Date() })
+              .where(and(
+                eq(pwrTasks.id, dep.taskId),
+                eq(pwrTasks.status, 'WAITING')
+              ))
+              .returning();
+            
+            if (unblocked) {
+              // Log hệ thống ghi nhận auto-unblock
+              await db.insert(pwrWorkLogs).values({
+                taskId: dep.taskId,
+                userId: session.id,
+                logType: 'SYSTEM',
+                content: `🔓 Tự động mở khóa vì "${existing.title}" đã DONE`,
+                statusFrom: 'WAITING',
+                statusTo: 'TODO',
+                isSystemLog: true,
+              });
+            }
+          }
+        }
+        // ==========================================
       }
       if (reopening) updatePayload.completedAt = null;
       if (newStatus === 'CANCELLED' && reason) updatePayload.cancelReason = reason;

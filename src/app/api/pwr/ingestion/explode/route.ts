@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { items, fileName, batchId } = body;
-    const userId = session.id; // Use actual logged-in user instead of hardcoded 1
+    const { items, fileName, batchId, projectId, projectName } = body;
+    const userId = session.id;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Không có vật tư để Nổ Task' }, { status: 400 });
@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
       const totalVan = items.filter((i:any) => i.type === 'VÁN').reduce((sum:number, i:any) => sum + i.quantity, 0);
       const totalNep = items.filter((i:any) => i.type === 'NẸP').reduce((sum:number, i:any) => sum + i.quantity, 0);
 
-      const commonProjectRef = `BATCH_${batchId}`; 
+      const commonProjectRef = projectName || `BATCH_${batchId}`; 
+      const batchTag = `BATCH_${batchId}`;
       const todayStr = new Date().toISOString().split('T')[0];
 
       const machines = await tx.select().from(pwrResources);
@@ -78,6 +79,9 @@ export async function POST(req: NextRequest) {
           priority: 'CRITICAL',
           status: 'TODO',
           projectRef: commonProjectRef,
+          projectId: projectId || null,
+          taskType: 'PROJECT_TASK',
+          tags: ['EXPLOSION', 'MUA_HANG', batchTag],
           source: 'SYSTEM_EXPLOSION'
         });
       }
@@ -91,7 +95,9 @@ export async function POST(req: NextRequest) {
         status: initialStatus,
         waitingFor: waitingReason,
         projectRef: commonProjectRef,
-        tags: ['EXPLOSION', 'CNC'],
+        projectId: projectId || null,
+        taskType: 'PROJECT_TASK',
+        tags: ['EXPLOSION', 'CNC', batchTag],
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
@@ -112,7 +118,9 @@ export async function POST(req: NextRequest) {
         priority: 'HIGH',
         status: 'TODO',
         projectRef: commonProjectRef,
-        tags: ['EXPLOSION', 'DÁN_CẠNH'],
+        projectId: projectId || null,
+        taskType: 'PROJECT_TASK',
+        tags: ['EXPLOSION', 'DÁN_CẠNH', batchTag],
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
