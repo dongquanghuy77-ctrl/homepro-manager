@@ -35,12 +35,11 @@ export async function POST(req: NextRequest) {
           if (!uniqueMissingMap.has(key)) {
             const [newMat] = await tx.insert(pwrMaterials).values({
               name: item.parsedName || item.rawName || 'Vật tư không tên',
-              type: item.type || 'OTHER',
+              category: item.type || 'OTHER',
               unit: item.unit || 'Cái',
               stockLevel: 0,
               reservedLevel: 0,
-              skuCode: `AUTO_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-              description: `Auto-generated from Ingestion: ${fileName}`
+              skuCode: `AUTO_${Date.now()}_${Math.floor(Math.random() * 1000)}`
             }).returning();
             uniqueMissingMap.set(key, newMat);
             dbMats.push(newMat);
