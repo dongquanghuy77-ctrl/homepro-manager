@@ -1,0 +1,210 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Sun, Moon } from 'lucide-react';
+import type { PwrTask, PwrStatus, PwrPriority } from '@/db/schema';
+import {
+  ChevronRight, ChevronDown, FolderOpen, FolderClosed,
+  CheckCircle2, Clock, AlertCircle, PlayCircle, Loader2,
+  Lock, ArrowRight, Zap, Package, Wrench, Users, ShoppingCart,
+  Briefcase, FileText, AlertTriangle, MoreHorizontal, FolderPlus,
+  Shield, Check, AlertOctagon, Archive, Trash2,
+} from 'lucide-react';
+import { PWR_PRIORITY, PWR_STATUS } from '@/lib/pwr/constants';
+import Link from 'next/link';
+import PwrCreateProjectModal     from './PwrCreateProjectModal';
+import PwrVanHanhSection         from './PwrVanHanhSection';
+import PwrCreateOperationalModal from './PwrCreateOperationalModal';
+
+interface Props { tasks: PwrTask[]; onRefresh?: () => void }
+
+// ─── Category Design System (Linear / Jira inspired) ─────────────────────────
+const CAT_STYLE: Record<string, { label: string; color: string; bg: string; Icon: React.ElementType }> = {
+  PRODUCTION: { label: 'Sản xuất',   color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  Icon: Zap },
+  MATERIAL:   { label: 'Vật tư',     color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  Icon: Package },
+  EQUIPMENT:  { label: 'Máy móc',    color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',  Icon: Wrench },
+  PERSONNEL:  { label: 'Nhân sự',    color: '#ec4899', bg: 'rgba(236,72,153,0.12)',  Icon: Users },
+  ORDER:      { label: 'Đơn hàng',   color: '#10b981', bg: 'rgba(16,185,129,0.12)',  Icon: ShoppingCart },
+  PROJECT:    { label: 'Dự án',      color: '#6366f1', bg: 'rgba(99,102,241,0.12)',  Icon: Briefcase },
+  ADMIN:      { label: 'Hành chính', color: 'var(--color-text-muted)', bg: 'rgba(100,116,139,0.12)', Icon: FileText },
+  INCIDENT:   { label: 'Phát sinh',  color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   Icon: AlertTriangle },
+  OTHER:      { label: 'Khác',       color: 'var(--color-text-secondary)', bg: 'rgba(148,163,184,0.12)', Icon: MoreHorizontal },
+};
+
+// ─── Status icon map ──────────────────────────────────────────────────────────
+function StatusIcon({ status }: { status: string }) {
+  switch (status) {
+    case 'DONE':        return <CheckCircle2 size={13} color="#10b981" />;
+    case 'IN_PROGRESS': return <Loader2     size={13} color="#3b82f6" style={{ animation: 'spin 1s linear infinite' }} />;
+    case 'WAITING':     return <Clock       size={13} color="#f59e0b" />;
+    case 'TODO':        return <PlayCircle  size={13} color="#8b5cf6" />;
+    case 'INBOX':       return <AlertCircle size={13} color="#ef4444" />;
+    default:            return <CheckCircle2 size={13} color="#64748b" />;
+  }
+}
+
+export default function PwrWbsView({ tasks, onRefresh }: Props) {
+  const [localTasks,         setLocalTasks]         = useState<PwrTask[]>(tasks);
+  const [expandedProjects,   setExpandedProjects]   = useState<Record<string, boolean>>({});
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [blockedMap, setBlockedMap] = useState<Record<number, string[]>>({});
+  const [checklistMap, setChecklistMap] = useState<Record<number, { total: number; done: number }>>({});
+  const [showModal,    setShowModal]    = useState(false);
+  const [showOpModal,  setShowOpModal]  = useState(false);
+  const [toast, setToast]              = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
+  const [pendingIds,   setPendingIds]   = useState<Set<number>>(new Set());
+
+  const [theme, setTheme] = useState<'dark'|'light'>('dark');
+  useEffect(() => {
+    const t = localStorage.getItem('pwr-theme') || 'dark';
+    setTheme(t as 'dark'|'light');
+    document.documentElement.setAttribute('data-theme', t);
+  }, []);
+  const toggleTheme = () => {
+    const n = theme === 'dark' ? 'light' : 'dark';
+    setTheme(n);
+    localStorage.setItem('pwr-theme', n);
+    document.documentElement.setAttribute('data-theme', n);
+  };
+
+
+  // Sync localTasks when parent refreshes tasks
+  useEffect(() => { setLocalTasks(tasks); }, [tasks]);
+
+  const toggleProject  = (p: string) => setExpandedProjects(prev => ({ ...prev, [p]: !(prev[p] ?? true) }));
+  const toggleCategory = (p: string, c: string) => {
+    const k = `${p}||${c}`;
+    setExpandedCategories(prev => ({ ...prev, [k]: !(prev[k] ?? true) }));
+  };
+
+  // ── Sprint B: Checklist warning modal state ─────────────────────────────────
+  const [warnTask, setWarnTask] = useState<PwrTask | null>(null);
+
+  // ── Sprint A+B: Quick toggle DONE / reopen ───────────────────────────────────
+  async function executeToggleDone(task: PwrTask) {
+    const newStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
+
+    // Optimistic update
+    setPendingIds(prev => new Set([...prev, task.id]));
+    setLocalTasks(prev => prev.map(t =>
+      t.id === task.id ? { ...t, status: newStatus as any, completedAt: newStatus === 'DONE' ? new Date() : null } : t
+    ));
+
+    try {
+      const res = await fetch(`/api/pwr/tasks/${task.id}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
+        setToast({ message: 'Lỗi cập nhật trạng thái — thử lại sau', type: 'error' });
+      } else {
+        const updated = await res.json();
+        setLocalTasks(prev => prev.map(t => t.id === task.id ? updated : t));
+        setToast({ message: newStatus === 'DONE' ? `Hoàn thành: ${task.title.substring(0, 40)}` : `Mở lại: ${task.title.substring(0, 40)}`, type: 'success' });
+      }
+    } catch {
+      setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
+      setToast({ message: 'Lỗi kết nối — kiểm tra mạng', type: 'error' });
+    } finally {
+      setTimeout(() => {
+        setPendingIds(prev => { const s = new Set(prev); s.delete(task.id); return s; });
+        setTimeout(() => setToast(null), 3000);
+      }, 400);
+    }
+  }
+
+  async function handleToggleDone(e: React.MouseEvent, task: PwrTask) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (pendingIds.has(task.id)) return; // debounce
+
+    // Sprint B — Gate 1: blocked task cannot be marked DONE
+    const blockers = blockedMap[task.id];
+    if (task.status !== 'DONE' && blockers && blockers.length > 0) {
+      setToast({ message: `Chưa thể hoàn thành. Bạn cần làm xong: ${blockers.join(', ')}`, type: 'warning' });
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+
+    // Sprint B — Gate 2: checklist incomplete → show warning modal
+    const cl = checklistMap[task.id];
+    if (task.status !== 'DONE' && cl && cl.total > 0 && cl.done < cl.total) {
+      setWarnTask(task);
+      return;
+    }
+
+    await executeToggleDone(task);
+  }
+
+  // Batch fetch: blocker status + checklist counts
+  useEffect(() => {
+    if (!tasks.length) return;
+    const nonDone = tasks.filter(t => !['DONE','CANCELLED'].includes(t.status));
+
+    // 1. Blocked status (with names)
+    Promise.all(
+      nonDone.map(t =>
+        fetch(`/api/pwr/tasks/${t.id}/dependencies`)
+          .then(r => r.json())
+          .then(d => {
+            const blockers = (d.blockedBy || [])
+              .filter((b: any) => !['DONE', 'CANCELLED'].includes(b.task.status))
+              .map((b: any) => b.task.title);
+            return { id: t.id, blockers };
+          })
+          .catch(() => ({ id: t.id, blockers: [] }))
+      )
+    ).then(res => {
+      const bMap: Record<number, string[]> = {};
+      res.forEach(r => {
+        if (r.blockers.length > 0) bMap[r.id] = r.blockers;
+      });
+      setBlockedMap(bMap);
+    });
+
+    // 2. Checklist counts (all tasks, not just non-done)
+    Promise.all(
+      tasks.map(t =>
+        fetch(`/api/pwr/tasks/${t.id}/checklists`)
+          .then(r => r.json())
+          .then((items: { isCompleted: boolean }[]) => ({
+            id: t.id,
+            total: items.length,
+            done:  items.filter(i => i.isCompleted).length,
+          }))
+          .catch(() => ({ id: t.id, total: 0, done: 0 }))
+      )
+    ).then(res => {
+      const map: Record<number, { total: number; done: number }> = {};
+      res.forEach(r => { map[r.id] = { total: r.total, done: r.done }; });
+      setChecklistMap(map);
+    });
+  }, [tasks]);
+
+  // ── Split tasks: PROJECT_TASK vs OPERATIONAL_TASK ──────────────────────────
+  const projTasks = localTasks.filter(t => (t as any).taskType !== 'OPERATIONAL_TASK' && t.projectRef);
+  const opTasks   = localTasks.filter(t => (t as any).taskType === 'OPERATIONAL_TASK' || !t.projectRef);
+
+  // Group project tasks: Project → Category
+  const projectsMap: Record<string, PwrTask[]> = {};
+  projTasks.forEach(t => {
+    const p = t.projectRef?.trim() || '[NỘI BỘ]';
+    if (!projectsMap[p]) projectsMap[p] = [];
+    projectsMap[p].push(t);
+  });
+
+  // ── Gate Health per project ─────────────────────────────────────────────
+  // Based on overdue % — meaningful even without dependency data
+  function getGateHealth(pTasks: PwrTask[]): { status: 'GREEN'|'YELLOW'|'RED'; detail: string } {
+    const active  = pTasks.filter(t => !['DONE','CANCELLED'].includes(t.status));
+    const overdue = active.filter(t => t.dueDate && t.dueDate < today);
+    const pct     = active.length > 0 ? Math.round((overdue.length / active.length) * 100) : 0;
+    if (overdue.length >= 3 || pct >= 30) return { status: 'RED',    detail: `${overdue.length} task quá hạn (${pct}%)` };
+    if (overdue.length >= 1)              return { status: 'YELLOW', detail: `${overdue.length} task quá hạn` };
+    return { status: 'GREEN', detail: 'Đúng tiến độ' };
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+

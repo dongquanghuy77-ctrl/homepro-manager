@@ -1,0 +1,10 @@
+HEADERS:
+['Hạng mục', 'Số lượng', 'Đơn vị']
+
+FIRST 5 ROWS:
+              Hạng mục  Số lượng Đơn vị
+0       HN - 111G-17.5      62.0    Tấm
+1       BT - 200T-17.5       6.0    Tấm
+2         HN - 111G-10      25.0    Tấm
+3  BT - SC 010 MW-17.5      65.0    Tấm
+4    BT - SC 010 MW-10      20.0    Tấm

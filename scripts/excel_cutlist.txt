@@ -1,0 +1,10 @@
+HEADERS:
+['ID', 'Tên chi tiết', 'Tên nhóm', 'Vật liệu', 'Độ dày', 'Chiều rộng', 'Chiều cao']
+
+FIRST 5 ROWS:
+      ID   Tên chi tiết Tên nhóm   Vật liệu  Độ dày  Chiều rộng  Chiều cao
+0    NaN            hồi        -  HN - 111G    17.5      1710.0      995.0
+1  124.0     BEND_PANEL        -  HN - 111G    17.5       647.0      632.7
+2    NaN      Hông Phải        -  HN - 111G    17.5       610.0      512.5
+3    NaN            Nóc        -  HN - 111G    17.5      1408.5      100.0
+4    NaN            Nóc        -  HN - 111G    17.5      1408.5      100.0

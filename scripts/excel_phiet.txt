@@ -1,0 +1,22 @@
+SHEETS: ['BOM', 'Cut List']
+
+--- SHEET: BOM ---
+HEADERS: ['Hạng mục', 'Số lượng', 'Đơn vị']
+FIRST 5 ROWS:
+                          Hạng mục  Số lượng Đơn vị
+0                      AC 631-17.5      5.00    Tấm
+1                     AC 200T-17.5      3.00    Tấm
+2                       AC631EV-10      2.00    Tấm
+3                     AC631EV-17.5      5.00    Tấm
+4  Nẹp dán cạnh~AC 631 17.5~Chỉ 2P    102.01      m
+
+--- SHEET: Cut List ---
+HEADERS: ['ID', 'Tên chi tiết', 'Tên nhóm', 'Vật liệu', 'Độ dày', 'Chiều rộng', 'Chiều cao']
+FIRST 5 ROWS:
+   ID                         Tên chi tiết   Tên nhóm Vật liệu  Độ dày  Chiều rộng  Chiều cao
+0   5              Anh Phiệt    TỦ 1 - Hậu  Anh Phiệt   AC 631    17.5      1282.5      870.0
+1  16  Anh Phiệt    TỦ C.THANG - Hông trái  Anh Phiệt   AC 631    17.5      1341.0      312.5
+2  15  Anh Phiệt    TỦ C.THANG - Hông Trái  Anh Phiệt   AC 631    17.5      1113.0      310.5
+3  40       Anh Phiệt    TỦ 3 - Cánh Lùa P  Anh Phiệt   AC 631    17.5       750.0      446.5
+4   7              Anh Phiệt    TỦ 1 - Nóc  Anh Phiệt   AC 631    17.5       870.0      380.0
+
