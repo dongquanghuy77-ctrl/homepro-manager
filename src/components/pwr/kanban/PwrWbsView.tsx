@@ -209,14 +209,14 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <div style={{ padding: '8px 24px 60px', color: '#f8fafc', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
+    <div style={{ padding: '8px 24px 60px', color: 'var(--color-text)', fontFamily: 'var(--font-family, -apple-system, sans-serif)' }}>
 
-      {/* ── Sprint B: Checklist Warning Modal ── */}
+      {/* --- Checklist Warning Modal --- */}
       {warnTask && (() => {
         const cl = checklistMap[warnTask.id];
         return (
           <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: '#1e293b', border: '1px solid rgba(251,146,60,0.4)', borderRadius: 14, padding: '28px 32px', maxWidth: 420, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
+            <div style={{ background: 'var(--color-surface)', border: '1px solid rgba(251,146,60,0.4)', borderRadius: 14, padding: '28px 32px', maxWidth: 420, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                 <span style={{ fontSize: 28 }}>⚠️</span>
                 <div>
@@ -232,7 +232,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => setWarnTask(null)}
-                  style={{ padding: '9px 18px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--color-text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+                  style={{ padding: '9px 18px', borderRadius: 8, background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
                 >
                   Hủy
                 </button>
@@ -248,69 +248,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         );
       })()}
 
-      {/* ─── Header toolbar ─── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-        <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
-          {Object.keys(projectsMap).length} dự án · {projTasks.length} task dự án
-          {opTasks.length > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>· {opTasks.length} việc vận hành</span>}
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {/* Tạo việc vận hành */}
-          <button
-            onClick={() => setShowOpModal(true)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 7,
-              padding: '8px 14px', borderRadius: 8,
-              border: '1px solid rgba(249,115,22,0.4)',
-              background: 'rgba(249,115,22,0.1)', color: '#fb923c',
-              cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background='rgba(249,115,22,0.22)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background='rgba(249,115,22,0.1)'; }}
-          >
-            ⚙️ + Vận Hành
-          </button>
-          {/* Tạo dự án */}
-          <button
-            onClick={() => setShowModal(true)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 7,
-              padding: '8px 16px', borderRadius: 8,
-              border: '1px solid rgba(99,102,241,0.4)',
-              background: 'rgba(99,102,241,0.12)', color: '#a5b4fc',
-              cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background='rgba(99,102,241,0.25)'; e.currentTarget.style.color='#c7d2fe'; }}
-            onMouseLeave={e => { e.currentTarget.style.background='rgba(99,102,241,0.12)'; e.currentTarget.style.color='#a5b4fc'; }}
-          >
-            <FolderPlus size={15} /> + Tạo dự án mới
-          </button>
-        </div>
-      </div>
-
-      {/* ─── Toast — type-aware colors ─── */}
-      {toast && (() => {
-        const cfg = {
-          success: { bg: '#10b981', shadow: 'rgba(16,185,129,0.4)',  icon: '✅' },
-          error:   { bg: '#ef4444', shadow: 'rgba(239,68,68,0.4)',   icon: '❌' },
-          warning: { bg: '#f59e0b', shadow: 'rgba(245,158,11,0.4)',  icon: '⚠️' },
-        }[toast.type];
-        return (
-          <div style={{
-            position: 'fixed', top: 24, right: 24, zIndex: 10000,
-            background: cfg.bg, color: '#fff', padding: '12px 20px',
-            borderRadius: 10, fontWeight: 600, fontSize: 14,
-            boxShadow: `0 8px 24px ${cfg.shadow}`,
-            animation: 'slideIn 0.3s ease',
-            display: 'flex', alignItems: 'center', gap: 8, maxWidth: 380,
-          }}>
-            <span style={{ flexShrink: 0 }}>{cfg.icon}</span>
-            <span>{toast.message}</span>
-          </div>
-        );
-      })()}
-
-      {/* ─── Modals ─── */}
+      {/* --- Modals --- */}
       {showModal && (
         <PwrCreateProjectModal
           onClose={() => setShowModal(false)}
@@ -337,45 +275,57 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         />
       )}
 
-      
-      {/* --- THEME TOGGLE --- */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-        <button onClick={toggleTheme} style={{
-          display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px',
-          background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 8,
-          color: 'var(--color-text)', cursor: 'pointer', fontSize: 12, fontWeight: 600
-        }}>
-          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-          {theme === 'dark' ? 'Giao diện Sáng' : 'Giao diện Tối'}
-        </button>
+      {/* --- Theme Toggle & Global Toolbar --- */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+          {Object.keys(projectsMap).length} dự án · {projTasks.length} task
+          {opTasks.length > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>· {opTasks.length} việc vận hành</span>}
+        </div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={toggleTheme} style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
+            background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 8,
+            color: 'var(--color-text)', cursor: 'pointer', fontSize: 13, fontWeight: 600
+          }}>
+            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+            {theme === 'dark' ? 'Giao diện Sáng' : 'Giao diện Tối'}
+          </button>
+          
+          <button
+            onClick={() => setShowOpModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '8px 14px', borderRadius: 8,
+              border: '1px solid rgba(249,115,22,0.4)',
+              background: 'rgba(249,115,22,0.1)', color: '#fb923c',
+              cursor: 'pointer', fontSize: 13, fontWeight: 600
+            }}
+          >
+            ⚡ + Vận Hành
+          </button>
+        </div>
       </div>
-      
-      {/* Empty State */}
 
+      {/* --- Empty State --- */}
       {!tasks.length && (
         <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-muted)' }}>
           <Briefcase size={40} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Chưa có công việc nào</div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text)' }}>Chưa có công việc nào</div>
           <div style={{ fontSize: 13, marginTop: 6 }}>Tạo việc đầu tiên để bắt đầu</div>
         </div>
       )}
 
+      {/* --- Projects Render --- */}
       {Object.keys(projectsMap).sort().map(projName => {
         const pTasks     = projectsMap[projName];
         const isProjExp  = expandedProjects[projName] ?? true;
-        const folderClr  = '#60a5fa';
-        const folderBdr  = 'rgba(96,165,250,0.18)';
-        const folderBg   = 'rgba(96,165,250,0.05)';
+        const folderClr  = '#3b82f6';
 
-        // Progress (only PROJECT_TASK tasks count toward %)
+        // Progress
         const doneCount  = pTasks.filter(t => t.status === 'DONE').length;
         const totalCount = pTasks.length;
         const pct        = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
         const pctColor   = pct === 100 ? '#10b981' : pct >= 50 ? '#3b82f6' : '#f59e0b';
-
-        // Gate health (smart: blocked + overdue analysis)
-        const gateHealth = getGateHealth(pTasks);
-        const gateColor  = gateHealth.status === 'GREEN' ? '#10b981' : gateHealth.status === 'YELLOW' ? '#f59e0b' : '#ef4444';
 
         const catMap: Record<string, PwrTask[]> = {};
         pTasks.forEach(t => {
@@ -385,179 +335,89 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         });
 
         return (
-          <div key={projName} style={{
-            marginBottom: 20,
-            border: `1px solid ${folderBdr}`,
-            borderRadius: 14,
-            overflow: 'hidden',
-            background: 'var(--color-surface)',
-            backdropFilter: 'blur(10px)',
-          }}>
+          <div key={projName} style={{ marginBottom: 30, background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
 
-            {/* ── Level 1: Project Header ── */}
-            <div
-              onClick={() => toggleProject(projName)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                padding: '14px 20px', cursor: 'pointer',
-                background: isProjExp ? folderBg : 'transparent',
-                borderBottom: isProjExp ? `1px solid ${folderBdr}` : 'none',
-                transition: 'background 0.2s',
-              }}
-            >
-              {/* Chevron */}
-              <div style={{ color: 'var(--color-text-muted)', flexShrink: 0 }}>
-                {isProjExp ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
-              </div>
-
-              {/* Folder Icon */}
-              <div style={{ color: folderClr, flexShrink: 0 }}>
-                {isProjExp ? <FolderOpen size={22} /> : <FolderClosed size={22} />}
-              </div>
-
-              {/* Project Name + Progress */}
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-                <div style={{
-                  fontSize: 15, fontWeight: 800, letterSpacing: 0.3,
-                  color: folderClr, textTransform: 'uppercase',
-                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                }}>
-                  {projName}
-                </div>
-                {/* Mini Progress Bar */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
-                  <div style={{ flex: 1, height: 4, background: 'var(--color-border)', borderRadius: 99, overflow: 'hidden', maxWidth: 160 }}>
-                    <div style={{
-                      height: '100%', width: `${pct}%`,
-                      background: pctColor,
-                      borderRadius: 99, transition: 'width 0.5s ease',
-                    }} />
+            {/* Level 1: Project Header (Mockup accurate layout) */}
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => toggleProject(projName)}>
+                  <div style={{ color: folderClr }}>
+                    {isProjExp ? <FolderOpen size={28} /> : <FolderClosed size={28} />}
                   </div>
-                  <span style={{ fontSize: 11, color: pctColor, fontWeight: 700 }}>
-                    {doneCount}/{totalCount} việc · {pct}%
-                  </span>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-text)', textTransform: 'uppercase' }}>
+                    {projName}
+                  </div>
                 </div>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setShowModal(true)} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                    + Tạo việc mới
+                  </button>
+                </div>
+
               </div>
 
-              {/* Gate Health Badge — smart risk indicator */}
-              <div
-                title={gateHealth.detail}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700,
-                  color: gateColor, background: `${gateColor}15`,
-                  border: `1px solid ${gateColor}30`, flexShrink: 0,
-                }}
-              >
-                {gateHealth.status === 'GREEN' && <><Check size={10} /> OK</>}
-                {gateHealth.status === 'YELLOW' && <><AlertCircle size={10} /> Chú ý</>}
-                {gateHealth.status === 'RED'    && <><AlertOctagon size={10} /> Rủi ro</>}
-              </div>
-
-              {/* Task Count Badge */}
-              <div style={{
-                background: 'rgba(96,165,250,0.15)',
-                color: folderClr, padding: '3px 10px', borderRadius: 99,
-                fontSize: 12, fontWeight: 700, flexShrink: 0,
-                border: `1px solid ${folderBdr}`,
-              }}>
-                {totalCount} việc
-              </div>
-
-              {/* Archive & Delete buttons — stop propagation so expand doesn't trigger */}
-              <div style={{ display: 'flex', gap: 4, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                <button
-                  title="Archive dự án (ẩn khỏi active view, giữ dữ liệu)"
-                  onClick={async () => {
-                    if (!confirm(`Archive dự án "${projName}"? Dự án sẽ bị ẩn nhưng dữ liệu vẫn được giữ.`)) return;
-                    // Find project id from tasks
-                    const projId = (pTasks[0] as any)?.projectId;
-                    if (projId) {
-                      await fetch(`/api/pwr/projects/${projId}?action=archive`, { method: 'DELETE' });
-                    } else {
-                      // Fallback: cancel all tasks of this project by projectRef
-                      await fetch('/api/pwr/tasks?action=cancel', {
-                        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ids: pTasks.map(t => t.id) }),
-                      });
-                    }
-                    setToast({ message: `Đã archive dự án "${projName}"`, type: 'success' });
-                    setTimeout(() => setToast(null), 3000);
-                    onRefresh?.();
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(245,158,11,0.1)'; (e.currentTarget as HTMLElement).style.color = '#f59e0b'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}>
-                  <Archive size={14} />
-                </button>
-                <button
-                  title="Xóa dự án + toàn bộ task (soft delete)"
-                  onClick={async () => {
-                    if (!confirm(`XÓA dự án "${projName}" và ${totalCount} task?\n\nDữ liệu sẽ bị ẩn hoàn toàn. Có thể phục hồi trong 30 ngày.`)) return;
-                    const projId = (pTasks[0] as any)?.projectId;
-                    if (projId) {
-                      await fetch(`/api/pwr/projects/${projId}?action=delete&deleteTasks=true`, { method: 'DELETE' });
-                    } else {
-                      await fetch('/api/pwr/tasks?action=delete', {
-                        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ids: pTasks.map(t => t.id) }),
-                      });
-                    }
-                    setToast({ message: `Đã xóa dự án "${projName}" (${totalCount} task)`, type: 'success' });
-                    setTimeout(() => setToast(null), 3000);
-                    onRefresh?.();
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px 6px', borderRadius: 6, display: 'flex', alignItems: 'center' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)'; (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}>
-                  <Trash2 size={14} />
-                </button>
+              {/* Progress Line */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-secondary)' }}>{totalCount} việc</div>
+                <div style={{ flex: 1, maxWidth: 200, height: 6, background: 'var(--color-border)', borderRadius: 99, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: pctColor, borderRadius: 99 }} />
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: pctColor }}>Tiến độ: {pct}%</div>
               </div>
             </div>
 
-            {/* ── Level 2 & 3 ── */}
             {isProjExp && (
-              <div style={{ padding: '12px 16px 16px' }}>
-                {Object.keys(catMap).sort().map(catKey => {
+              <div>
+                {/* GLOBAL TABLE HEADER */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'minmax(250px, 4fr) 2fr 1fr 1fr 1fr 1fr', gap: 16,
+                  padding: '12px 24px', borderBottom: '1px solid var(--color-border)',
+                  background: 'var(--color-bg)',
+                  fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 0.5
+                }}>
+                  <div>Tên công việc</div>
+                  <div>Phụ trách</div>
+                  <div>Hạn chót</div>
+                  <div>Tiến độ</div>
+                  <div style={{ textAlign: 'center' }}>Ưu tiên</div>
+                  <div style={{ textAlign: 'right' }}>Trạng thái</div>
+                </div>
 
+                {/* Categories */}
+                {Object.keys(catMap).sort().map(catKey => {
                   const catTasks = catMap[catKey];
                   const catStyle = CAT_STYLE[catKey] || CAT_STYLE.OTHER;
-                  const CatIcon  = catStyle.Icon;
                   const cKey     = `${projName}||${catKey}`;
                   const isCatExp = expandedCategories[cKey] ?? true;
                   const catDone  = catTasks.filter(t => t.status === 'DONE').length;
 
                   return (
-                    <div key={catKey} style={{ marginBottom: 8 }}>
-
-                      {/* ── Category Pill Header ── */}
+                    <div key={catKey}>
+                      {/* CATEGORY FULL WIDTH ROW */}
                       <div
                         onClick={() => toggleCategory(projName, catKey)}
                         style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 6,
-                          padding: '5px 12px 5px 8px',
-                          background: catStyle.bg,
-                          border: `1px solid ${catStyle.color}30`,
-                          borderRadius: 99, cursor: 'pointer',
-                          marginBottom: 8, marginLeft: 4,
-                          transition: 'opacity 0.2s',
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '12px 24px',
+                          background: 'var(--color-surface-2)',
+                          borderBottom: '1px solid var(--color-border)',
+                          cursor: 'pointer'
                         }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
-                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                       >
-                        {isCatExp ? <ChevronDown size={13} color={catStyle.color} /> : <ChevronRight size={13} color={catStyle.color} />}
-                        <CatIcon size={13} color={catStyle.color} />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: catStyle.color, letterSpacing: 0.3 }}>
+                        {isCatExp ? <ChevronDown size={16} color="var(--color-text-muted)" /> : <ChevronRight size={16} color="var(--color-text-muted)" />}
+                        <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--color-text)', textTransform: 'uppercase' }}>
                           {catStyle.label}
                         </span>
-                        <span style={{ fontSize: 11, color: `${catStyle.color}90`, fontWeight: 500 }}>
-                          {catDone}/{catTasks.length}
+                        <span style={{ fontSize: 11, color: 'var(--color-text-muted)', background: 'var(--color-bg)', padding: '2px 8px', borderRadius: 12, fontWeight: 600, border: '1px solid var(--color-border)' }}>
+                          {catDone}/{catTasks.length} việc
                         </span>
                       </div>
 
-                      {/* ── Level 3: Task Rows ── */}
+                      {/* TASK ROWS */}
                       {isCatExp && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, paddingLeft: 16 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                           {catTasks.sort((a, b) => a.id - b.id).map(task => {
                             const statusDef = PWR_STATUS[task.status as PwrStatus];
                             const prioDef   = PWR_PRIORITY[task.priority as PwrPriority];
@@ -565,142 +425,108 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                             const isDone    = task.status === 'DONE';
                             const cl        = checklistMap[task.id];
                             const hasChecklist = cl && cl.total > 0;
-                            const clPct     = cl?.total ? Math.round((cl.done / cl.total) * 100) : 0;
                             const isOverdue = task.dueDate && task.dueDate < today && !isDone;
+                            
+                            // Avatar initials logic
+                            const assignee = task.assignedTo || '';
+                            const initials = assignee.trim() ? assignee.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() : '?';
 
                             return (
-                              <Link key={task.id} href={`/pwr/tasks/${task.id}?from=wbs&project=${encodeURIComponent(projName)}`} style={{ textDecoration: 'none' }}>
+                              <Link key={task.id} href={`/pwr/tasks/${task.id}?from=wbs&project=${encodeURIComponent(projName)}`} style={{ textDecoration: 'none', display: 'block', borderBottom: '1px solid var(--color-border)' }}>
                                 <div
                                   style={{
-                                    display: 'grid', gridTemplateColumns: 'minmax(200px, 4fr) 2fr 1fr 1fr 1fr', gap: 12, alignItems: 'center',
-                                    padding: '6px 14px',
-                                    background: isBlocked
-                                      ? 'rgba(239,68,68,0.04)'
-                                      : isDone
-                                        ? 'rgba(16,185,129,0.03)'
-                                        : 'var(--color-surface-2)',
-                                    border: `1px solid ${
-                                      isBlocked ? 'rgba(239,68,68,0.15)' :
-                                      isDone ? 'rgba(16,185,129,0.12)' :
-                                      'var(--color-border)'
-                                    }`,
-                                    borderRadius: 9,
+                                    display: 'grid', gridTemplateColumns: 'minmax(250px, 4fr) 2fr 1fr 1fr 1fr 1fr', gap: 16, alignItems: 'center',
+                                    padding: '12px 24px',
+                                    background: isOverdue ? 'rgba(239, 68, 68, 0.05)' : isDone ? 'rgba(16,185,129,0.02)' : 'transparent',
                                     opacity: isDone ? 0.6 : 1,
-                                    transition: 'all 0.15s',
+                                    transition: 'background 0.15s',
                                   }}
-                                  onMouseEnter={e => {
-                                    e.currentTarget.style.background = 'var(--color-surface-3)';
-                                    e.currentTarget.style.borderColor = 'var(--color-border-light)';
-                                    e.currentTarget.style.transform = 'translateX(2px)';
-                                  }}
-                                  onMouseLeave={e => {
-                                    e.currentTarget.style.background = isBlocked ? 'rgba(239,68,68,0.04)' : isDone ? 'rgba(16,185,129,0.03)' : 'var(--color-surface-2)';
-                                    e.currentTarget.style.borderColor = isBlocked ? 'rgba(239,68,68,0.15)' : isDone ? 'rgba(16,185,129,0.12)' : 'var(--color-border)';
-                                    e.currentTarget.style.transform = 'translateX(0)';
-                                  }}
+                                  onMouseEnter={e => { e.currentTarget.style.background = isOverdue ? 'rgba(239, 68, 68, 0.1)' : 'var(--color-surface-2)'; }}
+                                  onMouseLeave={e => { e.currentTarget.style.background = isOverdue ? 'rgba(239, 68, 68, 0.05)' : isDone ? 'rgba(16,185,129,0.02)' : 'transparent'; }}
                                 >
-                                  {/* Status Icon — Sprint A: clickable quick-toggle */}
-                                  {/* Column 1: Title Group */}
+                                  {/* Col 1: Title & Icon */}
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
-                                  <button
-                                    onClick={e => handleToggleDone(e, task)}
-                                    disabled={pendingIds.has(task.id)}
-                                    title={isDone ? 'Bấm để mở lại task' : (isBlocked ? 'Task đang bị chặn bởi task khác' : 'Bấm để đánh dấu hoàn thành')}
-                                    style={{
-                                      background: 'none', border: 'none', cursor: isBlocked ? 'not-allowed' : 'pointer',
-                                      padding: 2, borderRadius: 99, flexShrink: 0,
-                                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                      opacity: pendingIds.has(task.id) ? 0.4 : 1,
-                                      transform: pendingIds.has(task.id) ? 'scale(0.85)' : 'scale(1)',
-                                      transition: 'all 0.15s',
-                                    }}
-                                    onMouseEnter={e => {
-                                      if (!isBlocked && !pendingIds.has(task.id)) {
-                                        (e.currentTarget as HTMLElement).style.transform = 'scale(1.25)';
-                                        (e.currentTarget as HTMLElement).style.filter = isDone ? 'drop-shadow(0 0 3px #10b981)' : 'drop-shadow(0 0 3px #6366f1)';
-                                      }
-                                    }}
-                                    onMouseLeave={e => {
-                                      (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
-                                      (e.currentTarget as HTMLElement).style.filter = 'none';
-                                    }}
-                                  >
-                                    <StatusIcon status={task.status} />
-                                  </button>
-
-                                  {/* ID */}
-                                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', width: 36, flexShrink: 0 }}>
-                                    #{task.id}
-                                  </span>
-
-                                  {/* Title + Blocker label */}
-                                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-                                    <div style={{
-                                      fontSize: 13.5, fontWeight: isDone ? 400 : 500,
-                                      color: isBlocked ? 'var(--color-text-muted)' : isDone ? 'var(--color-text-secondary)' : 'var(--color-text)',
-                                      textDecoration: isDone ? 'line-through' : 'none',
-                                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                    }}>
-                                      {isBlocked && <Lock size={10} style={{ marginRight: 5, verticalAlign: 'middle', color: '#ef4444' }} />}
+                                    <button
+                                      onClick={e => handleToggleDone(e, task)}
+                                      disabled={pendingIds.has(task.id)}
+                                      style={{
+                                        background: 'none', border: 'none', cursor: isBlocked ? 'not-allowed' : 'pointer',
+                                        padding: 0, flexShrink: 0,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        opacity: pendingIds.has(task.id) ? 0.4 : 1,
+                                      }}
+                                    >
+                                      {isDone ? <CheckCircle2 size={18} color="#10b981" /> : <div style={{ width: 16, height: 16, borderRadius: '50%', border: '1.5px solid var(--color-border-light)' }} />}
+                                    </button>
+                                    
+                                    <div style={{ fontSize: 14, fontWeight: isDone ? 400 : 500, color: isOverdue ? '#ef4444' : isDone ? 'var(--color-text-secondary)' : 'var(--color-text)', textDecoration: isDone ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      <span style={{ color: 'var(--color-text-muted)', fontSize: 12, marginRight: 8 }}>#{task.id}</span>
+                                      {isBlocked && <Lock size={12} style={{ marginRight: 6, verticalAlign: 'middle', color: '#ef4444' }} />}
                                       {task.title}
                                     </div>
+                                  </div>
 
-                                    {/* Checklist mini bar */}
-                                    {hasChecklist && (
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                                        <div style={{ width: 60, height: 3, background: 'var(--color-border)', borderRadius: 99, overflow: 'hidden' }}>
-                                          <div style={{
-                                            height: '100%', width: `${clPct}%`,
-                                            background: clPct === 100 ? '#10b981' : '#6366f1',
-                                            borderRadius: 99, transition: 'width 0.3s',
-                                          }} />
-                                        </div>
-                                        <span style={{ fontSize: 10, color: clPct === 100 ? '#10b981' : 'var(--color-text-muted)', fontWeight: 600 }}>
-                                          ✓ {cl.done}/{cl.total}
-                                        </span>
+                                  {/* Col 2: Phụ Trách (Avatar) */}
+                                  <div>
+                                    {assignee ? (
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(59,130,246,0.15)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>{initials}</div>
+                                        <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{assignee}</div>
+                                      </div>
+                                    ) : (
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-text-muted)', fontStyle: 'italic', fontSize: 13 }}>
+                                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--color-surface-2)', border: '1px dashed var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>?</div>
+                                        Chưa phân công
                                       </div>
                                     )}
                                   </div>
+
+                                  {/* Col 3: Hạn chót */}
+                                  <div>
+                                    {task.dueDate ? (
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: isOverdue ? '#ef4444' : 'var(--color-text-secondary)', fontWeight: isOverdue ? 700 : 400 }}>
+                                        {isOverdue && <AlertCircle size={14} />}
+                                        {isOverdue ? 'Hôm qua' : task.dueDate}
+                                      </div>
+                                    ) : (
+                                      <span style={{ color: 'var(--color-text-disabled)' }}>-</span>
+                                    )}
                                   </div>
 
-                                  {/* Right side badges */}
-                                  <div style={{ display: 'contents' }}>
-                                    {/* Due date */}
-                                    {task.dueDate && (
-                                      <span style={{
-                                        fontSize: 11, color: isOverdue ? '#ef4444' : 'var(--color-text-muted)',
-                                        fontWeight: isOverdue ? 700 : 400,
-                                      }}>
-                                        {isOverdue ? '⚠ ' : ''}{task.dueDate}
-                                      </span>
+                                  {/* Col 4: Tiến độ */}
+                                  <div>
+                                    {hasChecklist ? (
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', fontWeight: 500 }}>{cl.done}/{cl.total}</span>
+                                      </div>
+                                    ) : (
+                                      <span style={{ color: 'var(--color-text-disabled)' }}>-</span>
                                     )}
+                                  </div>
 
-                                    {/* Status badge */}
+                                  {/* Col 5: Ưu tiên */}
+                                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                    {prioDef && task.priority !== 'MEDIUM' ? (
+                                      <span style={{ fontSize: 11, fontWeight: 700, color: prioDef.color }}>{prioDef.label}</span>
+                                    ) : (
+                                      <span style={{ color: 'var(--color-text-disabled)' }}>-</span>
+                                    )}
+                                  </div>
+
+                                  {/* Col 6: Trạng thái */}
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                     <div style={{
                                       display: 'flex', alignItems: 'center', gap: 4,
-                                      fontSize: 11, fontWeight: 600,
+                                      fontSize: 12, fontWeight: 600,
                                       color: statusDef?.color,
                                       background: `${statusDef?.color}15`,
-                                      padding: '3px 8px', borderRadius: 20,
+                                      padding: '4px 10px', borderRadius: 6,
                                       border: `1px solid ${statusDef?.color}25`,
                                     }}>
                                       {statusDef?.label}
                                     </div>
-
-                                    {/* Priority badge */}
-                                    {prioDef && task.priority !== 'MEDIUM' && (
-                                      <div style={{
-                                        fontSize: 10, fontWeight: 700,
-                                        color: prioDef.color,
-                                        background: `${prioDef.color}15`,
-                                        padding: '3px 7px', borderRadius: 6,
-                                      }}>
-                                        {prioDef.label}
-                                      </div>
-                                    )}
-
-                                    <ArrowRight size={13} color="#334155" />
                                   </div>
+
                                 </div>
                               </Link>
                             );
@@ -716,7 +542,6 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         );
       })}
 
-      {/* ─── ZONE B: Vận Hành Nội Bộ ─── */}
       <PwrVanHanhSection
         tasks={opTasks}
         blockedIds={new Set(Object.keys(blockedMap).map(Number))}
@@ -726,4 +551,3 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     </div>
   );
 }
-
