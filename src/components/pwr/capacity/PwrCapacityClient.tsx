@@ -22,17 +22,18 @@ export default function PwrCapacityClient() {
 
   const loadBatches = async () => {
     try {
-      const res = await fetch('/api/pwr/tasks?source=SYSTEM_EXPLOSION');
-      const tasks = await res.json();
-      // Group by projectRef (BATCH_xxx)
+      const res = await fetch('/api/pwr/tasks');
+      const result = await res.json();
+      const allTasks = result.tasks || result || [];
+      // Group by projectRef (BATCH_xxx) - only tasks from Explosion
       const batchMap: Record<string, any> = {};
-      (tasks.tasks || tasks || []).forEach((t: any) => {
-        if (t.projectRef && t.projectRef.startsWith('BATCH_')) {
+      allTasks.forEach((t: any) => {
+        if (t.projectRef && t.projectRef.startsWith('BATCH_') && t.status !== 'CANCELLED' && !t.deletedAt) {
           if (!batchMap[t.projectRef]) {
             batchMap[t.projectRef] = { batchId: t.projectRef.replace('BATCH_', ''), tasks: [], title: '' };
           }
           batchMap[t.projectRef].tasks.push(t);
-          if (t.title.includes('CNC')) batchMap[t.projectRef].title = t.title;
+          if (t.title && t.title.includes('CNC')) batchMap[t.projectRef].title = t.title;
         }
       });
       setBatches(Object.values(batchMap));
