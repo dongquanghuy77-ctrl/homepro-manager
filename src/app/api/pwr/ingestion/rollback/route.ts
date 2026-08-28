@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskResources, pwrTaskDependencies } from '@/db/schema';
+import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskResources, pwrTaskDependencies, pwrWorkLogs, pwrTaskAuditLog, pwrChecklists } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
@@ -57,6 +57,11 @@ export async function POST(req: NextRequest) {
     for (const taskId of taskIds) {
       await db.delete(pwrTaskDependencies).where(eq(pwrTaskDependencies.taskId, taskId));
       await db.delete(pwrTaskDependencies).where(eq(pwrTaskDependencies.dependsOnId, taskId));
+      
+      // Xóa các bảng Audit liên quan để tránh Foreign Key Constraint
+      await db.delete(pwrWorkLogs).where(eq(pwrWorkLogs.taskId, taskId));
+      await db.delete(pwrTaskAuditLog).where(eq(pwrTaskAuditLog.taskId, taskId));
+      await db.delete(pwrChecklists).where(eq(pwrChecklists.taskId, taskId));
     }
 
     // 5. Xóa sổ các Task đã tạo (theo ID, không phải projectRef)
