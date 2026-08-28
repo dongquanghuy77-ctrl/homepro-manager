@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrTasks, pwrWorkLogs, pwrTaskAuditLog, pwrChecklists } from '@/db/schema';
-import { eq, and, isNull, asc } from 'drizzle-orm';
+import { pwrTasks, pwrWorkLogs, pwrTaskAuditLog, pwrChecklists, pwrTaskDependencies } from '@/db/schema';
+import { eq, and, isNull, asc, inArray } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { validateTransition, isReopen as checkReopen } from '@/lib/pwr/task-transitions';
 import type { PwrStatus } from '@/db/schema';
@@ -74,7 +74,7 @@ export async function PATCH(
     if (!existing) return NextResponse.json({ error: 'Không tìm thấy công việc' }, { status: 404 });
 
     const body = await request.json();
-    const { status: newStatus, reason, ...rest } = body;
+    const { status: newStatus, reason, forceOverride, ...rest } = body;
 
     // Explicit mutable field allowlist — no spread
     const updatePayload: Partial<typeof pwrTasks.$inferInsert> = { updatedAt: new Date() };
@@ -113,6 +113,54 @@ export async function PATCH(
       if (reopening && !reason?.trim()) {
         return NextResponse.json({ error: 'Cần ghi rõ lý do mở lại task' }, { status: 400 });
       }
+
+      
+      // ==========================================
+      // GATE LOGIC: Dependencies & Checklists
+      // ==========================================
+      if (!forceOverride) {
+        // Gate 1: Check Dependencies if moving to IN_PROGRESS or DONE
+        if (newStatus === 'IN_PROGRESS' || newStatus === 'DONE') {
+          const blockers = await db.select({
+            id: pwrTaskDependencies.id,
+            status: pwrTasks.status,
+            title: pwrTasks.title
+          })
+          .from(pwrTaskDependencies)
+          .innerJoin(pwrTasks, eq(pwrTaskDependencies.dependsOnId, pwrTasks.id))
+          .where(
+            and(
+              eq(pwrTaskDependencies.taskId, id),
+              eq(pwrTaskDependencies.depType, 'BLOCKED_BY')
+            )
+          );
+          
+          const activeBlockers = blockers.filter(b => b.status !== 'DONE' && b.status !== 'CANCELLED');
+          if (activeBlockers.length > 0) {
+            return NextResponse.json({ error: `Bị chặn bởi: ${activeBlockers.map(b => b.title).join(', ')}` }, { status: 400 });
+          }
+        }
+        
+        // Gate 2: Check Checklists if moving to DONE
+        if (newStatus === 'DONE') {
+          const incompleteChecklists = await db.select().from(pwrChecklists)
+            .where(and(eq(pwrChecklists.taskId, id), eq(pwrChecklists.isDone, false)));
+          
+          if (incompleteChecklists.length > 0) {
+            return NextResponse.json({ error: `Còn ${incompleteChecklists.length} việc con chưa hoàn thành` }, { status: 400 });
+          }
+        }
+      } else {
+        // If overriding, we MUST create an explicit Override log
+        await db.insert(pwrWorkLogs).values({
+          taskId:      id,
+          userId:      session.id,
+          logType:     'ISSUE_LOG',
+          content:     `[FORCE_PROCEED] Quản lý vượt rào: Chuyển sang ${newStatus}. Lý do: ${reason || 'Khẩn cấp'}`,
+          isSystemLog: false, // Make it highly visible in reports
+        });
+      }
+      // ==========================================
 
       updatePayload.status = newStatus;
 
