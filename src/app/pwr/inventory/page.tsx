@@ -1,6 +1,6 @@
 import { getSession } from '@/lib/session';
 import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, users } from '@/db/schema';
+import { pwrMaterials, pwrMaterialTransactions, users, pwrTasks } from '@/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import PwrInventoryClient from '@/components/pwr/inventory/PwrInventoryClient';
 import { redirect } from 'next/navigation';
@@ -12,6 +12,12 @@ export default async function PwrInventoryPage() {
   if (!session) redirect('/login');
 
   const materials = await db.select().from(pwrMaterials).orderBy(pwrMaterials.id);
+
+  const tasks = await db.select({
+    id: pwrTasks.id,
+    tags: pwrTasks.tags,
+    title: pwrTasks.title,
+  }).from(pwrTasks);
 
   const transactions = await db.select({
     id: pwrMaterialTransactions.id,
@@ -33,6 +39,7 @@ export default async function PwrInventoryPage() {
     <PwrInventoryClient 
       materials={materials} 
       transactions={transactions} 
+      tasks={tasks}
     />
   );
 }
