@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { items, fileName, batchId, projectId, projectName, isNewProject, newProjectType } = body;
+    const { items, fileName, batchId, projectId, projectName, isNewProject, newProjectType, batchName } = body;
     const userId = session.id;
 
     if (!items || items.length === 0) {
