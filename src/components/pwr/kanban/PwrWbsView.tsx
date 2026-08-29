@@ -370,11 +370,19 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setShowModal(true)} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                    + Tạo việc mới
-                  </button>
-                </div>
+                                  <div style={{ display: 'flex', gap: 8 }}>
+                    {pTasks[0]?.projectId && (
+                      <button 
+                        onClick={() => handleDeleteProject(pTasks[0].projectId!, projName)}
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                      >
+                        <Trash2 size={16} /> Xóa Dự Án
+                      </button>
+                    )}
+                    <button onClick={() => setShowModal(true)} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                      + Tạo việc mới
+                    </button>
+                  </div>
 
               </div>
 
