@@ -298,10 +298,33 @@ export default function PwrIngestionClient() {
                         ))}
                       </select>
                     </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--color-text-muted)' }}>Tên Lô / Đợt sản xuất (Tùy chọn):</label>
+                        <input 
+                          type="text" 
+                          value={batchName}
+                          onChange={(e) => setBatchName(e.target.value)}
+                          placeholder="VD: Đợt 1 - Tủ Bếp Tầng 1"
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', outline: 'none', fontSize: 14 }}
+                        />
+                      </div>
+
                   )}
                 </div>
 
-                <input type="file" id="file-upload" accept=".xlsx, .xls" onChange={handleFileChange} style={{ display: 'none' }} />
+                
+                  <div style={{ margin: '0 0 24px 0', textAlign: 'left' }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--color-text-muted)' }}>Tên Lô / Đợt sản xuất (Tùy chọn):</label>
+                    <input 
+                      type="text" 
+                      value={batchName}
+                      onChange={(e) => setBatchName(e.target.value)}
+                      placeholder="VD: Đợt 1 - Tủ Bếp Tầng 1"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', outline: 'none', fontSize: 14 }}
+                    />
+                  </div>
+<input type="file" id="file-upload" accept=".xlsx, .xls" onChange={handleFileChange} style={{ display: 'none' }} />
                 <label htmlFor="file-upload" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#3b82f6', color: '#fff', padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
                   <Plus size={18} /> Chọn file từ máy tính
                 </label>
