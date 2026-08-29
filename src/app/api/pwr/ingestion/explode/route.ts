@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
     let isShortageOut = false;
     let finalProjectId = projectId;
     let finalProjectName = projectName;
+    let tasksGenerated = 0;
+    let newMaterialsCount = 0;
 
     // [UAT INDEPENDENT AUDIT] SỬ DỤNG TRANSACTION ĐỂ CHỐNG RACE-CONDITION
     await db.transaction(async (tx) => {
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
       const uniqueMissingMap = new Map();
       for (const item of items) {
         if (!item.dbMaterialId) {
+          newMaterialsCount++;
           const key = (item.parsedName || item.rawName || 'Unknown').toLowerCase();
           if (!uniqueMissingMap.has(key)) {
             const [newMat] = await tx.insert(pwrMaterials).values({
@@ -243,7 +246,10 @@ export async function POST(req: NextRequest) {
       success: true, 
       batchId, 
       isShortage: isShortageOut,
-      tasksGenerated: isShortageOut ? 3 : 2
+      stats: {
+        tasksGenerated: isShortageOut ? 3 : 2,
+        newMaterialsCount
+      }
     });
 
   } catch (error: any) {
