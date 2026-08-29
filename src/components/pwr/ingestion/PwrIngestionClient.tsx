@@ -19,6 +19,7 @@ export default function PwrIngestionClient() {
   const [projectMode, setProjectMode] = useState<'NEW' | 'EXISTING'>('NEW');
   const [newProjectName, setNewProjectName] = useState<string>('');
   const [newProjectType, setNewProjectType] = useState<string>('CÔNG TRÌNH');
+  const [batchName, setBatchName] = useState<string>('');
   const [showProjectHelp, setShowProjectHelp] = useState<boolean>(true);
 
   const [uploadStep, setUploadStep] = useState<'IDLE' | 'PROCESSING' | 'SUCCESS'>('IDLE');
@@ -131,6 +132,7 @@ export default function PwrIngestionClient() {
           batchId: batchId,
           projectId: finalProjectId,
           projectName: finalProjectName,
+            batchName: batchName.trim() || parsedData.fileName.replace('.xlsx', ''),
           isNewProject: projectMode === 'NEW',
           newProjectType: newProjectType
         })

@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
       const totalNep = Math.ceil(items.filter((i:any) => i.type === 'EDGE_BAND' || i.category === 'EDGE_BAND').reduce((sum:number, i:any) => sum + i.quantity, 0));
 
       const commonProjectRef = finalProjectName || `BATCH_${batchId}`; 
-      const batchTag = `BATCH_${batchId}`;
+      const batchTag = `BATCH_${batchName || batchId}`;
       const todayStr = new Date().toISOString().split('T')[0];
 
       const machines = await tx.select().from(pwrResources);

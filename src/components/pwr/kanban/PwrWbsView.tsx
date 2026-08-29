@@ -206,6 +206,26 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     return { status: 'GREEN', detail: 'Đúng tiến độ' };
   }
 
+
+  const handleDeleteProject = async (projectId: number, projectName: string) => {
+    const confirmCode = window.prompt(`CẢNH BÁO: Bạn chuẩn bị XÓA TOÀN BỘ DỰ ÁN "${projectName}".\nViệc này sẽ xóa toàn bộ Task và hoàn trả số lượng vật tư đang giữ chỗ trong kho.\nNhập chữ "XOA" để xác nhận:`);
+    if (confirmCode !== 'XOA') {
+      if (confirmCode !== null) alert('Nhập sai từ khóa xác nhận. Hủy xóa.');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/pwr/projects/${projectId}?action=hard_delete`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setToast({ message: `Đã xóa dự án và hoàn trả vật tư thành công!`, type: 'success' });
+      setTimeout(() => setToast(null), 3000);
+      onRefresh?.();
+    } catch (e: any) {
+      alert("Lỗi khi xóa: " + e.message);
+    }
+  };
+
   const today = new Date().toISOString().slice(0, 10);
 
   return (

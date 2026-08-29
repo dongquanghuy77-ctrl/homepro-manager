@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { pwrProjects, pwrTasks } from "@/db/schema";
+import { pwrProjects, pwrTasks, pwrMaterialTransactions, pwrMaterials } from "@/db/schema";
+import { sql, inArray } from "drizzle-orm";
 import { eq, and, isNull } from "drizzle-orm";
 import { requireAuth, ALL_ROLES } from "@/lib/auth";
 
@@ -38,37 +39,63 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   return NextResponse.json({ project: updated });
 }
 
+
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   const { session, error } = await requireAuth(req as any, ALL_ROLES);
   if (error) return error;
   const id     = parseInt(params.id, 10);
   const url    = new URL(req.url);
   const action = url.searchParams.get("action") ?? "archive";
-  const deleteTasks = url.searchParams.get("deleteTasks") === "true";
+  
   const [proj] = await db.select().from(pwrProjects)
     .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
   if (!proj) return NextResponse.json({ error: "Khong tim thay du an" }, { status: 404 });
+  
+  if (action === "hard_delete") {
+    let deletedTaskCount = 0;
+    let revertedMaterialsCount = 0;
+    
+    await db.transaction(async (tx) => {
+      const tasksInProj = await tx.select({ id: pwrTasks.id }).from(pwrTasks)
+        .where(eq(pwrTasks.projectId, id));
+        
+      if (tasksInProj.length > 0) {
+        const taskIds = tasksInProj.map(t => t.id);
+        
+        const transactions = await tx.select().from(pwrMaterialTransactions)
+          .where(and(
+            inArray(pwrMaterialTransactions.taskId, taskIds),
+            inArray(pwrMaterialTransactions.transactionType, ['RESERVE', 'PENDING_IMPORT'])
+          ));
+          
+        const revertMap = new Map<number, number>();
+        for (const tr of transactions) {
+          if (tr.transactionType === 'RESERVE' && tr.quantity) {
+            revertMap.set(tr.materialId, (revertMap.get(tr.materialId) || 0) + tr.quantity);
+          }
+        }
+        
+        for (const [matId, qty] of revertMap.entries()) {
+          await tx.update(pwrMaterials)
+            .set({ reservedLevel: sql`${pwrMaterials.reservedLevel} - ${qty}` })
+            .where(eq(pwrMaterials.id, matId));
+          revertedMaterialsCount++;
+        }
+        
+        await tx.delete(pwrMaterialTransactions).where(inArray(pwrMaterialTransactions.taskId, taskIds));
+        await tx.delete(pwrTasks).where(inArray(pwrTasks.id, taskIds));
+        deletedTaskCount = taskIds.length;
+      }
+      
+      await tx.delete(pwrProjects).where(eq(pwrProjects.id, id));
+    });
+    
+    return NextResponse.json({ deleted: true, projectId: id, deletedTaskCount, revertedMaterialsCount });
+  }
+
   const now = new Date();
-  if (action === "archive") {
-    await db.update(pwrProjects)
-      .set({ status: "ARCHIVED", updatedAt: now } as any)
-      .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
-    return NextResponse.json({ archived: true, projectId: id });
-  }
-  let deletedTaskCount = 0;
-  if (deleteTasks) {
-    const taskResult = await db.update(pwrTasks)
-      .set({ deletedAt: now, updatedAt: now } as any)
-      .where(and(
-        eq(pwrTasks.userId, session.id),
-        isNull(pwrTasks.deletedAt),
-        eq(pwrTasks.projectRef, (proj as any).name),
-      ))
-      .returning({ id: pwrTasks.id });
-    deletedTaskCount = taskResult.length;
-  }
   await db.update(pwrProjects)
-    .set({ status: "DELETED", updatedAt: now } as any)
+    .set({ status: "ARCHIVED", updatedAt: now } as any)
     .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
-  return NextResponse.json({ deleted: true, projectId: id, deletedTaskCount });
+  return NextResponse.json({ archived: true, projectId: id });
 }
