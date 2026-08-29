@@ -83,7 +83,17 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
             revertedMaterialsCount++;
           }
           
+          // Manual cascading delete to prevent foreign key constraint violations
           await tx.delete(pwrMaterialTransactions).where(inArray(pwrMaterialTransactions.taskId, taskIds));
+          
+          // Delete all dependent task entities first
+          const { pwrTaskAuditLog, pwrWorkLogs, pwrTaskDependencies, pwrTaskResources } = await import('@/db/schema');
+          await tx.delete(pwrTaskAuditLog).where(inArray(pwrTaskAuditLog.taskId, taskIds));
+          await tx.delete(pwrWorkLogs).where(inArray(pwrWorkLogs.taskId, taskIds));
+          await tx.delete(pwrTaskDependencies).where(inArray(pwrTaskDependencies.taskId, taskIds));
+          await tx.delete(pwrTaskDependencies).where(inArray(pwrTaskDependencies.dependsOnId, taskIds));
+          await tx.delete(pwrTaskResources).where(inArray(pwrTaskResources.taskId, taskIds));
+
           await tx.delete(pwrTasks).where(inArray(pwrTasks.id, taskIds));
           deletedTaskCount = taskIds.length;
         }
