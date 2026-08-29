@@ -41,61 +41,66 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const { session, error } = await requireAuth(req as any, ALL_ROLES);
-  if (error) return error;
-  const id     = parseInt(params.id, 10);
-  const url    = new URL(req.url);
-  const action = url.searchParams.get("action") ?? "archive";
-  
-  const [proj] = await db.select().from(pwrProjects)
-    .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
-  if (!proj) return NextResponse.json({ error: "Khong tim thay du an" }, { status: 404 });
-  
-  if (action === "hard_delete") {
-    let deletedTaskCount = 0;
-    let revertedMaterialsCount = 0;
+  try {
+    const { session, error } = await requireAuth(req as any, ALL_ROLES);
+    if (error) return error;
+    const id     = parseInt(params.id, 10);
+    const url    = new URL(req.url);
+    const action = url.searchParams.get("action") ?? "archive";
     
-    await db.transaction(async (tx) => {
-      const tasksInProj = await tx.select({ id: pwrTasks.id }).from(pwrTasks)
-        .where(eq(pwrTasks.projectId, id));
-        
-      if (tasksInProj.length > 0) {
-        const taskIds = tasksInProj.map(t => t.id);
-        
-        const transactions = await tx.select().from(pwrMaterialTransactions)
-          .where(and(
-            inArray(pwrMaterialTransactions.taskId, taskIds),
-            inArray(pwrMaterialTransactions.transactionType, ['RESERVE', 'PENDING_IMPORT'])
-          ));
-          
-        const revertMap = new Map<number, number>();
-        for (const tr of transactions) {
-          if (tr.transactionType === 'RESERVE' && tr.quantity) {
-            revertMap.set(tr.materialId, (revertMap.get(tr.materialId) || 0) + tr.quantity);
-          }
-        }
-        
-        for (const [matId, qty] of revertMap.entries()) {
-          await tx.update(pwrMaterials)
-            .set({ reservedLevel: sql`${pwrMaterials.reservedLevel} - ${qty}` })
-            .where(eq(pwrMaterials.id, matId));
-          revertedMaterialsCount++;
-        }
-        
-        await tx.delete(pwrMaterialTransactions).where(inArray(pwrMaterialTransactions.taskId, taskIds));
-        await tx.delete(pwrTasks).where(inArray(pwrTasks.id, taskIds));
-        deletedTaskCount = taskIds.length;
-      }
+    const [proj] = await db.select().from(pwrProjects)
+      .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
+    if (!proj) return NextResponse.json({ error: "Khong tim thay du an" }, { status: 404 });
+    
+    if (action === "hard_delete") {
+      let deletedTaskCount = 0;
+      let revertedMaterialsCount = 0;
       
-      await tx.delete(pwrProjects).where(eq(pwrProjects.id, id));
-    });
-    
-    return NextResponse.json({ deleted: true, projectId: id, deletedTaskCount, revertedMaterialsCount });
-  }
+      await db.transaction(async (tx) => {
+        const tasksInProj = await tx.select({ id: pwrTasks.id }).from(pwrTasks)
+          .where(eq(pwrTasks.projectId, id));
+          
+        if (tasksInProj.length > 0) {
+          const taskIds = tasksInProj.map(t => t.id);
+          
+          const transactions = await tx.select().from(pwrMaterialTransactions)
+            .where(and(
+              inArray(pwrMaterialTransactions.taskId, taskIds),
+              inArray(pwrMaterialTransactions.transactionType, ['RESERVE', 'PENDING_IMPORT'])
+            ));
+            
+          const revertMap = new Map<number, number>();
+          for (const tr of transactions) {
+            if (tr.transactionType === 'RESERVE' && tr.quantity) {
+              revertMap.set(tr.materialId, (revertMap.get(tr.materialId) || 0) + tr.quantity);
+            }
+          }
+          
+          for (const [matId, qty] of revertMap.entries()) {
+            await tx.update(pwrMaterials)
+              .set({ reservedLevel: sql`${pwrMaterials.reservedLevel} - ${qty}` })
+              .where(eq(pwrMaterials.id, matId));
+            revertedMaterialsCount++;
+          }
+          
+          await tx.delete(pwrMaterialTransactions).where(inArray(pwrMaterialTransactions.taskId, taskIds));
+          await tx.delete(pwrTasks).where(inArray(pwrTasks.id, taskIds));
+          deletedTaskCount = taskIds.length;
+        }
+        
+        await tx.delete(pwrProjects).where(eq(pwrProjects.id, id));
+      });
+      
+      return NextResponse.json({ deleted: true, projectId: id, deletedTaskCount, revertedMaterialsCount });
+    }
 
-  const now = new Date();
-  await db.update(pwrProjects)
-    .set({ status: "ARCHIVED", updatedAt: now } as any)
-    .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
-  return NextResponse.json({ archived: true, projectId: id });
+    const now = new Date();
+    await db.update(pwrProjects)
+      .set({ status: "ARCHIVED", updatedAt: now } as any)
+      .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
+    return NextResponse.json({ archived: true, projectId: id });
+  } catch (err: any) {
+    console.error("DELETE PROJECT ERR:", err);
+    return NextResponse.json({ error: err.message || "Lỗi máy chủ" }, { status: 500 });
+  }
 }
