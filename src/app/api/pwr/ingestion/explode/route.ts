@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
             description: `Hệ thống tự động bỏ qua vì file Excel không có mét nẹp nào.`,
             category: 'PRODUCTION', priority: 'LOW', status: 'DONE',
             projectRef: commonProjectRef, projectId: finalProjectId || null, taskType: 'PROJECT_TASK',
-            tags: ['EXPLOSION', 'DAN_CANH', batchTag], source: 'SYSTEM_EXPLOSION'
+            tags: ['EXPLOSION', 'DAN_CANH', batchTag], source: 'SYSTEM_EXPLOSION', startDate: todayStr, dueDate: todayStr
          }).returning();
          edgeTaskIds.push(edgeTask.id);
       } else {
@@ -262,7 +262,7 @@ export async function POST(req: NextRequest) {
             userId, title: `[KHOAN CAM] Bỏ qua`, description: `Không có dữ liệu`,
             category: 'PRODUCTION', priority: 'LOW', status: 'DONE',
             projectRef: commonProjectRef, projectId: finalProjectId || null, taskType: 'PROJECT_TASK',
-            tags: ['EXPLOSION', 'KHOAN_CAM', batchTag], source: 'SYSTEM_EXPLOSION'
+            tags: ['EXPLOSION', 'KHOAN_CAM', batchTag], source: 'SYSTEM_EXPLOSION', startDate: todayStr, dueDate: todayStr
          });
       } else {
          for (const chunk of drillChunks) {
