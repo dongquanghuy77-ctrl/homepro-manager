@@ -26,7 +26,13 @@ export async function POST(req: NextRequest) {
 
     // [UAT INDEPENDENT AUDIT] SỬ DỤNG TRANSACTION ĐỂ CHỐNG RACE-CONDITION
     await db.transaction(async (tx) => {
-      // 0. Tạo Dự án mới nếu được yêu cầu
+      // 0. Tạo Dự án mới nếu được yêu cầu, hoặc lấy tên dự án cũ
+      if (!isNewProject && finalProjectId) {
+        const existingProj = await tx.select().from(pwrProjects).where(eq(pwrProjects.id, finalProjectId));
+        if (existingProj.length > 0) {
+          finalProjectName = existingProj[0].name;
+        }
+      }
       if (isNewProject && finalProjectName) {
         const [newProj] = await tx.insert(pwrProjects).values({
           userId,
@@ -174,7 +180,7 @@ export async function POST(req: NextRequest) {
             projectId: finalProjectId || null,
             taskType: 'PROJECT_TASK',
             tags: ['EXPLOSION', 'CNC', batchTag],
-            source: 'SYSTEM_EXPLOSION'
+            source: 'SYSTEM_EXPLOSION', startDate: chunk.dateStr, dueDate: chunk.dateStr
          }).returning();
          cncTaskIds.push(cncTask.id);
 
@@ -222,7 +228,7 @@ export async function POST(req: NextRequest) {
                category: 'PRODUCTION', priority: 'HIGH', status: edgeStatus, waitingFor: edgeWaitingReason,
                projectRef: commonProjectRef, projectId: finalProjectId || null, taskType: 'PROJECT_TASK',
                tags: ['EXPLOSION', 'DAN_CANH', batchTag, `⏰ Chờ CNC ${chunk.numChunks > 1 ? 'Phần ' + chunk.partIndex : '30p'}`],
-               source: 'SYSTEM_EXPLOSION'
+               source: 'SYSTEM_EXPLOSION', startDate: chunk.dateStr, dueDate: chunk.dateStr
             }).returning();
             edgeTaskIds.push(edgeTask.id);
 
@@ -274,7 +280,7 @@ export async function POST(req: NextRequest) {
                category: 'PRODUCTION', priority: 'HIGH', status: 'TODO',
                projectRef: commonProjectRef, projectId: finalProjectId || null, taskType: 'PROJECT_TASK',
                tags: ['EXPLOSION', 'KHOAN_CAM', batchTag, `⏰ Chờ Dán Cạnh ${chunk.numChunks > 1 ? 'Phần ' + chunk.partIndex : '1h'}`],
-               source: 'SYSTEM_EXPLOSION'
+               source: 'SYSTEM_EXPLOSION', startDate: chunk.dateStr, dueDate: chunk.dateStr
             }).returning();
 
             if (drillMachine) {

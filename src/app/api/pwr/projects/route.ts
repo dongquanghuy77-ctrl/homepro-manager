@@ -158,17 +158,27 @@ export async function POST(req: Request) {
     let createdTasks = 0;
     const tpl = templateType ? TEMPLATES[templateType] : null;
     if (tpl) {
-      const taskValues = tpl.map(t => ({
-        userId:      session.id,
-        title:       t.title,
-        description: t.description,
-        category:    t.category,
-        priority:    t.priority,
-        status:      'TODO' as const,
-        projectRef:  name.trim(),
-        source:      'SELF' as const,
-        tags:        [`giai-doan-${t.phase}`],
-      }));
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const taskValues = tpl.map(t => {
+        const d = new Date(now);
+        d.setDate(d.getDate() + (t.phase || 1));
+        const dueStr = d.toISOString().split('T')[0];
+        
+        return {
+          userId:      session.id,
+          title:       t.title,
+          description: t.description,
+          category:    t.category,
+          priority:    t.priority,
+          status:      'TODO' as const,
+          projectRef:  name.trim(),
+          source:      'SELF' as const,
+          tags:        [`giai-doan-${t.phase}`],
+          startDate:   todayStr,
+          dueDate:     dueStr
+        };
+      });
       await db.insert(pwrTasks).values(taskValues as any);
       createdTasks = taskValues.length;
     }
