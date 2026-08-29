@@ -1,5 +1,6 @@
-import PwrDispatchModal from './PwrDispatchModal';
 'use client';
+import PwrDispatchModal from './PwrDispatchModal';
+
 
 import { useState } from 'react';
 import Link from 'next/link';
