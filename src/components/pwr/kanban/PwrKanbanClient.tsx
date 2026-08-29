@@ -19,6 +19,7 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
   const [editTask, setEditTask] = useState<PwrTask | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
+  const [dispatchTask, setDispatchTask] = useState<any>(null);
   const todayVN = getTodayVN();
 
   const handleDragStart = (e: React.DragEvent, id: number) => {
@@ -206,10 +207,11 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
                           const action = quickMap[task.status];
                           if (!action) return null;
                           return (
+                            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                             <button
                               onClick={(e) => { e.stopPropagation(); moveTask(task, action.next); }}
                               style={{ 
-                                marginTop: 8, 
+                                flex: 1, 
                                 width: '100%', 
                                 padding: '6px 0', 
                                 fontSize: 11, 
@@ -226,6 +228,13 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
                             >
                               {action.icon} {action.label} 
                             </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setDispatchTask(task); }}
+                              style={{ flex: 1, padding: '6px 0', border: '1px solid var(--color-border)', background: 'var(--color-surface-2)', color: 'var(--color-text)', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: 11 }}
+                            >
+                              ⚡ Điều Phối
+                            </button>
+                            </div>
                           );
                         })()}
 
@@ -243,6 +252,7 @@ export default function PwrKanbanClient({ initialTasks }: Props) {
       {showForm && (
         <PwrTaskForm task={editTask} onClose={() => { setShowForm(false); setEditTask(null); }} onSaved={refresh} />
       )}
+      {dispatchTask && <PwrDispatchModal task={dispatchTask} onClose={() => setDispatchTask(null)} onRefresh={refresh} />}
     </div>
   );
 }

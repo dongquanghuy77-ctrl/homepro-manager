@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
         projectRef: commonProjectRef,
         projectId: finalProjectId || null,
         taskType: 'PROJECT_TASK',
-        tags: ['EXPLOSION', 'DAN_CANH', batchTag],
+        tags: ['EXPLOSION', 'DAN_CANH', batchTag, '⏰ Chờ CNC 30p'],
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
@@ -217,7 +217,7 @@ export async function POST(req: NextRequest) {
         projectRef: commonProjectRef,
         projectId: finalProjectId || null,
         taskType: 'PROJECT_TASK',
-        tags: ['EXPLOSION', 'KHOAN_CAM', batchTag],
+        tags: ['EXPLOSION', 'KHOAN_CAM', batchTag, '⏰ Chờ Dán Cạnh 1h'],
         source: 'SYSTEM_EXPLOSION'
       }).returning();
 
