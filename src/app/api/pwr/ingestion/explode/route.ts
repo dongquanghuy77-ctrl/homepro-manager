@@ -199,9 +199,9 @@ export async function POST(req: NextRequest) {
       });
 
       // 4. TẠO TASK KHOAN CAM
-      const totalPhuKien = items.filter((i) => i.type === 'HARDWARE' || i.category === 'HARDWARE').reduce((sum, i) => sum + i.quantity, 0);
+      const totalPhuKien = items.filter((i: any) => i.type === 'HARDWARE' || i.category === 'HARDWARE').reduce((sum: number, i: any) => sum + i.quantity, 0);
       const estimatedPhuKien = totalPhuKien > 0 ? totalPhuKien : Math.ceil(totalVan * 6); 
-      const drillMachine = machines.find((m) => m.name.includes('Khoan')) || machines[0];
+      const drillMachine = machines.find((m: any) => m.name.includes('Khoan')) || machines[0];
       
       const isNoDrilling = estimatedPhuKien <= 0 && totalVan <= 0;
       const drillStatus = isNoDrilling ? 'DONE' : 'TODO';
