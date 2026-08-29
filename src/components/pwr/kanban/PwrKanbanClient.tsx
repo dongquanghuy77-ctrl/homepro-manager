@@ -1,3 +1,4 @@
+import PwrDispatchModal from './PwrDispatchModal';
 'use client';
 
 import { useState } from 'react';

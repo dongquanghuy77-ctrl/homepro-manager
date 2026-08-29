@@ -36,7 +36,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         fieldName: 'reservedDate (San tải)',
         oldValue: resources[0]?.reservedDate || '',
         newValue: nextDate,
-        notes: 'Dời lịch toàn bộ'
+        reason: 'Dời lịch toàn bộ'
       });
       return NextResponse.json({ success: true, action: "RESCHEDULE", nextDate });
     }
@@ -56,7 +56,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         fieldName: 'status',
         oldValue: task.status,
         newValue: 'DONE',
-        notes: 'Chuyển sang thuê ngoài'
+        reason: 'Chuyển sang thuê ngoài'
       });
       return NextResponse.json({ success: true, action: "OUTSOURCE" });
     }
@@ -97,7 +97,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         fieldName: 'estimatedHours (Tăng ca tràn số)',
         oldValue: totalHours.toString(),
         newValue: `${limitHours} hôm nay, ${spillHours} ngày mai`,
-        notes: 'Điều phối Tăng ca tràn số'
+        reason: 'Điều phối Tăng ca tràn số'
       });
       
       return NextResponse.json({ success: true, action: "OVERTIME_SPILL", limitHours, spillHours, nextDate });
