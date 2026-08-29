@@ -247,7 +247,7 @@ export async function POST(req: NextRequest) {
       batchId, 
       isShortage: isShortageOut,
       stats: {
-        tasksGenerated: isShortageOut ? 3 : 2,
+        tasksGenerated: isShortageOut ? 4 : 3,
         newMaterialsCount
       }
     });
