@@ -27,7 +27,7 @@ export default function PwrIngestionClient() {
   const [successBatchId, setSuccessBatchId] = useState('');
 
   useEffect(() => {
-    let timer;
+    let timer: any;
     if (uploadStep === 'SUCCESS' && countdown > 0) {
       timer = setTimeout(() => setCountdown(c => c - 1), 1000);
     } else if (uploadStep === 'SUCCESS' && countdown === 0) {
