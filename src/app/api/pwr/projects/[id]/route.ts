@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { pwrProjects, pwrTasks, pwrMaterialTransactions, pwrMaterials } from "@/db/schema";
 import { sql, inArray } from "drizzle-orm";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, or } from "drizzle-orm";
 import { requireAuth, ALL_ROLES } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -58,7 +58,10 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       
       await db.transaction(async (tx) => {
         const tasksInProj = await tx.select({ id: pwrTasks.id }).from(pwrTasks)
-          .where(eq(pwrTasks.projectId, id));
+          .where(or(
+            eq(pwrTasks.projectId, id),
+            and(eq(pwrTasks.projectRef, proj.name), isNull(pwrTasks.projectId))
+          ));
           
         if (tasksInProj.length > 0) {
           const taskIds = tasksInProj.map(t => t.id);

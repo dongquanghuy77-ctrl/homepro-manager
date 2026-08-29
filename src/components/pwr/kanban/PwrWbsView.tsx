@@ -371,9 +371,9 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                 </div>
 
                                   <div style={{ display: 'flex', gap: 8 }}>
-                    {pTasks[0]?.projectId && (
+                    {(pTasks.find(t => t.projectId)?.projectId) && (
                       <button 
-                        onClick={() => handleDeleteProject(pTasks[0].projectId!, projName)}
+                        onClick={() => handleDeleteProject(pTasks.find(t => t.projectId)?.projectId!, projName)}
                         style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                       >
                         <Trash2 size={16} /> Xóa Dự Án
