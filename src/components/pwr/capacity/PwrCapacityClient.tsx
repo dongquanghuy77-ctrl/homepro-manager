@@ -3,6 +3,14 @@ import { useState, useEffect } from 'react';
 import { Activity, CalendarDays, AlertTriangle, Battery, BatteryFull, BatteryMedium, BatteryWarning, ChevronLeft, ChevronRight } from 'lucide-react';
 import { addDays, format } from 'date-fns';
 
+// Mapping máy → đơn vị sản xuất (tỷ lệ đã dùng trong Explode/AutoLevel)
+function getResourceMeta(name: string): { rate: number; unit: string; emoji: string } {
+  if (name.includes('CNC'))   return { rate: 1 / 0.15,   unit: 'tấm',  emoji: '🪵' };
+  if (name.includes('Dán'))   return { rate: 1 / 0.01,   unit: 'mét',  emoji: '📏' };
+  if (name.includes('Khoan')) return { rate: 1 / 0.0133, unit: 'lỗ',   emoji: '🔩' };
+  return { rate: 0, unit: 'h', emoji: '⚙️' };
+}
+
 export default function PwrCapacityClient() {
   const [showRollback, setShowRollback] = useState(false);
   const [batches, setBatches] = useState<any[]>([]);
@@ -275,6 +283,19 @@ export default function PwrCapacityClient() {
                       <div style={{ fontSize: 18, fontWeight: 900, color: color, display: 'flex', alignItems: 'center', gap: 4 }}>
                         {cell.totalHours.toFixed(1)} <span style={{ fontSize: 12, fontWeight: 700 }}>h</span>
                       </div>
+                      {/* Đơn vị sản xuất — ngôn ngữ của tổ trưởng */}
+                      {(() => {
+                        const meta = getResourceMeta(row.resource.name);
+                        if (meta.rate > 0) {
+                          const qty = Math.round(cell.totalHours * meta.rate);
+                          return (
+                            <div style={{ fontSize: 11, fontWeight: 600, color: '#8b5cf6', marginTop: 2, letterSpacing: 0.3 }}>
+                              {meta.emoji} ≈ {qty.toLocaleString('vi-VN')} {meta.unit}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                         {icon} {Math.round(cell.loadPercentage)}%
                         {cell.isOverride && <span style={{fontSize: 10, background: '#8b5cf6', color: '#fff', padding: '1px 4px', borderRadius: 4, marginLeft: 4}} title={cell.reason || 'Đã điều chỉnh lịch'}>⚡ {cell.maxCapacity}h</span>}
