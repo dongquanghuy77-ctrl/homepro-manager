@@ -294,6 +294,66 @@ export default function PwrCapacityClient() {
         ))}
       </div>
 
+      {/* Override Modal - Nắn Cốc */}
+      {overrideModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
+             onClick={() => setOverrideModal(null)}>
+          <div style={{ background: 'var(--color-surface)', borderRadius: 16, padding: 32, width: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+               onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 800 }}>⚡ Điều chỉnh Công Suất</h3>
+            <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--color-text-muted)' }}>
+              <strong>{overrideModal.resource.name}</strong> — Ngày <strong>{overrideModal.dateStr}</strong>
+              <br/>Mặc định gốc: <strong>{overrideModal.resource.capacityHoursPerDay}h/ngày</strong>
+            </p>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Công suất mới (giờ/ngày)</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              <input type="range" min="0" max="16" step="0.5"
+                value={overrideValue === '' ? overrideModal.resource.capacityHoursPerDay : Number(overrideValue)}
+                onChange={(e) => setOverrideValue(e.target.value)}
+                style={{ flex: 1 }} />
+              <span style={{ fontWeight: 800, fontSize: 20, minWidth: 50, textAlign: 'right', color: Number(overrideValue) === 0 ? '#ef4444' : Number(overrideValue) > 8 ? '#f59e0b' : '#10b981' }}>
+                {overrideValue === '' ? overrideModal.resource.capacityHoursPerDay : overrideValue}h
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 20 }}>
+              <span>0h (Nghỉ)</span><span>8h (Bình thường)</span><span>16h (Tăng ca)</span>
+            </div>
+
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 700, fontSize: 13 }}>Lý do (tuỳ chọn)</label>
+            <input type="text" value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)}
+              placeholder="Vd: Nghỉ lễ, Tăng ca bù, Sửa máy..."
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'var(--color-text)', fontSize: 14, boxSizing: 'border-box', marginBottom: 24 }} />
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              {overrideModal.isOverride && (
+                <button onClick={async () => {
+                  await fetch('/api/pwr/capacity/override', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resourceId: overrideModal.resource.id, dateStr: overrideModal.dateStr, capacityHours: null }) });
+                  setOverrideModal(null); setWeekOffset(w => w);
+                  const today = new Date(); const start = format(addDays(today, weekOffset * 7), 'yyyy-MM-dd'); const end = format(addDays(today, weekOffset * 7 + 6), 'yyyy-MM-dd');
+                  fetch(`/api/pwr/capacity?start=${start}&end=${end}`).then(r => r.json()).then(d => setData(d));
+                }} style={{ flex: 1, padding: '10px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
+                  🗑 Xóa điều chỉnh
+                </button>
+              )}
+              <button onClick={() => setOverrideModal(null)}
+                style={{ flex: 1, padding: '10px 16px', background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text)', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
+                Huỷ
+              </button>
+              <button onClick={async () => {
+                await fetch('/api/pwr/capacity/override', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ resourceId: overrideModal.resource.id, dateStr: overrideModal.dateStr, capacityHours: Number(overrideValue), reason: overrideReason }) });
+                setOverrideModal(null);
+                const today = new Date(); const start = format(addDays(today, weekOffset * 7), 'yyyy-MM-dd'); const end = format(addDays(today, weekOffset * 7 + 6), 'yyyy-MM-dd');
+                fetch(`/api/pwr/capacity?start=${start}&end=${end}`).then(r => r.json()).then(d => setData(d));
+              }} style={{ flex: 1, padding: '10px 16px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 700 }}>
+                💾 Lưu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ marginTop: 24, padding: 16, background: 'rgba(139, 92, 246, 0.1)', borderRadius: 12, color: '#7c3aed', fontSize: 13, fontWeight: 600, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
         <AlertTriangle size={24} style={{ flexShrink: 0 }} />
         <div>
