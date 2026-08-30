@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { Activity, CalendarDays, AlertTriangle, Battery, BatteryFull, BatteryMedium, BatteryWarning, ChevronLeft, ChevronRight } from 'lucide-react';
 import { addDays, format } from 'date-fns';
@@ -9,6 +10,53 @@ function getResourceMeta(name: string): { rate: number; unit: string; emoji: str
   if (name.includes('Dán'))   return { rate: 1 / 0.01,   unit: 'mét',  emoji: '📏' };
   if (name.includes('Khoan')) return { rate: 1 / 0.0133, unit: 'lỗ',   emoji: '🔩' };
   return { rate: 0, unit: 'h', emoji: '⚙️' };
+}
+
+// Bản sắc màu + icon SVG cho từng tổ máy — ngôn ngữ hình ảnh xuyên suốt hệ thống
+function getMachineConfig(name: string): { color: string; light: string; bg: string; icon: React.ReactNode } {
+  if (name.includes('CNC')) return {
+    color: '#8b5cf6', light: 'rgba(139,92,246,0.15)', bg: 'rgba(139,92,246,0.08)',
+    icon: (
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <rect x="2" y="22" width="32" height="8" rx="2" fill="#8b5cf6" opacity="0.3"/>
+        <rect x="6" y="22" width="24" height="4" rx="1" fill="#8b5cf6" opacity="0.6"/>
+        <rect x="15" y="6" width="6" height="16" rx="2" fill="#8b5cf6"/>
+        <circle cx="18" cy="5" r="4" fill="#8b5cf6"/>
+        <circle cx="18" cy="5" r="2" fill="#c4b5fd"/>
+        <rect x="8" y="18" width="20" height="3" rx="1" fill="#8b5cf6" opacity="0.5"/>
+      </svg>
+    )
+  };
+  if (name.includes('Dán')) return {
+    color: '#3b82f6', light: 'rgba(59,130,246,0.15)', bg: 'rgba(59,130,246,0.08)',
+    icon: (
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <rect x="2" y="12" width="32" height="12" rx="3" fill="#3b82f6" opacity="0.3"/>
+        <rect x="2" y="14" width="32" height="8" rx="2" fill="#3b82f6" opacity="0.6"/>
+        <circle cx="8" cy="18" r="4" fill="#3b82f6"/>
+        <circle cx="28" cy="18" r="4" fill="#3b82f6"/>
+        <rect x="4" y="9" width="4" height="6" rx="1" fill="#3b82f6" opacity="0.8"/>
+        <rect x="28" y="9" width="4" height="6" rx="1" fill="#3b82f6" opacity="0.8"/>
+        <rect x="10" y="16" width="16" height="4" rx="1" fill="#93c5fd"/>
+      </svg>
+    )
+  };
+  if (name.includes('Khoan')) return {
+    color: '#0d9488', light: 'rgba(13,148,136,0.15)', bg: 'rgba(13,148,136,0.08)',
+    icon: (
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <rect x="14" y="2" width="8" height="16" rx="2" fill="#0d9488" opacity="0.4"/>
+        <rect x="15" y="2" width="6" height="14" rx="1" fill="#0d9488"/>
+        <polygon points="14,18 22,18 20,26 16,26" fill="#0d9488"/>
+        <circle cx="18" cy="27" r="3" fill="#0d9488"/>
+        <rect x="6" y="28" width="24" height="6" rx="2" fill="#0d9488" opacity="0.3"/>
+        <rect x="8" y="29" width="20" height="4" rx="1" fill="#0d9488" opacity="0.6"/>
+      </svg>
+    )
+  };
+  return { color: '#6b7280', light: 'rgba(107,114,128,0.1)', bg: 'rgba(107,114,128,0.05)',
+    icon: <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="#6b7280" opacity="0.3"/></svg>
+  };
 }
 
 // Số người tối thiểu cần đồng thời khi máy đó chạy
@@ -370,13 +418,23 @@ export default function PwrCapacityClient() {
         </div>
 
         {/* Machine Rows */}
-        {data.matrix.map((row: any, idx: number) => (
-          <div key={row.resource.id} style={{ display: 'flex', borderBottom: idx === data.matrix.length - 1 ? 'none' : '1px solid var(--color-border)' }}>
-            
-            <div style={{ width: 200, padding: 16, borderRight: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
-              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{row.resource.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Battery size={14} /> Gốc: {row.resource.capacityHoursPerDay}h/ngày
+        {data.matrix.map((row: any, idx: number) => {
+          const mc = getMachineConfig(row.resource.name);
+          return (
+          <div key={row.resource.id} style={{ display: 'flex', borderBottom: idx === data.matrix.length - 1 ? 'none' : '1px solid var(--color-border)', borderLeft: `4px solid ${mc.color}` }}>
+
+            {/* ── SIDEBAR: Icon + Tên lớn + Màu signature ── */}
+            <div style={{ width: 196, padding: '12px 14px', borderRight: '1px solid var(--color-border)', background: mc.bg, display: 'flex', alignItems: 'center', gap: 10 }}>
+              {/* Machine Icon */}
+              <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 10, background: mc.light, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {mc.icon}
+              </div>
+              {/* Tên + capacity */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 800, fontSize: 15, color: mc.color, lineHeight: 1.2, marginBottom: 4 }}>{row.resource.name}</div>
+                <div style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <Battery size={12} /> {row.resource.capacityHoursPerDay}h/ngày
+                </div>
               </div>
             </div>
 
@@ -395,11 +453,11 @@ export default function PwrCapacityClient() {
               }
 
               return (
-                <div key={cell.dateStr} 
-                  onClick={() => { setOverrideModal({ resource: row.resource, dateStr: cell.dateStr, current: cell.maxCapacity, isOverride: cell.isOverride, reason: cell.reason }); setOverrideValue(cell.isOverride ? cell.maxCapacity.toString() : ''); setOverrideReason(cell.reason || ''); }} 
+                <div key={cell.dateStr}
+                  onClick={() => { setOverrideModal({ resource: row.resource, dateStr: cell.dateStr, current: cell.maxCapacity, isOverride: cell.isOverride, reason: cell.reason }); setOverrideValue(cell.isOverride ? cell.maxCapacity.toString() : ''); setOverrideReason(cell.reason || ''); }}
                   style={{ flex: 1, padding: 12, borderRight: '1px solid var(--color-border)', background: bg, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
                   title="Click để Nắn Cốc (Sửa công suất)">
-                  
+
                   {/* Load Bar */}
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4, background: 'rgba(0,0,0,0.05)' }}>
                     <div style={{ height: '100%', width: `${Math.min(cell.loadPercentage, 100)}%`, background: highlight, transition: 'width 0.5s ease-out' }}></div>
@@ -407,16 +465,17 @@ export default function PwrCapacityClient() {
 
                   {cell.totalHours > 0 ? (
                     <>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: color, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        {cell.totalHours.toFixed(1)} <span style={{ fontSize: 12, fontWeight: 700 }}>h</span>
+                      {/* Giờ máy — lớn, đậm, màu signature khi không có cảnh báo */}
+                      <div style={{ fontSize: 22, fontWeight: 900, color: color === 'var(--color-text)' ? mc.color : color, display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                        {cell.totalHours.toFixed(1)} <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>h</span>
                       </div>
-                      {/* Đơn vị sản xuất — ngôn ngữ của tổ trưởng */}
+                      {/* Đơn vị sản xuất */}
                       {(() => {
                         const meta = getResourceMeta(row.resource.name);
                         if (meta.rate > 0) {
                           const qty = Math.round(cell.totalHours * meta.rate);
                           return (
-                            <div style={{ fontSize: 11, fontWeight: 600, color: '#8b5cf6', marginTop: 2, letterSpacing: 0.3 }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: mc.color, marginTop: 2, opacity: 0.85 }}>
                               {meta.emoji} ≈ {qty.toLocaleString('vi-VN')} {meta.unit}
                             </div>
                           );
@@ -439,7 +498,9 @@ export default function PwrCapacityClient() {
               );
             })}
           </div>
-        ))}
+          );
+        })}
+
       </div>
 
       {/* ─── BẢNG NHÂN CÔNG ĐỘNG — Dynamic Staffing ─────────────────────── */}
