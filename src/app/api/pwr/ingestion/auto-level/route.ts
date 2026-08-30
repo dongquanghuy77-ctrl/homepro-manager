@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrTasks, pwrTaskResources, pwrResources, pwrResourceCalendar, pwrTaskDependencies, pwrMaterialTransactions } from '@/db/schema';
+import { pwrTasks, pwrTaskResources, pwrResources, pwrResourceCalendar, pwrTaskDependencies, pwrMaterialTransactions, pwrWorkLogs, pwrTaskAuditLog } from '@/db/schema';
 import { eq, inArray, and, gte } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
@@ -60,12 +60,16 @@ export async function POST(req: NextRequest) {
       const overrides = await tx.select().from(pwrResourceCalendar).where(gte(pwrResourceCalendar.dateStr, todayStr));
 
       // XÓA THEO THỨ TỰ ĐỂ TRÁNH VI PHẠM FOREIGN KEY
-      // 1. Xóa dependencies (taskId -> task bị xóa, hoặc dependsOnId -> task bị xóa)
+      // 1. Xóa audit log (onDelete: 'no action' — PHẢI xóa tay!)
+      await tx.delete(pwrTaskAuditLog).where(inArray(pwrTaskAuditLog.taskId, taskIds));
+      // 2. Xóa work logs (onDelete: 'cascade' nhưng xóa sớm cho chắc)
+      await tx.delete(pwrWorkLogs).where(inArray(pwrWorkLogs.taskId, taskIds));
+      // 3. Xóa dependencies (taskId -> task bị xóa, hoặc dependsOnId -> task bị xóa)
       await tx.delete(pwrTaskDependencies).where(inArray(pwrTaskDependencies.taskId, taskIds));
       await tx.delete(pwrTaskDependencies).where(inArray(pwrTaskDependencies.dependsOnId, taskIds));
-      // 2. Xóa task resources
+      // 4. Xóa task resources
       await tx.delete(pwrTaskResources).where(inArray(pwrTaskResources.taskId, taskIds));
-      // 3. Cuối cùng mới xóa tasks
+      // 5. Cuối cùng mới xóa tasks
       await tx.delete(pwrTasks).where(inArray(pwrTasks.id, taskIds));
 
       let totalNewTasks = 0;
