@@ -198,6 +198,17 @@ export default function PwrCapacityClient() {
     setEditingDay(null);
   };
 
+  // Theme toggle — Sáng / Tối
+  const [isLight, setIsLight] = useState<boolean>(() => {
+    try { return localStorage.getItem('pwr_theme') === 'light'; } catch { return false; }
+  });
+  const toggleTheme = () => {
+    setIsLight(prev => {
+      const next = !prev;
+      localStorage.setItem('pwr_theme', next ? 'light' : 'dark');
+      return next;
+    });
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -298,13 +309,16 @@ export default function PwrCapacityClient() {
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-text-muted)' }}>Đang tính toán Tải Trọng Máy Móc...</div>;
 
   return (
-    <div style={{ padding: '8px 24px 60px', color: 'var(--color-text)', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+    <div className={isLight ? 'pwr-light-mode' : ''} style={{ padding: '8px 24px 60px', color: 'var(--color-text)', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
       minHeight: '100vh', position: 'relative' }}>
       {/* ── WOOD TEXTURE — fixed phía sau tất cả layout ── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: -2, backgroundImage: 'url(/wood-bg.png)', backgroundSize: '500px 500px', backgroundRepeat: 'repeat' }} />
+      {!isLight && <div className="wood-overlay" style={{ position: 'fixed', inset: 0, zIndex: -2, backgroundImage: 'url(/wood-bg.png)', backgroundSize: '500px 500px', backgroundRepeat: 'repeat' }} />}
       {/* ── OVERLAY TỐI — giảm xuống 0.65 để thấy vân gỗ ── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'rgba(6,6,10,0.65)', pointerEvents: 'none' }} />
+      {!isLight && <div className="wood-overlay" style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'rgba(6,6,10,0.65)', pointerEvents: 'none' }} />}
+      {/* ── LIGHT MODE background ── */}
+      {isLight && <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(135deg, #f0f4f8 0%, #e8eef5 100%)', pointerEvents: 'none' }} />}
       <div style={{ position: 'relative', zIndex: 1 }}>
+
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid var(--color-border)' }}>
@@ -325,7 +339,19 @@ export default function PwrCapacityClient() {
             </div>
             <button onClick={() => setWeekOffset(w => w + 1)} style={{ padding: '6px 10px', background: 'transparent', border: 'none', borderLeft: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-text)', display: 'flex', alignItems: 'center' }}><ChevronRight size={18} /></button>
           </div>
-          
+
+          {/* ── THEME TOGGLE ── */}
+          <button onClick={toggleTheme}
+            style={{ padding: '8px 16px', borderRadius: 8, border: `1px solid ${isLight ? '#cbd5e1' : 'rgba(255,255,255,0.15)'}`,
+              background: isLight ? '#ffffff' : 'rgba(255,255,255,0.08)',
+              color: isLight ? '#0f172a' : '#f1f5f9',
+              cursor: 'pointer', fontWeight: 700, fontSize: 13,
+              display: 'flex', alignItems: 'center', gap: 7,
+              transition: 'all 0.2s ease',
+              boxShadow: isLight ? '0 1px 4px rgba(0,0,0,0.1)' : 'none' }}>
+            {isLight ? '🌙 Giao diện Tối' : '☀️ Giao diện Sáng'}
+          </button>
+
           <button
             onClick={() => { setShowAutoLevel(!showAutoLevel); setShowRollback(false); if (!showAutoLevel) loadBatches(); }}
             style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}
