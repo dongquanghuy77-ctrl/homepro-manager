@@ -312,9 +312,20 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
           </button>
           
           <button
+            onClick={() => setShowModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '8px 14px', borderRadius: 8,
+              border: 'none', background: '#3b82f6', color: '#fff',
+              cursor: 'pointer', fontSize: 13, fontWeight: 600
+            }}
+          >
+            <FolderPlus size={16} /> + Tạo Dự Án Mới
+          </button>
+          <button
             onClick={() => setShowOpModal(true)}
             style={{
-              display: 'flex', alignItems: 'center', gap: 7,
+              display: 'flex', alignItems: 'center', gap: 6,
               padding: '8px 14px', borderRadius: 8,
               border: '1px solid rgba(249,115,22,0.4)',
               background: 'rgba(249,115,22,0.1)', color: '#fb923c',
@@ -331,7 +342,18 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-muted)' }}>
           <Briefcase size={40} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
           <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text)' }}>Chưa có công việc nào</div>
-          <div style={{ fontSize: 13, marginTop: 6 }}>Tạo việc đầu tiên để bắt đầu</div>
+          <div style={{ fontSize: 13, marginTop: 6, marginBottom: 24 }}>Tạo việc đầu tiên để bắt đầu</div>
+          <button
+            onClick={() => setShowModal(true)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '10px 20px', borderRadius: 8,
+              border: 'none', background: '#3b82f6', color: '#fff',
+              cursor: 'pointer', fontSize: 14, fontWeight: 600
+            }}
+          >
+            <FolderPlus size={18} /> + Tạo Dự Án Mới
+          </button>
         </div>
       )}
 
