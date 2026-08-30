@@ -11,6 +11,91 @@ function getResourceMeta(name: string): { rate: number; unit: string; emoji: str
   return { rate: 0, unit: 'h', emoji: '⚙️' };
 }
 
+// Số người tối thiểu cần đồng thời khi máy đó chạy
+function getWorkersPerMachine(name: string): number {
+  if (name.includes('CNC')) return 2;   // 1 điều khiển + 1 khiêng ván
+  if (name.includes('Dán')) return 1;   // 1 vận hành (B hỗ trợ vận chuyển từ CNC)
+  if (name.includes('Khoan')) return 1; // 1 vận hành + tự phân loại
+  return 1;
+}
+
+// Effective capacity của 1 người trong N giờ (có yếu tố mệt mỏi)
+function effectiveHours(hours: number): number {
+  if (hours <= 8) return hours;
+  if (hours <= 12) return 8 + (hours - 8) * 0.85;
+  return 8 + 4 * 0.85 + (hours - 12) * 0.70; // sau 12h hiệu suất giảm 30%
+}
+
+// Thuật toán Dynamic Staffing — trả về phân tích nhân công cho 1 ngày
+function calcWorkforce(
+  matrix: any[],
+  dateStr: string,
+  teamSize: number
+): { personHours: number; workersNeeded: number; ratio: number; maxMachineHours: number; hasMachines: boolean; label: string; color: string; suggestion: string } {
+  const activeMachines = matrix.filter((row: any) => {
+    const cell = row.schedule.find((c: any) => c.dateStr === dateStr);
+    return cell && cell.totalHours > 0;
+  });
+
+  if (activeMachines.length === 0) {
+    return { personHours: 0, workersNeeded: 0, ratio: 0, maxMachineHours: 0, hasMachines: false, label: '', color: '', suggestion: '' };
+  }
+
+  // Person-hours thực tế cần thiết
+  const personHours = activeMachines.reduce((sum: number, row: any) => {
+    const cell = row.schedule.find((c: any) => c.dateStr === dateStr);
+    const h = cell?.totalHours || 0;
+    return sum + h * getWorkersPerMachine(row.resource.name);
+  }, 0);
+
+  // Giờ máy dài nhất trong ngày (xác định ca làm việc)
+  const maxMachineHours = activeMachines.reduce((max: number, row: any) => {
+    const cell = row.schedule.find((c: any) => c.dateStr === dateStr);
+    return Math.max(max, cell?.totalHours || 0);
+  }, 0);
+
+  // Effective capacity của 1 người (có fatigue)
+  const capPerPerson = effectiveHours(maxMachineHours);
+
+  // Concurrent peak — không thể xuống dưới số người tối thiểu khi máy cùng chạy
+  const concurrentPeak = activeMachines.reduce((sum: number, row: any) => sum + getWorkersPerMachine(row.resource.name), 0);
+
+  // Workers needed = max(concurrent_peak, ceil(personHours / capPerPerson))
+  const workersNeeded = Math.max(concurrentPeak, Math.ceil(personHours / capPerPerson));
+
+  // Ratio so với đội hiện tại
+  const teamCapacity = teamSize * capPerPerson;
+  const ratio = personHours / teamCapacity;
+
+  // Traffic light — ngưỡng màu + nhãn + gợi ý
+  let label: string, color: string, suggestion: string;
+  const idle = teamSize - workersNeeded;
+  if (ratio < 0.20) {
+    label = `✅ ${workersNeeded}/${teamSize} người`; color = '#10b981';
+    suggestion = idle > 0 ? `💡 ${idle} người rảnh — có thể giao việc khác` : '';
+  } else if (ratio < 0.60) {
+    label = `✅ ${workersNeeded}/${teamSize} người`; color = '#10b981';
+    suggestion = idle > 0 ? `💡 ${idle} người rảnh nửa ngày` : '';
+  } else if (ratio < 0.85) {
+    label = `⚠️ ${workersNeeded}/${teamSize} người`; color = '#f59e0b';
+    suggestion = 'Vận hành bình thường';
+  } else if (ratio <= 1.0) {
+    label = `⚠️ Căng! ${workersNeeded}/${teamSize}`; color = '#f97316';
+    suggestion = 'Không có buffer — theo dõi sát';
+  } else if (ratio <= 1.25) {
+    label = `🚨 Thiếu! Cần +${workersNeeded - teamSize} người`; color = '#ef4444';
+    suggestion = `Huy động bổ sung ${workersNeeded - teamSize} người ngay`;
+  } else {
+    const extra = workersNeeded - teamSize;
+    label = `🚨 Khủng hoảng! +${extra} người`; color = '#dc2626';
+    suggestion = `Cần thêm ${extra} người hoặc dời tiến độ`;
+  }
+
+  return { personHours, workersNeeded, ratio, maxMachineHours, hasMachines: true, label, color, suggestion };
+}
+
+
+
 export default function PwrCapacityClient() {
   const [showRollback, setShowRollback] = useState(false);
   const [batches, setBatches] = useState<any[]>([]);
@@ -23,6 +108,22 @@ export default function PwrCapacityClient() {
   const [overrideModal, setOverrideModal] = useState<any>(null);
   const [overrideValue, setOverrideValue] = useState('8.0');
   const [overrideReason, setOverrideReason] = useState('');
+  // Cấu hình đội — lưu localStorage để nhớ qua các lần mở
+  const [teamSize, setTeamSize] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('pwr_team_size');
+      return saved ? parseInt(saved) : 4;
+    }
+    return 4;
+  });
+  const changeTeamSize = (delta: number) => {
+    setTeamSize(prev => {
+      const next = Math.max(1, Math.min(20, prev + delta));
+      if (typeof window !== 'undefined') localStorage.setItem('pwr_team_size', String(next));
+      return next;
+    });
+  };
+
 
   useEffect(() => {
     setIsLoading(true);
@@ -315,70 +416,80 @@ export default function PwrCapacityClient() {
         ))}
       </div>
 
-      {/* ─── HÀNG NHÂN CÔNG — Đội 4 người luân chuyển ─────────────────── */}
+      {/* ─── BẢNG NHÂN CÔNG ĐỘNG — Dynamic Staffing ─────────────────────── */}
       <div style={{ marginTop: 16, border: '1px solid var(--color-border)', borderRadius: 12, overflow: 'hidden', background: 'var(--color-surface)' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', background: 'rgba(139,92,246,0.08)', borderBottom: '1px solid var(--color-border)', padding: '10px 0' }}>
-          <div style={{ width: 200, padding: '0 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-              👥 Đội 4 Người
+        {/* Header row với nút +/- cấu hình đội */}
+        <div style={{ display: 'flex', background: 'rgba(139,92,246,0.08)', borderBottom: '1px solid var(--color-border)' }}>
+          <div style={{ width: 200, padding: '12px 16px', borderRight: '1px solid var(--color-border)' }}>
+            <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 6 }}>👥 Đội Sản Xuất</div>
+            {/* Cấu hình team size */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button onClick={() => changeTeamSize(-1)}
+                style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-bg)', cursor: 'pointer', fontWeight: 900, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+              <span style={{ fontWeight: 900, fontSize: 20, minWidth: 20, textAlign: 'center' }}>{teamSize}</span>
+              <button onClick={() => changeTeamSize(1)}
+                style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-bg)', cursor: 'pointer', fontWeight: 900, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+              <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>người</span>
             </div>
-            <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginTop: 2 }}>Luân chuyển CNC → Dán → Khoan</div>
+            <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginTop: 4 }}>Luân chuyển CNC→Dán→Khoan</div>
           </div>
-          {data.dates.map((dateStr: string) => {
-            // Tính nhu cầu nhân công đồng thời cho ngày này
-            const activeMachines = data.matrix.filter((row: any) => {
-              const cell = row.schedule.find((c: any) => c.dateStr === dateStr);
-              return cell && cell.totalHours > 0;
-            });
-            // Số người cần đồng thời (peak concurrent):
-            // CNC = 2 (điều khiển + khiêng), Dán Cạnh = 1 (operator, B hỗ trợ vận chuyển), Khoan = 1 (operator+phân loại)
-            const peakWorkers = activeMachines.reduce((sum: number, row: any) => {
-              if (row.resource.name.includes('CNC')) return sum + 2;
-              return sum + 1;
-            }, 0);
-            // Kiểm tra OT: máy nào chạy > 8h → xuyên ca
-            const maxHours = activeMachines.reduce((max: number, row: any) => {
-              const cell = row.schedule.find((c: any) => c.dateStr === dateStr);
-              return Math.max(max, cell?.totalHours || 0);
-            }, 0);
-            const isOT = maxHours > 8;
-            const isOverload = peakWorkers > 4;
-            const isFull = peakWorkers === 4;
-            const hasMachines = activeMachines.length > 0;
 
+          {data.dates.map((dateStr: string) => {
+            const wf = calcWorkforce(data.matrix, dateStr, teamSize);
+            if (!wf.hasMachines) {
+              return <div key={dateStr} style={{ flex: 1, borderRight: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: 'var(--color-border)', fontSize: 18 }}>—</span>
+              </div>;
+            }
             return (
-              <div key={dateStr} style={{ flex: 1, padding: '10px 8px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>
-                {hasMachines ? (
-                  <>
-                    <div style={{ fontSize: 22, fontWeight: 900, color: isOverload ? '#ef4444' : isFull ? '#f59e0b' : '#10b981', lineHeight: 1 }}>
-                      {peakWorkers}
-                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>/4</span>
-                    </div>
-                    <div style={{ fontSize: 10, marginTop: 3, fontWeight: 700,
-                      color: isOverload ? '#ef4444' : isFull ? '#f59e0b' : '#10b981' }}>
-                      {isOverload ? '🚨 Thiếu người' : isFull ? '⚠️ Căng đội' : '✅ Đủ người'}
-                    </div>
-                    {isOT && (
-                      <div style={{ fontSize: 9, background: '#7c3aed', color: '#fff', padding: '2px 5px', borderRadius: 4, marginTop: 4, display: 'inline-block' }}>
-                        ⏰ OT {maxHours.toFixed(0)}h
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div style={{ color: 'var(--color-border)', fontSize: 16, lineHeight: '44px' }}>—</div>
+              <div key={dateStr} style={{ flex: 1, padding: '10px 6px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>
+                {/* Số người */}
+                <div style={{ fontSize: 20, fontWeight: 900, color: wf.color, lineHeight: 1 }}>
+                  {wf.workersNeeded}
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>/{teamSize}</span>
+                </div>
+                {/* Label màu */}
+                <div style={{ fontSize: 10, fontWeight: 700, color: wf.color, marginTop: 3 }}>{wf.label}</div>
+                {/* OT badge */}
+                {wf.maxMachineHours > 8 && (
+                  <div style={{ fontSize: 9, background: '#7c3aed', color: '#fff', padding: '2px 5px', borderRadius: 4, marginTop: 3, display: 'inline-block' }}>
+                    ⏰ OT {wf.maxMachineHours.toFixed(0)}h
+                  </div>
                 )}
+                {/* Person-hours */}
+                <div style={{ fontSize: 9, color: 'var(--color-text-muted)', marginTop: 3 }}>
+                  {wf.personHours.toFixed(1)} người-giờ
+                </div>
               </div>
             );
           })}
         </div>
 
-        {/* Chú thích rotation */}
-        <div style={{ padding: '8px 16px', fontSize: 11, color: 'var(--color-text-muted)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-          <span>🪵 CNC: <strong>2 người</strong> (điều khiển + khiêng ván)</span>
-          <span>📏 Dán Cạnh: <strong>1 người</strong> (vận hành, B hỗ trợ vận chuyển)</span>
-          <span>🔩 Khoan Cam: <strong>1 người</strong> (vận hành + phân loại)</span>
-          <span style={{ marginLeft: 'auto', color: '#7c3aed', fontWeight: 700 }}>⏰ OT = xuyên ca &gt;8h, 4 người không đổi ca</span>
+        {/* Hàng gợi ý hành động */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)' }}>
+          <div style={{ width: 200, padding: '8px 16px', fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', borderRight: '1px solid var(--color-border)' }}>
+            💡 Gợi ý hành động
+          </div>
+          {data.dates.map((dateStr: string) => {
+            const wf = calcWorkforce(data.matrix, dateStr, teamSize);
+            return (
+              <div key={dateStr} style={{ flex: 1, padding: '6px 8px', borderRight: '1px solid var(--color-border)', fontSize: 9, color: wf.color || 'var(--color-text-muted)', textAlign: 'center', fontWeight: 600 }}>
+                {wf.suggestion || '—'}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Chú thích */}
+        <div style={{ padding: '8px 16px', fontSize: 10, color: 'var(--color-text-muted)', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <span>🪵 CNC: <strong>2 người</strong></span>
+          <span>📏 Dán Cạnh: <strong>1 người</strong></span>
+          <span>🔩 Khoan Cam: <strong>1 người</strong></span>
+          <span style={{ color: '#10b981' }}>🟢 &lt;60%</span>
+          <span style={{ color: '#f59e0b' }}>🟡 60-85%</span>
+          <span style={{ color: '#f97316' }}>🟠 85-100%</span>
+          <span style={{ color: '#ef4444' }}>🔴 &gt;100%</span>
+          <span style={{ marginLeft: 'auto', fontSize: 9 }}>Fatigue: 8h=100% · 12h=85% · 16h=70%</span>
         </div>
       </div>
 
