@@ -507,18 +507,18 @@ export default function PwrCapacityClient() {
       <div style={{ marginTop: 16, border: '1px solid var(--color-border)', borderRadius: 12, overflow: 'hidden', background: 'var(--color-surface)' }}>
         {/* Header row với nút +/- cấu hình đội */}
         <div style={{ display: 'flex', background: 'rgba(139,92,246,0.08)', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ width: 200, padding: '14px 16px', borderRight: '1px solid var(--color-border)' }}>
-            <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>👥 Đội Sản Xuất</div>
+          <div style={{ width: 200, padding: '16px 16px', borderRight: '1px solid var(--color-border)' }}>
+            <div style={{ fontWeight: 800, fontSize: 21, marginBottom: 10 }}>👥 Đội Sản Xuất</div>
             {/* Cấu hình team size */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button onClick={() => changeTeamSize(-1)}
-                style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-bg)', cursor: 'pointer', fontWeight: 900, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-              <span style={{ fontWeight: 900, fontSize: 26, minWidth: 28, textAlign: 'center' }}>{teamSize}</span>
+                style={{ width: 34, height: 34, borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-bg)', cursor: 'pointer', fontWeight: 900, fontSize: 23, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+              <span style={{ fontWeight: 900, fontSize: 34, minWidth: 36, textAlign: 'center' }}>{teamSize}</span>
               <button onClick={() => changeTeamSize(1)}
-                style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-bg)', cursor: 'pointer', fontWeight: 900, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
-              <span style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>người</span>
+                style={{ width: 34, height: 34, borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-bg)', cursor: 'pointer', fontWeight: 900, fontSize: 23, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+              <span style={{ fontSize: 17, color: 'var(--color-text-muted)' }}>người</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 6 }}>Luân chuyển CNC→Dán→Khoan</div>
+            <div style={{ fontSize: 14, color: 'var(--color-text-muted)', marginTop: 6 }}>Luân chuyển CNC→Dán→Khoan</div>
           </div>
 
           {data.dates.map((dateStr: string) => {
@@ -531,55 +531,55 @@ export default function PwrCapacityClient() {
               <div key={dateStr} style={{ flex: 1, borderRight: '1px solid var(--color-border)', position: 'relative' }}>
                 {isEditing ? (
                   /* ── INLINE EDIT MODE ── */
-                  <div style={{ padding: '10px 6px', textAlign: 'center', background: 'rgba(139,92,246,0.1)' }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8, color: '#8b5cf6' }}>Số người ngày này</div>
+                  <div style={{ padding: '12px 6px', textAlign: 'center', background: 'rgba(139,92,246,0.1)' }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 10, color: '#8b5cf6' }}>Số người ngày này</div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                       <button onClick={() => setEditVal(v => Math.max(0, v - 1))}
-                        style={{ width: 26, height: 26, borderRadius: 4, border: '1px solid #8b5cf6', background: 'transparent', cursor: 'pointer', color: '#8b5cf6', fontWeight: 900, fontSize: 16 }}>−</button>
-                      <span style={{ fontWeight: 900, fontSize: 26, minWidth: 28, textAlign: 'center', color: '#8b5cf6' }}>{editVal}</span>
+                        style={{ width: 32, height: 32, borderRadius: 4, border: '1px solid #8b5cf6', background: 'transparent', cursor: 'pointer', color: '#8b5cf6', fontWeight: 900, fontSize: 21 }}>−</button>
+                      <span style={{ fontWeight: 900, fontSize: 34, minWidth: 36, textAlign: 'center', color: '#8b5cf6' }}>{editVal}</span>
                       <button onClick={() => setEditVal(v => Math.min(20, v + 1))}
-                        style={{ width: 26, height: 26, borderRadius: 4, border: '1px solid #8b5cf6', background: 'transparent', cursor: 'pointer', color: '#8b5cf6', fontWeight: 900, fontSize: 16 }}>+</button>
+                        style={{ width: 32, height: 32, borderRadius: 4, border: '1px solid #8b5cf6', background: 'transparent', cursor: 'pointer', color: '#8b5cf6', fontWeight: 900, fontSize: 21 }}>+</button>
                     </div>
-                    <div style={{ display: 'flex', gap: 4, marginTop: 8, justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: 6, marginTop: 10, justifyContent: 'center' }}>
                       <button onClick={() => applyDayTeam(dateStr, editVal)}
-                        style={{ fontSize: 11, padding: '3px 10px', borderRadius: 4, background: '#8b5cf6', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✓ Lưu</button>
+                        style={{ fontSize: 14, padding: '4px 12px', borderRadius: 4, background: '#8b5cf6', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✓ Lưu</button>
                       {isCustom && <button onClick={() => resetDayTeam(dateStr)}
-                        style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', cursor: 'pointer' }}>Reset</button>}
+                        style={{ fontSize: 14, padding: '4px 10px', borderRadius: 4, background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', cursor: 'pointer' }}>Reset</button>}
                       <button onClick={() => setEditingDay(null)}
-                        style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>✕</button>
+                        style={{ fontSize: 14, padding: '4px 10px', borderRadius: 4, background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>✕</button>
                     </div>
                   </div>
                 ) : (
                   /* ── DISPLAY MODE — click để chỉnh ── */
                   <div onClick={() => { setEditingDay(dateStr); setEditVal(dayTeam); }}
-                    style={{ padding: '12px 6px', textAlign: 'center', cursor: 'pointer', minHeight: 80 }}
+                    style={{ padding: '14px 6px', textAlign: 'center', cursor: 'pointer', minHeight: 100 }}
                     title={`Click để thay đổi số người ngày ${dateStr}`}>
                     {/* Badge riêng ngày */}
                     {isCustom && (
-                      <div style={{ position: 'absolute', top: 4, right: 4, fontSize: 10, background: '#8b5cf6', color: '#fff', borderRadius: 3, padding: '1px 5px' }}>✏️ {dayTeam}ng</div>
+                      <div style={{ position: 'absolute', top: 4, right: 4, fontSize: 12, background: '#8b5cf6', color: '#fff', borderRadius: 3, padding: '2px 6px' }}>✏️ {dayTeam}ng</div>
                     )}
                     {wf.hasMachines ? (
                       <>
                         {/* Số người — to rõ */}
-                        <div style={{ fontSize: 28, fontWeight: 900, color: wf.color, lineHeight: 1 }}>
+                        <div style={{ fontSize: 36, fontWeight: 900, color: wf.color, lineHeight: 1 }}>
                           {wf.workersNeeded}
-                          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-muted)' }}>/{dayTeam}</span>
+                          <span style={{ fontSize: 18, fontWeight: 600, color: 'var(--color-text-muted)' }}>/{dayTeam}</span>
                         </div>
                         {/* Label */}
-                        <div style={{ fontSize: 12, fontWeight: 700, color: wf.color, marginTop: 4 }}>{wf.label}</div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: wf.color, marginTop: 5 }}>{wf.label}</div>
                         {/* OT badge */}
                         {wf.maxMachineHours > 8 && (
-                          <div style={{ fontSize: 11, background: '#7c3aed', color: '#fff', padding: '2px 7px', borderRadius: 4, marginTop: 4, display: 'inline-block', fontWeight: 700 }}>
+                          <div style={{ fontSize: 14, background: '#7c3aed', color: '#fff', padding: '3px 8px', borderRadius: 4, marginTop: 5, display: 'inline-block', fontWeight: 700 }}>
                             ⏰ OT {wf.maxMachineHours.toFixed(0)}h
                           </div>
                         )}
                         {/* Person-hours */}
-                        <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 4 }}>{wf.personHours.toFixed(1)} ng-giờ</div>
+                        <div style={{ fontSize: 14, color: 'var(--color-text-muted)', marginTop: 5 }}>{wf.personHours.toFixed(1)} ng-giờ</div>
                       </>
                     ) : (
-                      <div style={{ color: 'var(--color-text-muted)', marginTop: 10 }}>
-                        <div style={{ fontSize: 20, color: 'var(--color-border)' }}>—</div>
-                        <div style={{ fontSize: 11, marginTop: 4 }}>standby: {dayTeam}ng</div>
+                      <div style={{ color: 'var(--color-text-muted)', marginTop: 12 }}>
+                        <div style={{ fontSize: 26, color: 'var(--color-border)' }}>—</div>
+                        <div style={{ fontSize: 14, marginTop: 6 }}>standby: {dayTeam}ng</div>
                       </div>
                     )}
                   </div>
@@ -591,13 +591,13 @@ export default function PwrCapacityClient() {
 
         {/* Hàng gợi ý hành động */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ width: 200, padding: '10px 16px', fontSize: 13, fontWeight: 700, color: 'var(--color-text-muted)', borderRight: '1px solid var(--color-border)' }}>
+          <div style={{ width: 200, padding: '12px 16px', fontSize: 17, fontWeight: 700, color: 'var(--color-text-muted)', borderRight: '1px solid var(--color-border)' }}>
             💡 Gợi ý hành động
           </div>
           {data.dates.map((dateStr: string) => {
             const wf = calcWorkforce(data.matrix, dateStr, getDayTeam(dateStr));
             return (
-              <div key={dateStr} style={{ flex: 1, padding: '8px 8px', borderRight: '1px solid var(--color-border)', fontSize: 11, color: wf.color || 'var(--color-text-muted)', textAlign: 'center', fontWeight: 600 }}>
+              <div key={dateStr} style={{ flex: 1, padding: '10px 8px', borderRight: '1px solid var(--color-border)', fontSize: 14, color: wf.color || 'var(--color-text-muted)', textAlign: 'center', fontWeight: 600 }}>
                 {wf.suggestion || (getDayTeam(dateStr) > 0 ? `Standby ${getDayTeam(dateStr)} người` : '—')}
               </div>
             );
@@ -605,7 +605,7 @@ export default function PwrCapacityClient() {
         </div>
 
         {/* Chú thích */}
-        <div style={{ padding: '10px 16px', fontSize: 12, color: 'var(--color-text-muted)', display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ padding: '12px 16px', fontSize: 16, color: 'var(--color-text-muted)', display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
           <span>🪵 CNC: <strong>2 người</strong></span>
           <span>📏 Dán Cạnh: <strong>1 người</strong></span>
           <span>🔩 Khoan Cam: <strong>1 người</strong></span>
@@ -613,9 +613,10 @@ export default function PwrCapacityClient() {
           <span style={{ color: '#f59e0b', fontWeight: 700 }}>🟡 60-85%</span>
           <span style={{ color: '#f97316', fontWeight: 700 }}>🟠 85-100%</span>
           <span style={{ color: '#ef4444', fontWeight: 700 }}>🔴 &gt;100%</span>
-          <span style={{ marginLeft: 'auto', fontSize: 11 }}>Fatigue: 8h=100% · 12h=85% · 16h=70%</span>
+          <span style={{ marginLeft: 'auto', fontSize: 14 }}>Fatigue: 8h=100% · 12h=85% · 16h=70%</span>
         </div>
       </div>
+
 
 
 
