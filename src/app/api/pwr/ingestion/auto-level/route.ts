@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       }).from(pwrTasks).where(
         and(
           eq(pwrTasks.source, 'SYSTEM_EXPLOSION'),
-          inArray(pwrTasks.status, ['TODO', 'INBOX'])
+          inArray(pwrTasks.status, ['TODO', 'INBOX', 'WAITING', 'IN_PROGRESS'])
         )
       );
 
