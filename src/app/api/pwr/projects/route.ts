@@ -172,6 +172,7 @@ export async function POST(req: Request) {
           category:    t.category,
           priority:    t.priority,
           status:      'TODO' as const,
+          projectId:   project.id,
           projectRef:  name.trim(),
           source:      'SELF' as const,
           tags:        [`giai-doan-${t.phase}`],

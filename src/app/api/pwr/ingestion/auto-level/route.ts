@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrTasks, pwrTaskResources, pwrResources, pwrResourceCalendar, pwrTaskDependencies } from '@/db/schema';
 import { eq, inArray, and, gte, like } from 'drizzle-orm';
-import { getAuthSession } from '@/lib/auth';
+import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getAuthSession();
-    if (!session?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const authResult = await requireAuth(req as any, ALL_ROLES);
+    if (authResult.error) return authResult.error;
+    const { session } = authResult;
     
     const { batchId } = await req.json();
     if (!batchId) return NextResponse.json({ error: 'Missing batchId' }, { status: 400 });
