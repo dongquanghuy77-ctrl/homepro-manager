@@ -124,6 +124,32 @@ export default function PwrCapacityClient() {
     });
   };
 
+  // Override số người từng ngày (linh hoạt) — lưu localStorage
+  const [dailyTeam, setDailyTeam] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem('pwr_daily_team') || '{}'); } catch { return {}; }
+  });
+  const [editingDay, setEditingDay] = useState<string | null>(null);
+  const [editVal, setEditVal] = useState(4);
+
+  const getDayTeam = (dateStr: string) => dailyTeam[dateStr] ?? teamSize;
+
+  const applyDayTeam = (dateStr: string, val: number) => {
+    setDailyTeam(prev => {
+      const next = { ...prev, [dateStr]: Math.max(0, Math.min(20, val)) };
+      localStorage.setItem('pwr_daily_team', JSON.stringify(next));
+      return next;
+    });
+    setEditingDay(null);
+  };
+  const resetDayTeam = (dateStr: string) => {
+    setDailyTeam(prev => {
+      const next = { ...prev }; delete next[dateStr];
+      localStorage.setItem('pwr_daily_team', JSON.stringify(next));
+      return next;
+    });
+    setEditingDay(null);
+  };
+
 
   useEffect(() => {
     setIsLoading(true);
@@ -435,31 +461,65 @@ export default function PwrCapacityClient() {
           </div>
 
           {data.dates.map((dateStr: string) => {
-            const wf = calcWorkforce(data.matrix, dateStr, teamSize);
-            if (!wf.hasMachines) {
-              return <div key={dateStr} style={{ flex: 1, borderRight: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: 'var(--color-border)', fontSize: 18 }}>—</span>
-              </div>;
-            }
+            const dayTeam = getDayTeam(dateStr);
+            const isCustom = dailyTeam[dateStr] !== undefined;
+            const wf = calcWorkforce(data.matrix, dateStr, dayTeam);
+            const isEditing = editingDay === dateStr;
+
+            // Ngày không có máy chạy — vẫn cho phép cài số người (để biết ai đang standby)
             return (
-              <div key={dateStr} style={{ flex: 1, padding: '10px 6px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>
-                {/* Số người */}
-                <div style={{ fontSize: 20, fontWeight: 900, color: wf.color, lineHeight: 1 }}>
-                  {wf.workersNeeded}
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>/{teamSize}</span>
-                </div>
-                {/* Label màu */}
-                <div style={{ fontSize: 10, fontWeight: 700, color: wf.color, marginTop: 3 }}>{wf.label}</div>
-                {/* OT badge */}
-                {wf.maxMachineHours > 8 && (
-                  <div style={{ fontSize: 9, background: '#7c3aed', color: '#fff', padding: '2px 5px', borderRadius: 4, marginTop: 3, display: 'inline-block' }}>
-                    ⏰ OT {wf.maxMachineHours.toFixed(0)}h
+              <div key={dateStr} style={{ flex: 1, borderRight: '1px solid var(--color-border)', position: 'relative' }}>
+                {isEditing ? (
+                  /* ── INLINE EDIT MODE ── */
+                  <div style={{ padding: '8px 4px', textAlign: 'center', background: 'rgba(139,92,246,0.1)' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, marginBottom: 6, color: '#8b5cf6' }}>Số người ngày này</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                      <button onClick={() => setEditVal(v => Math.max(0, v - 1))}
+                        style={{ width: 22, height: 22, borderRadius: 4, border: '1px solid #8b5cf6', background: 'transparent', cursor: 'pointer', color: '#8b5cf6', fontWeight: 900, fontSize: 14 }}>−</button>
+                      <span style={{ fontWeight: 900, fontSize: 20, minWidth: 24, textAlign: 'center', color: '#8b5cf6' }}>{editVal}</span>
+                      <button onClick={() => setEditVal(v => Math.min(20, v + 1))}
+                        style={{ width: 22, height: 22, borderRadius: 4, border: '1px solid #8b5cf6', background: 'transparent', cursor: 'pointer', color: '#8b5cf6', fontWeight: 900, fontSize: 14 }}>+</button>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, marginTop: 6, justifyContent: 'center' }}>
+                      <button onClick={() => applyDayTeam(dateStr, editVal)}
+                        style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, background: '#8b5cf6', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✓ Lưu</button>
+                      {isCustom && <button onClick={() => resetDayTeam(dateStr)}
+                        style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', cursor: 'pointer' }}>Reset</button>}
+                      <button onClick={() => setEditingDay(null)}
+                        style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'transparent', color: 'var(--color-text-muted)', border: '1px solid var(--color-border)', cursor: 'pointer' }}>✕</button>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── DISPLAY MODE — click để chỉnh ── */
+                  <div onClick={() => { setEditingDay(dateStr); setEditVal(dayTeam); }}
+                    style={{ padding: '10px 6px', textAlign: 'center', cursor: 'pointer', minHeight: 70 }}
+                    title={`Click để thay đổi số người ngày ${dateStr}`}>
+                    {/* Badge riêng ngày */}
+                    {isCustom && (
+                      <div style={{ position: 'absolute', top: 4, right: 4, fontSize: 9, background: '#8b5cf6', color: '#fff', borderRadius: 3, padding: '1px 4px' }}>✏️ {dayTeam}ng</div>
+                    )}
+                    {wf.hasMachines ? (
+                      <>
+                        <div style={{ fontSize: 20, fontWeight: 900, color: wf.color, lineHeight: 1 }}>
+                          {wf.workersNeeded}
+                          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>/{dayTeam}</span>
+                        </div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: wf.color, marginTop: 3 }}>{wf.label}</div>
+                        {wf.maxMachineHours > 8 && (
+                          <div style={{ fontSize: 9, background: '#7c3aed', color: '#fff', padding: '2px 5px', borderRadius: 4, marginTop: 3, display: 'inline-block' }}>
+                            ⏰ OT {wf.maxMachineHours.toFixed(0)}h
+                          </div>
+                        )}
+                        <div style={{ fontSize: 9, color: 'var(--color-text-muted)', marginTop: 3 }}>{wf.personHours.toFixed(1)} ng-giờ</div>
+                      </>
+                    ) : (
+                      <div style={{ color: 'var(--color-text-muted)', fontSize: 11, marginTop: 8 }}>
+                        <div style={{ fontSize: 16, color: 'var(--color-border)' }}>—</div>
+                        <div style={{ fontSize: 9, marginTop: 2 }}>standby: {dayTeam}ng</div>
+                      </div>
+                    )}
                   </div>
                 )}
-                {/* Person-hours */}
-                <div style={{ fontSize: 9, color: 'var(--color-text-muted)', marginTop: 3 }}>
-                  {wf.personHours.toFixed(1)} người-giờ
-                </div>
               </div>
             );
           })}
@@ -471,14 +531,15 @@ export default function PwrCapacityClient() {
             💡 Gợi ý hành động
           </div>
           {data.dates.map((dateStr: string) => {
-            const wf = calcWorkforce(data.matrix, dateStr, teamSize);
+            const wf = calcWorkforce(data.matrix, dateStr, getDayTeam(dateStr));
             return (
               <div key={dateStr} style={{ flex: 1, padding: '6px 8px', borderRight: '1px solid var(--color-border)', fontSize: 9, color: wf.color || 'var(--color-text-muted)', textAlign: 'center', fontWeight: 600 }}>
-                {wf.suggestion || '—'}
+                {wf.suggestion || (getDayTeam(dateStr) > 0 ? `Standby ${getDayTeam(dateStr)} người` : '—')}
               </div>
             );
           })}
         </div>
+
 
         {/* Chú thích */}
         <div style={{ padding: '8px 16px', fontSize: 10, color: 'var(--color-text-muted)', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
