@@ -8,9 +8,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
     const today = new Date();
-    const startDate = format(today, 'yyyy-MM-dd');
-    const endDate = format(addDays(today, 6), 'yyyy-MM-dd'); // 7 ngày
+    const startDate = searchParams.get('start') || format(today, 'yyyy-MM-dd');
+    const endDate = searchParams.get('end') || format(addDays(today, 6), 'yyyy-MM-dd');
 
     // 1. Lấy danh sách máy móc
     let resources = await db.select().from(pwrResources);
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
     // 3. Build Ma trận Heatmap
     const matrix = resources.map(res => {
       const dates = Array.from({length: 7}).map((_, i) => {
-        const dateStr = format(addDays(today, i), 'yyyy-MM-dd');
+        const dateStr = format(addDays(new Date(startDate), i), 'yyyy-MM-dd');
         const tasksOnDate = loads.filter(l => l.resourceId === res.id && l.reservedDate === dateStr);
         const totalHours = tasksOnDate.reduce((sum, task) => sum + parseFloat(task.estimatedHours || '0'), 0);
         const maxCapacity = parseFloat(res.capacityHoursPerDay || '8.0');
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({ matrix, dates: Array.from({length: 7}).map((_, i) => format(addDays(today, i), 'yyyy-MM-dd')) });
+    return NextResponse.json({ matrix, dates: Array.from({length: 7}).map((_, i) => format(addDays(new Date(startDate), i), 'yyyy-MM-dd')) });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

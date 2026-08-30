@@ -9,6 +9,7 @@ export default function PwrIngestionClient() {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [maxDailyHours, setMaxDailyHours] = useState(8);
   const [parsedData, setParsedData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   
@@ -134,7 +135,8 @@ export default function PwrIngestionClient() {
           projectName: finalProjectName,
             batchName: batchName.trim() || parsedData.fileName.replace('.xlsx', ''),
           isNewProject: projectMode === 'NEW',
-          newProjectType: newProjectType
+          newProjectType: newProjectType,
+          maxDailyHours: maxDailyHours
         })
       });
       const result = await res.json();
@@ -424,13 +426,22 @@ export default function PwrIngestionClient() {
                     <span style={{ color: '#ef4444', fontWeight: 600 }}><ShieldAlert size={16} style={{ verticalAlign: 'text-bottom', marginRight: 4 }}/> {parsedData.totalMissing} Mã Ngoại lai</span>
                   </div>
                 </div>
-                <button 
-                  onClick={handleExecute}
-                  disabled={isUploading}
-                  style={{ background: isUploading ? 'var(--color-surface-2)' : '#10b981', color: isUploading ? 'var(--color-text-muted)' : '#fff', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 700, cursor: isUploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}
-                >
-                  {isUploading ? 'ĐANG XỬ LÝ...' : 'Phát Lệnh Nổ Task'} <ArrowRight size={18} />
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', textAlign: 'right' }}>C.Suất Tối Đa/Ngày</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input type="range" min="4" max="16" step="0.5" value={maxDailyHours} onChange={e => setMaxDailyHours(Number(e.target.value))} style={{ width: 100 }} />
+                      <span style={{ fontSize: 14, fontWeight: 700, minWidth: 40, color: maxDailyHours > 8 ? '#ef4444' : 'var(--color-text)', textAlign: 'right' }}>{maxDailyHours}h</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleExecute}
+                    disabled={isUploading}
+                    style={{ background: isUploading ? 'var(--color-surface-2)' : '#10b981', color: isUploading ? 'var(--color-text-muted)' : '#fff', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 700, cursor: isUploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}
+                  >
+                    {isUploading ? 'ĐANG XỬ LÝ...' : 'Phát Lệnh Nổ Task'} <ArrowRight size={18} />
+                  </button>
+                </div>
               </div>
               
               {parsedData.totalMissing > 0 && (

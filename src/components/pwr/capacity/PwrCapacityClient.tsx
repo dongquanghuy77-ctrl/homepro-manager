@@ -1,7 +1,7 @@
 'use client';
-
 import { useState, useEffect } from 'react';
-import { Activity, CalendarDays, AlertTriangle, Battery, BatteryFull, BatteryMedium, BatteryWarning } from 'lucide-react';
+import { Activity, CalendarDays, AlertTriangle, Battery, BatteryFull, BatteryMedium, BatteryWarning, ChevronLeft, ChevronRight } from 'lucide-react';
+import { addDays, format } from 'date-fns';
 
 export default function PwrCapacityClient() {
   const [showRollback, setShowRollback] = useState(false);
@@ -9,15 +9,20 @@ export default function PwrCapacityClient() {
   const [isRollingBack, setIsRollingBack] = useState(false);
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [weekOffset, setWeekOffset] = useState(0);
 
   useEffect(() => {
-    fetch('/api/pwr/capacity')
+    setIsLoading(true);
+    const today = new Date();
+    const startDate = format(addDays(today, weekOffset * 7), 'yyyy-MM-dd');
+    const endDate = format(addDays(today, weekOffset * 7 + 6), 'yyyy-MM-dd');
+    fetch(`/api/pwr/capacity?start=${startDate}&end=${endDate}`)
       .then(res => res.json())
       .then(d => {
         setData(d);
         setIsLoading(false);
       });
-  }, []);
+  }, [weekOffset]);
 
 
   const loadBatches = async () => {
@@ -75,12 +80,24 @@ export default function PwrCapacityClient() {
             <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-muted)' }}>Mô phỏng thời gian thực lượng giờ máy đang bị chiếm dụng</p>
           </div>
         </div>
-        <button
-          onClick={() => { setShowRollback(!showRollback); if (!showRollback) loadBatches(); }}
-          style={{ background: showRollback ? '#ef4444' : 'rgba(239,68,68,0.1)', color: showRollback ? '#fff' : '#ef4444', border: '1px solid #ef4444', padding: '8px 16px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}
-        >
-          {showRollback ? '✕ Đóng' : '🔄 Hủy Nổ / Sửa Sai'}
-        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Week Navigation */}
+          <div style={{ display: 'flex', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 8, overflow: 'hidden' }}>
+            <button onClick={() => setWeekOffset(w => w - 1)} style={{ padding: '6px 10px', background: 'transparent', border: 'none', borderRight: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-text)', display: 'flex', alignItems: 'center' }}><ChevronLeft size={18} /></button>
+            <div style={{ padding: '6px 16px', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', minWidth: 100, justifyContent: 'center' }}>
+              {weekOffset === 0 ? 'Tuần này' : weekOffset === 1 ? 'Tuần sau' : weekOffset === -1 ? 'Tuần trước' : `Tuần ${weekOffset > 0 ? '+' : ''}${weekOffset}`}
+            </div>
+            <button onClick={() => setWeekOffset(w => w + 1)} style={{ padding: '6px 10px', background: 'transparent', border: 'none', borderLeft: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-text)', display: 'flex', alignItems: 'center' }}><ChevronRight size={18} /></button>
+          </div>
+          
+          <button
+            onClick={() => { setShowRollback(!showRollback); if (!showRollback) loadBatches(); }}
+            style={{ background: showRollback ? '#ef4444' : 'rgba(239,68,68,0.1)', color: showRollback ? '#fff' : '#ef4444', border: '1px solid #ef4444', padding: '8px 16px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}
+          >
+            {showRollback ? '✕ Đóng' : '🔄 Hủy Nổ / Sửa Sai'}
+          </button>
+        </div>
       </div>
 
       {/* Rollback Panel */}

@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { items, fileName, batchId, projectId, projectName, isNewProject, newProjectType, batchName } = body;
+    const { items, fileName, batchId, projectId, projectName, isNewProject, newProjectType, batchName, maxDailyHours } = body;
     const userId = session.id;
 
     if (!items || items.length === 0) {
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       }
 
       // --- AUTO-SPLIT ENGINE (BĂM LÔ) ---
-      const MAX_H = 8;
+      const MAX_H = Number(maxDailyHours) || 8;
       const generateChunks = (totalQty: number, totalHours: number) => {
         if (totalQty <= 0 || totalHours <= 0) return [];
         const numChunks = Math.ceil(totalHours / MAX_H);
