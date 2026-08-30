@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
         )
       );
 
-      const batchTasks = allExplodedTasks.filter(t => t.tags && t.tags.includes(batchId));
+      const batchTag = batchId.startsWith('BATCH_') ? batchId : \`BATCH_\${batchId}\`;
+      const batchTasks = allExplodedTasks.filter(t => t.tags && (t.tags.includes(batchId) || t.tags.includes(batchTag)));
       if (batchTasks.length === 0) {
         throw new Error('Không tìm thấy Task nào ở trạng thái TODO để San Phẳng.');
       }
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
             description: `Hệ thống tự động San Phẳng (Rót Nước) vào ngày ${dateStr} với công suất ${hoursToPour.toFixed(2)}h`,
             category: 'PRODUCTION', priority: 'MEDIUM', status: 'TODO',
             projectRef: projRef, projectId: projId, taskType: 'PROJECT_TASK',
-            tags: ['EXPLOSION', typeStr.replace(' ', '_'), batchId, 'AUTO_LEVELED'],
+            tags: ['EXPLOSION', typeStr.replace(' ', '_'), batchTag, 'AUTO_LEVELED'],
             source: 'SYSTEM_EXPLOSION', startDate: dateStr, dueDate: dateStr
           }).returning();
           
