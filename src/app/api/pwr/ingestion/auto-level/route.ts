@@ -59,7 +59,13 @@ export async function POST(req: NextRequest) {
       const todayStr = new Date().toISOString().split('T')[0];
       const overrides = await tx.select().from(pwrResourceCalendar).where(gte(pwrResourceCalendar.dateStr, todayStr));
 
-      // XÓA TASK CŨ
+      // XÓA THEO THỨ TỰ ĐỂ TRÁNH VI PHẠM FOREIGN KEY
+      // 1. Xóa dependencies (taskId -> task bị xóa, hoặc dependsOnId -> task bị xóa)
+      await tx.delete(pwrTaskDependencies).where(inArray(pwrTaskDependencies.taskId, taskIds));
+      await tx.delete(pwrTaskDependencies).where(inArray(pwrTaskDependencies.dependsOnId, taskIds));
+      // 2. Xóa task resources
+      await tx.delete(pwrTaskResources).where(inArray(pwrTaskResources.taskId, taskIds));
+      // 3. Cuối cùng mới xóa tasks
       await tx.delete(pwrTasks).where(inArray(pwrTasks.id, taskIds));
 
       let totalNewTasks = 0;
