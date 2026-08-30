@@ -48,9 +48,16 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     const url    = new URL(req.url);
     const action = url.searchParams.get("action") ?? "archive";
     
-    const [proj] = await db.select().from(pwrProjects)
-      .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
-    if (!proj) return NextResponse.json({ error: "Khong tim thay du an" }, { status: 404 });
+    const projectNameParam = url.searchParams.get("name");
+    let projName = "";
+    if (id === 0 && projectNameParam) {
+      projName = projectNameParam;
+    } else {
+      const [proj] = await db.select().from(pwrProjects)
+        .where(and(eq(pwrProjects.id, id), eq(pwrProjects.userId, session.id)));
+      if (!proj) return NextResponse.json({ error: "Khong tim thay du an" }, { status: 404 });
+      projName = proj.name;
+    }
     
     if (action === "hard_delete") {
       let deletedTaskCount = 0;
@@ -60,7 +67,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
         const tasksInProj = await tx.select({ id: pwrTasks.id }).from(pwrTasks)
           .where(or(
             eq(pwrTasks.projectId, id),
-            and(eq(pwrTasks.projectRef, proj.name), isNull(pwrTasks.projectId))
+            and(eq(pwrTasks.projectRef, projName), isNull(pwrTasks.projectId))
           ));
           
         if (tasksInProj.length > 0) {

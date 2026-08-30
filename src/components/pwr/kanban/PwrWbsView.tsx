@@ -215,7 +215,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     }
     
     try {
-      const res = await fetch(`/api/pwr/projects/${projectId}?action=hard_delete`, { method: 'DELETE' });
+      const res = await fetch(`/api/pwr/projects/${projectId}?action=hard_delete&name=${encodeURIComponent(projectName)}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setToast({ message: `Đã xóa dự án và hoàn trả vật tư thành công!`, type: 'success' });
@@ -371,14 +371,12 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
                 </div>
 
                                   <div style={{ display: 'flex', gap: 8 }}>
-                    {(pTasks.find(t => t.projectId)?.projectId) && (
                       <button 
-                        onClick={() => handleDeleteProject(pTasks.find(t => t.projectId)?.projectId!, projName)}
+                        onClick={() => handleDeleteProject(pTasks.find(t => t.projectId)?.projectId || 0, projName)}
                         style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                       >
                         <Trash2 size={16} /> Xóa Dự Án
                       </button>
-                    )}
                     <button onClick={() => setShowModal(true)} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                       + Tạo việc mới
                     </button>
