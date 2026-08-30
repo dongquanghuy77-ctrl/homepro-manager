@@ -299,10 +299,11 @@ export default function PwrCapacityClient() {
 
   return (
     <div style={{ padding: '8px 24px 60px', color: 'var(--color-text)', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
-      backgroundImage: 'url(/wood-bg.png)', backgroundSize: '600px 600px', backgroundRepeat: 'repeat',
       minHeight: '100vh', position: 'relative' }}>
-      {/* Overlay tối để chữ luôn đọc được trên nền gỗ */}
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(8,8,12,0.82)', zIndex: 0, pointerEvents: 'none' }} />
+      {/* ── WOOD TEXTURE — fixed phía sau tất cả layout ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: -2, backgroundImage: 'url(/wood-bg.png)', backgroundSize: '500px 500px', backgroundRepeat: 'repeat' }} />
+      {/* ── OVERLAY TỐI — giảm xuống 0.65 để thấy vân gỗ ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'rgba(6,6,10,0.65)', pointerEvents: 'none' }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
 
       {/* Header */}

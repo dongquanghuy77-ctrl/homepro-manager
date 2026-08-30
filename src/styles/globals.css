@@ -95,10 +95,27 @@ html {
 body {
   font-family: var(--font-family);
   background-color: var(--color-bg);
+  background-image: url('/wood-bg.png');
+  background-size: 500px 500px;
+  background-repeat: repeat;
   color: var(--color-text);
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 10, 0.72);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#__next, body > div {
+  position: relative;
+  z-index: 1;
 }
 
 a {
