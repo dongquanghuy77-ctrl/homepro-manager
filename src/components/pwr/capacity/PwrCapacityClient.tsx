@@ -298,8 +298,13 @@ export default function PwrCapacityClient() {
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-text-muted)' }}>Đang tính toán Tải Trọng Máy Móc...</div>;
 
   return (
-    <div style={{ padding: '8px 24px 60px', color: 'var(--color-text)', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif' }}>
-      
+    <div style={{ padding: '8px 24px 60px', color: 'var(--color-text)', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+      backgroundImage: 'url(/wood-bg.png)', backgroundSize: '600px 600px', backgroundRepeat: 'repeat',
+      minHeight: '100vh', position: 'relative' }}>
+      {/* Overlay tối để chữ luôn đọc được trên nền gỗ */}
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(8,8,12,0.82)', zIndex: 0, pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid var(--color-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -686,7 +691,7 @@ export default function PwrCapacityClient() {
           Khi nổ Task từ file OneClick, hệ thống đã ngầm quy đổi số Tấm/Mét Nẹp thành Giờ Chạy Máy. Nếu cột [Hôm nay] báo Đỏ (Vượt 100%), anh Huy tuyệt đối không được nổ thêm Task. Bắt buộc phải Kéo/Thả (Dời lịch) các Task sang ngày hôm sau để không làm thợ kiệt sức và cháy máy!
         </div>
       </div>
-      
+      </div>{/* end z-index wrapper */}
     </div>
   );
 }
