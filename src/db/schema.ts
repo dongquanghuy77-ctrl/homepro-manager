@@ -2509,3 +2509,16 @@ export const pwrMaterialTransactions = pgTable('pwr_material_transactions', {
 });
 export type PwrMaterialTransaction    = typeof pwrMaterialTransactions.$inferSelect;
 export type NewPwrMaterialTransaction = typeof pwrMaterialTransactions.$inferInsert;
+
+
+export const pwrResourceCalendar = pgTable('pwr_resource_calendar', {
+  id: serial('id').primaryKey(),
+  resourceId: integer('resource_id').notNull().references(() => pwrResources.id, { onDelete: 'cascade' }),
+  dateStr: text('date_str').notNull(),
+  capacityHours: numeric('capacity_hours').notNull(),
+  reason: text('reason'),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export type PwrResourceCalendar = typeof pwrResourceCalendar.$inferSelect;
+export type NewPwrResourceCalendar = typeof pwrResourceCalendar.$inferInsert;

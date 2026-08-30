@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrResources, pwrTaskResources, pwrTasks } from '@/db/schema';
+import { pwrResources, pwrTaskResources, pwrTasks, pwrResourceCalendar } from '@/db/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { addDays, format } from 'date-fns';
 
@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
     // 1. Lấy danh sách máy móc
     let resources = await db.select().from(pwrResources);
     
-    // Auto-seed nếu chưa có máy nào
     if (resources.length === 0) {
       const inserted = await db.insert(pwrResources).values([
         { userId: 1, name: 'Tổ CNC (Máy 1)', resourceType: 'MACHINE', capacityHoursPerDay: '8.0' },
@@ -25,6 +24,8 @@ export async function GET(req: NextRequest) {
       ]).returning();
       resources = inserted;
     }
+
+    const overrides = await db.select().from(pwrResourceCalendar).where(and(gte(pwrResourceCalendar.dateStr, startDate), lte(pwrResourceCalendar.dateStr, endDate)));
 
     // 2. Lấy tải trọng (TaskResources) trong 7 ngày
     const loads = await db.select({
@@ -51,11 +52,15 @@ export async function GET(req: NextRequest) {
         const dateStr = format(addDays(new Date(startDate), i), 'yyyy-MM-dd');
         const tasksOnDate = loads.filter(l => l.resourceId === res.id && l.reservedDate === dateStr);
         const totalHours = tasksOnDate.reduce((sum, task) => sum + parseFloat(task.estimatedHours || '0'), 0);
-        const maxCapacity = parseFloat(res.capacityHoursPerDay || '8.0');
-        const loadPercentage = (totalHours / maxCapacity) * 100;
+        
+        const override = overrides.find(o => o.resourceId === res.id && o.dateStr === dateStr);
+        const maxCapacity = override ? parseFloat(override.capacityHours || '8.0') : parseFloat(res.capacityHoursPerDay || '8.0');
+        
+        // Cần bảo vệ lỗi chia cho 0
+        const loadPercentage = maxCapacity === 0 ? (totalHours > 0 ? 150 : 0) : (totalHours / maxCapacity) * 100;
         
         let status = 'SAFE';
-        if (loadPercentage > 100) status = 'OVERLOAD';
+        if (loadPercentage > 100 || (maxCapacity === 0 && totalHours > 0)) status = 'OVERLOAD';
         else if (loadPercentage >= 80) status = 'WARNING';
         else if (loadPercentage === 0) status = 'EMPTY';
 
@@ -63,6 +68,8 @@ export async function GET(req: NextRequest) {
           dateStr,
           totalHours,
           maxCapacity,
+          isOverride: !!override,
+          reason: override?.reason || null,
           loadPercentage,
           status,
           tasks: tasksOnDate

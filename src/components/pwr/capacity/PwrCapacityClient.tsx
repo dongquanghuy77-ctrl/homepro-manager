@@ -10,6 +10,9 @@ export default function PwrCapacityClient() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [overrideModal, setOverrideModal] = useState<any>(null);
+  const [overrideValue, setOverrideValue] = useState('8.0');
+  const [overrideReason, setOverrideReason] = useState('');
 
   useEffect(() => {
     setIsLoading(true);
@@ -44,6 +47,27 @@ export default function PwrCapacityClient() {
       });
       setBatches(Object.values(batchMap));
     } catch (e) { console.error(e); }
+  };
+
+  const handleSaveOverride = async () => {
+    try {
+      const res = await fetch('/api/pwr/capacity/override', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resourceId: overrideModal.resource.id,
+          dateStr: overrideModal.dateStr,
+          capacityHours: overrideValue === '' ? null : Number(overrideValue),
+          reason: overrideReason
+        })
+      });
+      if(res.ok) {
+        setOverrideModal(null);
+        setWeekOffset(w => w + 0.0001); // force effect re-run
+      } else {
+        alert('Failed to save override');
+      }
+    } catch(e) { console.error(e) }
   };
 
   const handleRollback = async (batchId: string) => {
@@ -91,6 +115,13 @@ export default function PwrCapacityClient() {
             <button onClick={() => setWeekOffset(w => w + 1)} style={{ padding: '6px 10px', background: 'transparent', border: 'none', borderLeft: '1px solid var(--color-border)', cursor: 'pointer', color: 'var(--color-text)', display: 'flex', alignItems: 'center' }}><ChevronRight size={18} /></button>
           </div>
           
+          <button
+            onClick={() => { alert('Tính năng San Phẳng (Auto-Level) đang được hoàn thiện thuật toán. Vui lòng thử lại sau.'); }}
+            style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            🌊 San Phẳng
+          </button>
+
           <button
             onClick={() => { setShowRollback(!showRollback); if (!showRollback) loadBatches(); }}
             style={{ background: showRollback ? '#ef4444' : 'rgba(239,68,68,0.1)', color: showRollback ? '#fff' : '#ef4444', border: '1px solid #ef4444', padding: '8px 16px', borderRadius: 8, fontWeight: 700, cursor: 'pointer', fontSize: 13 }}
@@ -158,7 +189,7 @@ export default function PwrCapacityClient() {
             <div style={{ width: 200, padding: 16, borderRight: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
               <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{row.resource.name}</div>
               <div style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Battery size={14} /> Công suất: {row.resource.capacityHoursPerDay}h/ngày
+                <Battery size={14} /> Gốc: {row.resource.capacityHoursPerDay}h/ngày
               </div>
             </div>
 
@@ -177,7 +208,10 @@ export default function PwrCapacityClient() {
               }
 
               return (
-                <div key={cell.dateStr} style={{ flex: 1, padding: 12, borderRight: '1px solid var(--color-border)', background: bg, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <div key={cell.dateStr} 
+                  onClick={() => { setOverrideModal({ resource: row.resource, dateStr: cell.dateStr, current: cell.maxCapacity, isOverride: cell.isOverride, reason: cell.reason }); setOverrideValue(cell.isOverride ? cell.maxCapacity.toString() : ''); setOverrideReason(cell.reason || ''); }} 
+                  style={{ flex: 1, padding: 12, borderRight: '1px solid var(--color-border)', background: bg, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}
+                  title="Click để Nắn Cốc (Sửa công suất)">
                   
                   {/* Load Bar */}
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4, background: 'rgba(0,0,0,0.05)' }}>
@@ -191,10 +225,14 @@ export default function PwrCapacityClient() {
                       </div>
                       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                         {icon} {Math.round(cell.loadPercentage)}%
+                        {cell.isOverride && <span style={{fontSize: 10, background: '#8b5cf6', color: '#fff', padding: '1px 4px', borderRadius: 4, marginLeft: 4}} title={cell.reason || 'Đã điều chỉnh lịch'}>⚡ {cell.maxCapacity}h</span>}
                       </div>
                     </>
                   ) : (
-                    <div style={{ color: 'var(--color-border)', fontWeight: 600, fontSize: 14 }}>-</div>
+                    <>
+                      <div style={{ color: 'var(--color-border)', fontWeight: 600, fontSize: 14 }}>-</div>
+                      {cell.isOverride && <div style={{fontSize: 10, background: '#8b5cf6', color: '#fff', padding: '1px 4px', borderRadius: 4, marginTop: 4}} title={cell.reason || 'Đã điều chỉnh lịch'}>⚡ {cell.maxCapacity}h</div>}
+                    </>
                   )}
 
                 </div>
