@@ -315,7 +315,74 @@ export default function PwrCapacityClient() {
         ))}
       </div>
 
-      {/* Override Modal - Nắn Cốc */}
+      {/* ─── HÀNG NHÂN CÔNG — Đội 4 người luân chuyển ─────────────────── */}
+      <div style={{ marginTop: 16, border: '1px solid var(--color-border)', borderRadius: 12, overflow: 'hidden', background: 'var(--color-surface)' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', background: 'rgba(139,92,246,0.08)', borderBottom: '1px solid var(--color-border)', padding: '10px 0' }}>
+          <div style={{ width: 200, padding: '0 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+              👥 Đội 4 Người
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginTop: 2 }}>Luân chuyển CNC → Dán → Khoan</div>
+          </div>
+          {data.dates.map((dateStr: string) => {
+            // Tính nhu cầu nhân công đồng thời cho ngày này
+            const activeMachines = data.matrix.filter((row: any) => {
+              const cell = row.schedule.find((c: any) => c.dateStr === dateStr);
+              return cell && cell.totalHours > 0;
+            });
+            // Số người cần đồng thời (peak concurrent):
+            // CNC = 2 (điều khiển + khiêng), Dán Cạnh = 1 (operator, B hỗ trợ vận chuyển), Khoan = 1 (operator+phân loại)
+            const peakWorkers = activeMachines.reduce((sum: number, row: any) => {
+              if (row.resource.name.includes('CNC')) return sum + 2;
+              return sum + 1;
+            }, 0);
+            // Kiểm tra OT: máy nào chạy > 8h → xuyên ca
+            const maxHours = activeMachines.reduce((max: number, row: any) => {
+              const cell = row.schedule.find((c: any) => c.dateStr === dateStr);
+              return Math.max(max, cell?.totalHours || 0);
+            }, 0);
+            const isOT = maxHours > 8;
+            const isOverload = peakWorkers > 4;
+            const isFull = peakWorkers === 4;
+            const hasMachines = activeMachines.length > 0;
+
+            return (
+              <div key={dateStr} style={{ flex: 1, padding: '10px 8px', borderRight: '1px solid var(--color-border)', textAlign: 'center' }}>
+                {hasMachines ? (
+                  <>
+                    <div style={{ fontSize: 22, fontWeight: 900, color: isOverload ? '#ef4444' : isFull ? '#f59e0b' : '#10b981', lineHeight: 1 }}>
+                      {peakWorkers}
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>/4</span>
+                    </div>
+                    <div style={{ fontSize: 10, marginTop: 3, fontWeight: 700,
+                      color: isOverload ? '#ef4444' : isFull ? '#f59e0b' : '#10b981' }}>
+                      {isOverload ? '🚨 Thiếu người' : isFull ? '⚠️ Căng đội' : '✅ Đủ người'}
+                    </div>
+                    {isOT && (
+                      <div style={{ fontSize: 9, background: '#7c3aed', color: '#fff', padding: '2px 5px', borderRadius: 4, marginTop: 4, display: 'inline-block' }}>
+                        ⏰ OT {maxHours.toFixed(0)}h
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ color: 'var(--color-border)', fontSize: 16, lineHeight: '44px' }}>—</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Chú thích rotation */}
+        <div style={{ padding: '8px 16px', fontSize: 11, color: 'var(--color-text-muted)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <span>🪵 CNC: <strong>2 người</strong> (điều khiển + khiêng ván)</span>
+          <span>📏 Dán Cạnh: <strong>1 người</strong> (vận hành, B hỗ trợ vận chuyển)</span>
+          <span>🔩 Khoan Cam: <strong>1 người</strong> (vận hành + phân loại)</span>
+          <span style={{ marginLeft: 'auto', color: '#7c3aed', fontWeight: 700 }}>⏰ OT = xuyên ca &gt;8h, 4 người không đổi ca</span>
+        </div>
+      </div>
+
+
       {overrideModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
              onClick={() => setOverrideModal(null)}>
