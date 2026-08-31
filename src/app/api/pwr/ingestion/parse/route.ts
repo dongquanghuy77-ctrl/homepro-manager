@@ -121,11 +121,76 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // ─── THUẬT TOÁN PARAMETRIC (HÌNH HỌC) ───
+    let geoStats = null;
+    const cutListSheetName = workbook.SheetNames.find(n => n.toUpperCase().includes('CUT') || n.toUpperCase().includes('CẮT'));
+    if (cutListSheetName) {
+      const cutSheet = workbook.Sheets[cutListSheetName];
+      const cutData = xlsx.utils.sheet_to_json(cutSheet, { header: 1 }) as any[][];
+      
+      let cHeaderRow = -1;
+      let cWIdx = -1, cLIdx = -1, cQtyIdx = -1;
+      for (let i = 0; i < Math.min(10, cutData.length); i++) {
+        const row = cutData[i];
+        if (!row) continue;
+        const rowStr = row.map(c => String(c || '').toLowerCase().trim());
+        if (rowStr.some(c => c.includes('rộng') || c.includes('width'))) {
+          cHeaderRow = i;
+          cWIdx = rowStr.findIndex(c => c.includes('rộng') || c.includes('width'));
+          cLIdx = rowStr.findIndex(c => c.includes('dài') || c.includes('cao') || c.includes('length') || c.includes('height'));
+          cQtyIdx = rowStr.findIndex(c => c === 'sl' || c.includes('số lượng') || c === 'qty');
+          break;
+        }
+      }
+
+      if (cHeaderRow !== -1 && cWIdx !== -1 && cLIdx !== -1) {
+        let totalPerimeter = 0; // mét
+        let totalParts = 0;
+        let totalArea = 0; // m2
+        let largeParts = 0;
+        let mediumParts = 0;
+        let smallParts = 0;
+
+        for (let i = cHeaderRow + 1; i < cutData.length; i++) {
+          const row = cutData[i];
+          if (!row || row[cWIdx] == null || row[cLIdx] == null) continue;
+          
+          const w_mm = parseFloat(String(row[cWIdx]).replace(/[^\d.]/g, '')) || 0;
+          const l_mm = parseFloat(String(row[cLIdx]).replace(/[^\d.]/g, '')) || 0;
+          // Nhìn ảnh Cut List của user, nếu không có cột số lượng, ta mặc định là 1 chi tiết/dòng
+          const qty = cQtyIdx !== -1 && row[cQtyIdx] ? (parseFloat(String(row[cQtyIdx])) || 1) : 1;
+
+          if (w_mm <= 0 || l_mm <= 0) continue;
+
+          const w_m = w_mm / 1000;
+          const l_m = l_mm / 1000;
+          const area = w_m * l_m;
+          const perimeter = (w_m + l_m) * 2;
+
+          totalPerimeter += perimeter * qty;
+          totalArea += area * qty;
+          totalParts += qty;
+
+          if (area > 0.8) largeParts += qty;
+          else if (area > 0.2) mediumParts += qty;
+          else smallParts += qty;
+        }
+
+        if (totalParts > 0) {
+          geoStats = {
+            totalPerimeter, totalParts, totalArea,
+            largeParts, mediumParts, smallParts
+          };
+        }
+      }
+    }
+
     return NextResponse.json({ 
       fileName: file.name,
       items: parsedItems,
       totalMatched: parsedItems.filter(i => i.status === 'MATCHED').length,
       totalMissing: parsedItems.filter(i => i.status === 'MISSING').length,
+      geoStats
     });
 
   } catch (error: any) {

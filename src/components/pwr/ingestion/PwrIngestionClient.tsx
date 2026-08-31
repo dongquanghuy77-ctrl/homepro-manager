@@ -136,7 +136,8 @@ export default function PwrIngestionClient() {
             batchName: batchName.trim() || parsedData.fileName.replace('.xlsx', ''),
           isNewProject: projectMode === 'NEW',
           newProjectType: newProjectType,
-          maxDailyHours: maxDailyHours
+          maxDailyHours: maxDailyHours,
+          geoStats: parsedData.geoStats
         })
       });
       const result = await res.json();
