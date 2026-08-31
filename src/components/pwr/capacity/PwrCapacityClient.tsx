@@ -518,6 +518,42 @@ export default function PwrCapacityClient() {
                         {icon} {Math.round(cell.loadPercentage)}%
                         {cell.isOverride && <span style={{fontSize: 10, background: '#8b5cf6', color: '#fff', padding: '1px 4px', borderRadius: 4, marginLeft: 4}} title={cell.reason || 'Đã điều chỉnh lịch'}>⚡ {cell.maxCapacity}h</span>}
                       </div>
+
+                      {/* ── BƯỚC 1: PROJECT CHIPS (Tên dự án) ── */}
+                      {(() => {
+                        const projectMap = new Map();
+                        (cell.tasks || []).forEach((t: any) => {
+                          const pName = t.projectRef || 'Khác';
+                          projectMap.set(pName, (projectMap.get(pName) || 0) + parseFloat(t.estimatedHours || 0));
+                        });
+                        const projectArr = Array.from(projectMap.entries()).map(([name, hrs]) => ({name, hrs}));
+                        
+                        if (projectArr.length === 0) return null;
+                        
+                        // Lấy 2 dự án chiếm nhiều giờ nhất để hiển thị
+                        projectArr.sort((a, b) => b.hrs - a.hrs);
+                        const colors = ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'];
+
+                        return (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center', marginTop: 8, width: '100%', padding: '0 8px' }}>
+                            {projectArr.slice(0, 2).map((p, pIdx) => (
+                              <div key={pIdx} title={`${p.name}: ${p.hrs.toFixed(1)}h`} style={{ 
+                                fontSize: 10, fontWeight: 600, background: 'var(--color-surface)', border: '1px solid var(--color-border)', 
+                                color: 'var(--color-text)', padding: '2px 6px', borderRadius: 4, 
+                                display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%', overflow: 'hidden'
+                              }}>
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: colors[pIdx % colors.length], flexShrink: 0 }}></span>
+                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
+                              </div>
+                            ))}
+                            {projectArr.length > 2 && (
+                              <div style={{ fontSize: 10, fontWeight: 600, background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '2px 4px', borderRadius: 4 }} title={projectArr.slice(2).map(p => `${p.name}: ${p.hrs.toFixed(1)}h`).join('\n')}>
+                                +{projectArr.length - 2}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </>
                   ) : (
                     <>
