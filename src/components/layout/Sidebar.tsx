@@ -10,7 +10,7 @@ import {
   Factory, ScanLine, ClipboardList, BarChart2, BarChart3,
   Inbox, Banknote, Activity, PieChart, Grid,
   UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck,
-  MapPin, Heart, Edit3, Book, Target, Columns, Sunrise
+  MapPin, Heart, Edit3, Book, Target, Columns, Sunrise, Upload, Smartphone
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CommandPalette from '@/components/ui/CommandPalette';
@@ -24,7 +24,7 @@ const iconMap = {
   Factory, ScanLine, ClipboardList, BarChart2, BarChart3,
   Inbox, Banknote, Activity, PieChart, Grid,
   UserPlus, FileText, FileCheck, PenTool, Send, ShoppingCart, Truck,
-  MapPin, Heart, Edit3, Book, Target, Columns, Sunrise
+  MapPin, Heart, Edit3, Book, Target, Columns, Sunrise, Upload, Smartphone
 };
 
 interface UserState {
