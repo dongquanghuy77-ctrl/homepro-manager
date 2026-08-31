@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources, pwrProjects } from '@/db/schema';
-import { eq, sql, inArray } from 'drizzle-orm';
+import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources, pwrProjects, pwrResourceCalendar } from '@/db/schema';
+import { eq, sql, inArray, and, gte, lte } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
@@ -132,32 +132,82 @@ export async function POST(req: NextRequest) {
         purchaseTask = pt;
       }
 
-      // --- AUTO-SPLIT ENGINE (BĂM LÔ) ---
-      const MAX_H = Number(maxDailyHours) || 8;
-      const generateChunks = (totalQty: number, totalHours: number) => {
+      // --- SMART LEVELING ENGINE (San Phẳng Thông Minh) ---
+      const todayObj = new Date();
+      const startDateStr = todayObj.toISOString().split('T')[0];
+      const endDateObj = new Date();
+      endDateObj.setDate(endDateObj.getDate() + 90);
+      const endDateStr = endDateObj.toISOString().split('T')[0];
+
+      // Pre-fetch Tải trọng & Lịch nghỉ (Override)
+      const overrides = await tx.select().from(pwrResourceCalendar)
+        .where(and(gte(pwrResourceCalendar.dateStr, startDateStr), lte(pwrResourceCalendar.dateStr, endDateStr)));
+      
+      const existingLoads = await tx.select().from(pwrTaskResources)
+        .where(and(gte(pwrTaskResources.reservedDate, startDateStr), lte(pwrTaskResources.reservedDate, endDateStr)));
+
+      const checkCapacity = (machineId: number, dateStr: string) => {
+         const machine = machines.find((m:any) => m.id === machineId);
+         if (!machine) return { maxH: 8, usedH: 0, available: 8 };
+         
+         const override = overrides.find((o:any) => o.resourceId === machineId && o.dateStr === dateStr);
+         let maxH = override ? parseFloat(override.capacityHours || '0') : parseFloat(machine.capacityHoursPerDay || '8');
+         
+         if (!override && Number(maxDailyHours) > 0) {
+           maxH = Math.min(maxH, Number(maxDailyHours));
+         }
+
+         const usedH = existingLoads
+           .filter((l:any) => l.resourceId === machineId && l.reservedDate === dateStr)
+           .reduce((sum:number, l:any) => sum + parseFloat(l.estimatedHours || '0'), 0);
+         
+         return { maxH, usedH, available: Math.max(0, maxH - usedH) };
+      };
+
+      const generateChunks = (totalQty: number, totalHours: number, machineId: number) => {
         if (totalQty <= 0 || totalHours <= 0) return [];
-        const numChunks = Math.ceil(totalHours / MAX_H);
         const chunks = [];
         let remQty = totalQty;
         let remH = totalHours;
         
         let d = new Date();
-        // Bỏ qua Chủ Nhật ngay từ ngày đầu
-        if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+        let safetyCounter = 0;
         
-        for (let i = 0; i < numChunks; i++) {
-          const h = Math.min(MAX_H, remH);
-          const q = (i === numChunks - 1) ? remQty : Math.round(totalQty * (h / totalHours));
-          remH -= h;
-          remQty -= q;
-          
+        while (remH > 0 && safetyCounter < 100) {
+          safetyCounter++;
+          // Bỏ qua Chủ Nhật
+          if (d.getDay() === 0) {
+            d.setDate(d.getDate() + 1);
+            continue;
+          }
+
           const dateStr = d.toISOString().split('T')[0];
-          chunks.push({ partIndex: i + 1, numChunks, qty: q, hours: h, dateStr });
-          
-          // Tăng ngày lên 1, bỏ qua Chủ Nhật
-          d.setDate(d.getDate() + 1);
-          if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+          const cap = checkCapacity(machineId, dateStr);
+
+          if (cap.available > 0.1) {
+            // Có thể nhét thêm vào ngày này
+            const h = Math.min(cap.available, remH);
+            
+            // Số lượng tỷ lệ thuận, nếu là chunk cuối thì gom hết số lượng còn lại
+            const isLastChunk = h === remH;
+            const q = isLastChunk ? remQty : Math.round(totalQty * (h / totalHours));
+            
+            remH -= h;
+            remQty -= q;
+            
+            chunks.push({ partIndex: chunks.length + 1, numChunks: 0, qty: q, hours: h, dateStr });
+            
+            // Lưu vào RAM cache để vòng lặp sau (hoặc task máy khác) nhìn thấy
+            existingLoads.push({ resourceId: machineId, reservedDate: dateStr, estimatedHours: String(h) } as any);
+          }
+
+          if (remH > 0) {
+            d.setDate(d.getDate() + 1); // Sang ngày hôm sau nếu vẫn còn giờ
+          }
         }
+        
+        // Cập nhật lại numChunks
+        chunks.forEach(c => c.numChunks = chunks.length);
         return chunks;
       };
 
@@ -176,7 +226,7 @@ export async function POST(req: NextRequest) {
         // Dẫn đến Parametric tính ra thời gian quá thấp, ta phải giữ mức sàn Heuristic để đảm bảo thực tế.
         cncTotalHours = Math.max(parametricTime, cncTotalHours);
       }
-      const cncChunks = generateChunks(totalVan, cncTotalHours);
+      const cncChunks = generateChunks(totalVan, cncTotalHours, cncMachine.id);
       const cncTaskIds = [];
 
       for (const chunk of cncChunks) {
@@ -230,7 +280,7 @@ export async function POST(req: NextRequest) {
         edgeTotalHours = Math.max(parametricTime, edgeTotalHours);
       }
       
-      const edgeChunks = generateChunks(totalNep, edgeTotalHours);
+      const edgeChunks = generateChunks(totalNep, edgeTotalHours, edgeMachine.id);
       const edgeTaskIds = [];
 
       if (isNoEdgeBanding) {
@@ -297,7 +347,7 @@ export async function POST(req: NextRequest) {
       }
       
       const isNoDrilling = estimatedPhuKien <= 0 && totalVan <= 0 && drillTotalHours <= 0;
-      const drillChunks = generateChunks(estimatedPhuKien, drillTotalHours);
+      const drillChunks = generateChunks(estimatedPhuKien, drillTotalHours, drillMachine.id);
 
       if (isNoDrilling) {
          await tx.insert(pwrTasks).values({
