@@ -263,6 +263,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
       { id: 'pwr-sx-grp',         label: 'SẢN XUẤT',          icon: '',             href: '#',                       sprint: 1, isGroupHeader: true },
       { id: 'pwr-ingestion',      label: 'Nuốt File Excel',    icon: 'Upload',       href: '/pwr/ingestion',          sprint: 1 },
       { id: 'pwr-capacity',       label: 'Tải Trọng Máy',      icon: 'Activity',     href: '/pwr/capacity',           sprint: 1 },
+      { id: 'pwr-station',        label: 'Trạm Làm Việc',      icon: 'Smartphone',   href: '/pwr/station',            sprint: 1 },
       { id: 'pwr-inventory',      label: 'Kho Tự Động',        icon: 'Package',      href: '/pwr/inventory',          sprint: 1 },
       { id: 'pwr-rep-grp',        label: 'BÁO CÁO',           icon: '',             href: '#',                       sprint: 1, isGroupHeader: true },
       { id: 'pwr-progress',       label: 'Tiến Độ Dự Án',      icon: 'TrendingUp',   href: '/pwr/reports/projects',   sprint: 2 },

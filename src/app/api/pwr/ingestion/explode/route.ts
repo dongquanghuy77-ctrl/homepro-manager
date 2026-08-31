@@ -164,16 +164,17 @@ export async function POST(req: NextRequest) {
          return { maxH, usedH, available: Math.max(0, maxH - usedH) };
       };
 
-      const generateChunks = (totalQty: number, totalHours: number, machineId: number) => {
+      const generateChunks = (totalQty: number, totalHours: number, machineId: number, maxQtyPerChunk: number) => {
         if (totalQty <= 0 || totalHours <= 0) return [];
         const chunks = [];
         let remQty = totalQty;
         let remH = totalHours;
+        const hoursPerUnit = totalHours / totalQty;
         
         let d = new Date();
         let safetyCounter = 0;
         
-        while (remH > 0 && safetyCounter < 100) {
+        while (remQty > 0 && safetyCounter < 1000) {
           safetyCounter++;
           // Bỏ qua Chủ Nhật
           if (d.getDay() === 0) {
@@ -184,29 +185,41 @@ export async function POST(req: NextRequest) {
           const dateStr = d.toISOString().split('T')[0];
           const cap = checkCapacity(machineId, dateStr);
 
-          if (cap.available > 0.1) {
-            // Có thể nhét thêm vào ngày này
-            const h = Math.min(cap.available, remH);
-            
-            // Số lượng tỷ lệ thuận, nếu là chunk cuối thì gom hết số lượng còn lại
-            const isLastChunk = h === remH;
-            const q = isLastChunk ? remQty : Math.round(totalQty * (h / totalHours));
-            
-            remH -= h;
-            remQty -= q;
-            
-            chunks.push({ partIndex: chunks.length + 1, numChunks: 0, qty: q, hours: h, dateStr });
-            
-            // Lưu vào RAM cache để vòng lặp sau (hoặc task máy khác) nhìn thấy
-            existingLoads.push({ resourceId: machineId, reservedDate: dateStr, estimatedHours: String(h) } as any);
-          }
+          if (cap.available > 0.05) { // Còn trống ít nhất 3 phút
+            // Tính số lượng tối đa có thể nhét vào số giờ trống (theo tỷ lệ)
+            const qtyForCap = cap.available / hoursPerUnit;
 
-          if (remH > 0) {
-            d.setDate(d.getDate() + 1); // Sang ngày hôm sau nếu vẫn còn giờ
+            // Quyết định số lượng Q cho chunk này:
+            // 1. Không vượt quá giới hạn "Xe" (maxQtyPerChunk)
+            // 2. Không vượt quá số lượng tương đương với giờ còn trống (qtyForCap)
+            // 3. Không vượt quá số lượng còn lại (remQty)
+            let q = Math.min(maxQtyPerChunk, remQty, qtyForCap);
+            
+            // Làm tròn số lượng chi tiết nguyên
+            if (q > 1) q = Math.round(q);
+            if (q < 1 && remQty >= 1) q = 1; // Đảm bảo luôn gặm ít nhất 1 nếu còn
+            q = Math.min(q, remQty);
+
+            // Tính số giờ tương ứng cho lượng Q này
+            let h = q * hoursPerUnit;
+            // Xử lý sai số làm tròn ở chunk cuối cùng
+            if (q === remQty) h = remH;
+            
+            // Tuyệt đối không vượt quá sức chứa còn lại của ngày
+            if (h > cap.available) h = cap.available;
+
+            remQty -= q;
+            remH -= h;
+
+            chunks.push({ partIndex: chunks.length + 1, numChunks: 0, qty: q, hours: h, dateStr });
+            existingLoads.push({ resourceId: machineId, reservedDate: dateStr, estimatedHours: String(h) } as any);
+          } else {
+            // Ngày này đã đầy tải, đẩy sang ngày tiếp theo
+            d.setDate(d.getDate() + 1);
           }
         }
         
-        // Cập nhật lại numChunks
+        // Cập nhật lại numChunks tổng cho title
         chunks.forEach(c => c.numChunks = chunks.length);
         return chunks;
       };
@@ -226,11 +239,11 @@ export async function POST(req: NextRequest) {
         // Dẫn đến Parametric tính ra thời gian quá thấp, ta phải giữ mức sàn Heuristic để đảm bảo thực tế.
         cncTotalHours = Math.max(parametricTime, cncTotalHours);
       }
-      const cncChunks = generateChunks(totalVan, cncTotalHours, cncMachine.id);
+      const cncChunks = generateChunks(totalVan, cncTotalHours, cncMachine.id, 40);
       const cncTaskIds = [];
 
       for (const chunk of cncChunks) {
-         const partLabel = chunk.numChunks > 1 ? ` - Phần ${chunk.partIndex}/${chunk.numChunks}` : '';
+         const partLabel = chunk.numChunks > 1 ? ` - Xe ${chunk.partIndex}/${chunk.numChunks}` : '';
          const [cncTask] = await tx.insert(pwrTasks).values({
             userId,
             title: `[CNC] Cắt ${chunk.qty} Tấm ván - ${fileName.replace('.xlsx', '')}${partLabel}`,
@@ -280,7 +293,7 @@ export async function POST(req: NextRequest) {
         edgeTotalHours = Math.max(parametricTime, edgeTotalHours);
       }
       
-      const edgeChunks = generateChunks(totalNep, edgeTotalHours, edgeMachine.id);
+      const edgeChunks = generateChunks(totalNep, edgeTotalHours, edgeMachine.id, 200);
       const edgeTaskIds = [];
 
       if (isNoEdgeBanding) {
@@ -295,7 +308,7 @@ export async function POST(req: NextRequest) {
          edgeTaskIds.push(edgeTask.id);
       } else {
          for (const chunk of edgeChunks) {
-            const partLabel = chunk.numChunks > 1 ? ` - Phần ${chunk.partIndex}/${chunk.numChunks}` : '';
+            const partLabel = chunk.numChunks > 1 ? ` - Xe ${chunk.partIndex}/${chunk.numChunks}` : '';
             const [edgeTask] = await tx.insert(pwrTasks).values({
                userId,
                title: `[DÁN CẠNH] Dán ${chunk.qty} Mét nẹp - ${fileName.replace('.xlsx', '')}${partLabel}`,
@@ -347,7 +360,7 @@ export async function POST(req: NextRequest) {
       }
       
       const isNoDrilling = estimatedPhuKien <= 0 && totalVan <= 0 && drillTotalHours <= 0;
-      const drillChunks = generateChunks(estimatedPhuKien, drillTotalHours, drillMachine.id);
+      const drillChunks = generateChunks(estimatedPhuKien, drillTotalHours, drillMachine.id, 150);
 
       if (isNoDrilling) {
          await tx.insert(pwrTasks).values({
@@ -358,7 +371,7 @@ export async function POST(req: NextRequest) {
          });
       } else {
          for (const chunk of drillChunks) {
-            const partLabel = chunk.numChunks > 1 ? ` - Phần ${chunk.partIndex}/${chunk.numChunks}` : '';
+            const partLabel = chunk.numChunks > 1 ? ` - Xe ${chunk.partIndex}/${chunk.numChunks}` : '';
             const [drillTask] = await tx.insert(pwrTasks).values({
                userId,
                title: `[KHOAN CAM] Khoan ${chunk.qty} mũi/chi tiết - ${fileName.replace('.xlsx', '')}${partLabel}`,
