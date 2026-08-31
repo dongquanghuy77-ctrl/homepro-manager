@@ -165,12 +165,16 @@ export async function POST(req: NextRequest) {
       // Hiệu suất thực tế = 70% (tức là tốn thêm ~30% thời gian do các yếu tố môi trường, máy lỗi, dọn dẹp...)
       const REALITY_FACTOR = 1.3; 
       
-      let cncTotalHours = totalVan * 0.15; // fallback
+      let cncTotalHours = totalVan * 0.15; // fallback (Mức sàn an toàn: ~9 phút/tấm)
       if (geoStats) {
         // Tốc độ cắt 15m/p = 900m/h. Handling 10s/phôi = 0.0027h/phôi
         const cuttingTime = geoStats.totalPerimeter / 900;
         const handlingTime = geoStats.totalParts * (10 / 3600);
-        cncTotalHours = (cuttingTime + handlingTime) * REALITY_FACTOR;
+        const parametricTime = (cuttingTime + handlingTime) * REALITY_FACTOR;
+        
+        // SAFEGUARD: Nếu file Excel có Cut List bị thiếu (số dòng chi tiết quá ít so với tổng tấm BOM)
+        // Dẫn đến Parametric tính ra thời gian quá thấp, ta phải giữ mức sàn Heuristic để đảm bảo thực tế.
+        cncTotalHours = Math.max(parametricTime, cncTotalHours);
       }
       const cncChunks = generateChunks(totalVan, cncTotalHours);
       const cncTaskIds = [];
@@ -214,14 +218,16 @@ export async function POST(req: NextRequest) {
       const edgeStatus = isNoEdgeBanding ? 'DONE' : 'TODO';
       const edgeWaitingReason = (!isNoEdgeBanding && isEdgeShortage) ? `Chờ Nẹp: ${edgeShortageNotes.join(', ')}` : null;
       
-      let edgeTotalHours = isNoEdgeBanding ? 0 : (totalNep / 10) * 0.1; // fallback
+      let edgeTotalHours = isNoEdgeBanding ? 0 : (totalNep / 10) * 0.1; // fallback (Mức sàn an toàn: 100m/h)
       if (!isNoEdgeBanding && geoStats) {
         // Tốc độ dán 15m/p = 900m/h. Handling 6s/cạnh
         // Ước tính số cạnh = Số lượng chi tiết * 2.5 cạnh
         const bandingTime = totalNep / 900;
         const estimatedEdges = geoStats.totalParts * 2.5; 
         const edgeHandlingTime = estimatedEdges * (6 / 3600);
-        edgeTotalHours = (bandingTime + edgeHandlingTime) * REALITY_FACTOR;
+        const parametricTime = (bandingTime + edgeHandlingTime) * REALITY_FACTOR;
+        
+        edgeTotalHours = Math.max(parametricTime, edgeTotalHours);
       }
       
       const edgeChunks = generateChunks(totalNep, edgeTotalHours);
@@ -279,12 +285,14 @@ export async function POST(req: NextRequest) {
       const estimatedPhuKien = totalPhuKien > 0 ? totalPhuKien : Math.ceil(totalVan * 6); 
       const drillMachine = machines.find((m: any) => m.name.includes('Khoan')) || machines[0];
       
-      let drillTotalHours = estimatedPhuKien * 0.0133; // fallback
+      let drillTotalHours = estimatedPhuKien * 0.0133; // fallback (Mức sàn an toàn: ~75 lỗ/h)
       if (geoStats) {
         // Ván to (>0.8m2): lật ván 1.5p. Ván vừa: 0.8p. Ván nhỏ (<0.2): ko khoan
         const largeTime = (geoStats.largeParts || 0) * (1.5 / 60);
         const mediumTime = (geoStats.mediumParts || 0) * (0.8 / 60);
-        drillTotalHours = (largeTime + mediumTime) * REALITY_FACTOR;
+        const parametricTime = (largeTime + mediumTime) * REALITY_FACTOR;
+        
+        drillTotalHours = Math.max(parametricTime, drillTotalHours);
         if (drillTotalHours === 0 && totalVan > 0) drillTotalHours = 0.5; // tối thiểu 30p nếu có ván
       }
       
