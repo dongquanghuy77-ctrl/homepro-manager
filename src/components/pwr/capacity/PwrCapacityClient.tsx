@@ -501,19 +501,39 @@ export default function PwrCapacityClient() {
                       <div style={{ fontSize: 22, fontWeight: 900, color: color === 'var(--color-text)' ? mc.color : color, display: 'flex', alignItems: 'baseline', gap: 3 }}>
                         {cell.totalHours.toFixed(1)} <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>h</span>
                       </div>
-                      {/* Đơn vị sản xuất */}
+                      {/* Đơn vị sản xuất: Lấy chính xác từ Tên Task (Dữ liệu gốc) thay vì tính ngược từ Giờ */}
                       {(() => {
                         const meta = getResourceMeta(row.resource.name);
-                        if (meta.rate > 0) {
-                          const qty = Math.round(cell.totalHours * meta.rate);
+                        let totalQty = 0;
+                        
+                        (cell.tasks || []).forEach((t: any) => {
+                          if (row.resource.name.includes('CNC')) {
+                            const match = t.taskTitle.match(/Cắt (\d+) Tấm/i);
+                            if (match) totalQty += parseInt(match[1]);
+                          } else if (row.resource.name.includes('Dán')) {
+                            const match = t.taskTitle.match(/Dán (\d+) Mét/i);
+                            if (match) totalQty += parseInt(match[1]);
+                          } else if (row.resource.name.includes('Khoan')) {
+                            const match = t.taskTitle.match(/Khoan (\d+) mũi/i);
+                            if (match) totalQty += parseInt(match[1]);
+                          }
+                        });
+
+                        // Nếu không parse được từ title thì fallback về tính ngược
+                        if (totalQty === 0 && meta.rate > 0) {
+                          totalQty = Math.round(cell.totalHours * meta.rate);
+                        }
+
+                        if (totalQty > 0 || (meta.rate > 0 && cell.totalHours > 0)) {
                           return (
                             <div style={{ fontSize: 11, fontWeight: 700, color: mc.color, marginTop: 2, opacity: 0.85 }}>
-                              {meta.emoji} ≈ {qty.toLocaleString('vi-VN')} {meta.unit}
+                              {meta.emoji} {totalQty.toLocaleString('vi-VN')} {meta.unit}
                             </div>
                           );
                         }
                         return null;
                       })()}
+                      
                       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
                         {icon} {Math.round(cell.loadPercentage)}%
                         {cell.isOverride && <span style={{fontSize: 10, background: '#8b5cf6', color: '#fff', padding: '1px 4px', borderRadius: 4, marginLeft: 4}} title={cell.reason || 'Đã điều chỉnh lịch'}>⚡ {cell.maxCapacity}h</span>}
