@@ -166,18 +166,18 @@ export default function MobileStationClient() {
 
             {/* --- CNC CARD --- */}
             <div className="machine-card machine-card-cnc" onClick={() => setActiveStation('CNC')}>
-              <div className="relative w-16 h-16 rounded-full flex items-center justify-center bg-purple-900/30 flex-shrink-0" style={{ boxShadow: 'inset 0 0 20px rgba(139,92,246,0.4)' }}>
+              <div className="relative w-16 h-16 rounded-full flex items-center justify-center bg-purple-900/30 flex-shrink-0" style={{ boxShadow: '0 0 15px rgba(139,92,246,0.5)' }}>
                 {/* Vòng xoay */}
-                <div className="light-ring cnc-ring-1"></div>
-                <div className="light-ring cnc-ring-2"></div>
+                <div className="light-ring cnc-ring-1" style={{ inset: '-2px' }}></div>
+                <div className="light-ring cnc-ring-2" style={{ inset: '-6px' }}></div>
                 
-                {/* Icon Dao cắt */}
-                <div className="relative z-10" style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', animation: 'pulse-glow 2s infinite' }}>
-                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {/* Icon Dao cắt 3D */}
+                <div className="relative z-10" style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.05)' }} />
                 </div>
                 
-                {/* Tia lửa */}
-                <div className="absolute bottom-3 left-1/2">
+                {/* Tia lửa CSS phụ trợ (giữ lại 1 ít để tạo độ động) */}
+                <div className="absolute bottom-2 left-1/2 z-20">
                    <div className="spark spark-1"></div>
                    <div className="spark spark-2"></div>
                    <div className="spark spark-3"></div>
