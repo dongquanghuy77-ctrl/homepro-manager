@@ -1,183 +1,296 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { Camera, Image as ImageIcon, ShieldAlert, LogIn, UserPlus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+type AuthState = 'LOGIN' | 'REGISTER' | 'WELCOME';
 
 export default function StationAuthUI() {
   const router = useRouter();
-  const [workerCode, setWorkerCode] = useState('');
-  const [pinCode, setPinCode] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [selectedFaction, setSelectedFaction] = useState('CNC');
-  const [inviteCode, setInviteCode] = useState('');
-  
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [authState, setAuthState] = useState<AuthState>('LOGIN');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const handleNumpadClick = (num: string) => {
-    if (pinCode.length < 6) setPinCode(p => p + num);
+  // Gamification Glow Colors
+  const colors = {
+    login: '#8b5cf6', // Purple
+    register: '#10b981', // Green
+    welcome: '#3b82f6', // Blue
   };
-  const handleClear = () => setPinCode('');
-  
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const url = URL.createObjectURL(e.target.files[0]);
-      setAvatarPreview(url);
+
+  const currentGlow = authState === 'LOGIN' ? colors.login : authState === 'REGISTER' ? colors.register : colors.welcome;
+
+  const handleAction = () => {
+    if (authState === 'LOGIN' || authState === 'REGISTER') {
+      setAuthState('WELCOME');
+    } else {
+      router.push('/pwr/station');
     }
-  };
-
-  const handleLogin = async () => {
-    if (pinCode.length < 4) return alert('PIN phải từ 4-6 số');
-    // Mock API
-    alert('BEEP! Đăng nhập thành công: ' + workerCode);
-    router.push('/pwr/station');
-  };
-
-  const handleRegister = async () => {
-    if (inviteCode !== 'XUONGHP2026') return alert('Lỗi: Mã xưởng không hợp lệ! Hành vi tạo tài khoản bị từ chối.');
-    if (!avatarPreview) return alert('Vui lòng chọn hoặc chụp ảnh đại diện!');
-    
-    alert('TẠO NHÂN VẬT THÀNH CÔNG! Chào mừng gia nhập phái ' + selectedFaction);
-    router.push('/pwr/station');
   };
 
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #09090b 0%, #18181b 100%)', 
+      background: '#09090e', 
+      backgroundImage: 'radial-gradient(circle at center, #13131f 0%, #05050a 100%)',
       color: '#fff', 
-      fontFamily: 'monospace',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       padding: 20
     }}>
-      {/* Khung Viền Gamified */}
+      
+      {/* Header text */}
+      <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 8px 0', background: 'linear-gradient(90deg, #8b5cf6, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          THẺ ĐĂNG KÝ, ĐĂNG NHẬP
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <div style={{ height: 1, width: 40, background: 'rgba(255,255,255,0.2)' }} />
+          <span style={{ color: '#9ca3af', fontSize: 14, letterSpacing: 2 }}>TRẠM LÀM VIỆC - GAME HÓA</span>
+          <div style={{ height: 1, width: 40, background: 'rgba(255,255,255,0.2)' }} />
+        </div>
+      </div>
+
+      {/* Main Card */}
       <div style={{
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'rgba(15,15,25,0.6)',
+        border: `1px solid ${currentGlow}40`,
         borderRadius: 24,
         padding: 32,
-        width: '100%', maxWidth: 420,
-        boxShadow: '0 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02)'
+        width: '100%', maxWidth: 400,
+        boxShadow: `0 0 40px ${currentGlow}20, inset 0 0 20px ${currentGlow}10`,
+        transition: 'all 0.5s ease'
       }}>
+        
+        {/* Card Header & Icon */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <h1 style={{ fontSize: 24, color: '#38bdf8', textShadow: '0 0 10px rgba(56,189,248,0.5)', margin: '0 0 8px 0' }}>
-            {isRegistering ? 'TẠO NHÂN VẬT (NEW PLAYER)' : 'ĐĂNG NHẬP TRẠM (LOGIN)'}
-          </h1>
-          <p style={{ color: '#a1a1aa', fontSize: 14, margin: 0 }}>HOMEPRO STATION OS v5.0</p>
+          <div style={{ 
+            width: 64, height: 64, margin: '0 auto 16px', borderRadius: 16,
+            background: `rgba(255,255,255,0.03)`, border: `1px solid ${currentGlow}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: `0 0 20px ${currentGlow}40`
+          }}>
+            <FactoryIcon color={currentGlow} />
+          </div>
+          <h2 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 8px 0' }}>Trạm Làm Việc</h2>
+          <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
+            {authState === 'LOGIN' ? 'Hệ thống điều khiển máy trạm' : 
+             authState === 'REGISTER' ? 'Tạo tài khoản để bắt đầu' : 
+             'Đăng nhập để tiếp tục hành trình'}
+          </p>
         </div>
 
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', marginBottom: 8, color: '#9ca3af', fontSize: 12 }}>MÃ THỢ (PLAYER ID)</label>
-          <input 
-            type="text" 
-            value={workerCode}
-            onChange={e => setWorkerCode(e.target.value.toUpperCase())}
-            placeholder="VD: T01"
-            style={{ 
-              width: '100%', background: '#000', border: '1px solid #3f3f46', 
-              color: '#fff', padding: 16, fontSize: 20, textAlign: 'center', borderRadius: 12,
-              letterSpacing: 4
-            }} 
-          />
-        </div>
-
-        {!isRegistering ? (
-          <>
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', marginBottom: 8, color: '#9ca3af', fontSize: 12, textAlign: 'center' }}>MÃ PIN (4-6 SỐ)</label>
-              <div style={{ fontSize: 32, textAlign: 'center', letterSpacing: 12, height: 40 }}>
-                {pinCode.replace(/./g, '●')}
-              </div>
-            </div>
-
-            {/* Numpad Khổng Lồ */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                <button 
-                  key={num} 
-                  onClick={() => handleNumpadClick(String(num))}
-                  style={{ background: '#27272a', border: 'none', color: '#fff', padding: 20, fontSize: 24, borderRadius: 12, cursor: 'pointer' }}
-                >
-                  {num}
-                </button>
-              ))}
-              <button onClick={handleClear} style={{ background: '#ef4444', border: 'none', color: '#fff', padding: 20, fontSize: 16, borderRadius: 12, cursor: 'pointer' }}>XÓA</button>
-              <button onClick={() => handleNumpadClick('0')} style={{ background: '#27272a', border: 'none', color: '#fff', padding: 20, fontSize: 24, borderRadius: 12, cursor: 'pointer' }}>0</button>
-              <button onClick={() => setIsRegistering(true)} style={{ background: '#3b82f6', border: 'none', color: '#fff', padding: 20, fontSize: 14, borderRadius: 12, cursor: 'pointer' }}>MỚI</button>
-            </div>
-
-            <button onClick={handleLogin} style={{ width: '100%', padding: 20, background: '#10b981', color: '#000', fontWeight: 'bold', fontSize: 18, border: 'none', borderRadius: 12, cursor: 'pointer', boxShadow: '0 0 20px rgba(16,185,129,0.4)' }}>
-              VÀO TRẠM <LogIn size={20} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 8 }}/>
-            </button>
-          </>
-        ) : (
-          <>
-            {/* Form Đăng Ký */}
-            <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-              <button 
-                onClick={() => setSelectedFaction('CNC')}
-                style={{ flex: 1, padding: 12, border: `2px solid ${selectedFaction === 'CNC' ? '#3b82f6' : '#27272a'}`, background: selectedFaction === 'CNC' ? 'rgba(59,130,246,0.1)' : '#000', color: selectedFaction === 'CNC' ? '#3b82f6' : '#fff', borderRadius: 12, cursor: 'pointer' }}
-              >
-                TỔ CNC
-              </button>
-              <button 
-                onClick={() => setSelectedFaction('DAN_CANH')}
-                style={{ flex: 1, padding: 12, border: `2px solid ${selectedFaction === 'DAN_CANH' ? '#f59e0b' : '#27272a'}`, background: selectedFaction === 'DAN_CANH' ? 'rgba(245,158,11,0.1)' : '#000', color: selectedFaction === 'DAN_CANH' ? '#f59e0b' : '#fff', borderRadius: 12, cursor: 'pointer' }}
-              >
-                TỔ DÁN
-              </button>
-            </div>
-
-            {/* Avatar Selector */}
-            <div style={{ marginBottom: 20, textAlign: 'center' }}>
-              <div style={{ 
-                width: 100, height: 100, borderRadius: 50, border: '2px dashed #52525b', 
-                margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden', background: '#000'
-              }}>
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <UserPlus size={32} color="#52525b" />
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                <button onClick={() => cameraInputRef.current?.click()} style={{ padding: '8px 12px', background: '#27272a', border: 'none', color: '#fff', borderRadius: 8, fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                  <Camera size={14}/> Camera
-                </button>
-                <button onClick={() => fileInputRef.current?.click()} style={{ padding: '8px 12px', background: '#27272a', border: 'none', color: '#fff', borderRadius: 8, fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                  <ImageIcon size={14}/> Thư viện
-                </button>
-              </div>
-              {/* Hidden Inputs */}
-              <input type="file" accept="image/*" capture="user" ref={cameraInputRef} style={{ display: 'none' }} onChange={handleImageSelect} />
-              <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }} onChange={handleImageSelect} />
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <input 
-                type="text" 
-                value={inviteCode}
-                onChange={e => setInviteCode(e.target.value.toUpperCase())}
-                placeholder="MÃ XƯỞNG BÍ MẬT"
-                style={{ 
-                  width: '100%', background: '#000', border: '1px solid #ef4444', 
-                  color: '#ef4444', padding: 12, fontSize: 14, textAlign: 'center', borderRadius: 8
-                }} 
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={() => setIsRegistering(false)} style={{ flex: 1, padding: 16, background: '#27272a', color: '#fff', border: 'none', borderRadius: 12, cursor: 'pointer' }}>QUAY LẠI</button>
-              <button onClick={handleRegister} style={{ flex: 2, padding: 16, background: '#38bdf8', color: '#000', fontWeight: 'bold', fontSize: 16, border: 'none', borderRadius: 12, cursor: 'pointer', boxShadow: '0 0 20px rgba(56,189,248,0.4)' }}>
-                TẠO NHÂN VẬT
-              </button>
-            </div>
-          </>
+        {/* Tab Switcher (Login / Register) */}
+        {(authState === 'LOGIN' || authState === 'REGISTER') && (
+          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: 12, pading: 4, marginBottom: 24, border: '1px solid rgba(255,255,255,0.05)' }}>
+            <button 
+              onClick={() => setAuthState('LOGIN')}
+              style={{ flex: 1, padding: '12px 0', borderRadius: 10, border: 'none', 
+                background: authState === 'LOGIN' ? 'rgba(139,92,246,0.1)' : 'transparent', 
+                color: authState === 'LOGIN' ? '#fff' : '#6b7280', 
+                fontWeight: authState === 'LOGIN' ? 600 : 400,
+                cursor: 'pointer', transition: 'all 0.2s'
+              }}>Đăng nhập</button>
+            <button 
+              onClick={() => setAuthState('REGISTER')}
+              style={{ flex: 1, padding: '12px 0', borderRadius: 10, border: 'none', 
+                background: authState === 'REGISTER' ? 'rgba(16,185,129,0.1)' : 'transparent', 
+                color: authState === 'REGISTER' ? '#fff' : '#6b7280', 
+                fontWeight: authState === 'REGISTER' ? 600 : 400,
+                cursor: 'pointer', transition: 'all 0.2s'
+              }}>Đăng ký</button>
+          </div>
         )}
+
+        {/* LOGIN FORM */}
+        {authState === 'LOGIN' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ position: 'relative' }}>
+              <Mail size={18} color="#6b7280" style={{ position: 'absolute', left: 16, top: 16 }} />
+              <input type="text" placeholder="Email hoặc số điện thoại" style={inputStyle} />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} color="#6b7280" style={{ position: 'absolute', left: 16, top: 16 }} />
+              <input type="password" placeholder="Mật khẩu" style={inputStyle} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setRememberMe(!rememberMe)}>
+                {rememberMe ? <CheckSquare size={16} color={colors.login} /> : <Square size={16} color="#6b7280" />}
+                <span style={{ color: '#d1d5db' }}>Ghi nhớ đăng nhập</span>
+              </div>
+              <span style={{ color: colors.login, cursor: 'pointer' }}>Quên mật khẩu?</span>
+            </div>
+            
+            <button onClick={handleAction} style={{ ...btnStyle, background: colors.login, boxShadow: `0 8px 24px ${colors.login}40`, marginTop: 8 }}>
+              ĐĂNG NHẬP <ChevronRight size={18} />
+            </button>
+
+            {/* Gamification Banner */}
+            <div style={{ marginTop: 24, background: 'rgba(139,92,246,0.05)', border: `1px solid ${colors.login}30`, borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ background: 'rgba(139,92,246,0.1)', padding: 12, borderRadius: 12 }}>
+                <Trophy size={24} color="#fbbf24" />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#e5e7eb', marginBottom: 4 }}>Hoàn thành nhiệm vụ để nhận XP</div>
+                <div style={{ fontSize: 11, color: '#9ca3af' }}>Đăng nhập mỗi ngày để nhận thưởng!</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* REGISTER FORM */}
+        {authState === 'REGISTER' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ position: 'relative' }}>
+              <User size={18} color="#6b7280" style={{ position: 'absolute', left: 16, top: 16 }} />
+              <input type="text" placeholder="Họ và tên" style={inputStyle} />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <Mail size={18} color="#6b7280" style={{ position: 'absolute', left: 16, top: 16 }} />
+              <input type="email" placeholder="Email" style={inputStyle} />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <Phone size={18} color="#6b7280" style={{ position: 'absolute', left: 16, top: 16 }} />
+              <input type="text" placeholder="Số điện thoại (tùy chọn)" style={inputStyle} />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} color="#6b7280" style={{ position: 'absolute', left: 16, top: 16 }} />
+              <input type="password" placeholder="Mật khẩu" style={inputStyle} />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} color="#6b7280" style={{ position: 'absolute', left: 16, top: 16 }} />
+              <input type="password" placeholder="Xác nhận mật khẩu" style={inputStyle} />
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }} onClick={() => setAgreeTerms(!agreeTerms)}>
+              {agreeTerms ? <CheckSquare size={16} color={colors.register} /> : <Square size={16} color="#6b7280" />}
+              <span style={{ color: '#d1d5db' }}>Tôi đồng ý với <span style={{ color: colors.register }}>Điều khoản sử dụng</span></span>
+            </div>
+
+            <button onClick={handleAction} style={{ ...btnStyle, background: colors.register, boxShadow: `0 8px 24px ${colors.register}40`, marginTop: 8 }}>
+              TẠO TÀI KHOẢN <ChevronRight size={18} />
+            </button>
+
+            {/* Level Up Banner */}
+            <div style={{ marginTop: 16, background: 'rgba(16,185,129,0.05)', border: `1px solid ${colors.register}30`, borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ background: 'rgba(16,185,129,0.1)', padding: 12, borderRadius: 12, color: colors.register, fontWeight: 900, textAlign: 'center', lineHeight: 1.1 }}>
+                LEVEL<br/>UP!
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#e5e7eb', marginBottom: 4 }}>Tạo tài khoản để lên Level</div>
+                <div style={{ fontSize: 11, color: '#9ca3af' }}>Nhận 50 XP khi đăng ký thành công!</div>
+              </div>
+              <Gift size={24} color="#fbbf24" />
+            </div>
+          </div>
+        )}
+
+        {/* WELCOME SCREEN */}
+        {authState === 'WELCOME' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            
+            {/* Hexagon Avatar */}
+            <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 40 }}>
+              <div style={{ 
+                position: 'absolute', inset: 0, 
+                clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                background: `linear-gradient(135deg, ${colors.welcome}, #1e3a8a)`,
+                padding: 4
+              }}>
+                <div style={{
+                  width: '100%', height: '100%',
+                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                  background: 'url("https://i.pravatar.cc/150?u=a042581f4e29026704d") center/cover'
+                }} />
+              </div>
+              {/* Level Badge */}
+              <div style={{
+                position: 'absolute', bottom: -12, left: -12,
+                width: 40, height: 40, background: '#1e3a8a', border: `2px solid ${colors.welcome}`,
+                borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 18, fontWeight: 800, color: '#fff', boxShadow: `0 0 15px ${colors.welcome}80`
+              }}>
+                12
+              </div>
+            </div>
+
+            {/* XP Bar */}
+            <div style={{ width: '100%', marginBottom: 32 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 8, fontWeight: 600 }}>
+                <span style={{ color: colors.welcome, letterSpacing: 1 }}>LEVEL</span>
+                <span style={{ color: '#9ca3af' }}>1250 / 2000 XP</span>
+              </div>
+              <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ width: '62.5%', height: '100%', background: colors.welcome, boxShadow: `0 0 10px ${colors.welcome}` }} />
+              </div>
+            </div>
+
+            {/* Feature List */}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#d1d5db' }}>
+                <Settings size={18} color={colors.login} /> Quản lý máy trạm hiệu quả
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#d1d5db' }}>
+                <Award size={18} color={colors.login} /> Hoàn thành nhiệm vụ nhận XP
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#d1d5db' }}>
+                <Gift size={18} color={colors.login} /> Mở khóa thành tích và phần thưởng
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: '#d1d5db' }}>
+                <Trophy size={18} color={colors.login} /> Leo hạng bảng xếp hạng
+              </div>
+            </div>
+
+            <button onClick={handleAction} style={{ ...btnStyle, background: colors.welcome, boxShadow: `0 8px 24px ${colors.welcome}40` }}>
+              ĐĂNG NHẬP NGAY <ChevronRight size={18} />
+            </button>
+            <div style={{ marginTop: 16, fontSize: 13, color: '#9ca3af' }}>
+              Chưa có tài khoản? <span style={{ color: colors.welcome, cursor: 'pointer' }} onClick={() => setAuthState('REGISTER')}>Đăng ký ngay</span>
+            </div>
+
+          </div>
+        )}
+
       </div>
     </div>
   );
+}
+
+const inputStyle = {
+  width: '100%', 
+  background: 'rgba(0,0,0,0.4)', 
+  border: '1px solid rgba(255,255,255,0.1)', 
+  color: '#fff', 
+  padding: '16px 16px 16px 48px', 
+  fontSize: 14, 
+  borderRadius: 12,
+  outline: 'none',
+};
+
+const btnStyle = {
+  width: '100%', 
+  padding: 16, 
+  color: '#fff', 
+  fontWeight: 'bold', 
+  fontSize: 15, 
+  border: 'none', 
+  borderRadius: 12, 
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  transition: 'transform 0.1s'
+};
+
+function FactoryIcon({ color }: { color: string }) {
+  return (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+      <path d="M17 18h1"/>
+      <path d="M12 18h1"/>
+      <path d="M7 18h1"/>
+    </svg>
+  )
 }
