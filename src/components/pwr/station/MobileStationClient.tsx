@@ -172,8 +172,8 @@ export default function MobileStationClient() {
                 <div className="light-ring cnc-ring-2" style={{ inset: '-6px' }}></div>
                 
                 {/* Icon Dao cắt 3D */}
-                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', WebkitMaskImage: '-webkit-radial-gradient(white, black)', maskImage: 'radial-gradient(white, black)' }}>
-                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.05)' }} />
+                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                 </div>
                 
                 {/* Tia lửa CSS phụ trợ (giữ lại 1 ít để tạo độ động) */}
@@ -207,15 +207,12 @@ export default function MobileStationClient() {
                 {/* Vòng xoay */}
                 <div className="light-ring edge-ring-1"></div>
                 
-                {/* Icon Máy dán */}
-                <div style={{ position: 'relative', zIndex: 10, transform: 'translateY(-4px)' }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-                  </svg>
+                {/* Icon Máy dán 3D (Crop từ ảnh to) */}
+                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', backgroundImage: "url('/pwr-assets/edge-card.png')", backgroundSize: 'auto 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
                 </div>
                 
                 {/* Hiệu ứng nẹp dán di chuyển */}
-                <div className="edge-band-track">
+                <div className="edge-band-track" style={{ zIndex: 20 }}>
                   <div className="edge-band-light"></div>
                 </div>
               </div>
@@ -242,15 +239,12 @@ export default function MobileStationClient() {
                 {/* Vòng xoay */}
                 <div className="light-ring drill-ring-1"></div>
                 
-                {/* Icon Khoan tịnh tiến */}
-                <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7dd3fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2v20"/><path d="M7 2h10"/><path d="M9 6h6"/>
-                  </svg>
+                {/* Icon Khoan tịnh tiến 3D (Crop từ ảnh to) */}
+                <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', backgroundImage: "url('/pwr-assets/drill-card.png')", backgroundSize: 'auto 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
                 </div>
                 
                 {/* Mạt gỗ bay */}
-                <div style={{ position: 'absolute', bottom: 16, left: '50%' }}>
+                <div style={{ position: 'absolute', bottom: 16, left: '50%', zIndex: 20 }}>
                    <div className="sawdust sawdust-1"></div>
                    <div className="sawdust sawdust-2"></div>
                    <div className="sawdust sawdust-3"></div>
