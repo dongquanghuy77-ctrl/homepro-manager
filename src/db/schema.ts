@@ -2535,5 +2535,5 @@ export const pwrUserStats = pgTable('pwr_user_stats', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
-export type PwrUserStat = typeof pwrUserStats.;
-export type NewPwrUserStat = typeof pwrUserStats.;
+export type PwrUserStat = typeof pwrUserStats.$inferSelect;
+export type NewPwrUserStat = typeof pwrUserStats.$inferInsert;
