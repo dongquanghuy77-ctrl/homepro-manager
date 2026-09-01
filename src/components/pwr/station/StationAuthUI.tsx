@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { QRCodeSVG } from 'qrcode.react';
 
-type AuthState = 'LOGIN' | 'REGISTER' | 'WELCOME' | 'FORGOT';
+type AuthState = 'LOGIN' | 'REGISTER' | 'REGISTER_SUCCESS' | 'WELCOME' | 'FORGOT';
 
 export default function StationAuthUI() {
   const router = useRouter();
@@ -136,9 +136,8 @@ export default function StationAuthUI() {
           setAuthError(data.error);
           setIsSubmitting(false);
         } else {
-          // Instead of auto-login, redirect to LOGIN screen
-          setAuthSuccess('Đăng ký thành công! Vui lòng đăng nhập.');
-          setPhone(regUsername); // Pre-fill username
+          // Redirect to REGISTER_SUCCESS screen
+          setPhone(regUsername); // Pre-fill username for later login
           setPassword('');
           
           // Clear register fields
@@ -150,7 +149,7 @@ export default function StationAuthUI() {
           setAgreeTerms(false);
           
           setIsSubmitting(false);
-          setAuthState('LOGIN');
+          setAuthState('REGISTER_SUCCESS');
         }
       } catch (err) {
         setAuthError('Lỗi kết nối. Vui lòng thử lại.');
@@ -486,6 +485,28 @@ export default function StationAuthUI() {
               </div>
 
             </div>
+          </div>
+        )}
+
+        {/* REGISTER SUCCESS SCREEN */}
+        {authState === 'REGISTER_SUCCESS' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '0 0 30px rgba(16,185,129,0.2)' }}>
+              <CheckSquare size={40} color={colors.register} />
+            </div>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 12 }}>Tạo Tài Khoản Thành Công!</h2>
+            <p style={{ color: '#9ca3af', fontSize: 15, marginBottom: 32, lineHeight: 1.5 }}>
+              Tài khoản của bạn đã được thiết lập thành công. Vui lòng đăng nhập để bắt đầu trải nghiệm hệ thống Trạm Làm Việc.
+            </p>
+            <button 
+              onClick={() => {
+                setAuthSuccess('Đăng ký thành công! Vui lòng đăng nhập.');
+                setAuthState('LOGIN');
+              }} 
+              style={{ ...btnStyle, background: `linear-gradient(90deg, #064e3b, ${colors.register})`, boxShadow: `0 8px 25px rgba(16,185,129,0.4)` }}
+            >
+              ĐĂNG NHẬP NGAY <ChevronRight size={20} strokeWidth={3} />
+            </button>
           </div>
         )}
 
