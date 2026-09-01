@@ -17,6 +17,15 @@ export default function StationAuthUI() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   
+  // Register States
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regUsername, setRegUsername] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState('');
+
   // Forgot Password States
   const [resetToken, setResetToken] = useState('');
   const [resetStatus, setResetStatus] = useState<'PENDING' | 'APPROVED' | 'EXPIRED' | ''>('');
@@ -73,9 +82,72 @@ export default function StationAuthUI() {
 
   const currentGlow = authState === 'LOGIN' ? colors.login : authState === 'REGISTER' ? colors.register : colors.welcome;
 
-  const handleAction = () => {
-    if (authState === 'LOGIN' || authState === 'REGISTER') {
-      setAuthState('WELCOME');
+  const handleAction = async () => {
+    setAuthError('');
+    if (authState === 'LOGIN') {
+      if (!phone || !password) {
+        setAuthError('Vui lòng nhập tài khoản và mật khẩu');
+        return;
+      }
+      setIsSubmitting(true);
+      const res = await signIn('credentials', {
+        redirect: false,
+        username: phone,
+        password: password,
+      });
+      setIsSubmitting(false);
+      
+      if (res?.error) {
+        setAuthError('Tài khoản hoặc mật khẩu không đúng');
+      } else {
+        setAuthState('WELCOME');
+      }
+    } else if (authState === 'REGISTER') {
+      if (!regName || !regUsername || !regPassword) {
+        setAuthError('Vui lòng điền các trường bắt buộc (Họ tên, SĐT/User, Mật khẩu)');
+        return;
+      }
+      if (regPassword !== regConfirmPassword) {
+        setAuthError('Mật khẩu xác nhận không khớp');
+        return;
+      }
+      if (!agreeTerms) {
+        setAuthError('Bạn phải đồng ý với Điều khoản sử dụng');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const res = await fetch('/api/pwr/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: regName,
+            email: regEmail,
+            username: regUsername,
+            password: regPassword
+          })
+        });
+        const data = await res.json();
+        if (data.error) {
+          setAuthError(data.error);
+          setIsSubmitting(false);
+        } else {
+          // Auto login after register
+          const signInRes = await signIn('credentials', {
+            redirect: false,
+            username: regUsername,
+            password: regPassword,
+          });
+          setIsSubmitting(false);
+          if (!signInRes?.error) {
+            setAuthState('WELCOME');
+          }
+        }
+      } catch (err) {
+        setAuthError('Lỗi kết nối. Vui lòng thử lại.');
+        setIsSubmitting(false);
+      }
     } else {
       router.push('/pwr/station');
     }
@@ -169,14 +241,15 @@ export default function StationAuthUI() {
         {/* LOGIN FORM */}
         {authState === 'LOGIN' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {authError && <div style={{ color: '#ef4444', fontSize: 13, background: 'rgba(239,68,68,0.1)', padding: 10, borderRadius: 8 }}>{authError}</div>}
             <div style={{ position: 'relative' }}>
               <Mail size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <input type="text" placeholder="Email hoặc số điện thoại" style={inputStyle} />
+              <input type="text" placeholder="Email hoặc số điện thoại" style={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} />
             </div>
             <div style={{ position: 'relative' }}>
               <Lock size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <input type="password" placeholder="Mật khẩu" style={inputStyle} />
-              <Eye size={18} color="#6b7280" style={{ position: 'absolute', right: 16, top: 16, cursor: 'pointer' }} />
+              <input type={showPassword ? "text" : "password"} placeholder="Mật khẩu" style={inputStyle} value={password} onChange={e => setPassword(e.target.value)} />
+              <Eye size={18} color="#6b7280" style={{ position: 'absolute', right: 16, top: 16, cursor: 'pointer' }} onClick={() => setShowPassword(!showPassword)} />
             </div>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, marginTop: 4, marginBottom: 8 }}>
@@ -198,8 +271,8 @@ export default function StationAuthUI() {
               </span>
             </div>
             
-            <button onClick={handleAction} style={{ ...btnStyle, background: `linear-gradient(90deg, ${colors.loginBg}, ${colors.login})`, boxShadow: `0 8px 25px rgba(168,85,247,0.4)` }}>
-              ĐĂNG NHẬP <ChevronRight size={20} strokeWidth={3} />
+            <button onClick={handleAction} disabled={isSubmitting} style={{ ...btnStyle, background: `linear-gradient(90deg, ${colors.loginBg}, ${colors.login})`, boxShadow: `0 8px 25px rgba(168,85,247,0.4)` }}>
+              {isSubmitting ? 'ĐANG ĐĂNG NHẬP...' : 'ĐĂNG NHẬP'} <ChevronRight size={20} strokeWidth={3} />
             </button>
 
             {/* Social Logins */}
@@ -298,27 +371,28 @@ export default function StationAuthUI() {
         {/* REGISTER FORM */}
         {authState === 'REGISTER' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {authError && <div style={{ color: '#ef4444', fontSize: 13, background: 'rgba(239,68,68,0.1)', padding: 10, borderRadius: 8 }}>{authError}</div>}
             <div style={{ position: 'relative' }}>
               <User size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <input type="text" placeholder="Họ và tên" style={inputStyle} />
+              <input type="text" placeholder="Họ và tên" style={inputStyle} value={regName} onChange={e => setRegName(e.target.value)} />
             </div>
             <div style={{ position: 'relative' }}>
               <Mail size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <input type="email" placeholder="Email" style={inputStyle} />
+              <input type="email" placeholder="Email" style={inputStyle} value={regEmail} onChange={e => setRegEmail(e.target.value)} />
             </div>
             <div style={{ position: 'relative' }}>
               <Phone size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <input type="text" placeholder="Số điện thoại (tùy chọn)" style={inputStyle} />
+              <input type="text" placeholder="huy.dong" style={inputStyle} value={regUsername} onChange={e => setRegUsername(e.target.value)} />
             </div>
             <div style={{ position: 'relative' }}>
               <Lock size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <input type="password" placeholder="Mật khẩu" style={inputStyle} />
-              <Eye size={18} color="#6b7280" style={{ position: 'absolute', right: 16, top: 16, cursor: 'pointer' }} />
+              <input type={showPassword ? "text" : "password"} placeholder="Mật khẩu" style={inputStyle} value={regPassword} onChange={e => setRegPassword(e.target.value)} />
+              <Eye size={18} color="#6b7280" style={{ position: 'absolute', right: 16, top: 16, cursor: 'pointer' }} onClick={() => setShowPassword(!showPassword)} />
             </div>
             <div style={{ position: 'relative' }}>
               <Lock size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <input type="password" placeholder="Xác nhận mật khẩu" style={inputStyle} />
-              <Eye size={18} color="#6b7280" style={{ position: 'absolute', right: 16, top: 16, cursor: 'pointer' }} />
+              <input type={showPassword ? "text" : "password"} placeholder="Xác nhận mật khẩu" style={inputStyle} value={regConfirmPassword} onChange={e => setRegConfirmPassword(e.target.value)} />
+              <Eye size={18} color="#6b7280" style={{ position: 'absolute', right: 16, top: 16, cursor: 'pointer' }} onClick={() => setShowPassword(!showPassword)} />
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', marginTop: 4, marginBottom: 8 }} onClick={() => setAgreeTerms(!agreeTerms)}>
@@ -332,8 +406,8 @@ export default function StationAuthUI() {
               <span style={{ color: '#e5e7eb', fontWeight: 500 }}>Tôi đồng ý với <span style={{ color: colors.register }}>Điều khoản sử dụng</span></span>
             </div>
 
-            <button onClick={handleAction} style={{ ...btnStyle, background: `linear-gradient(90deg, #064e3b, ${colors.register})`, boxShadow: `0 8px 25px rgba(16,185,129,0.4)` }}>
-              TẠO TÀI KHOẢN <ChevronRight size={20} strokeWidth={3} />
+            <button onClick={handleAction} disabled={isSubmitting} style={{ ...btnStyle, background: `linear-gradient(90deg, #064e3b, ${colors.register})`, boxShadow: `0 8px 25px rgba(16,185,129,0.4)` }}>
+              {isSubmitting ? 'ĐANG TẠO...' : 'TẠO TÀI KHOẢN'} <ChevronRight size={20} strokeWidth={3} />
             </button>
 
             {/* Level Up Banner */}

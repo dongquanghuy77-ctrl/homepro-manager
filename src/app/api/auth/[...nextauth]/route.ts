@@ -2,10 +2,40 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
 import AppleProvider from "next-auth/providers/apple";
-import AzureADProvider from "next-auth/providers/azure-ad"; // Microsoft
+import AzureADProvider from "next-auth/providers/azure-ad";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 const handler = NextAuth({
   providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) return null;
+        
+        const userRecs = await db.select().from(users).where(eq(users.username, credentials.username));
+        const user = userRecs[0];
+        
+        if (!user) return null;
+        
+        const isValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isValid) return null;
+        
+        return { 
+          id: user.id.toString(), 
+          name: user.name, 
+          email: user.email, 
+          // You can attach more fields to JWT here if needed
+        };
+      }
+    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "mock_google_id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "mock_google_secret",
