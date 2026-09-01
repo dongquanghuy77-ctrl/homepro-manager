@@ -15,9 +15,10 @@ export default function MobileStationClient() {
     .app-container {
       background-color: #03030a;
       background-image: url('/pwr-assets/factory-bg.png');
-      background-size: cover;
-      background-position: center;
+      background-size: 120% auto;
+      background-position: center -60px;
       background-attachment: fixed;
+      background-repeat: no-repeat;
       min-height: 100vh;
       color: #ffffff;
       padding-bottom: 90px;
@@ -26,7 +27,7 @@ export default function MobileStationClient() {
 
     .app-overlay {
       position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(3,3,10,0.6) 0%, rgba(3,3,10,0.95) 100%);
+      background: linear-gradient(180deg, rgba(3,3,10,0.85) 0%, rgba(3,3,10,0.5) 30%, rgba(3,3,10,0.95) 100%);
       z-index: 0; pointer-events: none;
     }
 
@@ -56,14 +57,13 @@ export default function MobileStationClient() {
     
     @keyframes spin-slow { 100% { transform: rotate(360deg); } }
     @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
-    @keyframes pulse-glow { 50% { opacity: 0.5; transform: scale(0.95); } }
     
     /* Vòng xoay ánh sáng chung */
     .light-ring { position: absolute; border-radius: 50%; }
     
     /* --- CNC Animations (Tia lửa, dao xoay) --- */
-    .cnc-ring-1 { inset: -4px; border: 2px solid rgba(168,85,247,0.6); border-top-color: transparent; animation: spin-slow 2s linear infinite; box-shadow: 0 0 10px rgba(168,85,247,0.4); }
-    .cnc-ring-2 { inset: -8px; border: 1px dashed rgba(192,132,252,0.4); animation: spin-reverse 3s linear infinite; }
+    .cnc-ring-1 { inset: -2px; border: 2px solid rgba(168,85,247,0.6); border-top-color: transparent; animation: spin-slow 2s linear infinite; box-shadow: 0 0 10px rgba(168,85,247,0.4); }
+    .cnc-ring-2 { inset: -6px; border: 1px dashed rgba(192,132,252,0.4); animation: spin-reverse 3s linear infinite; }
     
     .spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fef08a; box-shadow: 0 0 5px #fef08a; }
     .spark-1 { animation: fly1 0.6s infinite ease-out; }
@@ -126,26 +126,32 @@ export default function MobileStationClient() {
         <div className="app-overlay" />
 
         <div className="content-wrapper">
-          {/* iOS Status Bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 24px', fontSize: 14, fontWeight: 600 }}>
-            <div>11:26</div>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <Signal size={16} /> <span style={{ fontSize: 12 }}>5G</span> <BatteryMedium size={18} color="#22c55e" />
-            </div>
-          </div>
+          {/* iOS Status Bar (ẩn đi để dùng status bar thật của đt) */}
+          <div style={{ height: 44 }} />
 
-          <div style={{ padding: '0 24px', marginBottom: 20 }}><Menu size={28} color="#9ca3af" /></div>
-
-          {/* App Logo */}
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{ width: 72, height: 72, margin: '0 auto 16px', borderRadius: 20, border: '1px solid #a855f7', background: 'rgba(139,92,246,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(139,92,246,0.2)' }}>
-              <Factory size={32} color="#c084fc" />
+          {/* Header Layout (Menu + Logo) */}
+          <div style={{ position: 'relative', textAlign: 'center', marginBottom: 32, padding: '0 24px' }}>
+            {/* Menu Icon Absolute Left */}
+            <div style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 20 }}>
+              <Menu size={32} color="#f3f4f6" />
             </div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>Trạm Làm Việc</h1>
+
+            {/* App Logo */}
+            <div style={{ 
+              width: 72, height: 72, margin: '0 auto 16px', borderRadius: 22,
+              border: '2px solid #c084fc', background: 'rgba(139,92,246,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 0 20px rgba(168,85,247,0.5), inset 0 0 15px rgba(168,85,247,0.3)'
+            }}>
+              <Factory size={36} color="#e879f9" strokeWidth={1.5} />
+            </div>
+            
+            <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 8px 0', letterSpacing: '-0.5px', color: '#ffffff' }}>Trạm Làm Việc</h1>
+            <p style={{ fontSize: 15, color: '#d1d5db', margin: 0, fontWeight: 500 }}>Hệ thống điều khiển máy trạm</p>
           </div>
 
           <div style={{ padding: '0 20px' }}>
-            {/* User Profile */}
+            {/* User Profile */}      {/* User Profile */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                 <img src="https://ui-avatars.com/api/?name=Huy&background=3b82f6&color=fff" alt="Avatar" style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #374151', objectFit: 'cover' }} />
