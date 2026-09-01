@@ -1,11 +1,13 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePwrStore } from '@/lib/pwr/usePwrStore';
+import { StationWorkflowUI } from './StationWorkflowUI';
 import { Menu, Trophy, ChevronRight, Home, BarChart2, Bell, User, Factory, BatteryMedium, Signal, CheckCircle2, ClipboardList, ArrowLeft, Play, AlertTriangle, Check, ShieldAlert } from 'lucide-react';
 
 export default function MobileStationClient() {
   const router = useRouter();
-  const [activeStation, setActiveStation] = useState<string | null>(null);
+  const { currentTab: activeTab, setTab: setActiveTab, activeStation, setActiveStation } = usePwrStore();
 
   const STYLES = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -105,231 +107,208 @@ export default function MobileStationClient() {
     @keyframes dust2 { 0%, 50% { transform: translate(0,0) scale(0); opacity: 0; } 55% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(15px, -10px) rotate(90deg) scale(0); opacity: 0; } }
     @keyframes dust3 { 0%, 50% { transform: translate(0,0) scale(0); opacity: 0; } 55% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(-5px, -20px) rotate(135deg) scale(0); opacity: 0; } }
 
-
     /* Layout utilities */
     .nav-item {
       display: flex; flex-direction: column; align-items: center; gap: 4px;
       color: #6b7280; font-size: 10px; border: none; background: none; cursor: pointer;
+      transition: color 0.2s;
     }
     .nav-item.active { color: #c084fc; }
     .floating-fab {
       width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      background: #03030a; border: 2px solid #a855f7; color: #c084fc;
-      transform: translateY(-20px); box-shadow: 0 0 15px rgba(139,92,246,0.4), inset 0 0 15px rgba(139,92,246,0.4);
+      background: #03030a; border: 2px solid #374151; color: #9ca3af;
+      transform: translateY(-20px); transition: all 0.2s;
+    }
+    .floating-fab.active {
+      border: 2px solid #a855f7; color: #c084fc;
+      box-shadow: 0 0 15px rgba(139,92,246,0.4), inset 0 0 15px rgba(139,92,246,0.4);
     }
   `;
 
-  if (!activeStation) {
-    return (
-      <div className="app-container" style={{ maxWidth: 480, margin: '0 auto' }}>
-        <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-        <div className="app-overlay" />
-
-        <div className="content-wrapper">
-          {/* iOS Status Bar (ẩn đi để dùng status bar thật của đt) */}
-          <div style={{ height: 44 }} />
-
-          {/* Header Layout (Menu + Logo) */}
-          <div style={{ position: 'relative', textAlign: 'center', marginBottom: 32, padding: '0 24px' }}>
-            {/* Menu Icon Absolute Left */}
-            <div style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 20 }}>
-              <Menu size={32} color="#f3f4f6" />
-            </div>
-
-            {/* App Logo */}
-            <div style={{ 
-              width: 72, height: 72, margin: '0 auto 16px', borderRadius: 22,
-              border: '2px solid #c084fc', background: 'rgba(139,92,246,0.1)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(168,85,247,0.5), inset 0 0 15px rgba(168,85,247,0.3)'
-            }}>
-              <Factory size={36} color="#e879f9" strokeWidth={1.5} />
-            </div>
-            
-            <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 8px 0', letterSpacing: '-0.5px', color: '#ffffff' }}>Trạm Làm Việc</h1>
-            <p style={{ fontSize: 15, color: '#d1d5db', margin: 0, fontWeight: 500 }}>Hệ thống điều khiển máy trạm</p>
-          </div>
-
-          <div style={{ padding: '0 20px' }}>
-            {/* User Profile */}      {/* User Profile */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <img src="https://ui-avatars.com/api/?name=Huy&background=3b82f6&color=fff" alt="Avatar" style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #374151', objectFit: 'cover' }} />
-                <div>
-                  <div style={{ fontSize: 12, color: '#9ca3af' }}>Xin chào,</div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>Anh Huy</div>
-                  <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>Level 12</div>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', color: '#fbbf24', marginBottom: 2 }}>
-                  <Trophy size={20} fill="currentColor" />
-                  <span style={{ fontSize: 24, fontWeight: 800 }}>120</span>
-                </div>
-                <div style={{ fontSize: 12, color: '#9ca3af' }}>Điểm thành tích</div>
-              </div>
-            </div>
-
-            {/* --- CNC CARD --- */}
-            <div className="machine-card machine-card-cnc" onClick={() => setActiveStation('CNC')}>
-              <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(76, 29, 149, 0.3)', flexShrink: 0, boxShadow: '0 0 15px rgba(139,92,246,0.5)' }}>
-                {/* Vòng xoay */}
-                <div className="light-ring cnc-ring-1" style={{ inset: '-2px' }}></div>
-                <div className="light-ring cnc-ring-2" style={{ inset: '-6px' }}></div>
-                
-                {/* Icon Dao cắt 3D */}
-                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
-                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
-                </div>
-                
-                {/* Tia lửa CSS phụ trợ (giữ lại 1 ít để tạo độ động) */}
-                <div style={{ position: 'absolute', bottom: 8, left: '50%', zIndex: 20 }}>
-                   <div className="spark spark-1"></div>
-                   <div className="spark spark-2"></div>
-                   <div className="spark spark-3"></div>
-                   <div className="spark spark-4"></div>
-                </div>
-              </div>
-              
-              <div style={{ flex: 1, paddingLeft: 16 }}>
-                <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ CNC</div>
-                <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Cắt ván, soi rãnh, đánh mòi</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
-                  <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-                    <div style={{ width: '85%', height: '100%', background: '#a855f7', borderRadius: 2, boxShadow: '0 0 8px #a855f7' }} />
-                  </div>
-                  <span style={{ fontSize: 12, color: '#a855f7', fontWeight: 600 }}>85%</span>
-                </div>
-              </div>
-              <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
-                <ChevronRight size={18} color="#c084fc" />
-              </div>
-            </div>
-
-            {/* --- EDGE CARD --- */}
-            <div className="machine-card machine-card-edge" onClick={() => setActiveStation('DAN_CANH')}>
-              <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(6, 78, 59, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(16,185,129,0.4)' }}>
-                {/* Vòng xoay */}
-                <div className="light-ring edge-ring-1"></div>
-                
-                {/* Icon Máy dán 3D (Ảnh gốc) */}
-                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
-                  <img src="/pwr-assets/edge-icon-3d.png" alt="Edge 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
-                </div>
-                
-                {/* Hiệu ứng nẹp dán di chuyển */}
-                <div className="edge-band-track" style={{ zIndex: 20 }}>
-                  <div className="edge-band-light"></div>
-                </div>
-              </div>
-              
-              <div style={{ flex: 1, paddingLeft: 16 }}>
-                <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Dán Cạnh</div>
-                <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Dán nẹp thẳng, vát, acrylic</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
-                  <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-                    <div style={{ width: '70%', height: '100%', background: '#10b981', borderRadius: 2, boxShadow: '0 0 8px #10b981' }} />
-                  </div>
-                  <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>70%</span>
-                </div>
-              </div>
-              <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
-                <ChevronRight size={18} color="#34d399" />
-              </div>
-            </div>
-
-            {/* --- DRILL CARD --- */}
-            <div className="machine-card machine-card-drill" onClick={() => setActiveStation('KHOAN_CAM')}>
-              <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(12, 74, 110, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(14,165,233,0.4)' }}>
-                {/* Vòng xoay */}
-                <div className="light-ring drill-ring-1"></div>
-                
-                {/* Icon Khoan tịnh tiến 3D (Ảnh gốc) */}
-                <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
-                  <img src="/pwr-assets/drill-icon-3d.png" alt="Drill 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
-                </div>
-                
-                {/* Mạt gỗ bay */}
-                <div style={{ position: 'absolute', bottom: 16, left: '50%', zIndex: 20 }}>
-                   <div className="sawdust sawdust-1"></div>
-                   <div className="sawdust sawdust-2"></div>
-                   <div className="sawdust sawdust-3"></div>
-                </div>
-              </div>
-              
-              <div style={{ flex: 1, paddingLeft: 16 }}>
-                <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Khoan Cam</div>
-                <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Khoan chốt, bản lề, ray trượt</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
-                  <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-                    <div style={{ width: '60%', height: '100%', background: '#0ea5e9', borderRadius: 2, boxShadow: '0 0 8px #0ea5e9' }} />
-                  </div>
-                  <span style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 600 }}>60%</span>
-                </div>
-              </div>
-              <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(14,165,233,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
-                <ChevronRight size={18} color="#38bdf8" />
-              </div>
-            </div>
-
-            {/* Bottom Stats Grid */}
-            <div className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', marginTop: 32 }}>
-              <div style={{ textAlign: 'center' }}>
-                <ClipboardList size={20} color="#9ca3af" style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Nhiệm vụ</div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>12</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <CheckCircle2 size={20} color="#9ca3af" style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Đang xử lý</div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>5</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <CheckCircle2 size={20} color="#10b981" style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Hoàn thành</div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>36</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <Trophy size={20} color="#fbbf24" style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Thành tích</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#fbbf24' }}>120</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Floating Bottom Nav */}
-        <div style={{ 
-          position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', 
-          width: '100%', maxWidth: 480, height: 70,
-          background: 'rgba(10, 10, 15, 0.95)', borderTop: '1px solid rgba(255,255,255,0.05)',
-          display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '0 16px',
-          zIndex: 100
-        }}>
-          <button className="nav-item active"><Home size={24} /> Trang chủ</button>
-          <button className="nav-item"><BarChart2 size={24} /> Hạng</button>
-          <div style={{ position: 'relative', width: 56, height: 56 }}><button className="floating-fab"><Factory size={24} /></button></div>
-          <button className="nav-item"><Bell size={24} /> Báo cáo</button>
-          <button className="nav-item"><User size={24} /> Cá nhân</button>
-        </div>
-      </div>
-    );
+  if (activeStation) {
+    return <StationWorkflowUI stationId={activeStation} onBack={() => setActiveStation(null)} />;
   }
 
-  // --- TRANG CON BÊN TRONG TRẠM ---
   return (
     <div className="app-container" style={{ maxWidth: 480, margin: '0 auto' }}>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       <div className="app-overlay" />
-      <div className="content-wrapper" style={{ padding: 20 }}>
-        <button onClick={() => setActiveStation(null)} style={{ padding: '12px 24px', background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: 12, border: '1px solid rgba(255,255,255,0.2)' }}>
-          ← Quay lại
-        </button>
-        <h2 style={{ marginTop: 24, fontSize: 24 }}>Đang trong trạm {activeStation}</h2>
-        <p style={{ color: '#9ca3af' }}>Chức năng danh sách lệnh sẽ được phát triển tiếp...</p>
+
+      <div className="content-wrapper">
+        <div style={{ height: 44 }} />
+
+        {activeTab === 'STATION' ? (
+          <>
+            {/* Header Layout (Menu + Logo) */}
+            <div style={{ position: 'relative', textAlign: 'center', marginBottom: 32, padding: '0 24px' }}>
+              <div style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', zIndex: 20 }}>
+                <Menu size={32} color="#f3f4f6" />
+              </div>
+
+              <div style={{ 
+                width: 72, height: 72, margin: '0 auto 16px', borderRadius: 22,
+                border: '2px solid #c084fc', background: 'rgba(139,92,246,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 0 20px rgba(168,85,247,0.5), inset 0 0 15px rgba(168,85,247,0.3)'
+              }}>
+                <Factory size={36} color="#e879f9" strokeWidth={1.5} />
+              </div>
+              
+              <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 8px 0', letterSpacing: '-0.5px', color: '#ffffff' }}>Trạm Làm Việc</h1>
+              <p style={{ fontSize: 15, color: '#d1d5db', margin: 0, fontWeight: 500 }}>Hệ thống điều khiển máy trạm</p>
+            </div>
+
+            <div style={{ padding: '0 20px' }}>
+              {/* User Profile */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <img src="https://ui-avatars.com/api/?name=Huy&background=3b82f6&color=fff" alt="Avatar" style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #374151', objectFit: 'cover' }} />
+                  <div>
+                    <div style={{ fontSize: 12, color: '#9ca3af' }}>Xin chào,</div>
+                    <div style={{ fontSize: 16, fontWeight: 700 }}>Anh Huy</div>
+                    <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>Level 12</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginBottom: 4 }}>
+                    <Trophy size={20} color="#fbbf24" fill="#fbbf24" />
+                    <span style={{ fontSize: 24, fontWeight: 800, color: '#fbbf24' }}>120</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#9ca3af' }}>Điểm thành tích</div>
+                </div>
+              </div>
+
+              {/* --- CNC CARD --- */}
+              <div className="machine-card machine-card-cnc" onClick={() => setActiveStation('CNC')}>
+                <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(76, 29, 149, 0.3)', flexShrink: 0, boxShadow: '0 0 15px rgba(139,92,246,0.5)' }}>
+                  <div className="light-ring cnc-ring-1"></div>
+                  <div className="light-ring cnc-ring-2"></div>
+                  <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                    <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 8, left: '50%', zIndex: 20 }}>
+                     <div className="spark spark-1"></div><div className="spark spark-2"></div>
+                     <div className="spark spark-3"></div><div className="spark spark-4"></div>
+                  </div>
+                </div>
+                
+                <div style={{ flex: 1, paddingLeft: 16 }}>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ CNC</div>
+                  <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Cắt ván, soi rãnh, đánh mòi</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
+                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
+                      <div style={{ width: '85%', height: '100%', background: '#a855f7', borderRadius: 2, boxShadow: '0 0 8px #a855f7' }} />
+                    </div>
+                    <span style={{ fontSize: 12, color: '#a855f7', fontWeight: 600 }}>85%</span>
+                  </div>
+                </div>
+                <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
+                  <ChevronRight size={18} color="#c084fc" />
+                </div>
+              </div>
+
+              {/* --- EDGE CARD --- */}
+              <div className="machine-card machine-card-edge" onClick={() => setActiveStation('DAN_CANH')}>
+                <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(6, 78, 59, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(16,185,129,0.4)' }}>
+                  <div className="light-ring edge-ring-1"></div>
+                  <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                    <img src="/pwr-assets/edge-icon-3d.png" alt="Edge 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
+                  </div>
+                  <div className="edge-band-track" style={{ zIndex: 20 }}>
+                    <div className="edge-band-light"></div>
+                  </div>
+                </div>
+                <div style={{ flex: 1, paddingLeft: 16 }}>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Dán Cạnh</div>
+                  <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Dán nẹp thẳng, vát, acrylic</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
+                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
+                      <div style={{ width: '70%', height: '100%', background: '#10b981', borderRadius: 2, boxShadow: '0 0 8px #10b981' }} />
+                    </div>
+                    <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>70%</span>
+                  </div>
+                </div>
+                <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
+                  <ChevronRight size={18} color="#34d399" />
+                </div>
+              </div>
+
+              {/* --- DRILL CARD --- */}
+              <div className="machine-card machine-card-drill" onClick={() => setActiveStation('KHOAN_CAM')}>
+                <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(12, 74, 110, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(14,165,233,0.4)' }}>
+                  <div className="light-ring drill-ring-1"></div>
+                  <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                    <img src="/pwr-assets/drill-icon-3d.png" alt="Drill 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 16, left: '50%', zIndex: 20 }}>
+                     <div className="sawdust sawdust-1"></div><div className="sawdust sawdust-2"></div><div className="sawdust sawdust-3"></div>
+                  </div>
+                </div>
+                <div style={{ flex: 1, paddingLeft: 16 }}>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Khoan Cam</div>
+                  <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Khoan chốt, bản lề, ray trượt</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
+                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
+                      <div style={{ width: '60%', height: '100%', background: '#0ea5e9', borderRadius: 2, boxShadow: '0 0 8px #0ea5e9' }} />
+                    </div>
+                    <span style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 600 }}>60%</span>
+                  </div>
+                </div>
+                <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(14,165,233,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
+                  <ChevronRight size={18} color="#38bdf8" />
+                </div>
+              </div>
+
+              {/* Bottom Stats Grid */}
+              <div className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', marginTop: 32 }}>
+                <div style={{ textAlign: 'center' }}>
+                  <ClipboardList size={20} color="#9ca3af" style={{ margin: '0 auto 8px' }} />
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Nhiệm vụ</div>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>12</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <CheckCircle2 size={20} color="#9ca3af" style={{ margin: '0 auto 8px' }} />
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Đang xử lý</div>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>5</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <CheckCircle2 size={20} color="#10b981" style={{ margin: '0 auto 8px' }} />
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Hoàn thành</div>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>36</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <Trophy size={20} color="#fbbf24" style={{ margin: '0 auto 8px' }} />
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Thành tích</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#fbbf24' }}>120</div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', padding: 20, textAlign: 'center' }}>
+            <Factory size={64} color="#374151" style={{ marginBottom: 24 }} />
+            <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12 }}>Thẻ {activeTab}</h2>
+            <p style={{ color: '#9ca3af' }}>Đang phát triển theo Checklist QA. Vui lòng trở lại thẻ Trạm Làm Việc ở giữa.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Bottom Nav */}
+      <div style={{ 
+        position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', 
+        width: '100%', maxWidth: 480, height: 70,
+        background: 'rgba(10, 10, 15, 0.95)', borderTop: '1px solid rgba(255,255,255,0.05)',
+        display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '0 16px',
+        zIndex: 100, backdropFilter: 'blur(20px)'
+      }}>
+        <button className={`nav-item ${activeTab === 'HOME' ? 'active' : ''}`} onClick={() => setActiveTab('HOME')}><Home size={24} /> Trang chủ</button>
+        <button className={`nav-item ${activeTab === 'LEADERBOARD' ? 'active' : ''}`} onClick={() => setActiveTab('LEADERBOARD')}><BarChart2 size={24} /> Hạng</button>
+        <div style={{ position: 'relative', width: 56, height: 56 }}><button className={`floating-fab ${activeTab === 'STATION' ? 'active' : ''}`} onClick={() => setActiveTab('STATION')}><Factory size={24} /></button></div>
+        <button className={`nav-item ${activeTab === 'REPORTS' ? 'active' : ''}`} onClick={() => setActiveTab('REPORTS')}><Bell size={24} /> Báo cáo</button>
+        <button className={`nav-item ${activeTab === 'PROFILE' ? 'active' : ''}`} onClick={() => setActiveTab('PROFILE')}><User size={24} /> Cá nhân</button>
       </div>
     </div>
   );
