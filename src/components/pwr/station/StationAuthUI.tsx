@@ -403,7 +403,16 @@ export default function StationAuthUI() {
               <Eye size={18} color="#6b7280" style={{ position: 'absolute', right: 16, top: 16, cursor: 'pointer' }} onClick={() => setShowPassword(!showPassword)} />
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', marginTop: 4, marginBottom: 8 }} onClick={() => setAgreeTerms(!agreeTerms)}>
+            <div 
+              style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', marginTop: 4, marginBottom: 8 }} 
+              onClick={() => {
+                if (!agreeTerms) {
+                  setShowTerms(true); // Force open terms if not agreed
+                } else {
+                  setAgreeTerms(false); // Allow unchecking freely
+                }
+              }}
+            >
               {agreeTerms ? (
                 <div style={{ width: 18, height: 18, background: colors.register, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckSquare size={14} color="#fff" strokeWidth={3} />
@@ -421,7 +430,17 @@ export default function StationAuthUI() {
               </span>
             </div>
 
-            <button onClick={handleAction} disabled={isSubmitting} style={{ ...btnStyle, background: `linear-gradient(90deg, #064e3b, ${colors.register})`, boxShadow: `0 8px 25px rgba(16,185,129,0.4)` }}>
+            <button 
+              onClick={handleAction} 
+              disabled={isSubmitting || !agreeTerms} 
+              style={{ 
+                ...btnStyle, 
+                background: (!agreeTerms) ? '#374151' : `linear-gradient(90deg, #064e3b, ${colors.register})`, 
+                boxShadow: (!agreeTerms) ? 'none' : `0 8px 25px rgba(16,185,129,0.4)`,
+                color: (!agreeTerms) ? '#9ca3af' : '#fff',
+                cursor: (!agreeTerms) ? 'not-allowed' : 'pointer'
+              }}
+            >
               {isSubmitting ? 'ĐANG TẠO...' : 'TẠO TÀI KHOẢN'} <ChevronRight size={20} strokeWidth={3} />
             </button>
 
@@ -685,7 +704,10 @@ export default function StationAuthUI() {
           </div>
 
           <button 
-            onClick={() => setShowTerms(false)}
+            onClick={() => {
+              setAgreeTerms(true);
+              setShowTerms(false);
+            }}
             style={{ 
               width: '100%', padding: 16, marginTop: 24, background: '#10b981', color: '#fff', 
               fontWeight: 700, borderRadius: 12, border: 'none', cursor: 'pointer' 
