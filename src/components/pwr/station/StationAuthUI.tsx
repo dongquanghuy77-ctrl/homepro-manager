@@ -36,22 +36,12 @@ export default function StationAuthUI() {
       backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png"), radial-gradient(circle at top, #1a103c 0%, #05050a 100%)',
       color: '#fff', 
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       padding: '40px 20px',
       overflowY: 'auto'
     }}>
       
-      {/* Header text */}
-      <div style={{ textAlign: 'center', marginBottom: 30 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 8px 0', color: '#a855f7', textShadow: '0 0 15px rgba(168, 85, 247, 0.6)', textTransform: 'uppercase', letterSpacing: 1 }}>
-          Thẻ Đăng Ký, Đăng Nhập
-        </h1>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <div style={{ height: 1, width: 30, background: 'rgba(255,255,255,0.2)' }} />
-          <span style={{ color: '#9ca3af', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase' }}>Trạm Làm Việc - Game Hóa</span>
-          <div style={{ height: 1, width: 30, background: 'rgba(255,255,255,0.2)' }} />
-        </div>
-      </div>
+      {/* Removed Header Text per user request */}
 
       {/* Main Card */}
       <div style={{
