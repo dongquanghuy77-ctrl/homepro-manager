@@ -2522,3 +2522,18 @@ export const pwrResourceCalendar = pgTable('pwr_resource_calendar', {
 
 export type PwrResourceCalendar = typeof pwrResourceCalendar.$inferSelect;
 export type NewPwrResourceCalendar = typeof pwrResourceCalendar.$inferInsert;
+
+// ============================================================
+// PWR V5 - GAMIFICATION & USER STATS
+// ============================================================
+export const pwrUserStats = pgTable('pwr_user_stats', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  totalPoints: integer('total_points').notNull().default(0),
+  currentLevel: integer('current_level').notNull().default(1),
+  lastActiveAt: timestamp('last_active_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+export type PwrUserStat = typeof pwrUserStats.;
+export type NewPwrUserStat = typeof pwrUserStats.;
