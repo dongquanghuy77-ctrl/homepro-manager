@@ -83,6 +83,7 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 8 * 60 * 60, // 8 hours = length of 1 factory shift
   },
+  secret: process.env.NEXTAUTH_SECRET || "fallback_secret_for_homepro_12345!@#",
   pages: {
     signIn: '/pwr/station/login',
     error: '/pwr/station/login', // Redirect back on error (Fix Flaw #3: Fallback UI)
