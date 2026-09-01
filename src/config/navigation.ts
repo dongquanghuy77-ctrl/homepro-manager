@@ -261,6 +261,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
       { id: 'pwr-kanban',         label: 'My Work Center',     icon: 'Columns',      href: '/pwr/kanban',             sprint: 1 },
       { id: 'pwr-calendar',       label: 'Lịch công việc',     icon: 'CalendarDays', href: '/pwr/calendar',           sprint: 2 },
       { id: 'pwr-sx-grp',         label: 'SẢN XUẤT',          icon: '',             href: '#',                       sprint: 1, isGroupHeader: true },
+      { id: 'pwr-dispatch',       label: 'Điều Phối (Kanban)', icon: 'GripVertical', href: '/pwr/dispatch',          sprint: 1, managerOnly: true },
       { id: 'pwr-ingestion',      label: 'Nuốt File Excel',    icon: 'Upload',       href: '/pwr/ingestion',          sprint: 1 },
       { id: 'pwr-capacity',       label: 'Tải Trọng Máy',      icon: 'Activity',     href: '/pwr/capacity',           sprint: 1 },
       { id: 'pwr-station',        label: 'Trạm Làm Việc',      icon: 'Smartphone',   href: '/pwr/station',            sprint: 1 },
