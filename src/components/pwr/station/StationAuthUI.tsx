@@ -153,22 +153,35 @@ export default function StationAuthUI() {
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                {['G', 'f', '🍎', 'M'].map((icon, i) => (
-                  <button key={i} style={{ 
-                    flex: 1, height: 48, background: 'rgba(255,255,255,0.03)', 
-                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 20, color: '#fff', cursor: 'pointer'
-                  }}>
-                    {i === 0 ? <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width={20} alt="G" /> :
-                     i === 1 ? <span style={{ color: '#3b5998', fontWeight: 'bold', fontSize: 24 }}>f</span> :
-                     i === 2 ? <span></span> :
-                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, width: 16, height: 16 }}>
-                       <div style={{ background: '#f25022' }}/><div style={{ background: '#7fba00' }}/>
-                       <div style={{ background: '#00a4ef' }}/><div style={{ background: '#ffb900' }}/>
-                     </div>}
-                  </button>
-                ))}
+                
+                {/* Google */}
+                <div style={octBorder}>
+                  <div style={octInner}>
+                    <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                  </div>
+                </div>
+
+                {/* Facebook */}
+                <div style={octBorder}>
+                  <div style={octInner}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#1877F2"><path d="M15.12 24v-9.52h3.19l.48-3.71h-3.67v-2.37c0-1.07.3-1.81 1.84-1.81h1.96V3.27c-.34-.05-1.5-.15-2.86-.15-2.83 0-4.76 1.73-4.76 4.9v2.75h-3.2v3.71h3.2V24h3.82z"/></svg>
+                  </div>
+                </div>
+
+                {/* Apple */}
+                <div style={octBorder}>
+                  <div style={octInner}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05 1.8-3.08 1.8-.95 0-1.28-.58-2.6-.58-1.32 0-1.7.55-2.6.55-1.02 0-2.18-.9-3.23-1.93-2.1-2.08-3.95-6.03-3.95-9.3 0-4.08 2.5-6.38 5.15-6.38 1.43 0 2.68.83 3.48.83.75 0 2.18-.95 3.75-.95 1.95.05 3.55.93 4.45 2.38-3.85 2.15-3.25 7.4.55 8.93-.85 2.05-1.85 4-2.92 4.65M12.03 4.45c.5-2.23 2.55-3.95 4.75-4.2-.4 2.45-2.7 4.5-5.1 4.38-.05-.05-.05-.13-.05-.18z"/></svg>
+                  </div>
+                </div>
+
+                {/* Microsoft */}
+                <div style={octBorder}>
+                  <div style={octInner}>
+                    <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#f25022" d="M1 1h10.5v10.5H1z"/><path fill="#7fba00" d="M12.5 1H23v10.5H12.5z"/><path fill="#00a4ef" d="M1 12.5h10.5V23H1z"/><path fill="#ffb900" d="M12.5 12.5H23V23H12.5z"/></svg>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -340,6 +353,23 @@ const btnStyle = {
   alignItems: 'center',
   justifyContent: 'center',
   gap: 8,
+};
+
+const octagonClip = "polygon(29% 0%, 71% 0%, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0% 71%, 0% 29%)";
+
+const octBorder = {
+  flex: 1, height: 56,
+  background: 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02))',
+  clipPath: octagonClip,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  cursor: 'pointer', transition: 'transform 0.15s'
+};
+
+const octInner = {
+  width: 'calc(100% - 2px)', height: 'calc(100% - 2px)',
+  background: '#0a0a12',
+  clipPath: octagonClip,
+  display: 'flex', alignItems: 'center', justifyContent: 'center'
 };
 
 function FactoryIcon({ color }: { color: string }) {
