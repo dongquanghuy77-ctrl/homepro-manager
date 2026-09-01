@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Play, Check, AlertTriangle, ArrowLeft, Loader2, Trophy, Menu, Bell, User, Home, BarChart2, Activity, Zap, CheckCircle2, Factory, ShieldAlert } from 'lucide-react';
+import { Play, Check, AlertTriangle, ArrowLeft, Loader2, Target, CheckCircle2, Factory, Disc, Layers, Crosshair, Trophy, Menu, Bell, User, Home, BarChart2, Activity, Zap, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- CUSTOM ANIMATED SVGS ---
