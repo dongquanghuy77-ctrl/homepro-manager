@@ -14,7 +14,7 @@ export default function MobileStationClient() {
     
     .app-container {
       background-color: #03030a;
-      background-image: url('/pwr-assets/factory-bg.png');
+      background-image: url('/pwr-assets/factory-bg-clean.png');
       background-size: cover;
       background-position: center top;
       background-attachment: fixed;
