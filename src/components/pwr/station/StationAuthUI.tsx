@@ -101,7 +101,7 @@ export default function StationAuthUI() {
       setIsSubmitting(false);
       
       if (res?.error) {
-        setAuthError('Tài khoản hoặc mật khẩu không đúng');
+        setAuthError(`Lỗi: ${res.error} (Mã: ${res?.status})`);
       } else {
         setAuthState('WELCOME');
       }

@@ -18,21 +18,26 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null;
+        if (!credentials?.username || !credentials?.password) {
+          throw new Error("MissingCredentials");
+        }
         
         const userRecs = await db.select().from(users).where(eq(users.username, credentials.username));
         const user = userRecs[0];
         
-        if (!user) return null;
+        if (!user) {
+          throw new Error("UserNotFound");
+        }
         
         const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+        if (!isValid) {
+          throw new Error("InvalidPassword");
+        }
         
         return { 
           id: user.id.toString(), 
           name: user.name, 
           email: user.email, 
-          // You can attach more fields to JWT here if needed
         };
       }
     }),
