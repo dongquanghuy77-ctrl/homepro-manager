@@ -207,8 +207,9 @@ export default function MobileStationClient() {
                 {/* Vòng xoay */}
                 <div className="light-ring edge-ring-1"></div>
                 
-                {/* Icon Máy dán 3D (Crop từ ảnh to) */}
-                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', backgroundImage: "url('/pwr-assets/edge-card.png')", backgroundSize: 'auto 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
+                {/* Icon Máy dán 3D (Ảnh gốc) */}
+                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                  <img src="/pwr-assets/edge-icon-3d.png" alt="Edge 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                 </div>
                 
                 {/* Hiệu ứng nẹp dán di chuyển */}
@@ -239,8 +240,9 @@ export default function MobileStationClient() {
                 {/* Vòng xoay */}
                 <div className="light-ring drill-ring-1"></div>
                 
-                {/* Icon Khoan tịnh tiến 3D (Crop từ ảnh to) */}
-                <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', backgroundImage: "url('/pwr-assets/drill-card.png')", backgroundSize: 'auto 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }}>
+                {/* Icon Khoan tịnh tiến 3D (Ảnh gốc) */}
+                <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                  <img src="/pwr-assets/drill-icon-3d.png" alt="Drill 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                 </div>
                 
                 {/* Mạt gỗ bay */}
