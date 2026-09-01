@@ -2537,3 +2537,21 @@ export const pwrUserStats = pgTable('pwr_user_stats', {
 });
 export type PwrUserStat = typeof pwrUserStats.$inferSelect;
 export type NewPwrUserStat = typeof pwrUserStats.$inferInsert;
+
+// ============================================================
+// PWR V5 - STATION USERS (MOBILE AUTH)
+// ============================================================
+export const pwrStationUsers = pgTable('pwr_station_users', {
+  id: serial('id').primaryKey(),
+  workerCode: text('worker_code').notNull().unique(), // VD: T01, T02
+  fullName: text('full_name').notNull(),
+  pinCode: text('pin_code').notNull(), // Mã PIN 4-6 số
+  stationRole: text('station_role').notNull(), // CNC, DAN_CANH, KHOAN_CAM
+  avatarUrl: text('avatar_url'),
+  points: integer('points').notNull().default(0),
+  level: integer('level').notNull().default(1),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+export type PwrStationUser = typeof pwrStationUsers.$inferSelect;
+export type NewPwrStationUser = typeof pwrStationUsers.$inferInsert;
