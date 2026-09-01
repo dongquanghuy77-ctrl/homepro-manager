@@ -265,7 +265,7 @@ export default function MobileStationClient() {
               </div>
 
               {/* --- DRILL CARD --- */}
-              <div className="machine-card machine-card-drill" onClick={() => setActiveStation('KHOAN')} style={userStationRole === 'KHOAN' ? { border: '2px solid #3b82f6', boxShadow: '0 0 20px rgba(59,130,246,0.5)' } : { opacity: 0.4, filter: 'grayscale(1)' }}>
+              <div className="machine-card machine-card-drill" onClick={() => setActiveStation('KHOAN_CAM')} style={userStationRole === 'KHOAN_CAM' ? { border: '2px solid #3b82f6', boxShadow: '0 0 20px rgba(59,130,246,0.5)' } : { opacity: 0.4, filter: 'grayscale(1)' }}>
                 <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(30, 58, 138, 0.3)', flexShrink: 0, boxShadow: '0 0 15px rgba(59,130,246,0.5)' }}>
                   <div className="drill-bit"></div>
                   <div className="drill-particle p-1"></div>
@@ -274,6 +274,9 @@ export default function MobileStationClient() {
                   <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
                     <img src="/pwr-assets/drill-icon-3d.png" alt="Drill 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
                   </div>
+                </div>
+                <div style={{ flex: 1, paddingLeft: 16 }}>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Khoan Cam {userStationRole === 'KHOAN_CAM' && <span style={{ fontSize: 10, background: '#3b82f6', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Khoan chốt, bản lề, ray trượt</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
