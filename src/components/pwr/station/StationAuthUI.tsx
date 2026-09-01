@@ -25,6 +25,7 @@ export default function StationAuthUI() {
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [authSuccess, setAuthSuccess] = useState('');
   const [showTerms, setShowTerms] = useState(false);
 
   // Forgot Password States
@@ -85,6 +86,7 @@ export default function StationAuthUI() {
 
   const handleAction = async () => {
     setAuthError('');
+    setAuthSuccess('');
     if (authState === 'LOGIN') {
       if (!phone || !password) {
         setAuthError('Vui lòng nhập tài khoản và mật khẩu');
@@ -134,16 +136,21 @@ export default function StationAuthUI() {
           setAuthError(data.error);
           setIsSubmitting(false);
         } else {
-          // Auto login after register
-          const signInRes = await signIn('credentials', {
-            redirect: false,
-            username: regUsername,
-            password: regPassword,
-          });
+          // Instead of auto-login, redirect to LOGIN screen
+          setAuthSuccess('Đăng ký thành công! Vui lòng đăng nhập.');
+          setPhone(regUsername); // Pre-fill username
+          setPassword('');
+          
+          // Clear register fields
+          setRegName('');
+          setRegEmail('');
+          setRegUsername('');
+          setRegPassword('');
+          setRegConfirmPassword('');
+          setAgreeTerms(false);
+          
           setIsSubmitting(false);
-          if (!signInRes?.error) {
-            setAuthState('WELCOME');
-          }
+          setAuthState('LOGIN');
         }
       } catch (err) {
         setAuthError('Lỗi kết nối. Vui lòng thử lại.');
@@ -242,7 +249,8 @@ export default function StationAuthUI() {
         {/* LOGIN FORM */}
         {authState === 'LOGIN' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {authError && <div style={{ color: '#ef4444', fontSize: 13, background: 'rgba(239,68,68,0.1)', padding: 10, borderRadius: 8 }}>{authError}</div>}
+            {authError && <div style={{ color: '#ef4444', fontSize: 13, background: 'rgba(239,68,68,0.1)', padding: 10, borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)' }}>{authError}</div>}
+            {authSuccess && <div style={{ color: '#10b981', fontSize: 13, background: 'rgba(16,185,129,0.1)', padding: 10, borderRadius: 8, border: '1px solid rgba(16,185,129,0.2)' }}>{authSuccess}</div>}
             <div style={{ position: 'relative' }}>
               <Mail size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
               <input type="text" placeholder="Email hoặc số điện thoại" style={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} />
