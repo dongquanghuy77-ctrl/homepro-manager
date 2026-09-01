@@ -31,6 +31,7 @@ export default function StationAuthUI() {
 
   return (
     <div style={{ 
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, overflowY: 'auto',
       minHeight: '100vh', 
       background: '#09090e', 
       backgroundImage: 'radial-gradient(circle at center, #13131f 0%, #05050a 100%)',
