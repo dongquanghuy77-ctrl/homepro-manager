@@ -33,7 +33,10 @@ export default function StationAuthUI() {
     <div style={{ 
       minHeight: '100vh', 
       background: '#05050a', 
-      backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png"), radial-gradient(circle at top, #1a103c 0%, #05050a 100%)',
+      backgroundImage: 'linear-gradient(rgba(5, 5, 10, 0.4), rgba(5, 5, 10, 0.8)), url("/pwr-assets/login-bg.png")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
       color: '#fff', 
       fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
