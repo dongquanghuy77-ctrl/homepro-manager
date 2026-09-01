@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
   try {
     const { session, error: authError } = await requireAuth(req);
     if (authError) return authError;
+    if (!session || !session.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const { pointsToAdd } = body;

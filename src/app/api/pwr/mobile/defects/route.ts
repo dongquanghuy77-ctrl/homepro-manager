@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     // 4. Ghi DB: Tạo Issue Log
     const newLog = await db.insert(pwrWorkLogs).values({
       taskId: parseInt(taskId),
-      userId: session.userId,
+      userId: session!.id,
       logType: 'ISSUE_LOG',
       content: note || 'Báo cáo sự cố từ máy trạm',
       issue: fileUrl ? `Đính kèm ảnh lỗi: ${fileUrl}` : null,
