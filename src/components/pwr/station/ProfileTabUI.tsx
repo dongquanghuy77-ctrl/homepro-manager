@@ -59,7 +59,7 @@ export function ProfileTabUI() {
           <Settings size={20} color="#9ca3af" />
           <span style={{ fontSize: 16, fontWeight: 500 }}>Cài đặt tài khoản</span>
         </button>
-        <button style={{ width: '100%', padding: 16, display: 'flex', alignItems: 'center', gap: 12, background: 'transparent', border: 'none', color: '#ef4444', textAlign: 'left' }}>
+        <button onClick={() => window.location.href = '/pwr/station/login'} style={{ width: '100%', padding: 16, display: 'flex', alignItems: 'center', gap: 12, background: 'transparent', border: 'none', color: '#ef4444', textAlign: 'left' }}>
           <LogOut size={20} />
           <span style={{ fontSize: 16, fontWeight: 500 }}>Đăng xuất</span>
         </button>
