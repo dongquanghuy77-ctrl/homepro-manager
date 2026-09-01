@@ -57,8 +57,8 @@ export default function MobileStationClient() {
     /* ANIMATIONS FOR ICONS                      */
     /* ========================================= */
     
-    @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-    @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+    @keyframes spin-slow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes spin-reverse { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
     
     /* Vòng xoay ánh sáng chung */
     .light-ring { position: absolute; border-radius: 50%; }
