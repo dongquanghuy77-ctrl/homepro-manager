@@ -186,14 +186,53 @@ export default function StationAuthUI() {
             </div>
 
             {/* Gamification Banner */}
-            <div style={{ marginTop: 24, background: 'rgba(10, 10, 18, 0.8)', border: `2px solid ${colors.login}60`, borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 16, position: 'relative', overflow: 'hidden', boxShadow: `0 0 20px ${colors.login}20` }}>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, height: 4, width: '100%', background: `linear-gradient(90deg, ${colors.login}, transparent)` }} />
-              <div style={{ background: `linear-gradient(135deg, ${colors.login}, ${colors.loginBg})`, padding: 12, borderRadius: 12, border: `1px solid ${colors.login}`, boxShadow: `0 0 15px ${colors.login}80` }}>
-                <Trophy size={24} color="#fbbf24" fill="#fbbf24" />
+            <div style={{ marginTop: 24, background: 'rgba(15, 10, 25, 0.6)', border: `1px solid rgba(168,85,247,0.3)`, borderRadius: 16, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, boxShadow: 'inset 0 0 20px rgba(168,85,247,0.05), 0 4px 20px rgba(0,0,0,0.5)' }}>
+              
+              {/* Octagon Trophy Icon */}
+              <div style={{
+                width: 60, height: 60, flexShrink: 0,
+                background: `linear-gradient(135deg, #a855f7, #4c1d95)`,
+                clipPath: octagonClip,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: `0 0 15px rgba(168,85,247,0.5)`
+              }}>
+                <div style={{
+                  width: 56, height: 56,
+                  background: '#130c27',
+                  clipPath: octagonClip,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" style={{ filter: 'drop-shadow(0 4px 6px rgba(234,179,8,0.3))' }}>
+                    <defs>
+                      <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fef08a" />
+                        <stop offset="40%" stopColor="#eab308" />
+                        <stop offset="100%" stopColor="#854d0e" />
+                      </linearGradient>
+                    </defs>
+                    <path fill="url(#gold)" d="M21 4h-3V3c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1v1H3c-1.1 0-2 .9-2 2v3c0 2.41 1.73 4.43 4.02 4.9.43 1.89 1.83 3.4 3.73 4.04V20H5v2h14v-2h-3.75v-2.06c1.9-.64 3.3-2.15 3.73-4.04 2.29-.47 4.02-2.49 4.02-4.9V6c0-1.1-.9-2-2-2zm-16 4V6h1v4.82C4.33 10.3 3 8.78 3 8zm14.18 2.82H19V6h1v2c0 1.22-1.33 2.7-3.82 2.82z"/>
+                    <path fill="#713f12" d="M12 7l1.22 2.47 2.73.4-1.98 1.93.47 2.72L12 13.25l-2.44 1.27.47-2.72-1.98-1.93 2.73-.4z"/>
+                  </svg>
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: colors.login, marginBottom: 4 }}>Hoàn thành nhiệm vụ để nhận XP</div>
-                <div style={{ fontSize: 12, color: '#9ca3af' }}>Đăng nhập mỗi ngày để nhận thưởng!</div>
+
+              {/* Content */}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#d8b4fe', marginBottom: 6, letterSpacing: 0.2 }}>
+                  Hoàn thành nhiệm vụ để nhận XP
+                </div>
+                <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>
+                  Đăng nhập mỗi ngày để nhận thưởng!
+                </div>
+                {/* Internal Progress Bar */}
+                <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ 
+                    width: '70%', height: '100%', 
+                    background: `linear-gradient(90deg, #7c3aed 0%, #c084fc 90%, #f3e8ff 100%)`, 
+                    borderRadius: 3,
+                    boxShadow: '0 0 10px #c084fc' 
+                  }} />
+                </div>
               </div>
             </div>
           </div>
@@ -241,16 +280,46 @@ export default function StationAuthUI() {
             </button>
 
             {/* Level Up Banner */}
-            <div style={{ marginTop: 16, background: 'rgba(10, 10, 18, 0.8)', border: `2px solid ${colors.register}60`, borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 16, position: 'relative', overflow: 'hidden', boxShadow: `0 0 20px ${colors.register}20` }}>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, height: 4, width: '100%', background: `linear-gradient(90deg, ${colors.register}, transparent)` }} />
-              <div style={{ background: `linear-gradient(135deg, ${colors.register}, #064e3b)`, padding: '8px 12px', borderRadius: 12, border: `1px solid ${colors.register}`, color: '#fff', fontWeight: 900, textAlign: 'center', lineHeight: 1.1, boxShadow: `0 0 15px ${colors.register}80` }}>
-                LEVEL<br/>UP!
+            <div style={{ marginTop: 16, background: 'rgba(15, 20, 15, 0.6)', border: `1px solid rgba(16,185,129,0.3)`, borderRadius: 16, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, boxShadow: 'inset 0 0 20px rgba(16,185,129,0.05), 0 4px 20px rgba(0,0,0,0.5)' }}>
+              
+              {/* Octagon Level Icon */}
+              <div style={{
+                width: 60, height: 60, flexShrink: 0,
+                background: `linear-gradient(135deg, #10b981, #064e3b)`,
+                clipPath: octagonClip,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: `0 0 15px rgba(16,185,129,0.5)`
+              }}>
+                <div style={{
+                  width: 56, height: 56,
+                  background: '#0a1711',
+                  clipPath: octagonClip,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#10b981', fontWeight: 900, textAlign: 'center', lineHeight: 1.1,
+                  textShadow: '0 2px 10px rgba(16,185,129,0.5)'
+                }}>
+                  LVL<br/>UP!
+                </div>
               </div>
+
+              {/* Content */}
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: colors.register, marginBottom: 4 }}>Tạo tài khoản để lên Level</div>
-                <div style={{ fontSize: 12, color: '#9ca3af' }}>Nhận 50 XP khi đăng ký!</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399', marginBottom: 6, letterSpacing: 0.2 }}>
+                  Tạo tài khoản để lên Level
+                </div>
+                <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>
+                  Nhận ngay 50 XP khởi đầu!
+                </div>
+                {/* Internal Progress Bar */}
+                <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                  <div style={{ 
+                    width: '30%', height: '100%', 
+                    background: `linear-gradient(90deg, #10b981 0%, #34d399 90%, #d1fae5 100%)`, 
+                    borderRadius: 3,
+                    boxShadow: '0 0 10px #34d399' 
+                  }} />
+                </div>
               </div>
-              <Gift size={24} color="#fbbf24" fill="#fbbf24" />
             </div>
           </div>
         )}
