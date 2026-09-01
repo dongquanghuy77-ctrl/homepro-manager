@@ -25,6 +25,7 @@ export default function StationAuthUI() {
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
 
   // Forgot Password States
   const [resetToken, setResetToken] = useState('');
@@ -403,7 +404,14 @@ export default function StationAuthUI() {
               ) : (
                 <Square size={18} color="#6b7280" />
               )}
-              <span style={{ color: '#e5e7eb', fontWeight: 500 }}>Tôi đồng ý với <span style={{ color: colors.register }}>Điều khoản sử dụng</span></span>
+              <span style={{ color: '#e5e7eb', fontWeight: 500 }}>
+                Tôi đồng ý với <span 
+                  style={{ color: colors.register, cursor: 'pointer', textDecoration: 'underline' }}
+                  onClick={(e) => { e.stopPropagation(); setShowTerms(true); }}
+                >
+                  Điều khoản sử dụng
+                </span>
+              </span>
             </div>
 
             <button onClick={handleAction} disabled={isSubmitting} style={{ ...btnStyle, background: `linear-gradient(90deg, #064e3b, ${colors.register})`, boxShadow: `0 8px 25px rgba(16,185,129,0.4)` }}>
@@ -593,6 +601,54 @@ export default function StationAuthUI() {
 
       </div>
     </div>
+
+    {/* TERMS OF USE MODAL */}
+    {showTerms && (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+      }}>
+        <div style={{
+          background: '#111', border: '1px solid #333', borderRadius: 24, padding: 32,
+          maxWidth: 500, width: '100%', color: '#fff', maxHeight: '80vh', overflowY: 'auto'
+        }}>
+          <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 20, color: '#10b981' }}>Nội Quy & Điều Khoản Sử Dụng</h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, fontSize: 14, color: '#d1d5db', lineHeight: 1.6 }}>
+            <div>
+              <strong style={{ color: '#fff' }}>1. Tính trung thực & Trách nhiệm cá nhân</strong><br/>
+              Tài khoản này gắn liền với định danh, bảng chấm công và KPI của bạn. Nghiêm cấm mọi hành vi mượn tài khoản, thao tác hộ, hoặc khai báo khống khối lượng công việc.
+            </div>
+            
+            <div>
+              <strong style={{ color: '#fff' }}>2. Bảo mật Thông tin</strong><br/>
+              Bạn tự chịu trách nhiệm bảo mật Mã PIN / Mật khẩu của mình. Mọi thao tác phát sinh từ tài khoản của bạn sẽ được tính là do chính bạn thực hiện.
+            </div>
+
+            <div>
+              <strong style={{ color: '#fff' }}>3. Ý thức bảo vệ Thiết bị chung</strong><br/>
+              iPad/Kiosk tại trạm làm việc là tài sản của công ty. Chỉ được phép sử dụng cho mục đích công việc. Cấm tuyệt đối việc sử dụng để giải trí, lướt web cá nhân, hoặc có hành vi cố tình phá hoại thiết bị.
+            </div>
+
+            <div>
+              <strong style={{ color: '#fff' }}>4. Quy định về Điểm thưởng (Gamification)</strong><br/>
+              Hệ thống Điểm kinh nghiệm (XP) và Cấp độ (Level) là công cụ đánh giá năng lực minh bạch. Điểm thưởng chỉ có hiệu lực sau khi Quản đốc duyệt. Mọi hành vi gian lận (spam XP) sẽ dẫn đến việc hủy toàn bộ điểm và xử lý kỷ luật.
+            </div>
+          </div>
+
+          <button 
+            onClick={() => setShowTerms(false)}
+            style={{ 
+              width: '100%', padding: 16, marginTop: 24, background: '#10b981', color: '#fff', 
+              fontWeight: 700, borderRadius: 12, border: 'none', cursor: 'pointer' 
+            }}
+          >
+            TÔI ĐÃ HIỂU VÀ ĐỒNG Ý
+          </button>
+        </div>
+      </div>
+    )}
     </>
   );
 }
