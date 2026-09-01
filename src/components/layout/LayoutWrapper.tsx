@@ -13,7 +13,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   // - /login: Man hinh dang nhap cho tat ca nguoi dung
   // - /change-password: Man hinh bat buoc doi pass/PIN
   // Trang khong can sidebar: Login, Doi mat khau, Nhan vien (mobile-first), Mobile Station (pwr/station)
-  const isCleanPage = pathname === '/login' || pathname === '/change-password' || pathname === '/nhan-vien' || pathname === '/pwr/station';
+  const isCleanPage = pathname === '/login' || pathname === '/change-password' || pathname === '/nhan-vien' || pathname?.startsWith('/pwr/station');
 
   if (isCleanPage) {
     return (

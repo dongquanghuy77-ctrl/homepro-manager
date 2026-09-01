@@ -31,7 +31,6 @@ export default function StationAuthUI() {
 
   return (
     <div style={{ 
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, overflowY: 'auto',
       minHeight: '100vh', 
       background: '#09090e', 
       backgroundImage: 'radial-gradient(circle at center, #13131f 0%, #05050a 100%)',
@@ -84,7 +83,7 @@ export default function StationAuthUI() {
 
         {/* Tab Switcher (Login / Register) */}
         {(authState === 'LOGIN' || authState === 'REGISTER') && (
-          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: 12, pading: 4, marginBottom: 24, border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: 4, marginBottom: 24, border: '1px solid rgba(255,255,255,0.05)' }}>
             <button 
               onClick={() => setAuthState('LOGIN')}
               style={{ flex: 1, padding: '12px 0', borderRadius: 10, border: 'none', 
