@@ -148,7 +148,7 @@ export default function MobileStationClient() {
             {/* User Profile */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Huy&backgroundColor=3b82f6" alt="Avatar" style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #374151' }} />
+                <img src="https://ui-avatars.com/api/?name=Huy&background=3b82f6&color=fff" alt="Avatar" style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #374151', objectFit: 'cover' }} />
                 <div>
                   <div style={{ fontSize: 12, color: '#9ca3af' }}>Xin chào,</div>
                   <div style={{ fontSize: 16, fontWeight: 700 }}>Anh Huy</div>
@@ -166,18 +166,18 @@ export default function MobileStationClient() {
 
             {/* --- CNC CARD --- */}
             <div className="machine-card machine-card-cnc" onClick={() => setActiveStation('CNC')}>
-              <div className="relative w-16 h-16 rounded-full flex items-center justify-center bg-purple-900/30 flex-shrink-0" style={{ boxShadow: '0 0 15px rgba(139,92,246,0.5)' }}>
+              <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(76, 29, 149, 0.3)', flexShrink: 0, boxShadow: '0 0 15px rgba(139,92,246,0.5)' }}>
                 {/* Vòng xoay */}
                 <div className="light-ring cnc-ring-1" style={{ inset: '-2px' }}></div>
                 <div className="light-ring cnc-ring-2" style={{ inset: '-6px' }}></div>
                 
                 {/* Icon Dao cắt 3D */}
-                <div className="relative z-10" style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', WebkitMaskImage: '-webkit-radial-gradient(white, black)', maskImage: 'radial-gradient(white, black)' }}>
+                <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', WebkitMaskImage: '-webkit-radial-gradient(white, black)', maskImage: 'radial-gradient(white, black)' }}>
                   <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.05)' }} />
                 </div>
                 
                 {/* Tia lửa CSS phụ trợ (giữ lại 1 ít để tạo độ động) */}
-                <div className="absolute bottom-2 left-1/2 z-20">
+                <div style={{ position: 'absolute', bottom: 8, left: '50%', zIndex: 20 }}>
                    <div className="spark spark-1"></div>
                    <div className="spark spark-2"></div>
                    <div className="spark spark-3"></div>
@@ -196,19 +196,19 @@ export default function MobileStationClient() {
                   <span style={{ fontSize: 12, color: '#a855f7', fontWeight: 600 }}>85%</span>
                 </div>
               </div>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', justifyItems: 'center', paddingLeft: 7, paddingTop: 7, marginLeft: 12 }}>
+              <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
                 <ChevronRight size={18} color="#c084fc" />
               </div>
             </div>
 
             {/* --- EDGE CARD --- */}
             <div className="machine-card machine-card-edge" onClick={() => setActiveStation('DAN_CANH')}>
-              <div className="relative w-16 h-16 rounded-full flex items-center justify-center bg-emerald-900/30 flex-shrink-0" style={{ boxShadow: 'inset 0 0 20px rgba(16,185,129,0.4)' }}>
+              <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(6, 78, 59, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(16,185,129,0.4)' }}>
                 {/* Vòng xoay */}
                 <div className="light-ring edge-ring-1"></div>
                 
                 {/* Icon Máy dán */}
-                <div className="relative z-10" style={{ transform: 'translateY(-4px)' }}>
+                <div style={{ position: 'relative', zIndex: 10, transform: 'translateY(-4px)' }}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>
                   </svg>
@@ -231,26 +231,26 @@ export default function MobileStationClient() {
                   <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>70%</span>
                 </div>
               </div>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyItems: 'center', paddingLeft: 7, paddingTop: 7, marginLeft: 12 }}>
+              <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
                 <ChevronRight size={18} color="#34d399" />
               </div>
             </div>
 
             {/* --- DRILL CARD --- */}
             <div className="machine-card machine-card-drill" onClick={() => setActiveStation('KHOAN_CAM')}>
-              <div className="relative w-16 h-16 rounded-full flex items-center justify-center bg-sky-900/30 flex-shrink-0" style={{ boxShadow: 'inset 0 0 20px rgba(14,165,233,0.4)' }}>
+              <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(12, 74, 110, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(14,165,233,0.4)' }}>
                 {/* Vòng xoay */}
                 <div className="light-ring drill-ring-1"></div>
                 
                 {/* Icon Khoan tịnh tiến */}
-                <div className="relative z-10 drill-bit-wrapper">
+                <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10 }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7dd3fc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2v20"/><path d="M7 2h10"/><path d="M9 6h6"/>
                   </svg>
                 </div>
                 
                 {/* Mạt gỗ bay */}
-                <div className="absolute bottom-4 left-1/2">
+                <div style={{ position: 'absolute', bottom: 16, left: '50%' }}>
                    <div className="sawdust sawdust-1"></div>
                    <div className="sawdust sawdust-2"></div>
                    <div className="sawdust sawdust-3"></div>
@@ -268,7 +268,7 @@ export default function MobileStationClient() {
                   <span style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 600 }}>60%</span>
                 </div>
               </div>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(14,165,233,0.2)', display: 'flex', alignItems: 'center', justifyItems: 'center', paddingLeft: 7, paddingTop: 7, marginLeft: 12 }}>
+              <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(14,165,233,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
                 <ChevronRight size={18} color="#38bdf8" />
               </div>
             </div>
