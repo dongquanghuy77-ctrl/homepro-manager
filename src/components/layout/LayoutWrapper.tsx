@@ -12,8 +12,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   // Danh sach cac trang khong render Sidebar quan tri va mobile header/bottom nav:
   // - /login: Man hinh dang nhap cho tat ca nguoi dung
   // - /change-password: Man hinh bat buoc doi pass/PIN
-  // - /nhan-vien: Cong thong tin Cong nhan (co sidebar/navigation rieng biet de phu hop mobile-first)
-  const isCleanPage = pathname === '/login' || pathname === '/change-password' || pathname === '/nhan-vien';
+  // Trang khong can sidebar: Login, Doi mat khau, Nhan vien (mobile-first), Mobile Station (pwr/station)
+  const isCleanPage = pathname === '/login' || pathname === '/change-password' || pathname === '/nhan-vien' || pathname === '/pwr/station';
 
   if (isCleanPage) {
     return (
