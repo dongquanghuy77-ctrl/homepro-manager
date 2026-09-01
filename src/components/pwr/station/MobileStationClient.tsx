@@ -3,6 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePwrStore } from '@/lib/pwr/usePwrStore';
 import { StationWorkflowUI } from './StationWorkflowUI';
+import { HomeTabUI } from './HomeTabUI';
+import { LeaderboardTabUI } from './LeaderboardTabUI';
+import { ReportsTabUI } from './ReportsTabUI';
+import { ProfileTabUI } from './ProfileTabUI';
 import { Menu, Trophy, ChevronRight, Home, BarChart2, Bell, User, Factory, BatteryMedium, Signal, CheckCircle2, ClipboardList, ArrowLeft, Play, AlertTriangle, Check, ShieldAlert } from 'lucide-react';
 import CountUp from 'react-countup';
 
@@ -311,13 +315,15 @@ export default function MobileStationClient() {
               </div>
             </div>
           </>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh', padding: 20, textAlign: 'center' }}>
-            <Factory size={64} color="#374151" style={{ marginBottom: 24 }} />
-            <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 12 }}>Thẻ {activeTab}</h2>
-            <p style={{ color: '#9ca3af' }}>Đang phát triển theo Checklist QA. Vui lòng trở lại thẻ Trạm Làm Việc ở giữa.</p>
-          </div>
-        )}
+        ) : activeTab === 'HOME' ? (
+          <HomeTabUI />
+        ) : activeTab === 'LEADERBOARD' ? (
+          <LeaderboardTabUI />
+        ) : activeTab === 'REPORTS' ? (
+          <ReportsTabUI />
+        ) : activeTab === 'PROFILE' ? (
+          <ProfileTabUI />
+        ) : null}
       </div>
 
       {/* Floating Bottom Nav */}
