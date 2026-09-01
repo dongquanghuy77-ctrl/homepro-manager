@@ -173,7 +173,7 @@ export default function MobileStationClient() {
                 
                 {/* Icon Dao cắt 3D */}
                 <div className="relative z-10" style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', WebkitMaskImage: '-webkit-radial-gradient(white, black)', maskImage: 'radial-gradient(white, black)' }}>
-                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.3)' }} />
+                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.05)' }} />
                 </div>
                 
                 {/* Tia lửa CSS phụ trợ (giữ lại 1 ít để tạo độ động) */}
