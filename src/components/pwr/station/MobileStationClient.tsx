@@ -172,10 +172,8 @@ export default function MobileStationClient() {
                 <div className="light-ring cnc-ring-2"></div>
                 
                 {/* Icon Dao cắt */}
-                <div className="relative z-10" style={{ animation: 'pulse-glow 2s infinite' }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d8b4fe" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                  </svg>
+                <div className="relative z-10" style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', animation: 'pulse-glow 2s infinite' }}>
+                  <img src="/pwr-assets/cnc-icon-3d.png" alt="CNC 3D" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 
                 {/* Tia lửa */}
