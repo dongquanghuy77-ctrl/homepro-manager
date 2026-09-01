@@ -12,6 +12,7 @@ import CountUp from 'react-countup';
 
 export default function MobileStationClient() {
   const router = useRouter();
+  const userStationRole = 'CNC'; // MOCK
   const { 
     currentTab: activeTab, 
     setTab: setActiveTab, 
@@ -207,7 +208,7 @@ export default function MobileStationClient() {
               </div>
 
               {/* --- CNC CARD --- */}
-              <div className="machine-card machine-card-cnc" onClick={() => setActiveStation('CNC')}>
+              <div className="machine-card machine-card-cnc" onClick={() => setActiveStation('CNC')} style={userStationRole === 'CNC' ? { border: '2px solid #a855f7', boxShadow: '0 0 20px rgba(168,85,247,0.5)' } : { opacity: 0.4, filter: 'grayscale(1)' }}>
                 <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(76, 29, 149, 0.3)', flexShrink: 0, boxShadow: '0 0 15px rgba(139,92,246,0.5)' }}>
                   <div className="light-ring cnc-ring-1"></div>
                   <div className="light-ring cnc-ring-2"></div>
@@ -221,7 +222,7 @@ export default function MobileStationClient() {
                 </div>
                 
                 <div style={{ flex: 1, paddingLeft: 16 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ CNC</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ CNC {userStationRole === 'CNC' && <span style={{ fontSize: 10, background: '#a855f7', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Cắt ván, soi rãnh, đánh mòi</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
@@ -237,7 +238,7 @@ export default function MobileStationClient() {
               </div>
 
               {/* --- EDGE CARD --- */}
-              <div className="machine-card machine-card-edge" onClick={() => setActiveStation('DAN_CANH')}>
+              <div className="machine-card machine-card-edge" onClick={() => setActiveStation('DAN_CANH')} style={userStationRole === 'DAN_CANH' ? { border: '2px solid #10b981', boxShadow: '0 0 20px rgba(16,185,129,0.5)' } : { opacity: 0.4, filter: 'grayscale(1)' }}>
                 <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(6, 78, 59, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(16,185,129,0.4)' }}>
                   <div className="light-ring edge-ring-1"></div>
                   <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
@@ -248,7 +249,7 @@ export default function MobileStationClient() {
                   </div>
                 </div>
                 <div style={{ flex: 1, paddingLeft: 16 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Dán Cạnh</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Dán Cạnh {userStationRole === 'DAN_CANH' && <span style={{ fontSize: 10, background: '#10b981', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Dán nẹp thẳng, vát, acrylic</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
@@ -264,18 +265,15 @@ export default function MobileStationClient() {
               </div>
 
               {/* --- DRILL CARD --- */}
-              <div className="machine-card machine-card-drill" onClick={() => setActiveStation('KHOAN_CAM')}>
-                <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(12, 74, 110, 0.3)', flexShrink: 0, boxShadow: 'inset 0 0 20px rgba(14,165,233,0.4)' }}>
-                  <div className="light-ring drill-ring-1"></div>
-                  <div className="drill-bit-wrapper" style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+              <div className="machine-card machine-card-drill" onClick={() => setActiveStation('KHOAN')} style={userStationRole === 'KHOAN' ? { border: '2px solid #3b82f6', boxShadow: '0 0 20px rgba(59,130,246,0.5)' } : { opacity: 0.4, filter: 'grayscale(1)' }}>
+                <div style={{ position: 'relative', width: 64, height: 64, minWidth: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(30, 58, 138, 0.3)', flexShrink: 0, boxShadow: '0 0 15px rgba(59,130,246,0.5)' }}>
+                  <div className="drill-bit"></div>
+                  <div className="drill-particle p-1"></div>
+                  <div className="drill-particle p-2"></div>
+                  <div className="drill-particle p-3"></div>
+                  <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
                     <img src="/pwr-assets/drill-icon-3d.png" alt="Drill 3D" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', transform: 'scale(1.05)' }} />
                   </div>
-                  <div style={{ position: 'absolute', bottom: 16, left: '50%', zIndex: 20 }}>
-                     <div className="sawdust sawdust-1"></div><div className="sawdust sawdust-2"></div><div className="sawdust sawdust-3"></div>
-                  </div>
-                </div>
-                <div style={{ flex: 1, paddingLeft: 16 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Khoan Cam</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Khoan chốt, bản lề, ray trượt</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
