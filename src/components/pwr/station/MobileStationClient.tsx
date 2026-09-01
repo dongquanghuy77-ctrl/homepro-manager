@@ -15,8 +15,8 @@ export default function MobileStationClient() {
     .app-container {
       background-color: #03030a;
       background-image: url('/pwr-assets/factory-bg.png');
-      background-size: 120% auto;
-      background-position: center -60px;
+      background-size: cover;
+      background-position: center top;
       background-attachment: fixed;
       background-repeat: no-repeat;
       min-height: 100vh;
@@ -27,7 +27,7 @@ export default function MobileStationClient() {
 
     .app-overlay {
       position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(3,3,10,0.85) 0%, rgba(3,3,10,0.5) 30%, rgba(3,3,10,0.95) 100%);
+      background: linear-gradient(180deg, rgba(3,3,10,0.7) 0%, rgba(3,3,10,0.5) 40%, rgba(3,3,10,0.95) 100%);
       z-index: 0; pointer-events: none;
     }
 
