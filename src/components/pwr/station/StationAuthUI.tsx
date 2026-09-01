@@ -419,46 +419,64 @@ export default function StationAuthUI() {
             </button>
 
             {/* Level Up Banner */}
-            <div style={{ marginTop: 16, background: 'rgba(15, 20, 15, 0.6)', border: `1px solid rgba(16,185,129,0.3)`, borderRadius: 16, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, boxShadow: 'inset 0 0 20px rgba(16,185,129,0.05), 0 4px 20px rgba(0,0,0,0.5)' }}>
+            <div style={{ 
+              marginTop: 16, background: 'rgba(5, 15, 12, 0.8)', border: `1px solid rgba(16,185,129,0.3)`, 
+              borderRadius: 16, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 16, 
+              boxShadow: 'inset 0 0 30px rgba(16,185,129,0.1), 0 8px 30px rgba(0,0,0,0.6)',
+              position: 'relative', overflow: 'hidden'
+            }}>
               
-              {/* Octagon Level Icon */}
-              <div style={{
-                width: 60, height: 60, flexShrink: 0,
-                background: `linear-gradient(135deg, #10b981, #064e3b)`,
-                clipPath: octagonClip,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: `0 0 15px rgba(16,185,129,0.5)`
-              }}>
-                <div style={{
-                  width: 56, height: 56,
-                  background: '#0a1711',
-                  clipPath: octagonClip,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#10b981', fontWeight: 900, textAlign: 'center', lineHeight: 1.1,
-                  textShadow: '0 2px 10px rgba(16,185,129,0.5)'
-                }}>
-                  LVL<br/>UP!
-                </div>
+              {/* Outer Glow */}
+              <div style={{ position: 'absolute', top: -30, left: -30, width: 100, height: 100, background: 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)', zIndex: 0 }} />
+
+              {/* Glassy Octagon SVG */}
+              <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0, zIndex: 1, filter: 'drop-shadow(0 0 8px rgba(16,185,129,0.5))' }}>
+                <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+                  <polygon points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30" fill="rgba(6,78,59,0.8)" stroke="#34d399" strokeWidth="2.5" />
+                  <polygon points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30" fill="url(#regOctoGrad)" opacity="0.6" />
+                  <defs>
+                    <linearGradient id="regOctoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
+                      <stop offset="40%" stopColor="#ffffff" stopOpacity="0" />
+                      <stop offset="100%" stopColor="#000000" stopOpacity="0.5" />
+                    </linearGradient>
+                  </defs>
+                  <text x="50" y="44" fill="#34d399" fontSize="21" fontWeight="900" fontFamily="system-ui, sans-serif" textAnchor="middle" style={{ textShadow: '0 0 10px #34d399' }}>LEVEL</text>
+                  <text x="50" y="72" fill="#34d399" fontSize="21" fontWeight="900" fontFamily="system-ui, sans-serif" textAnchor="middle" style={{ textShadow: '0 0 10px #34d399' }}>UP!</text>
+                </svg>
               </div>
 
               {/* Content */}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399', marginBottom: 6, letterSpacing: 0.2 }}>
+              <div style={{ flex: 1, zIndex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#34d399', marginBottom: 6, textShadow: '0 0 10px rgba(52,211,153,0.3)' }}>
                   Tạo tài khoản để lên Level
                 </div>
                 <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>
-                  Nhận ngay 50 XP khởi đầu!
+                  Nhận 50 XP khi đăng ký thành công!
                 </div>
-                {/* Internal Progress Bar */}
-                <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                {/* Glowing Progress Bar */}
+                <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden', display: 'flex' }}>
                   <div style={{ 
-                    width: '30%', height: '100%', 
-                    background: `linear-gradient(90deg, #10b981 0%, #34d399 90%, #d1fae5 100%)`, 
+                    width: '80%', height: '100%', 
+                    background: `linear-gradient(90deg, #10b981 0%, #34d399 100%)`, 
                     borderRadius: 3,
                     boxShadow: '0 0 10px #34d399' 
                   }} />
+                  <div style={{ width: '20%', height: '100%', background: '#78350f' }} />
                 </div>
               </div>
+
+              {/* Glowing Gift Icon */}
+              <div style={{ flexShrink: 0, zIndex: 1, marginLeft: 4, filter: 'drop-shadow(0 0 8px rgba(245,158,11,0.6))' }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#fbbf24">
+                  <rect x="4" y="9" width="16" height="4" rx="1" fill="#f59e0b" />
+                  <rect x="5" y="13" width="14" height="9" rx="1" fill="#d97706" />
+                  <path d="M12 9v13" stroke="#b45309" strokeWidth="2" />
+                  <path d="M12 9c-2-3-5-3-5-1s3 3 5 1z" fill="#fcd34d" stroke="#b45309" strokeWidth="1.5" />
+                  <path d="M12 9c2-3 5-3 5-1s-3 3-5 1z" fill="#fcd34d" stroke="#b45309" strokeWidth="1.5" />
+                </svg>
+              </div>
+
             </div>
           </div>
         )}
