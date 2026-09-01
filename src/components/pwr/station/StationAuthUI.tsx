@@ -30,18 +30,30 @@ export default function StationAuthUI() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#05050a', 
-      backgroundImage: 'linear-gradient(rgba(5, 5, 10, 0.4), rgba(5, 5, 10, 0.8)), url("/pwr-assets/login-bg.png")',
+    <>
+    {/* Fixed Background Image for Mobile Compatibility */}
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: -2,
+      background: '#05050a',
+      backgroundImage: 'url("/pwr-assets/login-bg.png")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
+    }} />
+    {/* Darkening Overlay */}
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: -1,
+      background: 'linear-gradient(rgba(5, 5, 10, 0.3), rgba(5, 5, 10, 0.7))',
+    }} />
+
+    <div style={{ 
+      minHeight: '100vh', 
       color: '#fff', 
       fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       padding: '40px 20px',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      position: 'relative',
+      zIndex: 1
     }}>
       
       {/* Removed Header Text per user request */}
@@ -299,6 +311,7 @@ export default function StationAuthUI() {
 
       </div>
     </div>
+    </>
   );
 }
 
