@@ -118,13 +118,13 @@ export default function StationAuthUI() {
             <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
               <button 
                 onClick={() => setSelectedFaction('CNC')}
-                style={{ flex: 1, padding: 12, border: \`2px solid \${selectedFaction === 'CNC' ? '#3b82f6' : '#27272a'}\`, background: selectedFaction === 'CNC' ? 'rgba(59,130,246,0.1)' : '#000', color: selectedFaction === 'CNC' ? '#3b82f6' : '#fff', borderRadius: 12, cursor: 'pointer' }}
+                style={{ flex: 1, padding: 12, border: `2px solid ${selectedFaction === 'CNC' ? '#3b82f6' : '#27272a'}`, background: selectedFaction === 'CNC' ? 'rgba(59,130,246,0.1)' : '#000', color: selectedFaction === 'CNC' ? '#3b82f6' : '#fff', borderRadius: 12, cursor: 'pointer' }}
               >
                 TỔ CNC
               </button>
               <button 
                 onClick={() => setSelectedFaction('DAN_CANH')}
-                style={{ flex: 1, padding: 12, border: \`2px solid \${selectedFaction === 'DAN_CANH' ? '#f59e0b' : '#27272a'}\`, background: selectedFaction === 'DAN_CANH' ? 'rgba(245,158,11,0.1)' : '#000', color: selectedFaction === 'DAN_CANH' ? '#f59e0b' : '#fff', borderRadius: 12, cursor: 'pointer' }}
+                style={{ flex: 1, padding: 12, border: `2px solid ${selectedFaction === 'DAN_CANH' ? '#f59e0b' : '#27272a'}`, background: selectedFaction === 'DAN_CANH' ? 'rgba(245,158,11,0.1)' : '#000', color: selectedFaction === 'DAN_CANH' ? '#f59e0b' : '#fff', borderRadius: 12, cursor: 'pointer' }}
               >
                 TỔ DÁN
               </button>
