@@ -29,9 +29,29 @@ export const usePwrStore = create<PwrState>((set) => ({
   setActiveStation: (station) => set({ activeStation: station }),
   
   // Thuật toán: Tự động cộng điểm và tính lại Level (Level = Floor(Sqrt(Points/100)) + 1)
-  addPoints: (pointsToAdd) => set((state) => {
-    const newPoints = state.userPoints + pointsToAdd;
+  addPoints: async (pointsToAdd) => {
+    // 1. Snapshot điểm hiện tại (Optimistic Rollback Target)
+    const currentPoints = usePwrStore.getState().userPoints;
+    const currentLevel = usePwrStore.getState().userLevel;
+
+    // 2. Optimistic Update UI ngay lập tức
+    const newPoints = currentPoints + pointsToAdd;
     const newLevel = Math.floor(Math.sqrt(newPoints / 100)) + 1;
-    return { userPoints: newPoints, userLevel: newLevel > state.userLevel ? newLevel : state.userLevel };
-  }),
+    set({ userPoints: newPoints, userLevel: newLevel > currentLevel ? newLevel : currentLevel });
+
+    // 3. Gọi API Background
+    try {
+      const res = await fetch('/api/pwr/mobile/gamification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pointsToAdd })
+      });
+      if (!res.ok) throw new Error('API Error');
+    } catch (error) {
+      // 4. Nếu API lỗi hoặc rớt mạng -> Rollback âm thầm
+      console.warn('Lỗi mạng, hoàn tác điểm:', error);
+      set({ userPoints: currentPoints, userLevel: currentLevel });
+      // Ghi chú: Thực tế nên hiện thêm Toast thông báo cho user "Mạng yếu, không lưu được điểm"
+    }
+  },
 }));
