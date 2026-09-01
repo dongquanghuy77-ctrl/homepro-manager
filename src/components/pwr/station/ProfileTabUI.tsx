@@ -29,7 +29,7 @@ export function ProfileTabUI() {
         <img 
           src={userAvatar} 
           alt="Avatar" 
-          onError={(e) => { e.currentTarget.src = \`https://ui-avatars.com/api/?name=\${encodeURIComponent(userName)}&background=3b82f6&color=fff&bold=true\`; }}
+          onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3b82f6&color=fff&bold=true`; }}
           style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid #374151', objectFit: 'cover', margin: '0 auto 16px' }} 
         />
         <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px 0' }}>{userName}</h2>
@@ -42,7 +42,7 @@ export function ProfileTabUI() {
         {/* QA Safeguard: Visual Liveness via animated border */}
         <div style={{ 
           padding: 16, background: '#fff', borderRadius: 16, 
-          boxShadow: \`0 0 20px \${timeLeft < 5 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}\`,
+          boxShadow: `0 0 20px ${timeLeft < 5 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.3)'}`,
           transition: 'box-shadow 0.3s'
         }}>
           <QRCodeSVG value={qrCode} size={180} />
