@@ -12,7 +12,7 @@ import CountUp from 'react-countup';
 
 export default function MobileStationClient() {
   const router = useRouter();
-  const userStationRole = 'CNC'; // MOCK
+  const userStationRole: string = 'CNC'; // MOCK
   const { 
     currentTab: activeTab, 
     setTab: setActiveTab, 
