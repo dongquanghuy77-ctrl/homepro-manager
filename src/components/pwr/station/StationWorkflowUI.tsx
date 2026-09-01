@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, CheckCircle2, ShieldAlert, Play, Clock, Camera, Check, AlertTriangle, Upload, X } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
+import { usePwrStore } from '@/lib/pwr/usePwrStore';
 
 export function StationWorkflowUI({ stationId, onBack }: { stationId: string, onBack: () => void }) {
   const [tasks, setTasks] = useState([
@@ -12,13 +13,17 @@ export function StationWorkflowUI({ stationId, onBack }: { stationId: string, on
   const [defectPhoto, setDefectPhoto] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { addPoints } = usePwrStore();
 
   // Thuật toán: Optimistic Update
   const handleComplete = (taskId: number) => {
     // 1. Cập nhật UI ngay lập tức
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'DONE' } : t));
     
-    // 2. Play sound / Animation (Giả lập)
+    // 2. Kích hoạt thuật toán cộng điểm (15 điểm mỗi việc)
+    addPoints(15);
+    
+    // 3. Play sound / Animation (Giả lập)
     if (typeof window !== 'undefined') {
       const audio = new Audio('/ting.mp3');
       audio.play().catch(() => {});

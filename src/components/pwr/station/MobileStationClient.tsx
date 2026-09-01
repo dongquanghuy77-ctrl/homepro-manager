@@ -4,10 +4,20 @@ import { useRouter } from 'next/navigation';
 import { usePwrStore } from '@/lib/pwr/usePwrStore';
 import { StationWorkflowUI } from './StationWorkflowUI';
 import { Menu, Trophy, ChevronRight, Home, BarChart2, Bell, User, Factory, BatteryMedium, Signal, CheckCircle2, ClipboardList, ArrowLeft, Play, AlertTriangle, Check, ShieldAlert } from 'lucide-react';
+import CountUp from 'react-countup';
 
 export default function MobileStationClient() {
   const router = useRouter();
-  const { currentTab: activeTab, setTab: setActiveTab, activeStation, setActiveStation } = usePwrStore();
+  const { 
+    currentTab: activeTab, 
+    setTab: setActiveTab, 
+    activeStation, 
+    setActiveStation,
+    userName,
+    userAvatar,
+    userPoints,
+    userLevel
+  } = usePwrStore();
 
   const STYLES = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -159,20 +169,34 @@ export default function MobileStationClient() {
             </div>
 
             <div style={{ padding: '0 20px' }}>
-              {/* User Profile */}
+              {/* User Profile (Tích hợp State + QA Fallback) */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <img src="https://ui-avatars.com/api/?name=Huy&background=3b82f6&color=fff" alt="Avatar" style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #374151', objectFit: 'cover' }} />
-                  <div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0, paddingRight: 16 }}>
+                  <img 
+                    src={userAvatar} 
+                    alt="Avatar" 
+                    onError={(e) => {
+                      // QA Safegard: Lỗi CDN -> Tự sinh ảnh từ Tên
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3b82f6&color=fff&bold=true`;
+                    }}
+                    style={{ width: 48, height: 48, minWidth: 48, borderRadius: '50%', border: '2px solid #374151', objectFit: 'cover' }} 
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, color: '#9ca3af' }}>Xin chào,</div>
-                    <div style={{ fontSize: 16, fontWeight: 700 }}>Anh Huy</div>
-                    <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>Level 12</div>
+                    {/* QA Safeguard: Truncate tên quá dài để không vỡ UI */}
+                    <div style={{ fontSize: 16, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {userName}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>Level {userLevel}</div>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
+                
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginBottom: 4 }}>
                     <Trophy size={20} color="#fbbf24" fill="#fbbf24" />
-                    <span style={{ fontSize: 24, fontWeight: 800, color: '#fbbf24' }}>120</span>
+                    <span style={{ fontSize: 24, fontWeight: 800, color: '#fbbf24' }}>
+                      <CountUp end={userPoints} duration={1.5} preserveValue={true} separator="," />
+                    </span>
                   </div>
                   <div style={{ fontSize: 12, color: '#9ca3af' }}>Điểm thành tích</div>
                 </div>
