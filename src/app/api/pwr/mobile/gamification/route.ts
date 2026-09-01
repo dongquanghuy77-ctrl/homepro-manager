@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrUserStats } from '@/db/schema';
-import { getUserSession } from '@/lib/auth';
+import { requireAuth } from '@/lib/auth';
 import { sql } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getUserSession();
-    if (!session || !session.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { session, error } = await requireAuth(req);
+    if (error) return error;
 
     // Lấy top 50 user có điểm cao nhất
     // Giả lập logic lấy từ DB do chúng ta chưa chạy lệnh push migration (để bảo vệ DB production)
@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getUserSession();
-    if (!session || !session.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const { session, error: authError } = await requireAuth(req);
+    if (authError) return authError;
 
     const body = await req.json();
     const { pointsToAdd } = body;
