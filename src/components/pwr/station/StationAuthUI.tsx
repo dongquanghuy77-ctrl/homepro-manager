@@ -1,17 +1,68 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight, Eye, QrCode, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { QRCodeSVG } from 'qrcode.react';
 
-type AuthState = 'LOGIN' | 'REGISTER' | 'WELCOME';
+type AuthState = 'LOGIN' | 'REGISTER' | 'WELCOME' | 'FORGOT';
 
 export default function StationAuthUI() {
   const router = useRouter();
   const [authState, setAuthState] = useState<AuthState>('LOGIN');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  
+  // Forgot Password States
+  const [resetToken, setResetToken] = useState('');
+  const [resetStatus, setResetStatus] = useState<'PENDING' | 'APPROVED' | 'EXPIRED' | ''>('');
+  const [tempPin, setTempPin] = useState('');
+
+  // Polling for forgot password
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (resetToken && resetStatus !== 'APPROVED') {
+      interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/pwr/auth/forgot-password?token=${resetToken}`);
+          const data = await res.json();
+          if (data.status === 'APPROVED') {
+            setResetStatus('APPROVED');
+            setTempPin(data.tempPin);
+            clearInterval(interval);
+          } else if (data.status === 'EXPIRED') {
+            setResetStatus('EXPIRED');
+            clearInterval(interval);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [resetToken, resetStatus]);
+
+  const handleRequestReset = async () => {
+    if (!phone) return;
+    try {
+      const res = await fetch('/api/pwr/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'REQUEST', phone })
+      });
+      const data = await res.json();
+      if (data.token) {
+        setResetToken(data.token);
+        setResetStatus('PENDING');
+      }
+    } catch (e) {
+      // error
+    }
+  };
 
   const colors = {
     login: '#a855f7', 
@@ -139,7 +190,12 @@ export default function StationAuthUI() {
                 )}
                 <span style={{ color: '#e5e7eb', fontWeight: 500 }}>Ghi nhớ đăng nhập</span>
               </div>
-              <span style={{ color: colors.login, fontWeight: 500, cursor: 'pointer' }}>Quên mật khẩu?</span>
+              <span 
+                style={{ color: colors.login, fontWeight: 500, cursor: 'pointer' }}
+                onClick={() => setAuthState('FORGOT')}
+              >
+                Quên mật khẩu?
+              </span>
             </div>
             
             <button onClick={handleAction} style={{ ...btnStyle, background: `linear-gradient(90deg, ${colors.loginBg}, ${colors.login})`, boxShadow: `0 8px 25px rgba(168,85,247,0.4)` }}>
@@ -389,6 +445,75 @@ export default function StationAuthUI() {
               Chưa có tài khoản? <span style={{ color: colors.welcome, cursor: 'pointer', fontWeight: 600 }} onClick={() => setAuthState('REGISTER')}>Đăng ký ngay</span>
             </div>
 
+          </div>
+        )}
+
+        {/* FORGOT PASSWORD SCREEN */}
+        {authState === 'FORGOT' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ alignSelf: 'flex-start', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#9ca3af', marginBottom: 24, fontSize: 14 }} onClick={() => setAuthState('LOGIN')}>
+              <ArrowLeft size={16} /> Quay lại đăng nhập
+            </div>
+
+            {resetStatus === '' && (
+              <div style={{ width: '100%' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Khôi phục mật khẩu</div>
+                <div style={{ fontSize: 13, color: '#aaa', marginBottom: 24 }}>Nhập số điện thoại để tạo mã QR duyệt từ Tổ trưởng.</div>
+                
+                <div style={{ position: 'relative', marginBottom: 20 }}>
+                  <Phone size={18} color="#9ca3af" style={{ position: 'absolute', left: 16, top: 16 }} />
+                  <input type="text" placeholder="Số điện thoại của bạn" style={inputStyle} value={phone} onChange={e => setPhone(e.target.value)} />
+                </div>
+
+                <button onClick={handleRequestReset} style={{ ...btnStyle, background: `linear-gradient(90deg, #10b981, #059669)`, boxShadow: `0 8px 25px rgba(16,185,129,0.3)` }}>
+                  <QrCode size={20} /> TẠO MÃ QR
+                </button>
+              </div>
+            )}
+
+            {resetStatus === 'PENDING' && (
+              <div style={{ width: '100%', textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ background: '#fff', padding: 16, borderRadius: 16, display: 'inline-block', marginBottom: 20 }}>
+                  <QRCodeSVG 
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/pwr/station/approve-reset?token=${resetToken}`}
+                    size={200}
+                  />
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#f59e0b', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                  </span>
+                  Đang chờ Tổ trưởng duyệt...
+                </div>
+                <div style={{ fontSize: 13, color: '#aaa' }}>Vui lòng gọi Tổ trưởng ca đến quét mã QR này để cấp lại mã PIN cho bạn.</div>
+              </div>
+            )}
+
+            {resetStatus === 'EXPIRED' && (
+              <div style={{ width: '100%', textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ color: '#ef4444', fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>Mã QR đã hết hạn!</div>
+                <button onClick={() => setResetStatus('')} style={{ ...btnStyle, background: '#333' }}>
+                  TẠO LẠI MÃ MỚI
+                </button>
+              </div>
+            )}
+
+            {resetStatus === 'APPROVED' && (
+              <div style={{ width: '100%', textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ width: 64, height: 64, background: 'rgba(16,185,129,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <CheckSquare size={32} color="#10b981" />
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#10b981', marginBottom: 8 }}>Yêu cầu đã được duyệt!</div>
+                <div style={{ fontSize: 14, color: '#aaa', marginBottom: 20 }}>Mã PIN tạm thời của bạn là:</div>
+                <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: 4, background: '#111', padding: '12px 0', borderRadius: 12, border: '1px dashed #333', marginBottom: 24 }}>
+                  {tempPin}
+                </div>
+                <button onClick={() => { setAuthState('LOGIN'); setResetStatus(''); }} style={{ ...btnStyle, background: `linear-gradient(90deg, #10b981, #059669)` }}>
+                  ĐĂNG NHẬP NGAY
+                </button>
+              </div>
+            )}
           </div>
         )}
 
