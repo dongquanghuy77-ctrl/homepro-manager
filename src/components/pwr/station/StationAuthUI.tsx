@@ -60,7 +60,7 @@ export default function StationAuthUI() {
 
       {/* Main Card */}
       <div style={{
-        background: 'rgba(10, 10, 18, 0.8)',
+        background: 'linear-gradient(135deg, rgba(168,85,247,0.22), rgba(88,28,135,0.12))',
         border: `1px solid ${currentGlow}60`,
         borderRadius: 24,
         padding: '32px 24px',
