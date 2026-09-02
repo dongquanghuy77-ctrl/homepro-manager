@@ -529,74 +529,104 @@ export default function StationAuthUI() {
           </div>
         )}
 
-        {/* WELCOME SCREEN */}
-        {authState === 'WELCOME' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            
-            {/* Hexagon Avatar */}
-            <div style={{ position: 'relative', width: 140, height: 140, marginBottom: 40 }}>
-              <div style={{ 
-                position: 'absolute', inset: 0, 
-                clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)',
-                background: `linear-gradient(135deg, ${colors.welcome}, #1e3a8a, #a855f7)`,
-                padding: 4,
-                boxShadow: `0 0 30px ${colors.welcome}`
-              }}>
+                  {/* WELCOME / TEAM SELECTION SCREEN */}
+          {authState === 'WELCOME' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ fontSize: 13, color: colors.welcome, fontWeight: 700, letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>
+                XÁC NHẬN TỔ ĐỘI
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 32, textAlign: 'center' }}>
+                Chào mừng trở lại,<br/>{phone || 'Đồng Quang Huy'}!
+              </div>
+
+              {/* Dynamic Avatar & Level (Simulated Real Data) */}
+              <div style={{ position: 'relative', marginBottom: 40 }}>
+                {/* Fallback Initials Avatar */}
+                <div style={{ 
+                  width: 100, height: 110, background: '#111', 
+                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: `2px solid ${colors.welcome}`,
+                  boxShadow: `0 0 30px ${colors.welcome}40`,
+                  fontSize: 32, fontWeight: 800, color: colors.welcome
+                }}>
+                  {phone === '0866903420' ? 'AD' : 'ĐQ'}
+                </div>
+                {/* Level Badge */}
                 <div style={{
-                  width: '100%', height: '100%',
-                  clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)',
-                  background: 'url("https://i.pravatar.cc/150?u=a042581f4e29026704d") center/cover'
-                }} />
+                  position: 'absolute', bottom: -10, left: -10,
+                  width: 48, height: 48, background: '#1e3a8a', border: `3px solid ${colors.welcome}`,
+                  borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20, fontWeight: 900, color: '#fff', boxShadow: `0 0 20px ${colors.welcome}`
+                }}>
+                  {phone === '0866903420' ? '99' : '1'}
+                </div>
               </div>
-              {/* Level Badge */}
-              <div style={{
-                position: 'absolute', bottom: -10, left: -10,
-                width: 48, height: 48, background: '#1e3a8a', border: `3px solid ${colors.welcome}`,
-                borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, fontWeight: 900, color: '#fff', boxShadow: `0 0 20px ${colors.welcome}`
-              }}>
-                12
-              </div>
+
+              {/* XP Bar (Simulated Real Data) */}
+              {phone !== '0866903420' && (
+                <div style={{ width: '100%', marginBottom: 32 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8, fontWeight: 700 }}>
+                    <span style={{ color: colors.welcome, letterSpacing: 2 }}>LEVEL</span>
+                    <span style={{ color: '#d1d5db' }}>0 / 100 XP</span>
+                  </div>
+                  <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ width: '0%', height: '100%', background: colors.welcome, boxShadow: `0 0 15px ${colors.welcome}` }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Role / Team Selection */}
+              {phone === '0866903420' ? (
+                <div style={{ width: '100%', padding: 20, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: 16, marginBottom: 32, textAlign: 'center' }}>
+                  <div style={{ color: '#ef4444', fontWeight: 800, fontSize: 18, marginBottom: 8 }}>VAI TRÒ QUẢN TRỊ VIÊN (ADMIN)</div>
+                  <div style={{ fontSize: 13, color: '#fca5a5' }}>Bạn có toàn quyền truy cập hệ thống. Hãy chuyển đến Bảng điều khiển Quản trị.</div>
+                </div>
+              ) : (
+                <div style={{ width: '100%', marginBottom: 32 }}>
+                  <div style={{ fontSize: 14, color: '#9ca3af', marginBottom: 16, textAlign: 'center' }}>Vui lòng chọn Tổ Đội (Ca làm việc):</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {['Tổ Cắt', 'Tổ Dán', 'Tổ Khoan'].map((team) => (
+                      <button 
+                        key={team}
+                        onClick={() => {
+                          localStorage.setItem('pwr_selected_team', team);
+                          alert(`Đã cấp quyền truy cập Phiên làm việc: ${team}`);
+                          router.push('/pwr/station/dashboard');
+                        }}
+                        style={{
+                          width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
+                          background: 'rgba(255,255,255,0.03)', color: '#fff', fontSize: 15, fontWeight: 600,
+                          cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}
+                      >
+                        {team} <ChevronRight size={18} color="#9ca3af" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button 
+                onClick={() => {
+                  if (phone === '0866903420') {
+                    router.push('/pwr');
+                  } else {
+                    const savedTeam = localStorage.getItem('pwr_selected_team');
+                    if (savedTeam) {
+                      router.push('/pwr/station/dashboard');
+                    } else {
+                      alert('Vui lòng chọn 1 Tổ đội ở trên để tiếp tục!');
+                    }
+                  }
+                }} 
+                style={{ ...btnStyle, background: phone === '0866903420' ? 'linear-gradient(90deg, #991b1b, #ef4444)' : `linear-gradient(90deg, #1e3a8a, ${colors.welcome})`, boxShadow: phone === '0866903420' ? '0 8px 25px rgba(239,68,68,0.5)' : `0 8px 25px rgba(59,130,246,0.5)` }}
+              >
+                {phone === '0866903420' ? 'ĐẾN TRANG QUẢN TRỊ ADMIN' : 'VÀO TRẠM LÀM VIỆC'} <ChevronRight size={20} strokeWidth={3} />
+              </button>
             </div>
-
-            {/* XP Bar */}
-            <div style={{ width: '100%', marginBottom: 32 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8, fontWeight: 700 }}>
-                <span style={{ color: colors.welcome, letterSpacing: 2 }}>LEVEL</span>
-                <span style={{ color: '#d1d5db' }}>1250 / 2000 XP</span>
-              </div>
-              <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{ width: '62.5%', height: '100%', background: colors.welcome, boxShadow: `0 0 15px ${colors.welcome}` }} />
-              </div>
-            </div>
-
-            {/* Feature List */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 14, color: '#e5e7eb', fontWeight: 500 }}>
-                <Settings size={20} color={colors.login} /> Quản lý máy trạm hiệu quả
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 14, color: '#e5e7eb', fontWeight: 500 }}>
-                <Award size={20} color={colors.login} /> Hoàn thành nhiệm vụ nhận XP
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 14, color: '#e5e7eb', fontWeight: 500 }}>
-                <Gift size={20} color={colors.login} /> Mở khóa thành tích và phần thưởng
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 14, color: '#e5e7eb', fontWeight: 500 }}>
-                <Trophy size={20} color={colors.login} /> Leo hạng bảng xếp hạng
-              </div>
-            </div>
-
-            <button onClick={handleAction} style={{ ...btnStyle, background: `linear-gradient(90deg, #1e3a8a, ${colors.welcome})`, boxShadow: `0 8px 25px rgba(59,130,246,0.5)` }}>
-              ĐĂNG NHẬP NGAY <ChevronRight size={20} strokeWidth={3} />
-            </button>
-            <div style={{ marginTop: 24, fontSize: 14, color: '#9ca3af' }}>
-              Chưa có tài khoản? <span style={{ color: colors.welcome, cursor: 'pointer', fontWeight: 600 }} onClick={() => setAuthState('REGISTER')}>Đăng ký ngay</span>
-            </div>
-
-          </div>
-        )}
-
-        {/* FORGOT PASSWORD SCREEN */}
+          )}
+{/* FORGOT PASSWORD SCREEN */}
         {authState === 'FORGOT' && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ alignSelf: 'flex-start', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#9ca3af', marginBottom: 24, fontSize: 14 }} onClick={() => setAuthState('LOGIN')}>
