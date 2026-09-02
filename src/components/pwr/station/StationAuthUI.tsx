@@ -10,7 +10,7 @@ type AuthState = 'LOGIN' | 'REGISTER' | 'REGISTER_SUCCESS' | 'WELCOME' | 'FORGOT
 
 export default function StationAuthUI() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
 
   const getInitials = (name) => {
     if (!name) return '??';
@@ -545,7 +545,7 @@ export default function StationAuthUI() {
                 XÁC NHẬN TỔ ĐỘI
               </div>
               <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 32, textAlign: 'center' }}>
-                Chào mừng trở lại,<br/>{session?.user?.name || phone}!
+                Chào mừng trở lại,<br/>{session?.user?.name || 'Đang tải...'}!
               </div>
 
               {/* Dynamic Avatar & Level (Simulated Real Data) */}
