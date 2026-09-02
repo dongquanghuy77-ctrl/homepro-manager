@@ -571,7 +571,7 @@ export default function StationAuthUI() {
                   boxShadow: `0 0 30px ${colors.welcome}40`,
                   fontSize: 32, fontWeight: 800, color: colors.welcome
                 }}>
-                  {session?.user?.name ? getInitials(session.user.name) : ((userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? 'AD' : 'ĐQ')}
+                  {userProfile?.name ? getInitials(userProfile.name) : (userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? 'AD' : '??'}
                 </div>
                 {/* Level Badge */}
                 <div style={{
@@ -612,7 +612,6 @@ export default function StationAuthUI() {
                         key={team}
                         onClick={() => {
                           localStorage.setItem('pwr_selected_team', team);
-                          alert(`Đã cấp quyền truy cập Phiên làm việc: ${team}`);
                           router.push('/pwr/station/dashboard');
                         }}
                         style={{
@@ -637,7 +636,7 @@ export default function StationAuthUI() {
                     if (savedTeam) {
                       router.push('/pwr/station/dashboard');
                     } else {
-                      alert('Vui lòng chọn 1 Tổ đội ở trên để tiếp tục!');
+                      setAuthError('Vui lòng chọn 1 Tổ đội ở trên để tiếp tục!');
                     }
                   }
                 }} 
