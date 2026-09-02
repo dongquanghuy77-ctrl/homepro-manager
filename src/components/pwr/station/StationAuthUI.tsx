@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight, Eye, QrCode, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
+import { signIn, useSession, getSession } from 'next-auth/react';
 import { QRCodeSVG } from 'qrcode.react';
 
 type AuthState = 'LOGIN' | 'REGISTER' | 'REGISTER_SUCCESS' | 'WELCOME' | 'FORGOT';
@@ -113,6 +113,17 @@ export default function StationAuthUI() {
       if (res?.error) {
         setAuthError(`Lỗi: ${res.error} (Mã: ${res?.status})`);
       } else {
+        // getSession() gọi thẳng /api/auth/session để lấy name thực từ DB
+        const freshSession = await getSession();
+        if (freshSession?.user?.name) {
+          setUserProfile({
+            id: 0,
+            username: phone,
+            name: freshSession.user.name,
+            role: (freshSession.user as any)?.role || 'WORKER',
+            phone: phone,
+          });
+        }
         setAuthState('WELCOME');
       }
     } else if (authState === 'REGISTER') {
