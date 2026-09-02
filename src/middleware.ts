@@ -11,6 +11,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/api/demo') ||
     pathname.startsWith('/favicon.ico') ||
     pathname === '/login' ||
+    pathname.startsWith('/pwr/login') ||
     pathname === '/demo' ||
     pathname === '/change-password' ||
     pathname.startsWith('/api')
@@ -40,8 +41,8 @@ export async function middleware(req: NextRequest) {
   const now = new Date(Date.now() + offset);
   const todayVN = now.toISOString().split('T')[0];
 
-  // Enforce Attendance Gate
-  if (lastAttendanceDate !== todayVN && pathname !== '/attendance-gate') {
+  // Enforce Attendance Gate (Skip for PWR_ADMIN)
+  if (role !== 'PWR_ADMIN' && lastAttendanceDate !== todayVN && pathname !== '/attendance-gate') {
     return NextResponse.redirect(new URL('/attendance-gate', req.url));
   }
   
@@ -62,11 +63,17 @@ export async function middleware(req: NextRequest) {
 
   // Restrict access to root dashboard (/)
   if (pathname === '/') {
+    if (role === 'PWR_ADMIN') return NextResponse.redirect(new URL('/pwr', req.url));
     if (role === 'WORKER' || role === 'STAFF' || role === 'DESIGNER') return NextResponse.redirect(new URL('/nhan-vien', req.url));
     if (role === 'HR') return NextResponse.redirect(new URL('/hr', req.url));
     if (role === 'ACCOUNTANT') return NextResponse.redirect(new URL('/payroll', req.url));
     if (role === 'MANAGER') return NextResponse.redirect(new URL('/projects', req.url));
     // ADMIN and VIEWER are allowed on /
+  }
+
+  // PWR_ADMIN role: strictly restricted to /pwr
+  if (role === 'PWR_ADMIN' && !pathname.startsWith('/pwr') && !pathname.startsWith('/api')) {
+    return NextResponse.redirect(new URL('/pwr', req.url));
   }
 
   // WORKER/STAFF/DESIGNER role: strictly restricted to /nhan-vien
