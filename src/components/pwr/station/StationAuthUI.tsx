@@ -3,13 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight, Eye, QrCode, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { QRCodeSVG } from 'qrcode.react';
 
 type AuthState = 'LOGIN' | 'REGISTER' | 'REGISTER_SUCCESS' | 'WELCOME' | 'FORGOT';
 
 export default function StationAuthUI() {
   const router = useRouter();
+  const { data: session } = useSession();
+
+  const getInitials = (name) => {
+    if (!name) return '??';
+    const words = name.trim().split(' ').filter(Boolean);
+    if (words.length >= 2) return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+
   const [authState, setAuthState] = useState<AuthState>('LOGIN');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -536,7 +545,7 @@ export default function StationAuthUI() {
                 XÁC NHẬN TỔ ĐỘI
               </div>
               <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 32, textAlign: 'center' }}>
-                Chào mừng trở lại,<br/>{phone || 'Đồng Quang Huy'}!
+                Chào mừng trở lại,<br/>{session?.user?.name || phone}!
               </div>
 
               {/* Dynamic Avatar & Level (Simulated Real Data) */}
@@ -550,7 +559,7 @@ export default function StationAuthUI() {
                   boxShadow: `0 0 30px ${colors.welcome}40`,
                   fontSize: 32, fontWeight: 800, color: colors.welcome
                 }}>
-                  {phone === '0866903420' ? 'AD' : 'ĐQ'}
+                  {session?.user?.name ? getInitials(session.user.name) : ((session?.user?.role === 'PWR_ADMIN' || phone === '0866903420') ? 'AD' : 'ĐQ')}
                 </div>
                 {/* Level Badge */}
                 <div style={{
@@ -559,12 +568,12 @@ export default function StationAuthUI() {
                   borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 20, fontWeight: 900, color: '#fff', boxShadow: `0 0 20px ${colors.welcome}`
                 }}>
-                  {phone === '0866903420' ? '99' : '1'}
+                  {(session?.user?.role === 'PWR_ADMIN' || phone === '0866903420') ? '99' : '1'}
                 </div>
               </div>
 
               {/* XP Bar (Simulated Real Data) */}
-              {phone !== '0866903420' && (
+              {(session?.user?.role !== 'PWR_ADMIN' && phone !== '0866903420') && (
                 <div style={{ width: '100%', marginBottom: 32 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8, fontWeight: 700 }}>
                     <span style={{ color: colors.welcome, letterSpacing: 2 }}>LEVEL</span>
@@ -577,7 +586,7 @@ export default function StationAuthUI() {
               )}
 
               {/* Role / Team Selection */}
-              {phone === '0866903420' ? (
+              {(session?.user?.role === 'PWR_ADMIN' || phone === '0866903420') ? (
                 <div style={{ width: '100%', padding: 20, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: 16, marginBottom: 32, textAlign: 'center' }}>
                   <div style={{ color: '#ef4444', fontWeight: 800, fontSize: 18, marginBottom: 8 }}>VAI TRÒ QUẢN TRỊ VIÊN (ADMIN)</div>
                   <div style={{ fontSize: 13, color: '#fca5a5' }}>Bạn có toàn quyền truy cập hệ thống. Hãy chuyển đến Bảng điều khiển Quản trị.</div>
@@ -609,7 +618,7 @@ export default function StationAuthUI() {
 
               <button 
                 onClick={() => {
-                  if (phone === '0866903420') {
+                  if ((session?.user?.role === 'PWR_ADMIN' || phone === '0866903420')) {
                     router.push('/pwr');
                   } else {
                     const savedTeam = localStorage.getItem('pwr_selected_team');
@@ -620,9 +629,9 @@ export default function StationAuthUI() {
                     }
                   }
                 }} 
-                style={{ ...btnStyle, background: phone === '0866903420' ? 'linear-gradient(90deg, #991b1b, #ef4444)' : `linear-gradient(90deg, #1e3a8a, ${colors.welcome})`, boxShadow: phone === '0866903420' ? '0 8px 25px rgba(239,68,68,0.5)' : `0 8px 25px rgba(59,130,246,0.5)` }}
+                style={{ ...btnStyle, background: (session?.user?.role === 'PWR_ADMIN' || phone === '0866903420') ? 'linear-gradient(90deg, #991b1b, #ef4444)' : `linear-gradient(90deg, #1e3a8a, ${colors.welcome})`, boxShadow: (session?.user?.role === 'PWR_ADMIN' || phone === '0866903420') ? '0 8px 25px rgba(239,68,68,0.5)' : `0 8px 25px rgba(59,130,246,0.5)` }}
               >
-                {phone === '0866903420' ? 'ĐẾN TRANG QUẢN TRỊ ADMIN' : 'VÀO TRẠM LÀM VIỆC'} <ChevronRight size={20} strokeWidth={3} />
+                {(session?.user?.role === 'PWR_ADMIN' || phone === '0866903420') ? 'ĐẾN TRANG QUẢN TRỊ ADMIN' : 'VÀO TRẠM LÀM VIỆC'} <ChevronRight size={20} strokeWidth={3} />
               </button>
             </div>
           )}
