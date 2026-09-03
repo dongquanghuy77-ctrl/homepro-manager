@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getSession } from 'next-auth/react';
 import { usePwrStore } from '@/lib/pwr/usePwrStore';
 import { StationWorkflowUI } from './StationWorkflowUI';
 import { HomeTabUI } from './HomeTabUI';
@@ -11,8 +12,30 @@ import { Menu, Trophy, ChevronRight, Home, BarChart2, Bell, User, Factory, Batte
 import CountUp from 'react-countup';
 
 export default function MobileStationClient() {
+
+  useEffect(() => {
+    // Sync store with actual session data
+    async function loadSession() {
+      const session = await getSession();
+      if (session?.user?.name) {
+        usePwrStore.setState({ 
+          userName: session.user.name,
+          userLevel: 1, // Default reset
+          userPoints: 0 // Default reset
+        });
+      }
+    }
+    loadSession();
+  }, []);
+
   const router = useRouter();
-  const userStationRole: string = 'CNC'; // MOCK
+  const [userStationRole, setUserStationRole] = useState<string>('CNC');
+  useEffect(() => {
+    const savedTeam = localStorage.getItem('pwr_selected_team');
+    if (savedTeam === 'Tổ Cắt') setUserStationRole('CNC');
+    else if (savedTeam === 'Tổ Dán') setUserStationRole('DAN_CANH');
+    else if (savedTeam === 'Tổ Khoan') setUserStationRole('KHOAN_CAM');
+  }, []);
   const { 
     currentTab: activeTab, 
     setTab: setActiveTab, 
