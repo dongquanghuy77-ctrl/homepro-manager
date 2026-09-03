@@ -611,7 +611,7 @@ export default function StationAuthUI() {
                         key={team}
                         onClick={() => {
                           localStorage.setItem('pwr_selected_team', team);
-                          router.push('/pwr/station/dashboard');
+                          router.push('/pwr/station');
                         }}
                         style={{
                           width: '100%', padding: 16, borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)',
@@ -633,7 +633,7 @@ export default function StationAuthUI() {
                   } else {
                     const savedTeam = localStorage.getItem('pwr_selected_team');
                     if (savedTeam) {
-                      router.push('/pwr/station/dashboard');
+                      router.push('/pwr/station');
                     } else {
                       setAuthError('Vui lòng chọn 1 Tổ đội ở trên để tiếp tục!');
                     }
