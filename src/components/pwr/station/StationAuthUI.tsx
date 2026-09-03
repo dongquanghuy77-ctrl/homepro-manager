@@ -76,6 +76,17 @@ export default function StationAuthUI() {
 
 
   const [authState, setAuthState] = useState<AuthState>('LOGIN');
+
+  // Tự động load avatar đã lưu khi vào màn WELCOME
+  useEffect(() => {
+    if (authState === 'WELCOME' && !avatarUrl) {
+      fetch('/api/pwr/auth/avatar')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.avatarUrl) setAvatarUrl(data.avatarUrl); })
+        .catch(() => {});
+    }
+  }, [authState]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
