@@ -267,13 +267,7 @@ export default function MobileStationClient() {
                 <div style={{ flex: 1, paddingLeft: 16 }}>
                   <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ CNC {userStationRole === 'CNC' && <span style={{ fontSize: 10, background: '#a855f7', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Cắt ván, soi rãnh, đánh mòi</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
-                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-                      <div style={{ width: '85%', height: '100%', background: '#a855f7', borderRadius: 2, boxShadow: '0 0 8px #a855f7' }} />
-                    </div>
-                    <span style={{ fontSize: 12, color: '#a855f7', fontWeight: 600 }}>85%</span>
-                  </div>
+                  
                 </div>
                 <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
                   <ChevronRight size={18} color="#c084fc" />
@@ -294,13 +288,7 @@ export default function MobileStationClient() {
                 <div style={{ flex: 1, paddingLeft: 16 }}>
                   <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Dán Cạnh {userStationRole === 'DAN_CANH' && <span style={{ fontSize: 10, background: '#10b981', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Dán nẹp thẳng, vát, acrylic</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
-                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-                      <div style={{ width: '70%', height: '100%', background: '#10b981', borderRadius: 2, boxShadow: '0 0 8px #10b981' }} />
-                    </div>
-                    <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>70%</span>
-                  </div>
+                  
                 </div>
                 <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(16,185,129,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
                   <ChevronRight size={18} color="#34d399" />
@@ -321,45 +309,16 @@ export default function MobileStationClient() {
                 <div style={{ flex: 1, paddingLeft: 16 }}>
                   <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Khoan Cam {userStationRole === 'KHOAN_CAM' && <span style={{ fontSize: 10, background: '#3b82f6', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Khoan chốt, bản lề, ray trượt</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Trophy size={14} color="#fbbf24" fill="#fbbf24" />
-                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-                      <div style={{ width: '60%', height: '100%', background: '#0ea5e9', borderRadius: 2, boxShadow: '0 0 8px #0ea5e9' }} />
-                    </div>
-                    <span style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 600 }}>60%</span>
-                  </div>
+                  
                 </div>
                 <div style={{ width: 32, height: 32, minWidth: 32, borderRadius: '50%', background: 'rgba(14,165,233,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 12 }}>
                   <ChevronRight size={18} color="#38bdf8" />
                 </div>
               </div>
 
-              {/* Bottom Stats Grid */}
-              <div className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 24px', marginTop: 32 }}>
-                <div style={{ textAlign: 'center' }}>
-                  <ClipboardList size={20} color="#9ca3af" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Nhiệm vụ</div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>12</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <CheckCircle2 size={20} color="#9ca3af" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Đang xử lý</div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>5</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <CheckCircle2 size={20} color="#10b981" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Hoàn thành</div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>36</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <Trophy size={20} color="#fbbf24" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Thành tích</div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: '#fbbf24' }}>120</div>
-                </div>
               </div>
-            </div>
-          </>
-        ) : activeTab === 'HOME' ? (
+            </>
+          ) : activeTab === 'HOME' ? (
           <HomeTabUI userName={usePwrStore.getState().userName || 'Thợ'} />
         ) : activeTab === 'LEADERBOARD' ? (
           <LeaderboardTabUI />
