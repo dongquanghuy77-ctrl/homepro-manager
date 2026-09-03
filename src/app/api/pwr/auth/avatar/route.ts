@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { getToken } from 'next-auth/jwt';
 import { authOptions } from '@/lib/auth/nextauth-options';
 import { db } from '@/db';
 import { users } from '@/db/schema';
@@ -15,13 +15,18 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'im
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Xác thực NextAuth session
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
+    // 1. Đọc JWT trực tiếp từ cookie (App Router reliable pattern)
+    const token = await getToken({
+      req,
+      secret: authOptions.secret || process.env.NEXTAUTH_SECRET || 'fallback_secret_for_homepro_12345!@#',
+    });
+
+    if (!token?.id) {
+      console.error('[Avatar POST] No token.id. Token:', JSON.stringify(token));
+      return NextResponse.json({ error: 'Chưa đăng nhập (token null)' }, { status: 401 });
     }
 
-    const userId = parseInt(session.user.id as string);
+    const userId = parseInt(token.id as string);
     if (isNaN(userId)) {
       return NextResponse.json({ error: 'Session không hợp lệ' }, { status: 401 });
     }
@@ -99,14 +104,18 @@ export async function POST(req: NextRequest) {
 }
 
 // GET: Lấy avatarUrl hiện tại của user đang login
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const token = await getToken({
+      req,
+      secret: authOptions.secret || process.env.NEXTAUTH_SECRET || 'fallback_secret_for_homepro_12345!@#',
+    });
+    if (!token?.id) {
       return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
     }
 
-    const userId = parseInt(session.user.id as string);
+    const userId = parseInt(token.id as string);
+
     const result = await db
       .select({ avatarUrl: users.avatarUrl, name: users.name })
       .from(users)
