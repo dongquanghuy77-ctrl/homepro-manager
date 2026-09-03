@@ -353,44 +353,36 @@ export default function MobileStationClient() {
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <Trophy size={20} color="#fbbf24" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ flex: 1, overflowY: 'auto' }}>
-          {activeTab === 'TASKS' ? (
-            <div style={{ padding: 20 }}>
-              <StationWorkflowUI team={userStationRole} userName={userName || 'Thợ'} />
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Thành tích</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#fbbf24' }}>120</div>
+                </div>
+              </div>
             </div>
-          ) : activeTab === 'HOME' ? (
-            <HomeTabUI userName={userName || 'Thợ'} />
-          ) : activeTab === 'LEADERBOARD' ? (
-            <LeaderboardTabUI />
-          ) : activeTab === 'REPORTS' ? (
-            <ReportsTabUI />
-          ) : activeTab === 'PROFILE' ? (
-            <ProfileTabUI />
-          ) : null}
-        </div>
+          </>
+        ) : activeTab === 'HOME' ? (
+          <HomeTabUI userName={usePwrStore.getState().userName || 'Thợ'} />
+        ) : activeTab === 'LEADERBOARD' ? (
+          <LeaderboardTabUI />
+        ) : activeTab === 'REPORTS' ? (
+          <ReportsTabUI />
+        ) : activeTab === 'PROFILE' ? (
+          <ProfileTabUI />
+        ) : null}
+      </div>
 
       {/* Floating Bottom Nav */}
       <div style={{ 
-        position: 'fixed', bottom: 0, left: 0, right: 0, 
-        background: 'rgba(15,15,20,0.85)', backdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(255,255,255,0.05)',
-        display: 'flex', justifyContent: 'space-around', padding: '16px 8px 24px 8px', zIndex: 100
+        position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', 
+        width: '100%', maxWidth: 480, height: 70,
+        background: 'rgba(10, 10, 15, 0.95)', borderTop: '1px solid rgba(255,255,255,0.05)',
+        display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '0 16px',
+        zIndex: 100, backdropFilter: 'blur(20px)'
       }}>
-        <button onClick={() => setActiveTab('HOME')} style={{ background: 'transparent', border: 'none', color: activeTab === 'HOME' ? '#34d399' : '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <Home size={22} />
-        </button>
-        <button onClick={() => setActiveTab('TASKS')} style={{ background: 'transparent', border: 'none', color: activeTab === 'TASKS' ? '#34d399' : '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <ClipboardList size={22} />
-        </button>
-        <button onClick={() => setActiveTab('LEADERBOARD')} style={{ background: 'transparent', border: 'none', color: activeTab === 'LEADERBOARD' ? '#34d399' : '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <Trophy size={22} />
-        </button>
-        <button onClick={() => setActiveTab('REPORTS')} style={{ background: 'transparent', border: 'none', color: activeTab === 'REPORTS' ? '#34d399' : '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <BarChart2 size={22} />
-        </button>
-        <button onClick={() => setActiveTab('PROFILE')} style={{ background: 'transparent', border: 'none', color: activeTab === 'PROFILE' ? '#34d399' : '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <User size={22} />
-        </button>
+        <button className={`nav-item ${activeTab === 'HOME' ? 'active' : ''}`} onClick={() => setActiveTab('HOME')}><Home size={24} /> Trang chủ</button>
+        <button className={`nav-item ${activeTab === 'LEADERBOARD' ? 'active' : ''}`} onClick={() => setActiveTab('LEADERBOARD')}><BarChart2 size={24} /> Hạng</button>
+        <div style={{ position: 'relative', width: 56, height: 56 }}><button className={`floating-fab ${activeTab === 'STATION' ? 'active' : ''}`} onClick={() => setActiveTab('STATION')}><Factory size={24} /></button></div>
+        <button className={`nav-item ${activeTab === 'REPORTS' ? 'active' : ''}`} onClick={() => setActiveTab('REPORTS')}><Bell size={24} /> Báo cáo</button>
+        <button className={`nav-item ${activeTab === 'PROFILE' ? 'active' : ''}`} onClick={() => setActiveTab('PROFILE')}><User size={24} /> Cá nhân</button>
       </div>
     </div>
   );
