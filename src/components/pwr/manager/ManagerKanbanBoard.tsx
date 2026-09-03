@@ -13,12 +13,8 @@ interface KanbanTask {
   points: number;
 }
 
-const INITIAL_TASKS: KanbanTask[] = [
-  { id: 101, title: 'Cắt lô ván MDF lõi xanh (Bếp)', station: 'INBOX', status: 'TODO', points: 15 },
-  { id: 102, title: 'Soi rãnh tủ quần áo master', station: 'INBOX', status: 'TODO', points: 10 },
-  { id: 103, title: 'Dán cạnh lô 5 hộc kéo', station: 'DAN_CANH', status: 'IN_PROGRESS', points: 12 }, // Không cho kéo đi
-  { id: 104, title: 'Cắt CNC vách ngăn nghệ thuật', station: 'CNC', status: 'TODO', points: 20 },
-];
+const INITIAL_TASKS: KanbanTask[] = [];
+
 
 const STATIONS = [
   { id: 'INBOX', name: 'Hàng Đợi (Chưa giao)', icon: Clock, color: '#9ca3af', isOffline: false },
@@ -31,6 +27,34 @@ const STATIONS = [
 export default function ManagerKanbanBoard() {
   const [tasks, setTasks] = useState<KanbanTask[]>(INITIAL_TASKS);
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
+  const [loadError, setLoadError] = useState('');
+
+  // Load real tasks from DB
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch('/api/pwr/tasks?stationDispatch=true&limit=100');
+      if (!res.ok) return;
+      const data = await res.json();
+      // Map pwr_tasks fields to KanbanTask shape
+      const mapped: KanbanTask[] = (data.tasks || []).map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        station: (t.stationTeam || 'INBOX') as StationId,
+        status: (t.status === 'DONE' ? 'DONE' : t.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'TODO') as TaskStatus,
+        points: 15,
+      }));
+      setTasks(mapped);
+      setLoadError('');
+    } catch {
+      setLoadError('Không tải được dữ liệu. Đang thử lại...');
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+    const interval = setInterval(fetchTasks, 30000); // Polling 30s
+    return () => clearInterval(interval);
+  }, []);
 
   const handleDragStart = (e: React.DragEvent, task: KanbanTask) => {
     // Rào chắn QA 1: Không cho kéo task đang IN_PROGRESS
@@ -69,6 +93,19 @@ export default function ManagerKanbanBoard() {
       t.id === taskId ? { ...t, station: targetStationId } : t
     ));
     setDraggedTaskId(null);
+
+    // Persist to DB
+    try {
+      const newTeam = targetStationId === 'INBOX' ? null : targetStationId;
+      await fetch(`/api/pwr/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stationTeam: newTeam }),
+      });
+    } catch {
+      // Rollback on error
+      fetchTasks();
+    }
   };
 
   return (

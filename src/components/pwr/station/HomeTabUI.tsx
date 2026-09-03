@@ -1,14 +1,32 @@
-import React from 'react';
-import { AlertCircle, Calendar, CheckCircle2, Clock, Factory } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertCircle, Calendar, CheckCircle2, Clock, Factory, Loader2 } from 'lucide-react';
 import { usePwrStore } from '@/lib/pwr/usePwrStore';
 
 export function HomeTabUI() {
   const { userName } = usePwrStore();
-  
+  const [stats, setStats] = useState<{ done: number; pending: number; inProgress: number; total: number } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/pwr/dashboard')
+      .then(r => r.json())
+      .then(data => {
+        setStats({
+          done: data.completedToday ?? data.done ?? 0,
+          pending: data.pending ?? data.todo ?? 0,
+          inProgress: data.inProgress ?? 0,
+          total: data.total ?? 0,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  const percent = stats && stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
+  const greeting = new Date().getHours() < 12 ? 'buổi sáng' : new Date().getHours() < 18 ? 'buổi chiều' : 'buổi tối';
+
   return (
     <div style={{ padding: '20px 20px 100px 20px' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px 0' }}>Chào buổi chiều,</h2>
+        <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px 0' }}>Chào {greeting},</h2>
         <h1 style={{ fontSize: 28, fontWeight: 800, color: '#c084fc', margin: 0 }}>{userName}!</h1>
         <p style={{ color: '#9ca3af', fontSize: 14, marginTop: 8 }}>Hôm nay xưởng khá bận rộn, cố lên nhé.</p>
       </div>
@@ -17,19 +35,23 @@ export function HomeTabUI() {
       <div className="glass-card" style={{ padding: 20, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <span style={{ fontSize: 16, fontWeight: 600 }}>Tiến độ hôm nay</span>
-          <span style={{ color: '#34d399', fontWeight: 700 }}>68%</span>
+          {stats ? (
+            <span style={{ color: '#34d399', fontWeight: 700 }}>{percent}%</span>
+          ) : (
+            <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} color="#34d399" />
+          )}
         </div>
         <div style={{ height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
-          <div style={{ width: '68%', height: '100%', background: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)', borderRadius: 4 }} />
+          <div style={{ width: `${percent}%`, height: '100%', background: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)', borderRadius: 4, transition: 'width 1s ease' }} />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
           <div>
             <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>Đã hoàn thành</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>42 SP</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>{stats?.done ?? '—'} task</div>
           </div>
           <div>
             <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>Còn lại</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>18 SP</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>{stats !== null ? (stats.pending + stats.inProgress) : '—'} task</div>
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ const MUTABLE_FIELDS = [
   'projectRef', 'tags', 'waitingFor', 'deferredTo',
   'result', 'cancelReason', 'source',
   'startTime', 'endTime',
+  'stationTeam',  // Manager giao task cho trạm
 ] as const;
 
 const AUDITABLE_FIELD_MAP: Partial<Record<string, string>> = {

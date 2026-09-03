@@ -1,15 +1,27 @@
-import React from 'react';
-import { Trophy, Medal, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trophy, Medal, Star, Loader2 } from 'lucide-react';
+
+interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  points: number;
+  level?: number;
+  isMe: boolean;
+}
 
 export function LeaderboardTabUI() {
-  const leaderboardData = [
-    { rank: 1, name: 'Trần Văn A', points: 1540, isMe: false },
-    { rank: 2, name: 'Nguyễn Thị B', points: 1420, isMe: false },
-    { rank: 3, name: 'Lê Hoàng C', points: 1380, isMe: false },
-    { rank: 4, name: 'Đồng nghiệp Tổ 2', points: 1250, isMe: false }, // QA Safeguard: Anonymization
-    { rank: 5, name: 'Đồng nghiệp Tổ 1', points: 1100, isMe: false },
-    { rank: 12, name: 'Anh Huy (Bạn)', points: 120, isMe: true }, // Me
-  ];
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/pwr/mobile/gamification')
+      .then(r => r.json())
+      .then(data => {
+        setLeaderboardData(data.data || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
     <div style={{ padding: '20px 20px 100px 20px' }}>
@@ -21,6 +33,17 @@ export function LeaderboardTabUI() {
         <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>Cạnh tranh lành mạnh, cùng nhau phát triển</p>
       </div>
 
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
+          <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 12px' }} />
+          <p>Đang tải bảng xếp hạng...</p>
+        </div>
+      ) : leaderboardData.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 32, color: '#9ca3af', background: 'rgba(255,255,255,0.05)', borderRadius: 16 }}>
+          <Trophy size={40} color="#fbbf24" style={{ margin: '0 auto 12px' }} />
+          <p>Chưa có dữ liệu xếp hạng. Hãy hoàn thành task đầu tiên!</p>
+        </div>
+      ) : (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {leaderboardData.map((user) => {
           const isTop3 = user.rank <= 3;
@@ -49,6 +72,7 @@ export function LeaderboardTabUI() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

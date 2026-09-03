@@ -2297,6 +2297,9 @@ export const pwrTasks = pgTable('pwr_tasks', {
   dueDate:       text('due_date'),
   deferredTo:    text('deferred_to'),
   completedAt:   timestamp('completed_at'),
+  stationTeam:   text('station_team'),             // 'CNC' | 'DAN_CANH' | 'KHOAN_CAM' | null
+  completedBy:   integer('completed_by').references(() => users.id),
+  quantityDone:  integer('quantity_done').default(0),
   deletedAt:     timestamp('deleted_at'),
   waitingFor:    text('waiting_for'),
   assignedTo:    text('assigned_to'),
@@ -2533,6 +2536,7 @@ export const pwrUserStats = pgTable('pwr_user_stats', {
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
   totalPoints: integer('total_points').notNull().default(0),
   currentLevel: integer('current_level').notNull().default(1),
+  tasksCompleted: integer('tasks_completed').notNull().default(0),
   lastActiveAt: timestamp('last_active_at').defaultNow(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
@@ -2557,3 +2561,4 @@ export const pwrStationUsers = pgTable('pwr_station_users', {
 });
 export type PwrStationUser = typeof pwrStationUsers.$inferSelect;
 export type NewPwrStationUser = typeof pwrStationUsers.$inferInsert;
+

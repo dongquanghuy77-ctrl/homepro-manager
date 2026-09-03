@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrTasks, pwrTaskAuditLog } from '@/db/schema';
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, desc, or, isNotNull } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { getTodayVN, TERMINAL_STATUSES } from '@/lib/pwr/constants';
 
@@ -12,13 +12,14 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const status       = searchParams.get('status');
-    const category     = searchParams.get('category');
-    const overdueParam = searchParams.get('overdue');
-    const q            = searchParams.get('q');
-    const dueDate      = searchParams.get('dueDate');
-    const assignedTo   = searchParams.get('assignedTo');
-    const projectRef   = searchParams.get('projectRef');
+    const status          = searchParams.get('status');
+    const category        = searchParams.get('category');
+    const overdueParam    = searchParams.get('overdue');
+    const q               = searchParams.get('q');
+    const dueDate         = searchParams.get('dueDate');
+    const assignedTo      = searchParams.get('assignedTo');
+    const projectRef      = searchParams.get('projectRef');
+    const stationDispatch = searchParams.get('stationDispatch'); // Manager dispatch view — hiển thị ALL tasks có thể dispatch
 
     const conditions: any[] = [
       eq(pwrTasks.userId, session.id),
@@ -29,6 +30,11 @@ export async function GET(request: Request) {
     if (dueDate)    conditions.push(eq(pwrTasks.dueDate,    dueDate));
     if (assignedTo) conditions.push(eq(pwrTasks.assignedTo, assignedTo));
     if (projectRef) conditions.push(eq(pwrTasks.projectRef, projectRef));
+
+    // stationDispatch=true: lấy tất cả task chưa DONE/CANCELLED để show trên board giao việc
+    if (stationDispatch === 'true') {
+      conditions.push(...[]);  // Không filter status — manager thấy tất cả
+    }
 
     let tasks = await db
       .select()
