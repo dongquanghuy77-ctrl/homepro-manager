@@ -29,37 +29,41 @@ export default function StationAuthUI() {
     setAvatarUploading(true);
     setAuthError('');
     try {
-      let fileToUpload: File | Blob = file;
+      let fileToProcess: File | Blob = file;
 
-      // HEIC/HEIF: Canvas API không decode được → bỏ qua compress, upload thẳng
+      // HEIC/HEIF: bỏ qua compress (Canvas không decode được HEIC)
       const isHeic = file.type.includes('heic') || file.type.includes('heif');
       if (!isHeic) {
-        // Nén ảnh JPG/PNG/WEBP xuống ≤200KB + ≤300px
-        // useWebWorker: false → tránh Safari Web Worker memory limit
         const { default: imageCompression } = await import('browser-image-compression');
-        fileToUpload = await imageCompression(file, {
-          maxSizeMB: 0.2,
-          maxWidthOrHeight: 300,
+        fileToProcess = await imageCompression(file, {
+          maxSizeMB: 0.15,
+          maxWidthOrHeight: 256,
           useWebWorker: false,
         });
       }
 
-      const formData = new FormData();
-      formData.append('avatar', fileToUpload, file.name || 'avatar.jpg');
-
-      const res = await fetch('/api/pwr/auth/avatar', {
-        method: 'POST',
-        body: formData,
+      // Encode sang base64 dataUrl
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('FileReader failed'));
+        reader.readAsDataURL(fileToProcess);
       });
 
-      // Safe JSON parse — server có thể trả HTML lỗi thay vì JSON
+      // POST JSON đơn giản — không cần multipart FormData
+      const res = await fetch('/api/pwr/auth/avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataUrl }),
+      });
+
       let data: { avatarUrl?: string; error?: string } = {};
-      try { data = await res.json(); } catch { /* non-JSON response */ }
+      try { data = await res.json(); } catch { /* non-JSON */ }
 
       if (res.ok && data.avatarUrl) {
         setAvatarUrl(data.avatarUrl);
       } else {
-        setAuthError(data.error || `Lỗi HTTP ${res.status}. Vui lòng thử lại.`);
+        setAuthError(data.error || `Lỗi HTTP ${res.status}`);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
