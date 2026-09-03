@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight, Eye, QrCode, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight, Eye, QrCode, ArrowLeft, Camera } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { signIn, getSession } from 'next-auth/react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -19,6 +19,44 @@ export default function StationAuthUI() {
   };
 
   const [userProfile, setUserProfile] = useState<{ id: number; name: string; role: string; username: string; phone: string | null } | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload avatar handler — nén ảnh → hash SHA-256 → POST lên API
+  const handleAvatarUpload = async (file: File) => {
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      // Nén ảnh xuống tối đa 200KB + 300x300px bằng browser-image-compression
+      const { default: imageCompression } = await import('browser-image-compression');
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.2,
+        maxWidthOrHeight: 300,
+        useWebWorker: true,
+      });
+
+      const formData = new FormData();
+      formData.append('avatar', compressed, compressed.name || 'avatar.jpg');
+
+      const res = await fetch('/api/pwr/auth/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (res.ok && data.avatarUrl) {
+        setAvatarUrl(data.avatarUrl);
+      } else {
+        setAuthError(data.error || 'Không tải được ảnh');
+      }
+    } catch (err) {
+      setAuthError('Lỗi khi tải ảnh. Vui lòng thử lại.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   const [authState, setAuthState] = useState<AuthState>('LOGIN');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -559,19 +597,77 @@ export default function StationAuthUI() {
                 Chào mừng trở lại,<br/>{userProfile?.name || userProfile?.name || 'Đang tải...'}!
               </div>
 
-              {/* Dynamic Avatar & Level (Simulated Real Data) */}
+              {/* Dynamic Avatar — Clickable để đổi ảnh */}
               <div style={{ position: 'relative', marginBottom: 40 }}>
-                {/* Fallback Initials Avatar */}
-                <div style={{ 
-                  width: 100, height: 110, background: '#111', 
-                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: `2px solid ${colors.welcome}`,
-                  boxShadow: `0 0 30px ${colors.welcome}40`,
-                  fontSize: 32, fontWeight: 800, color: colors.welcome
-                }}>
-                  {userProfile?.name ? getInitials(userProfile.name) : (userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? 'AD' : '??'}
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="user"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleAvatarUpload(file);
+                    e.target.value = ''; // Reset để có thể chọn lại cùng file
+                  }}
+                />
+
+                {/* Hexagon Avatar — click để upload */}
+                <div
+                  onClick={() => !avatarUploading && fileInputRef.current?.click()}
+                  title="Nhấn để đổi ảnh đại diện"
+                  style={{
+                    width: 100, height: 110,
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: `2px solid ${colors.welcome}`,
+                    boxShadow: `0 0 30px ${colors.welcome}40`,
+                    fontSize: 32, fontWeight: 800, color: colors.welcome,
+                    cursor: avatarUploading ? 'wait' : 'pointer',
+                    position: 'relative', overflow: 'hidden',
+                    background: avatarUrl ? 'transparent' : '#111',
+                  }}
+                >
+                  {avatarUploading ? (
+                    // Loading spinner khi đang upload
+                    <div style={{
+                      width: 36, height: 36, border: `3px solid ${colors.welcome}40`,
+                      borderTop: `3px solid ${colors.welcome}`,
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite',
+                    }} />
+                  ) : avatarUrl ? (
+                    // Hiển thị ảnh thật nếu đã upload
+                    <img
+                      src={avatarUrl}
+                      alt="Avatar"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    // Fallback initials
+                    userProfile?.name ? getInitials(userProfile.name) :
+                    (userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? 'AD' : '??'
+                  )}
                 </div>
+
+                {/* Camera icon overlay */}
+                {!avatarUploading && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      position: 'absolute', bottom: 5, right: -5,
+                      width: 28, height: 28, borderRadius: '50%',
+                      background: colors.welcome, cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: `0 2px 8px rgba(0,0,0,0.5)`,
+                    }}
+                    title="Đổi ảnh đại diện"
+                  >
+                    <Camera size={14} color="#fff" />
+                  </div>
+                )}
+
                 {/* Level Badge */}
                 <div style={{
                   position: 'absolute', bottom: -10, left: -10,
@@ -582,6 +678,10 @@ export default function StationAuthUI() {
                   {(userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? '99' : '1'}
                 </div>
               </div>
+
+              {/* CSS animation cho spinner */}
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
 
               {/* XP Bar (Simulated Real Data) */}
               {(userProfile?.role !== 'PWR_ADMIN' && !((!userProfile) && phone === '0866903420')) && (

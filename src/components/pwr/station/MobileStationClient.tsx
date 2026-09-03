@@ -14,19 +14,32 @@ import CountUp from 'react-countup';
 export default function MobileStationClient() {
 
   useEffect(() => {
-    // Sync store with actual session data
+    // Sync store với session thực từ NextAuth + lấy avatar từ DB
     async function loadSession() {
       const session = await getSession();
       if (session?.user?.name) {
-        usePwrStore.setState({ 
+        usePwrStore.setState({
           userName: session.user.name,
-          userLevel: 1, // Default reset
-          userPoints: 0 // Default reset
+          userLevel: 1,
+          userPoints: 0
         });
+      }
+      // Lấy avatar URL từ DB
+      try {
+        const res = await fetch('/api/pwr/auth/avatar');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.avatarUrl) {
+            usePwrStore.setState({ userAvatar: data.avatarUrl });
+          }
+        }
+      } catch (e) {
+        // Không có avatar → giữ fallback initials
       }
     }
     loadSession();
   }, []);
+
 
   const router = useRouter();
   const [userStationRole, setUserStationRole] = useState<string>('CNC');
@@ -200,13 +213,22 @@ export default function MobileStationClient() {
               {/* User Profile (Tích hợp State + QA Fallback) */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 1, minWidth: 0, paddingRight: 16 }}>
-                                    <div style={{ 
-                    width: 48, height: 48, minWidth: 48, borderRadius: '50%', border: '2px solid #374151',
-                    background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 20, fontWeight: 'bold'
-                  }}>
-                    {userName ? userName.trim().split(' ').filter(Boolean).map((w, i, a) => i === 0 || i === a.length - 1 ? w[0] : '').join('').toUpperCase().substring(0,2) : '??'}
-                  </div>
+                  {userAvatar && !userAvatar.includes('cdn-error-link') ? (
+                    <img
+                      src={userAvatar}
+                      alt={userName}
+                      style={{ width: 48, height: 48, minWidth: 48, borderRadius: '50%', border: '2px solid #374151', objectFit: 'cover' }}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 48, height: 48, minWidth: 48, borderRadius: '50%', border: '2px solid #374151',
+                      background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 20, fontWeight: 'bold'
+                    }}>
+                      {userName ? userName.trim().split(' ').filter(Boolean).map((w: string, i: number, a: string[]) => i === 0 || i === a.length - 1 ? w[0] : '').join('').toUpperCase().substring(0,2) : '??'}
+                    </div>
+                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, color: '#9ca3af' }}>Xin chào,</div>
                     {/* QA Safeguard: Truncate tên quá dài để không vỡ UI */}
