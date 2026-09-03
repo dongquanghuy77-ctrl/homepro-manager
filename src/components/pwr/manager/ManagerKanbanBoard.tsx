@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Play, AlertTriangle, Settings, CheckCircle2, Factory, Clock, GripVertical } from 'lucide-react';
+import { Play, AlertTriangle, CheckCircle2, Factory, Clock, Plus, X, Loader2, Check } from 'lucide-react';
 
 type StationId = 'INBOX' | 'CNC' | 'DAN_CANH' | 'KHOAN_CAM' | 'DONG_GOI';
 type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'ISSUE';
@@ -15,19 +15,22 @@ interface KanbanTask {
 
 const INITIAL_TASKS: KanbanTask[] = [];
 
-
 const STATIONS = [
-  { id: 'INBOX', name: 'Hàng Đợi (Chưa giao)', icon: Clock, color: '#9ca3af', isOffline: false },
-  { id: 'CNC', name: 'Máy CNC', icon: Factory, color: '#3b82f6', isOffline: false },
-  { id: 'DAN_CANH', name: 'Máy Dán Cạnh', icon: Factory, color: '#f59e0b', isOffline: true }, // Giả lập máy hỏng
-  { id: 'KHOAN_CAM', name: 'Máy Khoan Cam', icon: Factory, color: '#10b981', isOffline: false },
-  { id: 'DONG_GOI', name: 'Đóng Gói', icon: CheckCircle2, color: '#8b5cf6', isOffline: false },
+  { id: 'INBOX',     name: 'Hàng Đợi (Chưa giao)', icon: Clock,         color: '#9ca3af', isOffline: false },
+  { id: 'CNC',       name: 'Máy CNC',               icon: Factory,       color: '#3b82f6', isOffline: false },
+  { id: 'DAN_CANH',  name: 'Máy Dán Cạnh',          icon: Factory,       color: '#f59e0b', isOffline: false },
+  { id: 'KHOAN_CAM', name: 'Máy Khoan Cam',          icon: Factory,       color: '#10b981', isOffline: false },
+  { id: 'DONG_GOI',  name: 'Đóng Gói',              icon: CheckCircle2,  color: '#8b5cf6', isOffline: false },
 ];
 
 export default function ManagerKanbanBoard() {
   const [tasks, setTasks] = useState<KanbanTask[]>(INITIAL_TASKS);
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newTask, setNewTask] = useState({ title: '', stationTeam: 'INBOX' as StationId, priority: 'MEDIUM' });
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
 
   // Load real tasks from DB
   const fetchTasks = async () => {
@@ -108,12 +111,92 @@ export default function ManagerKanbanBoard() {
     }
   };
 
+  // Tạo task mới nhanh
+  const handleCreateTask = async () => {
+    if (!newTask.title.trim()) { setCreateError('Vui lòng nhập tên task'); return; }
+    setCreating(true); setCreateError('');
+    try {
+      const res = await fetch('/api/pwr/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newTask.title.trim(),
+          category: 'OPERATIONAL_TASK',
+          priority: newTask.priority,
+          status: 'TODO',
+          stationTeam: newTask.stationTeam === 'INBOX' ? null : newTask.stationTeam,
+        }),
+      });
+      if (!res.ok) { const d = await res.json(); setCreateError(d.error || 'Lỗi tạo task'); setCreating(false); return; }
+      setNewTask({ title: '', stationTeam: 'INBOX', priority: 'MEDIUM' });
+      setShowCreateModal(false);
+      fetchTasks(); // Reload board
+    } catch { setCreateError('Lỗi mạng'); }
+    setCreating(false);
+  };
+
   return (
     <div style={{ padding: 24, background: '#0a0a0f', minHeight: '100vh', color: '#fff' }}>
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px 0', color: '#c084fc' }}>Bảng Điều Phối Sản Xuất</h1>
-        <p style={{ color: '#9ca3af', fontSize: 16, margin: 0 }}>Kéo thả để giao việc xuống máy trạm của thợ. Tự động đồng bộ Real-time.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+        <div>
+          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px 0', color: '#c084fc' }}>Bảng Điều Phối Sản Xuất</h1>
+          <p style={{ color: '#9ca3af', fontSize: 16, margin: 0 }}>Kéo thả để giao việc xuống máy trạm. Tự động đồng bộ mỗi 30s.</p>
+        </div>
+        <button
+          onClick={() => { setShowCreateModal(true); setCreateError(''); }}
+          style={{ background: '#c084fc', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, flexShrink: 0 }}
+        >
+          <Plus size={20} /> Tạo Task Mới
+        </button>
       </div>
+
+      {/* Quick Create Modal */}
+      {showCreateModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 32, width: '100%', maxWidth: 480, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
+              <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>➕ Tạo Task Mới</h2>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            {createError && <div style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{createError}</div>}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 13, color: '#9ca3af', marginBottom: 6 }}>Tên công việc *</label>
+              <input
+                autoFocus
+                type="text"
+                placeholder="VD: Cắt lô ván MDF lõi xanh (Bếp A12)"
+                value={newTask.title}
+                onChange={e => setNewTask(t => ({ ...t, title: e.target.value }))}
+                onKeyDown={e => e.key === 'Enter' && handleCreateTask()}
+                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 14px', color: '#fff', fontSize: 15, boxSizing: 'border-box' as any }}
+              />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, color: '#9ca3af', marginBottom: 6 }}>Giao cho trạm</label>
+                <select value={newTask.stationTeam} onChange={e => setNewTask(t => ({ ...t, stationTeam: e.target.value as StationId }))}
+                  style={{ width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 14px', color: '#fff', fontSize: 14 }}>
+                  {STATIONS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, color: '#9ca3af', marginBottom: 6 }}>Độ ưu tiên</label>
+                <select value={newTask.priority} onChange={e => setNewTask(t => ({ ...t, priority: e.target.value }))}
+                  style={{ width: '100%', background: '#1a1a25', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 14px', color: '#fff', fontSize: 14 }}>
+                  <option value="LOW">🟢 Thấp</option>
+                  <option value="MEDIUM">🟡 Trung bình</option>
+                  <option value="HIGH">🔴 Cao</option>
+                </select>
+              </div>
+            </div>
+            <button onClick={handleCreateTask} disabled={creating}
+              style={{ width: '100%', background: '#c084fc', color: '#fff', border: 'none', borderRadius: 12, padding: '14px 0', fontWeight: 700, fontSize: 16, cursor: creating ? 'wait' : 'pointer', opacity: creating ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {creating ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={18} />}
+              {creating ? 'Đang tạo...' : 'Tạo Task'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 24, overflowX: 'auto', paddingBottom: 24 }}>
         {STATIONS.map((station) => (
@@ -194,6 +277,7 @@ export default function ManagerKanbanBoard() {
           </div>
         ))}
       </div>
+      <style>{`@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}`}</style>
     </div>
   );
 }

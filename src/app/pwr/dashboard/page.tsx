@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function RedirectPage() {
-  redirect('/pwr/kanban');
+  redirect('/pwr/manager');
 }
