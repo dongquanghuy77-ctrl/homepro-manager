@@ -360,7 +360,7 @@ export default function MobileStationClient() {
             </div>
           </>
         ) : activeTab === 'HOME' ? (
-          <HomeTabUI />
+          <HomeTabUI userName={session?.user?.name || 'Thợ'} />
         ) : activeTab === 'LEADERBOARD' ? (
           <LeaderboardTabUI />
         ) : activeTab === 'REPORTS' ? (

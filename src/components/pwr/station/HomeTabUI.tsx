@@ -1,9 +1,10 @@
+import { signOut } from "next-auth/react";
 ﻿import React, { useEffect, useState } from "react";
 import { LogOut, Sun, Coffee, CheckCircle2, TrendingUp, Bell } from "lucide-react";
 import { usePwrStore } from "@/lib/pwr/usePwrStore";
 
 export function HomeTabUI({ userName }: { userName: string }) {
-  const { logout } = usePwrStore();
+  const logout = () => signOut({ callbackUrl: "/pwr/station/login" });
   const [data, setData] = useState<any>(null);
   const [pushStatus, setPushStatus] = useState<"IDLE"|"SUBSCRIBED"|"UNSUPPORTED">("IDLE");
 

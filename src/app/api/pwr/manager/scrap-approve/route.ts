@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     await db.update(pwrScrapRequests).set({
       status: "APPROVED",
-      approvedBy: parseInt(auth.session.id),
+      approvedBy: Number(auth.session.id),
       updatedAt: new Date()
     } as any).where(eq(pwrScrapRequests.id, id));
 
