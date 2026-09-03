@@ -11,7 +11,7 @@ export const maxDuration = 30;
 
 // Tối đa 300KB sau khi client đã nén
 const MAX_SIZE_BYTES = 300 * 1024;
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,8 +58,11 @@ export async function POST(req: NextRequest) {
       .join('');
 
     // 6. Upload lên Vercel Blob
-    const ext = file.type.split('/')[1].replace('jpeg', 'jpg');
+    // Normalize ext: heic/heif → jpg (Blob public URL, HEIC kém hỗ trợ trên browser)
+    const rawExt = file.type.split('/')[1];
+    const ext = rawExt === 'jpeg' || rawExt === 'heic' || rawExt === 'heif' ? 'jpg' : rawExt;
     const blobPath = `avatars/user-${userId}/${hashHex.substring(0, 16)}.${ext}`;
+
 
     const { url } = await put(blobPath, arrayBuffer, {
       access: 'public',

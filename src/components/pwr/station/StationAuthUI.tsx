@@ -603,8 +603,7 @@ export default function StationAuthUI() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
-                  capture="user"
+                  accept="image/*,image/heic,image/heif"
                   style={{ display: 'none' }}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -693,6 +692,26 @@ export default function StationAuthUI() {
                   <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
                     <div style={{ width: '0%', height: '100%', background: colors.welcome, boxShadow: `0 0 15px ${colors.welcome}` }} />
                   </div>
+                </div>
+              )}
+
+              {/* Thông báo lỗi / thành công trong màn WELCOME */}
+              {authError && (
+                <div style={{
+                  width: '100%', padding: '12px 16px', marginBottom: 16,
+                  background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.5)',
+                  borderRadius: 12, color: '#fca5a5', fontSize: 14, textAlign: 'center'
+                }}>
+                  {authError}
+                </div>
+              )}
+              {avatarUploading && (
+                <div style={{
+                  width: '100%', padding: '10px 16px', marginBottom: 16,
+                  background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.4)',
+                  borderRadius: 12, color: '#93c5fd', fontSize: 14, textAlign: 'center'
+                }}>
+                  Đang tải ảnh lên...
                 </div>
               )}
 
