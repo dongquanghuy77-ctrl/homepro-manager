@@ -8,7 +8,7 @@ let changePasswordRatelimitInstance: import('@upstash/ratelimit').Ratelimit | nu
 const REDIS_URL   = process.env.UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-if (REDIS_URL && REDIS_TOKEN) {
+if (REDIS_URL && REDIS_URL.startsWith('http') && REDIS_TOKEN) {
   // Redis đã được cấu hình — bật rate limiting
   const { Ratelimit } = require('@upstash/ratelimit');
   const { Redis }     = require('@upstash/redis');
