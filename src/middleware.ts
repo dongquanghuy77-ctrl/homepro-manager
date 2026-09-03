@@ -7,6 +7,7 @@ export async function middleware(req: NextRequest) {
   // Allow static files, api auth routes, login page, and public demo page
   if (
     pathname.startsWith('/_next') ||
+    pathname.startsWith('/pwr-assets') || // Cho phép tải ảnh giao diện
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/demo') ||
     pathname.startsWith('/favicon.ico') ||
