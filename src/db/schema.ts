@@ -2300,6 +2300,7 @@ export const pwrTasks = pgTable('pwr_tasks', {
   stationTeam:   text('station_team'),             // 'CNC' | 'DAN_CANH' | 'KHOAN_CAM' | null
   completedBy:   integer('completed_by').references(() => users.id),
   quantityDone:  integer('quantity_done').default(0),
+  sourceRef:     text('source_ref'),               // ERP bridge: 'WO-{workOrderId}'
   deletedAt:     timestamp('deleted_at'),
   waitingFor:    text('waiting_for'),
   assignedTo:    text('assigned_to'),

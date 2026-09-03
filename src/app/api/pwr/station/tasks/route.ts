@@ -43,16 +43,27 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PATCH /api/pwr/station/tasks — mark task done + award points
+// PATCH /api/pwr/station/tasks — start task (IN_PROGRESS) or mark done (DONE)
 export async function PATCH(req: NextRequest) {
   const token = await getToken({ req, secret: SECRET });
   if (!token?.id) return NextResponse.json({ error: 'Chưa đăng nhập' }, { status: 401 });
 
   const userId = parseInt(token.id as string);
-  const { taskId, quantityDone = 1 } = await req.json() as { taskId: number; quantityDone?: number };
+  const body = await req.json() as { taskId: number; quantityDone?: number; status?: string };
+  const { taskId, quantityDone = 1, status } = body;
 
   if (!taskId) return NextResponse.json({ error: 'Thiếu taskId' }, { status: 400 });
 
+  // Nhánh 1: Chỉ chuyển sang IN_PROGRESS (thợ bấm "Bắt Đầu")
+  if (status === 'IN_PROGRESS') {
+    await db.update(pwrTasks).set({
+      status: 'IN_PROGRESS',
+      updatedAt: new Date(),
+    } as any).where(eq(pwrTasks.id, taskId));
+    return NextResponse.json({ success: true, status: 'IN_PROGRESS' });
+  }
+
+  // Nhánh 2: Hoàn Thành (DONE) — chạy full logic
   try {
     const now = new Date();
 

@@ -1,17 +1,14 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Play, AlertTriangle, CheckCircle2, Factory, Clock, Plus, X, Loader2, Check } from 'lucide-react';
+import { Play, AlertTriangle, CheckCircle2, Factory, Clock, Plus, X, Loader2, Check, Download, Package } from 'lucide-react';
 
 type StationId = 'INBOX' | 'CNC' | 'DAN_CANH' | 'KHOAN_CAM' | 'DONG_GOI';
 type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'ISSUE';
 
-interface KanbanTask {
-  id: number;
-  title: string;
-  station: StationId;
-  status: TaskStatus;
-  points: number;
-}
+interface KanbanTask { id: number; title: string; station: StationId; status: TaskStatus; points: number; }
+
+interface WorkOrder { id: number; operation: string; sequence: number; plannedQuantity: number; workCenterId: number | null; status: string; }
+interface ProductionOrder { id: number; code: string; status: string; priority: string | null; plannedQuantity: number; workOrders: WorkOrder[]; importedCount: number; plannedEnd: string | null; }
 
 const INITIAL_TASKS: KanbanTask[] = [];
 
@@ -23,6 +20,8 @@ const STATIONS = [
   { id: 'DONG_GOI',  name: 'Đóng Gói',              icon: CheckCircle2,  color: '#8b5cf6', isOffline: false },
 ];
 
+const WC_NAME: Record<number, string> = { 1: 'CNC', 2: 'Dán Cạnh', 3: 'Khoan Cam', 4: 'Đóng Gói' };
+
 export default function ManagerKanbanBoard() {
   const [tasks, setTasks] = useState<KanbanTask[]>(INITIAL_TASKS);
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
@@ -31,6 +30,14 @@ export default function ManagerKanbanBoard() {
   const [newTask, setNewTask] = useState({ title: '', stationTeam: 'INBOX' as StationId, priority: 'MEDIUM' });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+  // ERP Bridge states
+  const [showErpModal, setShowErpModal] = useState(false);
+  const [erpOrders, setErpOrders] = useState<ProductionOrder[]>([]);
+  const [erpLoading, setErpLoading] = useState(false);
+  const [selectedWOs, setSelectedWOs] = useState<Set<number>>(new Set());
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState('');
+  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
 
   // Load real tasks from DB
   const fetchTasks = async () => {
@@ -130,9 +137,42 @@ export default function ManagerKanbanBoard() {
       if (!res.ok) { const d = await res.json(); setCreateError(d.error || 'Lỗi tạo task'); setCreating(false); return; }
       setNewTask({ title: '', stationTeam: 'INBOX', priority: 'MEDIUM' });
       setShowCreateModal(false);
-      fetchTasks(); // Reload board
+      fetchTasks();
     } catch { setCreateError('Lỗi mạng'); }
     setCreating(false);
+  };
+
+  // ERP Bridge: Load production orders
+  const openErpModal = async () => {
+    setShowErpModal(true); setErpLoading(true); setSelectedWOs(new Set()); setImportMsg('');
+    try {
+      const res = await fetch('/api/pwr/erp/production-orders');
+      const d = await res.json();
+      setErpOrders(d.orders || []);
+    } catch {}
+    setErpLoading(false);
+  };
+
+  const toggleWO = (woId: number) => setSelectedWOs(prev => {
+    const next = new Set(prev);
+    next.has(woId) ? next.delete(woId) : next.add(woId);
+    return next;
+  });
+
+  const handleImport = async () => {
+    if (selectedWOs.size === 0) { setImportMsg('Chọn ít nhất 1 công đoạn'); return; }
+    setImporting(true); setImportMsg('');
+    try {
+      const res = await fetch('/api/pwr/erp/import-work-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workOrderIds: Array.from(selectedWOs) }),
+      });
+      const d = await res.json();
+      setImportMsg(d.message || (d.error ? '❌ ' + d.error : '✅ Thành công'));
+      if (d.created > 0) { fetchTasks(); }
+    } catch { setImportMsg('❌ Lỗi mạng'); }
+    setImporting(false);
   };
 
   return (
@@ -142,12 +182,16 @@ export default function ManagerKanbanBoard() {
           <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px 0', color: '#c084fc' }}>Bảng Điều Phối Sản Xuất</h1>
           <p style={{ color: '#9ca3af', fontSize: 16, margin: 0 }}>Kéo thả để giao việc xuống máy trạm. Tự động đồng bộ mỗi 30s.</p>
         </div>
-        <button
-          onClick={() => { setShowCreateModal(true); setCreateError(''); }}
-          style={{ background: '#c084fc', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, flexShrink: 0 }}
-        >
-          <Plus size={20} /> Tạo Task Mới
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+          <button onClick={openErpModal}
+            style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+            <Download size={18} /> Import từ Lệnh SX
+          </button>
+          <button onClick={() => { setShowCreateModal(true); setCreateError(''); }}
+            style={{ background: '#c084fc', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 20px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
+            <Plus size={20} /> Tạo Task Mới
+          </button>
+        </div>
       </div>
 
       {/* Quick Create Modal */}
@@ -277,6 +321,81 @@ export default function ManagerKanbanBoard() {
           </div>
         ))}
       </div>
+
+      {/* ERP Import Modal */}
+      {showErpModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: '#111118', borderRadius: 20, padding: 28, width: '100%', maxWidth: 600, border: '1px solid rgba(255,255,255,0.08)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>📥 Import từ Lệnh Sản Xuất</h2>
+              <button onClick={() => setShowErpModal(false)} style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            {importMsg && (
+              <div style={{ background: importMsg.startsWith('❌') ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', color: importMsg.startsWith('❌') ? '#ef4444' : '#10b981', padding: '10px 14px', borderRadius: 10, marginBottom: 16, fontSize: 14 }}>
+                {importMsg}
+              </div>
+            )}
+
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {erpLoading ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
+                  <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 12px', display: 'block' }} />
+                  Đang tải lệnh sản xuất...
+                </div>
+              ) : erpOrders.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
+                  <Package size={40} color="#6b7280" style={{ margin: '0 auto 12px', display: 'block' }} />
+                  Không có lệnh sản xuất nào ở trạng thái RELEASED/IN_PROGRESS.
+                </div>
+              ) : erpOrders.map(order => (
+                <div key={order.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, marginBottom: 12, overflow: 'hidden' }}>
+                  <div onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                    style={{ padding: '14px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontWeight: 700, color: '#c084fc' }}>{order.code}</span>
+                      <span style={{ marginLeft: 12, fontSize: 13, color: '#9ca3af' }}>
+                        {order.workOrders.length} công đoạn · SL: {order.plannedQuantity}
+                        {order.importedCount > 0 && <span style={{ color: '#10b981', marginLeft: 8 }}>✅ {order.importedCount} đã import</span>}
+                      </span>
+                    </div>
+                    <span style={{ color: '#6b7280', fontSize: 13 }}>{expandedOrderId === order.id ? '▲' : '▼'}</span>
+                  </div>
+                  {expandedOrderId === order.id && (
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '8px 16px 14px' }}>
+                      {order.workOrders.map(wo => (
+                        <div key={wo.id} onClick={() => toggleWO(wo.id)}
+                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 4px', cursor: 'pointer', borderRadius: 8, background: selectedWOs.has(wo.id) ? 'rgba(192,132,252,0.08)' : 'transparent' }}>
+                          <div style={{ width: 20, height: 20, borderRadius: 4, border: `2px solid ${selectedWOs.has(wo.id) ? '#c084fc' : '#374151'}`, background: selectedWOs.has(wo.id) ? '#c084fc' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {selectedWOs.has(wo.id) && <Check size={12} color="white" />}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 14, fontWeight: 600 }}>{wo.sequence}. {wo.operation}</div>
+                            <div style={{ fontSize: 12, color: '#9ca3af' }}>
+                              Trạm: {WC_NAME[wo.workCenterId ?? 0] || 'Chưa xác định'} · SL: {wo.plannedQuantity}
+                            </div>
+                          </div>
+                          <span style={{ fontSize: 11, color: wo.status === 'COMPLETED' ? '#10b981' : '#fbbf24', fontWeight: 600 }}>{wo.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 13, color: '#9ca3af' }}>Đã chọn: <strong style={{ color: '#c084fc' }}>{selectedWOs.size}</strong> công đoạn</span>
+              <button onClick={handleImport} disabled={importing || selectedWOs.size === 0}
+                style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontWeight: 700, cursor: (importing || selectedWOs.size === 0) ? 'not-allowed' : 'pointer', opacity: (importing || selectedWOs.size === 0) ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                {importing ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Download size={18} />}
+                {importing ? 'Đang tạo...' : 'Tạo Tasks'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}`}</style>
     </div>
   );
