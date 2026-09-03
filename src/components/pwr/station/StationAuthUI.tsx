@@ -27,35 +27,49 @@ export default function StationAuthUI() {
   const handleAvatarUpload = async (file: File) => {
     if (!file) return;
     setAvatarUploading(true);
+    setAuthError('');
     try {
-      // Nén ảnh xuống tối đa 200KB + 300x300px bằng browser-image-compression
-      const { default: imageCompression } = await import('browser-image-compression');
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 0.2,
-        maxWidthOrHeight: 300,
-        useWebWorker: true,
-      });
+      let fileToUpload: File | Blob = file;
+
+      // HEIC/HEIF: Canvas API không decode được → bỏ qua compress, upload thẳng
+      const isHeic = file.type.includes('heic') || file.type.includes('heif');
+      if (!isHeic) {
+        // Nén ảnh JPG/PNG/WEBP xuống ≤200KB + ≤300px
+        // useWebWorker: false → tránh Safari Web Worker memory limit
+        const { default: imageCompression } = await import('browser-image-compression');
+        fileToUpload = await imageCompression(file, {
+          maxSizeMB: 0.2,
+          maxWidthOrHeight: 300,
+          useWebWorker: false,
+        });
+      }
 
       const formData = new FormData();
-      formData.append('avatar', compressed, compressed.name || 'avatar.jpg');
+      formData.append('avatar', fileToUpload, file.name || 'avatar.jpg');
 
       const res = await fetch('/api/pwr/auth/avatar', {
         method: 'POST',
         body: formData,
       });
-      const data = await res.json();
+
+      // Safe JSON parse — server có thể trả HTML lỗi thay vì JSON
+      let data: { avatarUrl?: string; error?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON response */ }
 
       if (res.ok && data.avatarUrl) {
         setAvatarUrl(data.avatarUrl);
       } else {
-        setAuthError(data.error || 'Không tải được ảnh');
+        setAuthError(data.error || `Lỗi HTTP ${res.status}. Vui lòng thử lại.`);
       }
     } catch (err) {
-      setAuthError('Lỗi khi tải ảnh. Vui lòng thử lại.');
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[Avatar upload]', msg);
+      setAuthError(`Lỗi: ${msg.substring(0, 80)}`);
     } finally {
       setAvatarUploading(false);
     }
   };
+
 
   const [authState, setAuthState] = useState<AuthState>('LOGIN');
   const [showPassword, setShowPassword] = useState(false);
@@ -612,42 +626,48 @@ export default function StationAuthUI() {
                   }}
                 />
 
-                {/* Hexagon Avatar — click để upload */}
+                {/* Hexagon Avatar — Double Layer Technique (iOS Safari safe, no CSS border) */}
+                {/* Outer: hexagon màu viền (xanh) = background của viền */}
                 <div
                   onClick={() => !avatarUploading && fileInputRef.current?.click()}
                   title="Nhấn để đổi ảnh đại diện"
                   style={{
-                    width: 100, height: 110,
+                    width: 104, height: 114,
                     clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: `2px solid ${colors.welcome}`,
+                    background: colors.welcome,
                     boxShadow: `0 0 30px ${colors.welcome}40`,
-                    fontSize: 32, fontWeight: 800, color: colors.welcome,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: avatarUploading ? 'wait' : 'pointer',
-                    position: 'relative', overflow: 'hidden',
-                    background: avatarUrl ? 'transparent' : '#111',
                   }}
                 >
-                  {avatarUploading ? (
-                    // Loading spinner khi đang upload
-                    <div style={{
-                      width: 36, height: 36, border: `3px solid ${colors.welcome}40`,
-                      borderTop: `3px solid ${colors.welcome}`,
-                      borderRadius: '50%',
-                      animation: 'spin 0.8s linear infinite',
-                    }} />
-                  ) : avatarUrl ? (
-                    // Hiển thị ảnh thật nếu đã upload
-                    <img
-                      src={avatarUrl}
-                      alt="Avatar"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    // Fallback initials
-                    userProfile?.name ? getInitials(userProfile.name) :
-                    (userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? 'AD' : '??'
-                  )}
+                  {/* Inner: hexagon nền tối, nhỏ hơn 2px = tạo viền giả */}
+                  <div style={{
+                    width: 100, height: 110,
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                    background: avatarUrl ? 'transparent' : '#111',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 32, fontWeight: 800, color: colors.welcome,
+                    overflow: 'hidden',
+                  }}>
+                    {avatarUploading ? (
+                      <div style={{
+                        width: 36, height: 36,
+                        border: `3px solid ${colors.welcome}40`,
+                        borderTop: `3px solid ${colors.welcome}`,
+                        borderRadius: '50%',
+                        animation: 'spin 0.8s linear infinite',
+                      }} />
+                    ) : avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Avatar"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      userProfile?.name ? getInitials(userProfile.name) :
+                      (userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? 'AD' : '??'
+                    )}
+                  </div>
                 </div>
 
                 {/* Camera icon overlay */}
