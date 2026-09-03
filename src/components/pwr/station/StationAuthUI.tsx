@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, User, Phone, CheckSquare, Square, Trophy, Gift, Award, Settings, ChevronRight, Eye, QrCode, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { signIn, useSession, getSession } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { QRCodeSVG } from 'qrcode.react';
 
 type AuthState = 'LOGIN' | 'REGISTER' | 'REGISTER_SUCCESS' | 'WELCOME' | 'FORGOT';
 
 export default function StationAuthUI() {
   const router = useRouter();
-  const { data: session, update } = useSession();
 
   const getInitials = (name: string) => {
     if (!name) return '??';
@@ -557,7 +556,7 @@ export default function StationAuthUI() {
                 XÁC NHẬN TỔ ĐỘI
               </div>
               <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 32, textAlign: 'center' }}>
-                Chào mừng trở lại,<br/>{userProfile?.name || session?.user?.name || 'Đang tải...'}!
+                Chào mừng trở lại,<br/>{userProfile?.name || userProfile?.name || 'Đang tải...'}!
               </div>
 
               {/* Dynamic Avatar & Level (Simulated Real Data) */}
