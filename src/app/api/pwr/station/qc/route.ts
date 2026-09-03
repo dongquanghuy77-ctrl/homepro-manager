@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
       await db.update(pwrTasks).set({
         qcStatus: "QC_FAILED",
         status: "TODO", // Cần làm lại
+        priority: "CRITICAL", // Ưu tiên cao nhất
         reworkCount: (task.reworkCount || 0) + 1,
         waitingQcSince: null
       } as any).where(eq(pwrTasks.id, taskId));

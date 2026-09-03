@@ -57,6 +57,8 @@ export async function GET(request: Request) {
     // Today's todo/in-progress
     const todayFocus = activeTasks.filter(t => t.status === 'IN_PROGRESS' || t.status === 'TODO');
 
+    const urgentTasks = activeTasks.filter(t => t.priority === 'CRITICAL');
+
     const stats = {
       total:      allTasks.filter(t => !TERMINAL_STATUSES.includes(t.status as any)).length,
       inProgress: activeTasks.filter(t => t.status === 'IN_PROGRESS').length,
@@ -74,6 +76,7 @@ export async function GET(request: Request) {
       overdueTasks,
       longWaitingTasks,
       workLogCountToday: todayLogs.filter(l => !l.isSystemLog).length,
+      urgentTasks,
     });
   } catch (error) {
     console.error('[GET /api/pwr/dashboard]', error);
