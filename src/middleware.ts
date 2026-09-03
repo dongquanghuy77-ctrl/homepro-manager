@@ -12,6 +12,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/favicon.ico') ||
     pathname === '/login' ||
     pathname.startsWith('/pwr/login') ||
+    pathname.startsWith('/pwr/station') ||  // Kiosk Station dùng NextAuth riêng
     pathname === '/demo' ||
     pathname === '/change-password' ||
     pathname.startsWith('/api')
