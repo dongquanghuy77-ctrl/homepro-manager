@@ -7,13 +7,22 @@ import webpush from "web-push";
 
 const SECRET = process.env.NEXTAUTH_SECRET || "fallback_secret_for_homepro_12345!@#";
 
-webpush.setVapidDetails(
-  "mailto:admin@homepro.vn",
-  process.env.NEXT_PUBLIC_VAPID_KEY || "",
-  process.env.VAPID_PRIVATE_KEY || ""
-);
+// Lazy initialize webpush to prevent Vercel build crash
+let isWebPushInitialized = false;
+function initWebPush() {
+  if (isWebPushInitialized) return;
+  const pubKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+  const privKey = process.env.VAPID_PRIVATE_KEY;
+  if (pubKey && privKey && pubKey.trim() !== "" && privKey.trim() !== "") {
+    webpush.setVapidDetails("mailto:admin@homepro.vn", pubKey, privKey);
+    isWebPushInitialized = true;
+  } else {
+    console.warn("VAPID keys missing, webpush notifications disabled.");
+  }
+}
 
 export async function POST(req: NextRequest) {
+  initWebPush();
   const token = await getToken({ req, secret: SECRET });
   if (!token?.id) return NextResponse.json({ error: "Chua dang nh?p" }, { status: 401 });
 
