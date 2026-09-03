@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import ManagerDashboardClient from "@/components/pwr/manager/ManagerDashboardClient";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "B?ng –i?u H‡nh Xu?ng - HomePro" };
+export const metadata: Metadata = { title: "B?ng ƒêi?u H√†nh Xu?ng - HomePro" };
 export const dynamic = "force-dynamic";
 
 export default async function ManagerDashboardPage() {

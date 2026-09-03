@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import WorkerManagementClient from "@/components/pwr/manager/WorkerManagementClient";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Qu?n lý Th? - HomePro" };
+export const metadata: Metadata = { title: "Qu?n lÃ½ Th? - HomePro" };
 export const dynamic = "force-dynamic";
 
 export default async function PwrWorkersPage() {

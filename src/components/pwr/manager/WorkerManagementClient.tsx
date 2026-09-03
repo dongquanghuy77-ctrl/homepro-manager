@@ -31,12 +31,12 @@ export default function WorkerManagementClient() {
   useEffect(() => { fetch_(); }, []);
 
   const handleCreate = async () => {
-    if (!form.name||!form.phone||!form.password) { setError('Nh?p d?y d?: TÍn, S–T, M?t kh?u'); return; }
+    if (!form.name||!form.phone||!form.password) { setError('Nh?p d?y d?: T√™n, SƒêT, M?t kh?u'); return; }
     setSaving(true); setError('');
     const r = await fetch('/api/pwr/workers', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) });
     const d = await r.json();
     if (!r.ok) { setError(d.error||'L?i'); setSaving(false); return; }
-    setSuccess('–„ t?o t‡i kho?n: ' + form.name);
+    setSuccess('ƒê√£ t?o t√†i kho?n: ' + form.name);
     setForm({ name:'', phone:'', password:'' }); setShowCreate(false); setSaving(false); fetch_();
   };
 
@@ -46,7 +46,7 @@ export default function WorkerManagementClient() {
     const r = await fetch('/api/pwr/workers/'+editWorker.id, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(editForm) });
     const d = await r.json();
     if (!r.ok) { setError(d.error||'L?i'); setSaving(false); return; }
-    setSuccess('–„ c?p nh?t'); setEditWorker(null); setSaving(false); fetch_();
+    setSuccess('ƒê√£ c?p nh?t'); setEditWorker(null); setSaving(false); fetch_();
   };
 
   const Input = ({ label, k, type='text', ph='' }: { label:string; k:string; type?:string; ph?:string }) => (
@@ -67,13 +67,13 @@ export default function WorkerManagementClient() {
           <button onClick={() => { setShowCreate(false); setEditWorker(null); setError(''); }} style={{ background:'none', border:'none', color:c.muted, cursor:'pointer' }}><X size={20}/></button>
         </div>
         {error && <div style={{ background:'rgba(239,68,68,0.1)', color:c.danger, padding:12, borderRadius:8, marginBottom:16, fontSize:14 }}>{error}</div>}
-        <Input label="H? v‡ tÍn *" k="name" ph="Nguy?n Van A" />
+        <Input label="H? v√† t√™n *" k="name" ph="Nguy?n Van A" />
         <Input label="S? di?n tho?i *" k="phone" type="tel" ph="0901234567" />
-        <Input label={editWorker ? "M?t kh?u m?i (d? tr?ng = khÙng d?i)" : "M?t kh?u *"} k={editWorker?"newPassword":"password"} type="password" ph="Õt nh?t 6 k˝ t?" />
+        <Input label={editWorker ? "M?t kh?u m?i (d? tr?ng = kh√¥ng d?i)" : "M?t kh?u *"} k={editWorker?"newPassword":"password"} type="password" ph="√çt nh?t 6 k√Ω t?" />
         <button onClick={onSave} disabled={saving}
           style={{ width:'100%', background:btnColor, color:'#fff', border:'none', borderRadius:12, padding:'14px 0', fontWeight:700, fontSize:16, cursor:saving?'wait':'pointer', opacity:saving?0.7:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
           {saving ? <Loader2 size={18} style={{ animation:'spin 1s linear infinite' }}/> : <Check size={18}/>}
-          {saving ? '–ang x? l˝...' : 'X·c nh?n'}
+          {saving ? 'ƒêang x? l√Ω...' : 'X√°c nh?n'}
         </button>
       </div>
     </div>
@@ -85,12 +85,12 @@ export default function WorkerManagementClient() {
 
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:32 }}>
         <div>
-          <h1 style={{ fontSize:32, fontWeight:800, margin:'0 0 8px 0', color:c.accent }}>?? Qu?n L˝ Th? Xu?ng</h1>
-          <p style={{ color:c.muted, margin:0 }}>T?o t‡i kho?n, theo dıi di?m s? v‡ hi?u su?t t?ng th?</p>
+          <h1 style={{ fontSize:32, fontWeight:800, margin:'0 0 8px 0', color:c.accent }}>?? Qu?n L√Ω Th? Xu?ng</h1>
+          <p style={{ color:c.muted, margin:0 }}>T?o t√†i kho?n, theo d√µi di?m s? v√† hi?u su?t t?ng th?</p>
         </div>
         <button onClick={() => { setShowCreate(true); setError(''); }}
           style={{ background:c.accent, color:'#fff', border:'none', borderRadius:12, padding:'12px 24px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:8, fontSize:15 }}>
-          <Plus size={20}/> ThÍm Th? M?i
+          <Plus size={20}/> Th√™m Th? M?i
         </button>
       </div>
 
@@ -104,8 +104,8 @@ export default function WorkerManagementClient() {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:32 }}>
         {[
           { label:'T?ng th?', value:workers.length, color:c.blue },
-          { label:'–„ ho‡n th‡nh task', value:workers.filter(w=>(w.tasksCompleted||0)>0).length, color:c.success },
-          { label:'T?ng XP to‡n xu?ng', value:workers.reduce((s,w)=>s+(w.totalPoints||0),0).toLocaleString(), color:'#fbbf24' },
+          { label:'ƒê√£ ho√†n th√†nh task', value:workers.filter(w=>(w.tasksCompleted||0)>0).length, color:c.success },
+          { label:'T?ng XP to√†n xu?ng', value:workers.reduce((s,w)=>s+(w.totalPoints||0),0).toLocaleString(), color:'#fbbf24' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ background:c.card, border:'1px solid '+c.border, borderRadius:16, padding:20 }}>
             <div style={{ fontSize:12, color:c.muted, marginBottom:4 }}>{label}</div>
@@ -117,13 +117,13 @@ export default function WorkerManagementClient() {
       {loading ? (
         <div style={{ textAlign:'center', padding:60, color:c.muted }}>
           <Loader2 size={40} style={{ animation:'spin 1s linear infinite', margin:'0 auto 16px', display:'block' }}/>
-          –ang t?i...
+          ƒêang t?i...
         </div>
       ) : workers.length === 0 ? (
         <div style={{ textAlign:'center', padding:60, color:c.muted, background:c.card, borderRadius:16, border:'1px solid '+c.border }}>
           <Users size={48} color={c.accent} style={{ margin:'0 auto 16px', display:'block' }}/>
-          <p style={{ fontSize:18, fontWeight:600, color:'#fff' }}>Chua cÛ th? n‡o</p>
-          <p>Nh?n "ThÍm Th? M?i" d? b?t d?u</p>
+          <p style={{ fontSize:18, fontWeight:600, color:'#fff' }}>Chua c√≥ th? n√†o</p>
+          <p>Nh?n "Th√™m Th? M?i" d? b?t d?u</p>
         </div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
@@ -134,7 +134,7 @@ export default function WorkerManagementClient() {
               </div>
               <div style={{ flex:1 }}>
                 <div style={{ fontWeight:700, fontSize:16 }}>{w.name}</div>
-                <div style={{ color:c.muted, fontSize:13 }}>?? {w.phone||'ó'}</div>
+                <div style={{ color:c.muted, fontSize:13 }}>?? {w.phone||'¬ó'}</div>
               </div>
               <div style={{ display:'flex', gap:24, alignItems:'center' }}>
                 <div style={{ textAlign:'center' }}>
@@ -159,7 +159,7 @@ export default function WorkerManagementClient() {
         </div>
       )}
 
-      {showCreate && <Modal title="? ThÍm Th? M?i" onSave={handleCreate} btnColor={c.accent}/>}
+      {showCreate && <Modal title="? Th√™m Th? M?i" onSave={handleCreate} btnColor={c.accent}/>}
       {editWorker && <Modal title={'?? S?a: ' + editWorker.name} onSave={handleEdit} btnColor={c.blue}/>}
     </div>
   );
