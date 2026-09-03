@@ -67,13 +67,31 @@ export async function PATCH(req: NextRequest) {
   try {
     const now = new Date();
 
-    // 1. Mark task DONE
+    // 1. Fetch task to check sourceRef
+    const [task] = await db.select().from(pwrTasks).where(eq(pwrTasks.id, taskId));
+    if (!task) return NextResponse.json({ error: 'Không tìm thấy task' }, { status: 404 });
+
+    // 2. Mark task DONE
     await db.update(pwrTasks).set({
       status: 'DONE',
       completedAt: now,
       completedBy: userId,
       quantityDone,
     }).where(eq(pwrTasks.id, taskId));
+
+    // 3. ERP Bridge: Update work_order if task came from ERP
+    if (task.sourceRef && task.sourceRef.startsWith('WO-')) {
+      const woId = parseInt(task.sourceRef.split('-')[1]);
+      if (!isNaN(woId)) {
+        await db.execute(sql`
+          UPDATE work_orders 
+          SET completed_quantity = completed_quantity + ${quantityDone},
+              status = CASE WHEN completed_quantity + ${quantityDone} >= planned_quantity THEN 'COMPLETED' ELSE 'IN_PROGRESS' END,
+              updated_at = NOW()
+          WHERE id = ${woId}
+        `);
+      }
+    }
 
     // 2. Ghi work log
     await db.insert(pwrWorkLogs).values({

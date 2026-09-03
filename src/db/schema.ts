@@ -53,8 +53,9 @@ export const users = pgTable('users', {
   //   Công thức: basic_salary / 26 / 8 = đơn giá 1 giờ làm thêm
   officialSalary: numeric('official_salary', { precision: 20, scale: 2, mode: 'number' }).default(0),  // VND/tháng
   basicSalary:    numeric('basic_salary', { precision: 20, scale: 2, mode: 'number' }).default(0),     // VND/tháng
-  // ── PWR Avatar ──────────────────────────────────────────────────
+  // ── PWR Avatar & Push ──────────────────────────────────────────
   avatarUrl: text('avatar_url'),                         // URL ảnh đại diện (Vercel Blob hoặc data URI)
+  pushSubscription: jsonb('push_subscription'),          // Lưu thông tin Web Push API
   // ─────────────────────────────────────────────────────────────
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

@@ -6,6 +6,8 @@ import LayoutWrapper from '@/components/layout/LayoutWrapper';
 export const metadata: Metadata = {
   title: 'HomePro Manager — Quản lý dự án nội thất',
   description: 'Phần mềm quản lý dự án nội thất HomePro — theo dõi tiến độ, công việc, deadline và nhân sự.',
+  manifest: '/manifest.json',
+  themeColor: '#0a0a0f',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
