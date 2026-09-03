@@ -6,6 +6,8 @@ import { isNull, sql, desc, gte, and, eq, isNotNull } from 'drizzle-orm';
 
 const MANAGER_ROLES = ['ADMIN', 'MANAGER', 'HR'];
 
+import { pwrScrapRequests } from '@/db/schema';
+
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(req, MANAGER_ROLES);
   if (auth.error) return auth.error;
@@ -21,7 +23,7 @@ export async function GET(req: NextRequest) {
       -7, 0, 0, 0  // midnight VN = 17:00 prev UTC
     ));
 
-    // 1. T?ng task theo tr?m (aggregate toàn b?, không filter userId)
+    // 1. T?ng task theo tr?m (aggregate toï¿½n b?, khï¿½ng filter userId)
     const stationStats = await db.execute(sql`
       SELECT
         COALESCE(station_team, 'INBOX') AS station,
@@ -33,7 +35,7 @@ export async function GET(req: NextRequest) {
       ORDER BY station
     `);
 
-    // 2. Worker active hôm nay (có ít nh?t 1 task done hôm nay)
+    // 2. Worker active hï¿½m nay (cï¿½ ï¿½t nh?t 1 task done hï¿½m nay)
     const activeWorkers = await db.execute(sql`
       SELECT DISTINCT u.id, u.name, u.phone,
         COUNT(t.id) FILTER (WHERE t.status = 'DONE') AS tasks_done_today
@@ -45,7 +47,7 @@ export async function GET(req: NextRequest) {
       ORDER BY tasks_done_today DESC
     `);
 
-    // 3. T?ng task done hôm nay
+    // 3. T?ng task done hï¿½m nay
     const doneTodayResult = await db.execute(sql`
       SELECT COUNT(*) AS count FROM pwr_tasks
       WHERE status = 'DONE' AND completed_at >= ${dayStartUTC} AND deleted_at IS NULL
@@ -59,7 +61,7 @@ export async function GET(req: NextRequest) {
     `);
     const totalPending = parseInt((pendingResult.rows?.[0] as any)?.count ?? '0');
 
-    // 5. Defects hôm nay
+    // 5. Defects hï¿½m nay
     const defectsResult = await db.execute(sql`
       SELECT COUNT(*) AS count FROM pwr_work_logs
       WHERE log_type = 'ISSUE_LOG' AND created_at >= ${dayStartUTC}
@@ -84,7 +86,20 @@ export async function GET(req: NextRequest) {
       ? Math.round((doneToday / (doneToday + totalPending)) * 100)
       : doneToday > 0 ? 100 : 0;
 
+    const scrapRequests = await db
+      .select({
+        id: pwrScrapRequests.id,
+        taskId: pwrScrapRequests.taskId,
+        itemsRequested: pwrScrapRequests.itemsRequested,
+        reason: pwrScrapRequests.reason,
+        status: pwrScrapRequests.status,
+        createdAt: pwrScrapRequests.createdAt,
+      })
+      .from(pwrScrapRequests)
+      .where(eq(pwrScrapRequests.status, 'PENDING'));
+
     return NextResponse.json({
+      scrapRequests,
       stationStats: stationStats.rows || stationStats,
       activeWorkers: activeWorkers.rows || activeWorkers,
       activeWorkerCount: (activeWorkers.rows || activeWorkers).length,

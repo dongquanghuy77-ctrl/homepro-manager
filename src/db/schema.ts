@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
+﻿import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
 
 // ============================================================
@@ -2301,7 +2301,10 @@ export const pwrTasks = pgTable('pwr_tasks', {
   stationTeam:   text('station_team'),             // 'CNC' | 'DAN_CANH' | 'KHOAN_CAM' | null
   completedBy:   integer('completed_by').references(() => users.id),
   quantityDone:  integer('quantity_done').default(0),
-  sourceRef:     text('source_ref'),               // ERP bridge: 'WO-{workOrderId}'
+  sourceRef:     text('source_ref'),
+  qcStatus:      text('qc_status'),
+  waitingQcSince:timestamp('waiting_qc_since'),
+  reworkCount:   integer('rework_count').notNull().default(0),
   deletedAt:     timestamp('deleted_at'),
   waitingFor:    text('waiting_for'),
   assignedTo:    text('assigned_to'),
@@ -2318,6 +2321,27 @@ export const pwrTasks = pgTable('pwr_tasks', {
   projectId:         integer('project_id'),  // FK to pwr_projects.id (enforced at DB level)
   createdAt:         timestamp('created_at').defaultNow(),
   updatedAt:         timestamp('updated_at').defaultNow(),
+});
+
+export const pwrQcLogs = pgTable('pwr_qc_logs', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  qcBy: integer('qc_by').notNull().references(() => users.id),
+  status: text('status').notNull(),
+  reason: text('reason'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const pwrScrapRequests = pgTable('pwr_scrap_requests', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  requestedBy: integer('requested_by').notNull().references(() => users.id),
+  approvedBy: integer('approved_by').references(() => users.id),
+  status: text('status').notNull().default('PENDING'),
+  itemsRequested: jsonb('items_requested'),
+  reason: text('reason'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 export type PwrTask    = typeof pwrTasks.$inferSelect;

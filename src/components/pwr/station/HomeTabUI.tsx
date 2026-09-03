@@ -73,6 +73,7 @@ export function HomeTabUI({ userName }: { userName: string }) {
       </div>
 
       <div className="glass-card" style={{ padding: 24, marginBottom: 24, position: "relative", overflow: "hidden" }}>
+        <button onClick={() => window.location.href = '/pwr/station/qc'} style={{ position: 'absolute', top: 20, right: 20, zIndex: 2, background: 'rgba(52,211,153,0.1)', color: '#34d399', border: '1px solid rgba(52,211,153,0.3)', padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Mở Kiosk QC</button>
         <div style={{ position: "relative", zIndex: 1 }}>
           <h3 style={{ margin: "0 0 16px 0", fontSize: 15, color: "#9ca3af", display: "flex", alignItems: "center", gap: 6 }}>
             <TrendingUp size={16} /> Tiến độ hôm nay

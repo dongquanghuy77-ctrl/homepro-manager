@@ -71,16 +71,22 @@ export async function PATCH(req: NextRequest) {
     const [task] = await db.select().from(pwrTasks).where(eq(pwrTasks.id, taskId));
     if (!task) return NextResponse.json({ error: 'Không tìm thấy task' }, { status: 404 });
 
-    // 2. Mark task DONE
+        const isEndOfLine = task.stationTeam === 'DONG_GOI';
+    const nextStatus = isEndOfLine ? 'DONE' : 'DONE';
+    const nextQcStatus = isEndOfLine ? 'WAITING_QC' : 'QC_PASSED';
+    
+    // 2. Cập nhật task
     await db.update(pwrTasks).set({
-      status: 'DONE',
-      completedAt: now,
+      status: nextStatus,
+      qcStatus: nextQcStatus,
+      waitingQcSince: isEndOfLine ? now : null,
+      completedAt: isEndOfLine ? null : now, // Chưa hoàn thành thực sự nếu chờ QC
       completedBy: userId,
       quantityDone,
     }).where(eq(pwrTasks.id, taskId));
 
-    // 3. ERP Bridge: Update work_order if task came from ERP
-    if (task.sourceRef && task.sourceRef.startsWith('WO-')) {
+    // 3. ERP Bridge: Chỉ update nếu không phải chờ QC (hoặc đã passed)
+    if (!isEndOfLine && task.sourceRef && task.sourceRef.startsWith('WO-')) {
       const woId = parseInt(task.sourceRef.split('-')[1]);
       if (!isNaN(woId)) {
         await db.execute(sql`
