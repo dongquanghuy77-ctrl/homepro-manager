@@ -265,7 +265,7 @@ export default function MobileStationClient() {
                 </div>
                 
                 <div style={{ flex: 1, paddingLeft: 16 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ CNC {userStationRole === 'CNC' && <span style={{ fontSize: 10, background: '#a855f7', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ CNC {userStationRole === 'CNC' && <span style={{ fontSize: 10, background: '#a855f7', padding: '2px 6px', borderRadius: 4, marginLeft: 8, whiteSpace: 'nowrap', display: 'inline-block' }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Cắt ván, soi rãnh, đánh mòi</div>
                   
                 </div>
@@ -286,7 +286,7 @@ export default function MobileStationClient() {
                   </div>
                 </div>
                 <div style={{ flex: 1, paddingLeft: 16 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Dán Cạnh {userStationRole === 'DAN_CANH' && <span style={{ fontSize: 10, background: '#10b981', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Dán Cạnh {userStationRole === 'DAN_CANH' && <span style={{ fontSize: 10, background: '#10b981', padding: '2px 6px', borderRadius: 4, marginLeft: 8, whiteSpace: 'nowrap', display: 'inline-block' }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Dán nẹp thẳng, vát, acrylic</div>
                   
                 </div>
@@ -307,7 +307,7 @@ export default function MobileStationClient() {
                   </div>
                 </div>
                 <div style={{ flex: 1, paddingLeft: 16 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Khoan Cam {userStationRole === 'KHOAN_CAM' && <span style={{ fontSize: 10, background: '#3b82f6', padding: '2px 6px', borderRadius: 4, marginLeft: 8 }}>TRẠM CỦA BẠN</span>}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Tổ Khoan Cam {userStationRole === 'KHOAN_CAM' && <span style={{ fontSize: 10, background: '#3b82f6', padding: '2px 6px', borderRadius: 4, marginLeft: 8, whiteSpace: 'nowrap', display: 'inline-block' }}>TRẠM CỦA BẠN</span>}</div>
                   <div style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Khoan chốt, bản lề, ray trượt</div>
                   
                 </div>

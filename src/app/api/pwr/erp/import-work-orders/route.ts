@@ -29,10 +29,10 @@ export async function POST(req: NextRequest) {
     const { workOrderIds, productionOrderCode, priority = "MEDIUM" } = body;
 
     if (!workOrderIds?.length) {
-      return NextResponse.json({ error: "Ch?n Ìt nh?t 1 cÙng do?n" }, { status: 400 });
+      return NextResponse.json({ error: "Ch?n √≠t nh?t 1 c√¥ng do?n" }, { status: 400 });
     }
 
-    // L?y thÙng tin work orders du?c ch?n
+    // L?y th√¥ng tin work orders du?c ch?n
     const wos = await db.select().from(workOrders).where(inArray(workOrders.id, workOrderIds));
 
     const created: number[] = [];
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     for (const wo of wos) {
       const sourceRef = `WO-${wo.id}`;
 
-      // Check tr˘ng
+      // Check tr√πng
       const existing = await db.execute(sql`SELECT id FROM pwr_tasks WHERE source_ref = ${sourceRef} AND deleted_at IS NULL`);
       if ((existing.rows?.length ?? 0) > 0) { skipped.push(wo.id); continue; }
 
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       success: true,
       created: created.length,
       skipped: skipped.length,
-      message: `–„ t?o ${created.length} task${skipped.length > 0 ? `, b? qua ${skipped.length} (d„ import tru?c dÛ)` : ""}`
+      message: `ƒê√£ t?o ${created.length} task${skipped.length > 0 ? `, b? qua ${skipped.length} (d√£ import tru?c d√≥)` : ""}`
     });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

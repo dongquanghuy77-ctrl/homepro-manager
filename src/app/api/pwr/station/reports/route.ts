@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const userId = parseInt(token.id as string);
 
   try {
-    // 7 ng‡y g?n nh?t
+    // 7 ng√†y g?n nh?t
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
 
     // Tasks completed by this worker in last 7 days

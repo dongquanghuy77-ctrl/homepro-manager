@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
 
     try {
       await webpush.sendNotification(subscription, JSON.stringify({
-        title: "–„ b?t thÙng b·o",
-        body: "B?n s? nh?n du?c thÙng b·o khi cÛ cÙng vi?c m?i du?c giao.",
+        title: "ƒê√£ b?t th√¥ng b√°o",
+        body: "B?n s? nh?n du?c th√¥ng b√°o khi c√≥ c√¥ng vi?c m?i du?c giao.",
         icon: "/icon-192x192.png",
       }));
     } catch (pushErr) {}

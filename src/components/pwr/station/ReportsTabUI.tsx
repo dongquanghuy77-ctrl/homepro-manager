@@ -31,7 +31,7 @@ export function ReportsTabUI() {
   }, []);
 
   const stationName: Record<string, string> = {
-    CNC: "M·y CNC", DAN_CANH: "D·n C?nh", KHOAN_CAM: "Khoan Cam", DONG_GOI: "–Ûng GÛi",
+    CNC: "M√°y CNC", DAN_CANH: "D√°n C?nh", KHOAN_CAM: "Khoan Cam", DONG_GOI: "ƒê√≥ng G√≥i",
   };
 
   return (
@@ -42,8 +42,8 @@ export function ReportsTabUI() {
         <div style={{ width: 64, height: 64, margin: "0 auto 16px", borderRadius: 20, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Activity size={32} color="#10b981" />
         </div>
-        <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px 0" }}>B·o c·o Nang su?t</h2>
-        <p style={{ color: "#9ca3af", fontSize: 14, margin: 0 }}>D? li?u th?c t? 7 ng‡y g?n nh?t</p>
+        <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px 0" }}>B√°o c√°o Nang su?t</h2>
+        <p style={{ color: "#9ca3af", fontSize: 14, margin: 0 }}>D? li?u th?c t? 7 ng√†y g?n nh?t</p>
       </div>
 
       {/* Stats cards */}
@@ -63,7 +63,7 @@ export function ReportsTabUI() {
 
       {/* Chart */}
       <div className="glass-card" style={{ padding: "24px 16px", marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 24 }}>S?n lu?ng ho‡n th‡nh (task/ng‡y)</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 24 }}>S?n lu?ng ho√†n th√†nh (task/ng√†y)</h3>
         {loading ? (
           <div style={{ textAlign: "center", height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af" }}>
             <Loader2 size={32} style={{ animation: "spin 1s linear infinite" }} />
@@ -78,7 +78,7 @@ export function ReportsTabUI() {
                   <Tooltip
                     cursor={{ fill: "rgba(255,255,255,0.05)" }}
                     contentStyle={{ background: "#1f2937", border: "none", borderRadius: 8, color: "#fff" }}
-                    formatter={(v: any) => [v + " task", "Ho‡n th‡nh"]}
+                    formatter={(v: any) => [v + " task", "Ho√†n th√†nh"]}
                   />
                   <Bar dataKey="sp" fill="#34d399" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -90,16 +90,16 @@ export function ReportsTabUI() {
 
       {/* Recent tasks */}
       <div className="glass-card" style={{ padding: 16 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>L?ch s? g?n d‚y</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>L?ch s? g?n d√¢y</h3>
         {loading ? (
           <div style={{ textAlign: "center", padding: 24, color: "#9ca3af" }}>
             <Loader2 size={24} style={{ animation: "spin 1s linear infinite", display: "block", margin: "0 auto 8px" }} />
-            –ang t?i...
+            ƒêang t?i...
           </div>
         ) : recentTasks.length === 0 ? (
           <div style={{ textAlign: "center", padding: 24, color: "#9ca3af" }}>
             <CheckCircle2 size={32} style={{ margin: "0 auto 8px", display: "block" }} color="#10b981" />
-            Chua cÛ task n‡o du?c ho‡n th‡nh. B?t d?u l‡m vi?c d? cÛ d? li?u!
+            Chua c√≥ task n√†o du?c ho√†n th√†nh. B?t d?u l√†m vi?c d? c√≥ d? li?u!
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -107,13 +107,13 @@ export function ReportsTabUI() {
               const completedDate = task.completedAt ? new Date(task.completedAt) : null;
               const timeStr = completedDate
                 ? completedDate.toLocaleString("vi-VN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })
-                : "ó";
+                : "¬ó";
               return (
                 <div key={task.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 12, borderBottom: i < recentTasks.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 600 }}>{task.title}</div>
                     <div style={{ fontSize: 12, color: "#9ca3af" }}>
-                      {timeStr} ∑ {stationName[task.stationTeam || ""] || task.stationTeam || "ó"}
+                      {timeStr} ¬∑ {stationName[task.stationTeam || ""] || task.stationTeam || "¬ó"}
                     </div>
                   </div>
                   <div style={{ color: "#34d399", fontWeight: 600, flexShrink: 0 }}>+15 XP</div>
