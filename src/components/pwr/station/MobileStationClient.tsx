@@ -319,7 +319,7 @@ export default function MobileStationClient() {
               </div>
             </>
           ) : activeTab === 'HOME' ? (
-          <HomeTabUI userName={usePwrStore.getState().userName || 'Thợ'} />
+          <HomeTabUI userName={usePwrStore.getState().userName || 'Thợ Xưởng'} station={userStationRole} />
         ) : activeTab === 'LEADERBOARD' ? (
           <LeaderboardTabUI />
         ) : activeTab === 'REPORTS' ? (
