@@ -38,7 +38,7 @@ export async function GET(
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
     const [task] = await db.select().from(pwrTasks)
-      .where(and(eq(pwrTasks.id, id), eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)));
+      .where(and(eq(pwrTasks.id, id), isNull(pwrTasks.deletedAt)));
 
     if (!task) return NextResponse.json({ error: 'Không tìm thấy công việc' }, { status: 404 });
 
@@ -70,7 +70,7 @@ export async function PATCH(
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
     const [existing] = await db.select().from(pwrTasks)
-      .where(and(eq(pwrTasks.id, id), eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)));
+      .where(and(eq(pwrTasks.id, id), isNull(pwrTasks.deletedAt)));
 
     if (!existing) return NextResponse.json({ error: 'Không tìm thấy công việc' }, { status: 404 });
 
@@ -342,7 +342,7 @@ export async function DELETE(
     if (isNaN(id)) return NextResponse.json({ error: 'ID không hợp lệ' }, { status: 400 });
 
     const [existing] = await db.select().from(pwrTasks)
-      .where(and(eq(pwrTasks.id, id), eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)));
+      .where(and(eq(pwrTasks.id, id), isNull(pwrTasks.deletedAt)));
 
     if (!existing) return NextResponse.json({ error: 'Không tìm thấy công việc' }, { status: 404 });
 
