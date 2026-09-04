@@ -133,30 +133,30 @@ export function StationWorkflowUI({ stationId, onBack }: { stationId: string; on
       `}} />
 
       <button onClick={onBack} style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", display: "flex", alignItems: "center", gap: 8, padding: "8px 16px", borderRadius: 20, marginBottom: 24, cursor: "pointer" }}>
-        <ArrowLeft size={20} /> Quay lai the chinh
+        <ArrowLeft size={20} /> Quay lại thẻ chính
       </button>
 
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: 8 }}>
-          <Play size={24} color="#34d399" fill="#34d399" /> {stationId}
+          <Play size={24} color="#34d399" fill="#34d399" /> {stationId === "CNC" ? "Máy CNC" : stationId === "DAN_CANH" ? "Máy Dán Cạnh" : stationId === "KHOAN_CAM" ? "Máy Khoan Cam" : stationId}
         </h2>
         <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
-          <span style={{ fontSize: 13, color: "#9ca3af" }}>Dang cho: <strong style={{ color: "#fff" }}>{pendingTasks}</strong></span>
-          <span style={{ fontSize: 13, color: "#9ca3af" }}>Hoan thanh: <strong style={{ color: "#10b981" }}>{doneTasks}</strong></span>
-          <button onClick={fetchTasks} style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", padding: 0 }}><RefreshCw size={14} /></button>
+          <span style={{ fontSize: 13, color: "#cbd5e1" }}>Đang chờ: <strong style={{ color: "#fff" }}>{pendingTasks}</strong></span>
+          <span style={{ fontSize: 13, color: "#cbd5e1" }}>Hoàn thành: <strong style={{ color: "#10b981" }}>{doneTasks}</strong></span>
+          <button onClick={fetchTasks} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", padding: 0 }}><RefreshCw size={14} /></button>
         </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: 40, color: "#9ca3af" }}>
+        <div style={{ textAlign: "center", padding: 40, color: "#cbd5e1" }}>
           <Loader2 size={32} style={{ animation: "spin 1s linear infinite", margin: "0 auto 12px", display: "block" }} />
-          <p>Dang tai cong viec...</p>
+          <p>Đang tải công việc...</p>
         </div>
       ) : tasks.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 40, color: "#9ca3af", background: "rgba(255,255,255,0.05)", borderRadius: 16 }}>
+        <div style={{ textAlign: "center", padding: 40, color: "#cbd5e1", background: "rgba(255,255,255,0.05)", borderRadius: 16 }}>
           <CheckCircle2 size={48} color="#10b981" style={{ margin: "0 auto 12px", display: "block" }} />
-          <p style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>Khong co cong viec nao!</p>
-          <p style={{ fontSize: 13 }}>Manager chua giao task cho tram nay.</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>Không có công việc nào!</p>
+          <p style={{ fontSize: 14, color: "#94a3b8" }}>Quản đốc chưa giao việc cho trạm này.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -167,19 +167,19 @@ export function StationWorkflowUI({ stationId, onBack }: { stationId: string; on
             return (
               <div key={task.id} className="glass-card" style={{ padding: 20, borderLeft: `4px solid ${borderColor}` }}>
                 {task.dueDate && (
-                  <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
-                    <Clock size={12} /> Han: {task.dueDate}
+                  <div style={{ fontSize: 12, color: "#cbd5e1", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Clock size={12} /> Hạn: {task.dueDate}
                   </div>
                 )}
                 <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4, textDecoration: isDone ? "line-through" : "none", color: isDone ? "#6b7280" : "#fff" }}>
                   {task.title}
                 </div>
-                {task.description && <div style={{ fontSize: 13, color: "#9ca3af", marginBottom: 12 }}>{task.description}</div>}
+                {task.description && <div style={{ fontSize: 13, color: "#cbd5e1", marginBottom: 12 }}>{task.description}</div>}
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: 13, color: task.priority === "HIGH" ? "#ef4444" : "#fbbf24", fontWeight: 600 }}>
-                    {task.priority === "HIGH" ? "??" : task.priority === "MEDIUM" ? "??" : "??"} {task.priority}
-                  </span>
+  {task.priority === "HIGH" ? "🔴 KHẨN CẤP" : task.priority === "MEDIUM" ? "🟡 ƯU TIÊN" : "🟢 BÌNH THƯỜNG"}
+</span>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     {task.status === "TODO" && (
                       <>
@@ -226,19 +226,19 @@ export function StationWorkflowUI({ stationId, onBack }: { stationId: string; on
       {isUploading && (
         <div style={{ marginTop: 24, padding: 16, background: "rgba(239,68,68,0.1)", border: "1px dashed #ef4444", borderRadius: 16, textAlign: "center" }}>
           <div className="spinner" style={{ margin: "0 auto 12px" }}></div>
-          <div style={{ color: "#ef4444", fontSize: 14, fontWeight: 600 }}>Dang nen anh...</div>
+          <div style={{ color: "#ef4444", fontSize: 14, fontWeight: 600 }}>Đang nén ảnh...</div>
         </div>
       )}
 
       {defectPhotoUrl && !isUploading && (
         <div style={{ marginTop: 24, background: "rgba(30,30,35,0.8)", border: "1px solid #374151", borderRadius: 16, overflow: "hidden" }}>
           <div style={{ padding: "12px 16px", borderBottom: "1px solid #374151", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ color: "#ef4444", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}><AlertTriangle size={16} /> Bao loi vat tu</span>
-            <button onClick={() => { setDefectPhotoUrl(null); setCompressedFileObj(null); }} style={{ background: "none", border: "none", color: "#9ca3af", cursor: "pointer" }}><X size={18} /></button>
+            <span style={{ color: "#ef4444", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}><AlertTriangle size={16} /> Báo lỗi vật tư</span>
+            <button onClick={() => { setDefectPhotoUrl(null); setCompressedFileObj(null); }} style={{ background: "none", border: "none", color: "#cbd5e1", cursor: "pointer" }}><X size={18} /></button>
           </div>
           <img src={defectPhotoUrl} alt="Loi" style={{ width: "100%", maxHeight: 200, objectFit: "cover" }} />
           <div style={{ padding: 16 }}>
-            <input type="text" placeholder="Nhap ghi chu loi..." value={defectNote} onChange={e => setDefectNote(e.target.value)}
+            <input type="text" placeholder="Nhập ghi chú lỗi..." value={defectNote} onChange={e => setDefectNote(e.target.value)}
               style={{ width: "100%", background: "rgba(0,0,0,0.5)", border: "1px solid #374151", borderRadius: 8, padding: "12px", color: "white", marginBottom: 12, boxSizing: "border-box" }} />
             <button onClick={handleSubmitDefect} disabled={isSubmittingError}
               style={{ width: "100%", background: "#ef4444", color: "white", border: "none", borderRadius: 8, padding: "12px 0", fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: isSubmittingError ? 0.7 : 1, cursor: "pointer" }}>
@@ -253,10 +253,10 @@ export function StationWorkflowUI({ stationId, onBack }: { stationId: string; on
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 1000 }}>
           <div style={{ background: "#111118", borderRadius: "20px 20px 0 0", padding: "28px 24px 40px", width: "100%", maxWidth: 480, border: "1px solid rgba(255,255,255,0.08)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>? Nhap So Luong Hoan Thanh</h3>
-              <button onClick={() => setQtyModal(null)} style={{ background: "none", border: "none", color: "#9ca3af", cursor: "pointer" }}><X size={20} /></button>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Nhập Số Lượng Hoàn Thành</h3>
+              <button onClick={() => setQtyModal(null)} style={{ background: "none", border: "none", color: "#cbd5e1", cursor: "pointer" }}><X size={20} /></button>
             </div>
-            <p style={{ color: "#9ca3af", fontSize: 13, margin: "0 0 24px 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{qtyModal.taskTitle}</p>
+            <p style={{ color: "#cbd5e1", fontSize: 13, margin: "0 0 24px 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{qtyModal.taskTitle}</p>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginBottom: 28 }}>
               <button onClick={() => setQtyValue(v => Math.max(1, v - 1))}
                 style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -266,7 +266,7 @@ export function StationWorkflowUI({ stationId, onBack }: { stationId: string; on
                 <input type="number" min={1} max={9999} value={qtyValue}
                   onChange={e => setQtyValue(Math.max(1, parseInt(e.target.value) || 1))}
                   style={{ fontSize: 52, fontWeight: 800, color: "#10b981", background: "none", border: "none", width: 120, textAlign: "center", outline: "none" }} />
-                <div style={{ fontSize: 13, color: "#9ca3af" }}>san pham</div>
+                <div style={{ fontSize: 13, color: "#cbd5e1" }}>sản phẩm</div>
               </div>
               <button onClick={() => setQtyValue(v => Math.min(9999, v + 1))}
                 style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -275,7 +275,7 @@ export function StationWorkflowUI({ stationId, onBack }: { stationId: string; on
             </div>
             <button onClick={handleConfirmDone}
               style={{ width: "100%", background: "linear-gradient(135deg,#10b981,#059669)", color: "#fff", border: "none", borderRadius: 14, padding: "16px 0", fontWeight: 800, fontSize: 17, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-              <CheckCircle2 size={20} /> Xac Nhan Hoan Thanh {qtyValue} san pham
+              <CheckCircle2 size={20} /> Xác Nhận Hoàn Thành {qtyValue} san pham
             </button>
           </div>
         </div>
