@@ -176,8 +176,16 @@ export default function MobileStationClient() {
     }
   `;
 
-  if (activeStation) {
-    return <StationWorkflowUI stationId={activeStation} onBack={() => setActiveStation(null)} />;
+    if (activeStation) {
+    return (
+      <div className="app-container" style={{ margin: '0 auto', overflowX: 'hidden' }}>
+        <style dangerouslySetInnerHTML={{ __html: STYLES }} />
+        <div className="app-overlay" style={{ background: 'linear-gradient(180deg, rgba(3,3,10,0.85) 0%, rgba(3,3,10,0.7) 40%, rgba(3,3,10,0.98) 100%)' }} />
+        <div className="content-wrapper" style={{ minHeight: '100vh', position: 'relative', zIndex: 10, padding: 20 }}>
+          <StationWorkflowUI stationId={activeStation} onBack={() => setActiveStation(null)} />
+        </div>
+      </div>
+    );
   }
 
   return (
