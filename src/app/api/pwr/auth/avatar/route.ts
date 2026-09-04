@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, pwrUserStats } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const runtime = 'nodejs';
@@ -46,8 +46,17 @@ export async function GET(req: NextRequest) {
     });
     if (!token?.id) return NextResponse.json({ avatarUrl: null });
     const userId = parseInt(token.id as string);
-    const result = await db.select({ avatarUrl: users.avatarUrl, name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
-    return NextResponse.json({ avatarUrl: result[0]?.avatarUrl || null, name: result[0]?.name || null });
+    
+    // Fetch user and stats
+    const [userRow] = await db.select({ avatarUrl: users.avatarUrl, name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
+    const [statsRow] = await db.select().from(pwrUserStats).where(eq(pwrUserStats.userId, userId)).limit(1);
+    
+    return NextResponse.json({ 
+      avatarUrl: userRow?.avatarUrl || null, 
+      name: userRow?.name || null,
+      totalPoints: statsRow?.totalPoints || 0,
+      currentLevel: statsRow?.currentLevel || 1
+    });
   } catch (error: any) {
     console.error('[Avatar GET]', error?.message);
     return NextResponse.json({ avatarUrl: null });

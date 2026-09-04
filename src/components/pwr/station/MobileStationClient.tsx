@@ -26,14 +26,16 @@ export default function MobileStationClient() {
       }
       // Lấy avatar URL từ DB
       try {
-        const res = await fetch('/api/pwr/auth/avatar');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.avatarUrl) {
-            usePwrStore.setState({ userAvatar: data.avatarUrl });
+          const res = await fetch('/api/pwr/auth/avatar');
+          if (res.ok) {
+            const data = await res.json();
+            usePwrStore.setState({ 
+              userAvatar: data.avatarUrl || null,
+              userPoints: data.totalPoints || 0,
+              userLevel: data.currentLevel || 1
+            });
           }
-        }
-      } catch (e) {
+        } catch (e) {
         // Không có avatar → giữ fallback initials
       }
     }
