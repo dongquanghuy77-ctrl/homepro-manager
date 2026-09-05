@@ -21,6 +21,8 @@ export default function StationAuthUI() {
   const [userProfile, setUserProfile] = useState<{ id: number; name: string; role: string; username: string; phone: string | null } | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [userPoints, setUserPoints] = useState(0);
+  const [userLevel, setUserLevel] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Upload avatar handler — nén ảnh → hash SHA-256 → POST lên API
@@ -82,7 +84,11 @@ export default function StationAuthUI() {
     if (authState === 'WELCOME' && !avatarUrl) {
       fetch('/api/pwr/auth/avatar')
         .then(r => r.ok ? r.json() : null)
-        .then(data => { if (data?.avatarUrl) setAvatarUrl(data.avatarUrl); })
+        .then(data => { 
+            if (data?.avatarUrl) setAvatarUrl(data.avatarUrl); 
+            if (data?.totalPoints !== undefined) setUserPoints(data.totalPoints);
+            if (data?.currentLevel !== undefined) setUserLevel(data.currentLevel);
+          })
         .catch(() => {});
     }
   }, [authState]);
@@ -709,7 +715,7 @@ export default function StationAuthUI() {
                   borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 20, fontWeight: 900, color: '#fff', boxShadow: `0 0 20px ${colors.welcome}`
                 }}>
-                  {(userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? '99' : '1'}
+                  {(userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420')) ? '99' : userLevel}
                 </div>
               </div>
 
@@ -718,17 +724,30 @@ export default function StationAuthUI() {
 
 
               {/* XP Bar (Simulated Real Data) */}
-              {(userProfile?.role !== 'PWR_ADMIN' && !((!userProfile) && phone === '0866903420')) && (
-                <div style={{ width: '100%', marginBottom: 32 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8, fontWeight: 700 }}>
-                    <span style={{ color: colors.welcome, letterSpacing: 2 }}>LEVEL</span>
-                    <span style={{ color: '#d1d5db' }}>0 / 100 XP</span>
+              
+              {(() => {
+                const isAdmin = userProfile?.role === 'PWR_ADMIN' || (!userProfile && phone === '0866903420');
+                if (isAdmin) return null;
+                
+                const baseXP = Math.pow(userLevel - 1, 2) * 100;
+                const nextCapXP = Math.pow(userLevel, 2) * 100;
+                const xpInLevel = userPoints - baseXP;
+                const capInLevel = nextCapXP - baseXP;
+                const progressPercent = Math.min(100, Math.max(0, (xpInLevel / capInLevel) * 100));
+
+                return (
+                  <div style={{ width: '100%', marginBottom: 32 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8, fontWeight: 700 }}>
+                      <span style={{ color: colors.welcome, letterSpacing: 2 }}>LEVEL {userLevel}</span>
+                      <span style={{ color: '#d1d5db' }}>{userPoints} / {nextCapXP} XP</span>
+                    </div>
+                    <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ width: `${progressPercent}%`, height: '100%', background: colors.welcome, boxShadow: `0 0 15px ${colors.welcome}`, transition: 'width 1s ease-out' }} />
+                    </div>
                   </div>
-                  <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
-                    <div style={{ width: '0%', height: '100%', background: colors.welcome, boxShadow: `0 0 15px ${colors.welcome}` }} />
-                  </div>
-                </div>
-              )}
+                );
+              })()}
+
 
               {/* Thông báo lỗi / thành công trong màn WELCOME */}
               {authError && (
