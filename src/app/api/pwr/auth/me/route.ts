@@ -1,3 +1,4 @@
+import { hash } from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { db } from '@/db';
@@ -49,7 +50,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ user });
 }
 
-import { hash } from 'bcryptjs';
 
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession();

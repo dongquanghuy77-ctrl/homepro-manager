@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { User, LogOut, Settings, ShieldAlert, X, CheckCircle2, Lock } from 'lucide-react';
 import { usePwrStore } from '@/lib/pwr/usePwrStore';
-import { signOut, useSession } from 'next-auth/react';
+import { signOut, getSession } from 'next-auth/react';
 
 export function ProfileTabUI() {
   const { userName, userAvatar, userLevel } = usePwrStore();
-  const { data: session } = useSession();
+  const [userId, setUserId] = useState('UNKNOWN');
   
   const [qrCode, setQrCode] = useState('INIT_CODE');
   const [timeLeft, setTimeLeft] = useState(30);
@@ -17,8 +17,8 @@ export function ProfileTabUI() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
   // Thuật toán sinh mã TOTP Động (Client-side)
-  const generateTOTP = () => {
-    const userId = session?.user?.id || 'UNKNOWN';
+  const generateTOTP = (uid) => {
+    const currentUserId = uid || userId || 'UNKNOWN';
     // Lấy chu kỳ 30 giây hiện tại (Time Window)
     const timeWindow = Math.floor(Date.now() / 30000);
     // Tính số giây còn lại của chu kỳ
@@ -26,19 +26,26 @@ export function ProfileTabUI() {
     setTimeLeft(remaining);
     
     // Đóng gói Payload và Base64
-    const payload = JSON.stringify({ u: userId, t: timeWindow, action: "STATION_AUTH" });
+    const payload = JSON.stringify({ u: currentUserId, t: timeWindow, action: "STATION_AUTH" });
     setQrCode(btoa(payload));
   };
 
   useEffect(() => {
-    if (session?.user) {
-      generateTOTP();
-      const timer = setInterval(() => {
-        generateTOTP();
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [session]);
+    let activeId = 'UNKNOWN';
+    getSession().then(session => {
+      if (session?.user) {
+        // NextAuth might not expose id by default, fallback to name/email
+        activeId = (session.user as any).id || session.user.name || session.user.email || 'UNKNOWN';
+        setUserId(activeId);
+        generateTOTP(activeId);
+      }
+    });
+    
+    const timer = setInterval(() => {
+      generateTOTP(activeId);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleUpdatePassword = async () => {
     if (!newPassword || newPassword.length < 4) {
