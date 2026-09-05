@@ -3,13 +3,13 @@ import { signOut } from "next-auth/react";
 import { LogOut, Sun, Coffee, CheckCircle2, TrendingUp, Bell, AlertCircle, Clock } from "lucide-react";
 import { usePwrStore } from "@/lib/pwr/usePwrStore";
 
-export function HomeTabUI({ userName }: { userName: string }) {
+export function HomeTabUI({ userName, station }: { userName: string, station?: string }) {
   const logout = () => signOut({ callbackUrl: "/pwr/station/login" });
   const [data, setData] = useState<any>(null);
   const [pushStatus, setPushStatus] = useState<"IDLE"|"SUBSCRIBED"|"UNSUPPORTED">("IDLE");
 
   useEffect(() => {
-    fetch("/api/pwr/dashboard").then(r => r.json()).then(d => setData(d));
+    fetch(`/api/pwr/dashboard${station ? '?station=' + station : ''}`).then(r => r.json()).then(d => setData(d));
     if ("serviceWorker" in navigator && "PushManager" in window) {
       navigator.serviceWorker.ready.then(reg => {
         reg.pushManager.getSubscription().then(sub => {

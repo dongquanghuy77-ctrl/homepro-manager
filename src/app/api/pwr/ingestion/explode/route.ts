@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
             description: `Lệnh xuất từ file Ingestion.\nTổng lô: ${totalVan} Tấm. Phần này: ${chunk.qty} Tấm.\nYêu cầu quét mã vạch sau khi xong.`,
             category: 'PRODUCTION',
             priority: 'HIGH',
-            status: cncStatus,
+            status: cncStatus, stationTeam: 'CNC',
             waitingFor: cncWaitingReason,
             projectRef: commonProjectRef,
             projectId: finalProjectId || null,
@@ -313,7 +313,7 @@ export async function POST(req: NextRequest) {
                userId,
                title: `[DÁN CẠNH] Dán ${chunk.qty} Mét nẹp - ${fileName.replace('.xlsx', '')}${partLabel}`,
                description: `Tổng lô: ${totalNep} Mét. Phần này: ${chunk.qty} Mét.`,
-               category: 'PRODUCTION', priority: 'HIGH', status: edgeStatus, waitingFor: edgeWaitingReason,
+               category: 'PRODUCTION', priority: 'HIGH', status: 'WAITING', stationTeam: 'DAN_CANH', waitingFor: 'Chờ CNC cắt xong',
                projectRef: commonProjectRef, projectId: finalProjectId || null, taskType: 'PROJECT_TASK',
                tags: ['EXPLOSION', 'DAN_CANH', batchTag, `⏰ Chờ CNC ${chunk.numChunks > 1 ? 'Phần ' + chunk.partIndex : '30p'}`],
                source: 'SYSTEM_EXPLOSION', startDate: chunk.dateStr, dueDate: chunk.dateStr
@@ -376,7 +376,9 @@ export async function POST(req: NextRequest) {
                userId,
                title: `[KHOAN CAM] Khoan ${chunk.qty} mũi/chi tiết - ${fileName.replace('.xlsx', '')}${partLabel}`,
                description: `Tổng lô: ${estimatedPhuKien}. Phần này: ${chunk.qty}.`,
-               category: 'PRODUCTION', priority: 'HIGH', status: 'TODO',
+               category: 'PRODUCTION', priority: 'HIGH', status: 'WAITING',
+               stationTeam: 'KHOAN_CAM',
+               waitingFor: 'Chờ dán cạnh xong',
                projectRef: commonProjectRef, projectId: finalProjectId || null, taskType: 'PROJECT_TASK',
                tags: ['EXPLOSION', 'KHOAN_CAM', batchTag, `⏰ Chờ Dán Cạnh ${chunk.numChunks > 1 ? 'Phần ' + chunk.partIndex : '1h'}`],
                source: 'SYSTEM_EXPLOSION', startDate: chunk.dateStr, dueDate: chunk.dateStr

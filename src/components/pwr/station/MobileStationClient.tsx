@@ -44,6 +44,30 @@ export default function MobileStationClient() {
 
 
   const router = useRouter();
+  const [notifications, setNotifications] = useState([]);
+  
+  useEffect(() => {
+    let team = 'CNC';
+    const savedTeam = localStorage.getItem('pwr_selected_team');
+    if (savedTeam === 'Tổ Cắt') team = 'CNC';
+    else if (savedTeam === 'Tổ Dán') team = 'DAN_CANH';
+    else if (savedTeam === 'Tổ Khoan') team = 'KHOAN_CAM';
+
+    const fetchNotifs = async () => {
+      try {
+        const res = await fetch(`/api/pwr/station/notifications?stationTeam=${team}`);
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data.notifications || []);
+        }
+      } catch (e) {}
+    };
+    
+    fetchNotifs();
+    const intv = setInterval(fetchNotifs, 15000); // 15s poll
+    return () => clearInterval(intv);
+  }, []);
+
   const [userStationRole, setUserStationRole] = useState<string>('CNC');
   useEffect(() => {
     const savedTeam = localStorage.getItem('pwr_selected_team');
@@ -80,7 +104,14 @@ export default function MobileStationClient() {
       position: relative;
     }
 
-    .app-overlay {
+    @keyframes swing {
+        0%, 100% { transform: rotate(0deg); }
+        20% { transform: rotate(15deg); }
+        40% { transform: rotate(-10deg); }
+        60% { transform: rotate(5deg); }
+        80% { transform: rotate(-5deg); }
+      }
+      .app-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(180deg, rgba(3,3,10,0.7) 0%, rgba(3,3,10,0.5) 40%, rgba(3,3,10,0.95) 100%);
       z-index: 0; pointer-events: none;

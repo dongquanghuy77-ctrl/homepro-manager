@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { db } from '@/db';
-import { pwrTasks, pwrWorkLogs, pwrUserStats } from '@/db/schema';
+import { pwrTasks, pwrWorkLogs, pwrUserStats, pwrTaskDependencies } from '@/db/schema';
 import { eq, and, inArray, isNull, sql } from 'drizzle-orm';
 
 export const runtime = 'nodejs';
@@ -35,7 +35,12 @@ export async function GET(req: NextRequest) {
         inArray(pwrTasks.status, ['TODO', 'IN_PROGRESS']),
         isNull(pwrTasks.deletedAt),
       ))
-      .orderBy(pwrTasks.priority);
+      .orderBy(sql`CASE 
+          WHEN ${pwrTasks.priority} = 'CRITICAL' THEN 1 
+          WHEN ${pwrTasks.priority} = 'HIGH' THEN 2 
+          WHEN ${pwrTasks.priority} = 'MEDIUM' THEN 3 
+          WHEN ${pwrTasks.priority} = 'LOW' THEN 4 
+          ELSE 5 END ASC, ${pwrTasks.createdAt} ASC`);
 
     return NextResponse.json({ tasks });
   } catch (e: any) {
@@ -121,6 +126,44 @@ export async function PATCH(req: NextRequest) {
         current_level = GREATEST(1, (pwr_user_stats.total_points + ${POINTS_PER_TASK}) / 100 + 1),
         updated_at = NOW()
     `);
+
+    
+    // 4. THUẬT TOÁN AUTO-UNLOCK DÂY CHUYỀN (ROUTING)
+    // Tìm các task phụ thuộc vào task vừa hoàn thành
+    const deps = await db.select().from(pwrTaskDependencies).where(eq(pwrTaskDependencies.dependsOnId, taskId));
+    if (deps.length > 0) {
+      for (const dep of deps) {
+        // Lấy task con
+        const [childTask] = await db.select().from(pwrTasks).where(eq(pwrTasks.id, dep.taskId));
+        if (childTask && childTask.status === 'WAITING') {
+          // Tự động chuyển status sang TODO, và gán đúng stationTeam dựa trên Tag hoặc Title
+          let autoStation = childTask.stationTeam;
+          if (!autoStation) {
+            if (childTask.title.includes('[DÁN CẠNH]')) autoStation = 'DAN_CANH';
+            else if (childTask.title.includes('[KHOAN CAM]')) autoStation = 'KHOAN_CAM';
+            else if (childTask.title.includes('[CNC]')) autoStation = 'CNC';
+          }
+          
+          await db.update(pwrTasks).set({
+            status: 'TODO',
+            waitingFor: null,
+            stationTeam: autoStation || null,
+            updatedAt: new Date()
+          }).where(eq(pwrTasks.id, childTask.id));
+
+          // Log unlock
+          await db.insert(pwrWorkLogs).values({
+            taskId: childTask.id,
+            userId: userId,
+            logType: 'SYSTEM_EVENT',
+            content: `Tự động mở khóa (Chuyển đến trạm ${autoStation}) do công đoạn trước (${task.title}) đã hoàn thành.`,
+            statusFrom: 'WAITING',
+            statusTo: 'TODO',
+            isSystemLog: true,
+          });
+        }
+      }
+    }
 
     return NextResponse.json({ success: true, pointsAwarded: POINTS_PER_TASK });
   } catch (e: any) {

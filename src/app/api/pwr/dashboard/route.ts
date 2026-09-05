@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { pwrTasks, pwrWorkLogs } from '@/db/schema';
-import { eq, and, isNull, gte, lte } from 'drizzle-orm';
+import { eq, and, isNull, gte, lte, or } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 import { getTodayVN, TERMINAL_STATUSES, WAITING_ALERT_DAYS } from '@/lib/pwr/constants';
 
@@ -22,8 +22,16 @@ export async function GET(request: Request) {
     const dayEndVN   = new Date(dayStartVN.getTime() + 24 * 60 * 60 * 1000 - 1);
 
     // All non-deleted tasks
+    const { searchParams } = new URL(request.url);
+    const station = searchParams.get('station');
+
+    // Routing Logic: Thợ (Kiosk) thấy task của Trạm (category) HOẶC Rework của cá nhân (userId + CRITICAL)
+    const baseCondition = station 
+      ? or(eq(pwrTasks.stationTeam, station), and(eq(pwrTasks.userId, session.id), eq(pwrTasks.priority, 'CRITICAL')))
+      : eq(pwrTasks.userId, session.id);
+
     const allTasks = await db.select().from(pwrTasks)
-      .where(and(eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)));
+      .where(and(baseCondition, isNull(pwrTasks.deletedAt)));
 
     // Today's work logs
     const todayLogs = await db.select().from(pwrWorkLogs)

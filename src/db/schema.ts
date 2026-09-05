@@ -2304,7 +2304,9 @@ export const pwrTasks = pgTable('pwr_tasks', {
   sourceRef:     text('source_ref'),
   qcStatus:      text('qc_status'),
   waitingQcSince:timestamp('waiting_qc_since'),
-  reworkCount:   integer('rework_count').notNull().default(0),
+      reworkCount:   integer('rework_count').notNull().default(0),
+    reworkRefId:   integer('rework_ref_id'),
+    defectBy:      integer('defect_by'),
   deletedAt:     timestamp('deleted_at'),
   waitingFor:    text('waiting_for'),
   assignedTo:    text('assigned_to'),
@@ -2588,3 +2590,32 @@ export const pwrStationUsers = pgTable('pwr_station_users', {
 export type PwrStationUser = typeof pwrStationUsers.$inferSelect;
 export type NewPwrStationUser = typeof pwrStationUsers.$inferInsert;
 
+
+// ============================================================
+// PWR V5 - NOTIFICATIONS & SCRAP LOGS (REWORK/RUSH ENGINE)
+// ============================================================
+export const pwrNotifications = pgTable('pwr_notifications', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }), // Có thể null nếu là broadcast cho trạm
+  stationTeam: text('station_team'), // Để gửi cho tất cả thợ trong trạm (ví dụ: 'CNC')
+  title: text('title').notNull(),
+  content: text('content'),
+  priority: text('priority').notNull().default('INFO'), // INFO, URGENT, CRITICAL
+  isRead: boolean('is_read').notNull().default(false),
+  relatedTaskId: integer('related_task_id'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+export type PwrNotification = typeof pwrNotifications.$inferSelect;
+export type NewPwrNotification = typeof pwrNotifications.$inferInsert;
+
+export const pwrScrapLogs = pgTable('pwr_scrap_logs', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').references(() => pwrTasks.id, { onDelete: 'cascade' }),
+  reporterId: integer('reporter_id').references(() => users.id),
+  materialId: integer('material_id'),
+  quantity: integer('quantity').notNull(),
+  reason: text('reason'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+export type PwrScrapLog = typeof pwrScrapLogs.$inferSelect;
+export type NewPwrScrapLog = typeof pwrScrapLogs.$inferInsert;

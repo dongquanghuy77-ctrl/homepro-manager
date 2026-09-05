@@ -21,10 +21,10 @@ export async function GET(request: Request) {
     const projectRef      = searchParams.get('projectRef');
     const stationDispatch = searchParams.get('stationDispatch'); // Manager dispatch view — hiển thị ALL tasks có thể dispatch
 
-    const conditions: any[] = [
-      eq(pwrTasks.userId, session.id),
-      isNull(pwrTasks.deletedAt),
-    ];
+    const conditions: any[] = [ isNull(pwrTasks.deletedAt) ];
+    if (stationDispatch !== 'true') {
+      conditions.push(eq(pwrTasks.userId, session.id));
+    }
     if (status)     conditions.push(eq(pwrTasks.status,     status));
     if (category)   conditions.push(eq(pwrTasks.category,   category));
     if (dueDate)    conditions.push(eq(pwrTasks.dueDate,    dueDate));
@@ -54,10 +54,11 @@ export async function GET(request: Request) {
       );
     }
 
-    const allNonDeleted = await db
-      .select()
-      .from(pwrTasks)
-      .where(and(eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt)));
+    const allNonDeleted = await db.select().from(pwrTasks).where(
+      stationDispatch === 'true' 
+        ? isNull(pwrTasks.deletedAt) 
+        : and(eq(pwrTasks.userId, session.id), isNull(pwrTasks.deletedAt))
+    );
 
     const stats = {
       total:      tasks.length,
