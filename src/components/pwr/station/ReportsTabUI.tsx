@@ -31,7 +31,7 @@ export function ReportsTabUI() {
   }, []);
 
   const stationName: Record<string, string> = {
-    CNC: "Máy CNC", DAN_CANH: "Dán C?nh", KHOAN_CAM: "Khoan Cam", DONG_GOI: "Đóng Gói",
+    CNC: "Máy CNC", DAN_CANH: "Dán Cạnh", KHOAN_CAM: "Khoan Cam", DONG_GOI: "Đóng Gói",
   };
 
   return (
@@ -42,14 +42,14 @@ export function ReportsTabUI() {
         <div style={{ width: 64, height: 64, margin: "0 auto 16px", borderRadius: 20, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Activity size={32} color="#10b981" />
         </div>
-        <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px 0" }}>Báo cáo Nang su?t</h2>
-        <p style={{ color: "#9ca3af", fontSize: 14, margin: 0 }}>D? li?u th?c t? 7 ngày g?n nh?t</p>
+        <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px 0" }}>Báo cáo Năng suất</h2>
+        <p style={{ color: "#9ca3af", fontSize: 14, margin: 0 }}>Dữ liệu thực tế 7 ngày gần nhất</p>
       </div>
 
       {/* Stats cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 24 }}>
         {[
-          { label: "T?ng XP", value: stats.totalPoints.toLocaleString(), color: "#fbbf24", icon: Star },
+          { label: "Tổng XP", value: stats.totalPoints.toLocaleString(), color: "#fbbf24", icon: Star },
           { label: "Level", value: "Lv." + stats.level, color: "#c084fc", icon: Trophy },
           { label: "Task Done", value: stats.tasksCompleted, color: "#10b981", icon: CheckCircle2 },
         ].map(({ label, value, color, icon: Icon }) => (
@@ -63,7 +63,7 @@ export function ReportsTabUI() {
 
       {/* Chart */}
       <div className="glass-card" style={{ padding: "24px 16px", marginBottom: 24 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 24 }}>S?n lu?ng hoàn thành (task/ngày)</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 24 }}>Sản lượng hoàn thành (task/ngày)</h3>
         {loading ? (
           <div style={{ textAlign: "center", height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af" }}>
             <Loader2 size={32} style={{ animation: "spin 1s linear infinite" }} />
@@ -76,7 +76,7 @@ export function ReportsTabUI() {
                   <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip
-                    cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                    cursor={false} 
                     contentStyle={{ background: "#1f2937", border: "none", borderRadius: 8, color: "#fff" }}
                     formatter={(v: any) => [v + " task", "Hoàn thành"]}
                   />
@@ -90,16 +90,16 @@ export function ReportsTabUI() {
 
       {/* Recent tasks */}
       <div className="glass-card" style={{ padding: 16 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>L?ch s? g?n dây</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Lịch sử gần đây</h3>
         {loading ? (
           <div style={{ textAlign: "center", padding: 24, color: "#9ca3af" }}>
             <Loader2 size={24} style={{ animation: "spin 1s linear infinite", display: "block", margin: "0 auto 8px" }} />
-            Đang t?i...
+            Đang tải...
           </div>
         ) : recentTasks.length === 0 ? (
           <div style={{ textAlign: "center", padding: 24, color: "#9ca3af" }}>
             <CheckCircle2 size={32} style={{ margin: "0 auto 8px", display: "block" }} color="#10b981" />
-            Chua có task nào du?c hoàn thành. B?t d?u làm vi?c d? có d? li?u!
+            Chưa có task nào được hoàn thành. Bắt đầu làm việc để có dữ liệu!
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -107,13 +107,13 @@ export function ReportsTabUI() {
               const completedDate = task.completedAt ? new Date(task.completedAt) : null;
               const timeStr = completedDate
                 ? completedDate.toLocaleString("vi-VN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })
-                : "";
+                : "—";
               return (
                 <div key={task.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 12, borderBottom: i < recentTasks.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 600 }}>{task.title}</div>
                     <div style={{ fontSize: 12, color: "#9ca3af" }}>
-                      {timeStr} · {stationName[task.stationTeam || ""] || task.stationTeam || ""}
+                      {timeStr} • {stationName[task.stationTeam || ""] || task.stationTeam || "—"}
                     </div>
                   </div>
                   <div style={{ color: "#34d399", fontWeight: 600, flexShrink: 0 }}>+15 XP</div>
