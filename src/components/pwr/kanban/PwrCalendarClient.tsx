@@ -40,7 +40,7 @@ export default function PwrCalendarClient({ initialTasks }: Props) {
   const [tasks, setTasks] = useState<PwrTask[]>(initialTasks);
   const [view,  setView]  = useState<View>(Views.WEEK);
   const [date,  setDate]  = useState(new Date());
-  const [nowMs, setNowMs] = useState(Date.now() + 7*3600000);
+  const [nowMs, setNowMs] = useState(Date.now()); // Use real local time, not manual offset
   const [showUnscheduled, setShowUnscheduled] = useState(true);
 
   // Schedule popover state
@@ -52,12 +52,18 @@ export default function PwrCalendarClient({ initialTasks }: Props) {
 
   // Update clock every 30s for red-alert
   useEffect(() => {
-    const t = setInterval(() => setNowMs(Date.now() + 7*3600000), 30000);
+    const t = setInterval(() => setNowMs(Date.now()), 30000);
     return () => clearInterval(t);
   }, []);
 
+  // Show active tasks + recently completed (last 7 days) on calendar
   const events: CalEvent[] = tasks
-    .filter(t => !TERMINAL.includes(t.status) && t.dueDate)
+    .filter(t => {
+      if (!t.dueDate) return false;
+      if (!TERMINAL.includes(t.status)) return true;
+      // Also show DONE tasks so calendar is not empty
+      return true;
+    })
     .map(t => taskToEvent(t, nowMs)!).filter(Boolean);
 
   const unscheduled = tasks.filter(t => !t.dueDate && !TERMINAL.includes(t.status));

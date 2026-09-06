@@ -43,7 +43,7 @@ export default function PwrListView({ tasks, onRefresh }: Props) {
   }
 
   async function deleteOne(id: number) {
-    if (!confirm("Xoa task nay? Co the khoi phuc trong 30 ngay.")) return;
+    if (!confirm("Xoá task nay? Co the khoi phuc trong 30 ngay.")) return;
     await fetch("/api/pwr/tasks?id=" + id + "&action=delete", { method: "DELETE" });
     onRefresh?.();
   }
@@ -55,23 +55,23 @@ export default function PwrListView({ tasks, onRefresh }: Props) {
     <div style={{ padding: "20px 24px", overflowX: "auto" }}>
       {selected.size > 0 && (
         <div style={{ marginBottom: 12, padding: "10px 16px", borderRadius: 10, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 13, color: "#a5b4fc", fontWeight: 600 }}>{selected.size} task dang chon</span>
+          <span style={{ fontSize: 13, color: "#a5b4fc", fontWeight: 600 }}>{selected.size} task đang chọn</span>
           <button onClick={() => requestAction("cancel")} disabled={isPending}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 8, border: "1px solid rgba(245,158,11,0.35)", background: "rgba(245,158,11,0.08)", color: "#f59e0b", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-            <XCircle size={14} /> Huy task
+            <XCircle size={14} /> Huỷ task
           </button>
           <button onClick={() => requestAction("delete")} disabled={isPending}
             style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 14px", borderRadius: 8, border: "1px solid rgba(239,68,68,0.35)", background: "rgba(239,68,68,0.08)", color: "#ef4444", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-            <Trash2 size={14} /> Xoa task
+            <Trash2 size={14} /> Xoá task
           </button>
-          <button onClick={() => setSelected(new Set())} style={{ marginLeft: "auto", fontSize: 11, color: "#475569", background: "none", border: "none", cursor: "pointer" }}>Bo chon</button>
+          <button onClick={() => setSelected(new Set())} style={{ marginLeft: "auto", fontSize: 11, color: "#475569", background: "none", border: "none", cursor: "pointer" }}>Bỏ chọn</button>
         </div>
       )}
       {confirmMsg && (
         <div style={{ marginBottom: 12, padding: "12px 16px", borderRadius: 10, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <span style={{ flex: 1, fontSize: 13, color: "#fca5a5" }}>⚠️ {confirmMsg}</span>
-          <button onClick={confirmAction} style={{ padding: "5px 16px", borderRadius: 8, background: "#ef4444", border: "none", color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Xac nhan</button>
-          <button onClick={() => { setConfirmMsg(null); setPendingAction(null); }} style={{ padding: "5px 16px", borderRadius: 8, background: "none", border: "1px solid rgba(255,255,255,0.1)", color: "#94a3b8", fontSize: 12, cursor: "pointer" }}>Huy bo</button>
+          <button onClick={confirmAction} style={{ padding: "5px 16px", borderRadius: 8, background: "#ef4444", border: "none", color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>Xác nhận</button>
+          <button onClick={() => { setConfirmMsg(null); setPendingAction(null); }} style={{ padding: "5px 16px", borderRadius: 8, background: "none", border: "1px solid rgba(255,255,255,0.1)", color: "#94a3b8", fontSize: 12, cursor: "pointer" }}>Huỷ bỏ</button>
         </div>
       )}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
@@ -82,7 +82,7 @@ export default function PwrListView({ tasks, onRefresh }: Props) {
                 {allSelected ? <CheckSquare size={15} color="#6366f1" /> : <Square size={15} />}
               </button>
             </th>
-            {["#", "Tieu de", "Du an", "Nguoi LH", "Deadline", "Uu tien", "Trang thai", ""].map(h => (
+            {["#", "Tiêu đề", "Dự án", "Tổ làm", "Hạn chót", "Ưu tiên", "Trạng thái", ""].map(h => (
               <th key={h} style={{ padding: "10px 12px", textAlign: "left", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: 11, letterSpacing: 0.5, whiteSpace: "nowrap" }}>{h}</th>
             ))}
           </tr>
@@ -124,7 +124,7 @@ export default function PwrListView({ tasks, onRefresh }: Props) {
                 <td style={{ padding: "12px" }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <Link href={"/pwr/tasks/" + task.id + "?from=list"} style={{ color: "#3b82f6", display: "flex", alignItems: "center" }}><ExternalLink size={14} /></Link>
-                    <button onClick={() => deleteOne(task.id)} title="Xoa task"
+                    <button onClick={() => deleteOne(task.id)} title="Xoá task"
                       style={{ background: "none", border: "none", cursor: "pointer", color: "#475569", display: "flex", alignItems: "center", padding: 0 }}
                       onMouseEnter={e => (e.currentTarget.style.color = "#ef4444")}
                       onMouseLeave={e => (e.currentTarget.style.color = "#475569")}>
@@ -137,7 +137,7 @@ export default function PwrListView({ tasks, onRefresh }: Props) {
           })}
         </tbody>
       </table>
-      {sorted.length === 0 && (<div style={{ textAlign: "center", padding: 60, color: "#475569" }}>Khong co cong viec nao</div>)}
+      {sorted.length === 0 && (<div style={{ textAlign: "center", padding: 60, color: "#475569" }}>Không có công việc nào</div>)}
     </div>
   );
 }
