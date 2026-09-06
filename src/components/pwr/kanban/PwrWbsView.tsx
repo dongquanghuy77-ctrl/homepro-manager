@@ -51,6 +51,8 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [checklistMap, setChecklistMap] = useState<Record<number, { total: number; done: number }>>({});
   const [showModal,    setShowModal]    = useState(false);
   const [showOpModal,  setShowOpModal]  = useState(false);
+  const [projectFilter, setProjectFilter] = useState<'ACTIVE'|'COMPLETED'|'ALL'>('ACTIVE');
+  const [sealPrompt, setSealPrompt] = useState<string | null>(null);
   const [toast, setToast]              = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [pendingIds,   setPendingIds]   = useState<Set<number>>(new Set());
 
@@ -194,6 +196,20 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     if (!projectsMap[p]) projectsMap[p] = [];
     projectsMap[p].push(t);
   });
+
+  // Smart Filter computed values (after projectsMap is fully built)
+  const filteredProjectKeys = Object.keys(projectsMap).filter(pn => {
+    const pt = projectsMap[pn];
+    const allDone = pt.length > 0 && pt.every((t) => ['DONE','CANCELLED'].includes(t.status));
+    if (projectFilter === 'ACTIVE') return !allDone;
+    if (projectFilter === 'COMPLETED') return allDone;
+    return true;
+  });
+  const completedCount = Object.keys(projectsMap).filter(pn => {
+    const pt = projectsMap[pn];
+    return pt.length > 0 && pt.every((t) => ['DONE','CANCELLED'].includes(t.status));
+  }).length;
+  const activeCount = Object.keys(projectsMap).length - completedCount;
 
   // ── Gate Health per project ─────────────────────────────────────────────
   // Based on overdue % — meaningful even without dependency data
