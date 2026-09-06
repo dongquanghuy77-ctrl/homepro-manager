@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FocusReport } from "@/lib/pwr/reporting";
 import type { PwrTask } from "@/db/schema";
 
@@ -48,7 +48,7 @@ function TaskRow({ task, highlight }: { task: PwrTask; highlight?: string }) {
         <span style={{ fontSize: 10, color: "#475569", flexShrink: 0 }}>
           {STATUS_LABEL[task.status] ?? task.status}
         </span>
-        <span style={{ color: "#334155", fontSize: 12 }}>→</span>
+        <span style={{ color: "#334155", fontSize: 12 }}>›</span>
       </div>
     </Link>
   );
@@ -69,7 +69,7 @@ function Section({ title, color, count, tasks, highlight, emptyText }: {
         <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0, boxShadow: `0 0 6px ${color}` }} />
         <span style={{ fontSize: 13, fontWeight: 700, color, flex: 1 }}>{title}</span>
         <span style={{ fontSize: 12, fontWeight: 700, color, background: `${color}20`, padding: "2px 9px", borderRadius: 20 }}>{count}</span>
-        <span style={{ color: "#475569", fontSize: 12 }}>{expanded ? "▲" : "▼"}</span>
+        <span style={{ color: "#475569", fontSize: 12 }}>{expanded ? "▾" : "▸"}</span>
       </div>
       {expanded && (
         tasks.length === 0
@@ -81,10 +81,28 @@ function Section({ title, color, count, tasks, highlight, emptyText }: {
 }
 
 export default function PwrFocusClient({ report }: { report: FocusReport }) {
-  const dayNames = ["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
-  const d = new Date(report.today + "T00:00:00+07:00");
-  const dayName = dayNames[d.getUTCDay()];
-  const dateLabel = `${dayName}, ${report.today.split("-").reverse().join("/")}`;
+  // FIX: Lấy ngày hiển thị từ trình duyệt (Client-side hydration) để tránh sai múi giờ UTC
+  const [dateLabel, setDateLabel] = useState(() => {
+    // SSR fallback: parse đúng GMT+7 bằng cách thêm offset thủ công
+    const dayNamesVN = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+    const d = new Date(report.today + "T00:00:00+07:00");
+    // getUTCDay() cho múi giờ UTC. Vì ta đã ép +07:00, ngày UTC = ngày VN
+    const dayName = dayNamesVN[d.getUTCDay()];
+    const [y, m, dd] = report.today.split("-");
+    return `${dayName}, ${dd}/${m}/${y}`;
+  });
+
+  useEffect(() => {
+    // Client-side override: lấy CHÍNH XÁC ngày giờ trên máy người dùng (GMT+7 Việt Nam)
+    const now = new Date();
+    const vnNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+    const dayNamesVN = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+    const dayName = dayNamesVN[vnNow.getDay()];
+    const dd = String(vnNow.getDate()).padStart(2, "0");
+    const mm = String(vnNow.getMonth() + 1).padStart(2, "0");
+    const yyyy = vnNow.getFullYear();
+    setDateLabel(`${dayName}, ${dd}/${mm}/${yyyy}`);
+  }, []);
 
   const urgentCount = report.overdue.length + report.dueToday.length;
   const healthColor = urgentCount === 0 ? "#10b981" : urgentCount <= 3 ? "#f59e0b" : "#ef4444";
@@ -124,7 +142,7 @@ export default function PwrFocusClient({ report }: { report: FocusReport }) {
         </div>
       </div>
 
-      {/* OVERDUE */}
+      {/* QUÁ HẠN */}
       <Section
         title="🔴 QUÁ HẠN — Xử lý ngay"
         color="#ef4444" count={report.overdue.length}
@@ -132,7 +150,7 @@ export default function PwrFocusClient({ report }: { report: FocusReport }) {
         emptyText="Không có task quá hạn — tốt lắm! 🎉"
       />
 
-      {/* DUE TODAY */}
+      {/* HÔM NAY */}
       <Section
         title="🟡 HÔM NAY — Phải xong trong ngày"
         color="#f59e0b" count={report.dueToday.length}
@@ -140,23 +158,23 @@ export default function PwrFocusClient({ report }: { report: FocusReport }) {
         emptyText="Không có task nào đến hạn hôm nay"
       />
 
-      {/* IN PROGRESS */}
+      {/* ĐANG LÀM */}
       <Section
-        title="⚙️ ĐANG LÀM — Việc đang chạy"
+        title="🟣 ĐANG LÀM — Việc đang chạy"
         color="#6366f1" count={report.active.length}
         tasks={report.active}
         emptyText="Chưa có việc nào được bắt đầu — hãy chuyển 1 task sang In Progress"
       />
 
-      {/* DUE TOMORROW */}
+      {/* NGÀY MAI */}
       <Section
-        title="📅 NGÀY MAI — Chuẩn bị trước"
+        title="🔵 NGÀY MAI — Chuẩn bị trước"
         color="#3b82f6" count={report.dueTomorrow.length}
         tasks={report.dueTomorrow}
         emptyText="Không có deadline ngày mai"
       />
 
-      {/* EQUIPMENT / CNC */}
+      {/* MÁY MÓC & SẢN XUẤT */}
       <Section
         title="🔧 MÁY MÓC & SẢN XUẤT — Bottleneck xưởng"
         color="#f97316" count={report.equipmentCnc.length}
