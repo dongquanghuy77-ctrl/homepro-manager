@@ -64,7 +64,7 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
     const stock   = parseFloat(e.stockLevel);
     const reserve = parseFloat(e.reservedLevel);
     if (isNaN(stock) || isNaN(reserve)) {
-      setEdits(prev => ({ ...prev, [id]: { ...prev[id], error: 'So khong hop le' } }));
+      setEdits(prev => ({ ...prev, [id]: { ...prev[id], error: 'Số không hợp lệ' } }));
       return;
     }
     setEdits(prev => ({ ...prev, [id]: { ...prev[id], saving: true, error: null } }));
@@ -74,7 +74,7 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stockLevel: stock, reservedLevel: reserve, reason }),
       });
-      if (!res.ok) throw new Error((await res.json()).error || 'Loi');
+      if (!res.ok) throw new Error((await res.json()).error || 'Lỗi');
       setEdits(prev => ({ ...prev, [id]: { ...prev[id], saving: false, saved: true, dirty: false } }));
     } catch (err: any) {
       setEdits(prev => ({ ...prev, [id]: { ...prev[id], saving: false, error: err.message } }));
@@ -83,7 +83,7 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
 
   const saveAll = async () => {
     const dirtyIds = Object.entries(edits).filter(([, e]) => e.dirty).map(([id]) => parseInt(id));
-    if (dirtyIds.length === 0) { setGlobalMsg('Khong co thay doi nao de luu.'); return; }
+    if (dirtyIds.length === 0) { setGlobalMsg('Không có thay đổi nào để lưu.'); return; }
     setIsSavingAll(true);
     setGlobalMsg(null);
     let ok = 0, fail = 0;
@@ -101,12 +101,12 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
         setEdits(prev => ({ ...prev, [id]: { ...prev[id], saving: false, saved: true, dirty: false } }));
         ok++;
       } catch {
-        setEdits(prev => ({ ...prev, [id]: { ...prev[id], error: 'Luu that bai' } }));
+        setEdits(prev => ({ ...prev, [id]: { ...prev[id], error: 'Lưu thất bại' } }));
         fail++;
       }
     }
     setIsSavingAll(false);
-    setGlobalMsg(`Da luu ${ok} vat tu${fail > 0 ? ` | ${fail} that bai` : ''}.`);
+    setGlobalMsg(`Đã lưu ${ok} vật tư${fail > 0 ? ` | ${fail} thất bại` : ' thành công!'}.`);
   };
 
   const resetAll = () => {
@@ -137,7 +137,7 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
           <td colSpan={7} style={{ padding: '14px 20px', fontWeight: 800, fontSize: 15 }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {collapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
-              {icon} {title} ({group.length} vat tu)
+              {icon} {title} ({group.length} vật tư)
             </span>
           </td>
         </tr>
@@ -161,7 +161,7 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
               <td style={{ padding: '10px 16px', fontWeight: 600, fontSize: 14 }}>{mat.name}</td>
               <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--color-text-muted)' }}>{mat.unit}</td>
 
-              {/* Ton Tong input */}
+              {/* Tồn Tổng input */}
               <td style={{ padding: '10px 16px', textAlign: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
                   <span style={{ fontSize: 11, color: 'var(--color-text-muted)', minWidth: 28 }}>{origStock}</span>
@@ -181,7 +181,7 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
                 </div>
               </td>
 
-              {/* Giam Long input */}
+              {/* Giam Lỏng input */}
               <td style={{ padding: '10px 16px', textAlign: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
                   <span style={{ fontSize: 11, color: 'var(--color-text-muted)', minWidth: 28 }}>{origReserve}</span>
@@ -202,7 +202,7 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
                 </div>
               </td>
 
-              {/* Kha Dung preview */}
+              {/* Khả Dụng preview */}
               <td style={{ padding: '10px 16px', textAlign: 'right', fontWeight: 800 }}>
                 {(() => {
                   const avail = isNaN(newStock) || isNaN(newReserve) ? origStock - origReserve : newStock - newReserve;
@@ -210,19 +210,19 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
                 })()}
               </td>
 
-              {/* Status */}
+              {/* Trạng thái */}
               <td style={{ padding: '10px 16px', textAlign: 'center', width: 100 }}>
                 {e.error && <span style={{ color: '#ef4444', fontSize: 12 }}><AlertCircle size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> {e.error}</span>}
-                {e.saved && !e.error && <span style={{ color: '#10b981', fontSize: 12 }}><CheckCircle2 size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> Da luu</span>}
+                {e.saved && !e.error && <span style={{ color: '#10b981', fontSize: 12 }}><CheckCircle2 size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> Đã lưu</span>}
                 {e.dirty && !e.saving && !e.error && (
                   <button
                     onClick={() => saveOne(mat.id)}
                     style={{ background: '#f59e0b', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: 6, fontWeight: 700, cursor: 'pointer', fontSize: 12 }}
                   >
-                    Luu
+                    Lưu
                   </button>
                 )}
-                {e.saving && <span style={{ color: 'var(--color-text-muted)', fontSize: 12 }}>Dang luu...</span>}
+                {e.saving && <span style={{ color: 'var(--color-text-muted)', fontSize: 12 }}>Đang lưu...</span>}
               </td>
             </tr>
           );
@@ -240,26 +240,26 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
             <ClipboardList size={24} color="#fff" />
           </div>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Kiem Ke Kho — Dieu Chinh Thu Cong</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Kiểm Kê Kho — Điều Chỉnh Thủ Công</h1>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-muted)' }}>
-              Chinh sua so luong tung vat tu. Moi thay doi se duoc ghi vao lich su giao dich (ADJUSTMENT).
+              Chỉnh sửa số lượng từng vật tư. Mọi thay đổi sẽ được ghi vào lịch sử giao dịch (ADJUSTMENT).
             </p>
           </div>
         </div>
         <a href="/pwr/inventory" style={{ fontSize: 13, color: '#3b82f6', textDecoration: 'none', fontWeight: 600, padding: '8px 14px', border: '1px solid #3b82f6', borderRadius: 8 }}>
-          Quay lai Kho
+          ← Quay lại Kho
         </a>
       </div>
 
-      {/* Reason + Action bar */}
+      {/* Lý do + Action bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, padding: 16, background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)' }}>
         <div style={{ flex: 1 }}>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 6, color: 'var(--color-text-muted)' }}>Ly do dieu chinh (ghi vao lich su):</label>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 6, color: 'var(--color-text-muted)' }}>Lý do điều chỉnh (ghi vào lịch sử):</label>
           <input
             type="text"
             value={reason}
             onChange={e => setReason(e.target.value)}
-            placeholder="VD: Kiem ke thang 9/2026"
+            placeholder="VD: Kiểm kê tháng 9/2026"
             style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid var(--color-border)', background: 'var(--color-bg)', color: 'var(--color-text)', fontSize: 14 }}
           />
         </div>
@@ -268,55 +268,55 @@ export default function PwrStocktakeClient({ materials }: { materials: Material[
             onClick={resetAll}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8, border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text)', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}
           >
-            <RotateCcw size={16} /> Hoan tac
+            <RotateCcw size={16} /> Hoàn tác
           </button>
           <button
             onClick={saveAll}
             disabled={dirtyCount === 0 || isSavingAll}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 8, border: 'none', background: dirtyCount > 0 ? '#10b981' : '#64748b', color: '#fff', cursor: dirtyCount > 0 ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 14 }}
           >
-            <Save size={16} /> {isSavingAll ? 'Dang luu...' : `Luu tat ca (${dirtyCount})`}
+            <Save size={16} /> {isSavingAll ? 'Đang lưu...' : `Lưu tất cả (${dirtyCount})`}
           </button>
         </div>
       </div>
 
       {globalMsg && (
         <div style={{ padding: '10px 16px', marginBottom: 16, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, color: '#10b981', fontWeight: 600, fontSize: 13 }}>
-          {globalMsg}
+          ✅ {globalMsg}
         </div>
       )}
 
-      {/* Legend */}
+      {/* Chú thích màu */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 16, fontSize: 12, color: 'var(--color-text-muted)' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: 'rgba(251,191,36,0.3)', display: 'inline-block' }} /> Da chinh sua (chua luu)</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: 'rgba(16,185,129,0.3)', display: 'inline-block' }} /> Da luu thanh cong</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: 'rgba(239,68,68,0.3)', display: 'inline-block' }} /> Luu that bai</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: 'rgba(251,191,36,0.4)', display: 'inline-block' }} /> Đã chỉnh sửa (chưa lưu)</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: 'rgba(16,185,129,0.4)', display: 'inline-block' }} /> Đã lưu thành công</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 12, height: 12, borderRadius: 2, background: 'rgba(239,68,68,0.4)', display: 'inline-block' }} /> Lưu thất bại</span>
       </div>
 
-      {/* Table */}
+      {/* Bảng */}
       <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
           <thead style={{ background: 'var(--color-surface-2)', borderBottom: '2px solid var(--color-border)' }}>
             <tr>
-              <th style={{ padding: '14px 8px', fontWeight: 700, color: 'var(--color-text-muted)', textAlign: 'left', width: 50 }}>Ma</th>
-              <th style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--color-text-muted)', textAlign: 'left' }}>Ten Vat Tu</th>
-              <th style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--color-text-muted)', width: 60 }}>DVT</th>
-              <th style={{ padding: '14px 16px', fontWeight: 700, color: '#3b82f6', textAlign: 'center', width: 200 }}>Ton Tong (Cu → Moi)</th>
-              <th style={{ padding: '14px 16px', fontWeight: 700, color: '#f59e0b', textAlign: 'center', width: 200 }}>Giam Long (Cu → Moi)</th>
-              <th style={{ padding: '14px 16px', fontWeight: 700, color: '#10b981', textAlign: 'right', width: 100 }}>Kha Dung (preview)</th>
-              <th style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--color-text-muted)', textAlign: 'center', width: 100 }}>Trang thai</th>
+              <th style={{ padding: '14px 8px', fontWeight: 700, color: 'var(--color-text-muted)', textAlign: 'left', width: 50 }}>Mã</th>
+              <th style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--color-text-muted)', textAlign: 'left' }}>Tên Vật Tư</th>
+              <th style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--color-text-muted)', width: 60 }}>ĐVT</th>
+              <th style={{ padding: '14px 16px', fontWeight: 700, color: '#3b82f6', textAlign: 'center', width: 200 }}>Tồn Tổng (Cũ → Mới)</th>
+              <th style={{ padding: '14px 16px', fontWeight: 700, color: '#f59e0b', textAlign: 'center', width: 200 }}>Giam Lỏng (Cũ → Mới)</th>
+              <th style={{ padding: '14px 16px', fontWeight: 700, color: '#10b981', textAlign: 'right', width: 120 }}>Khả Dụng (preview)</th>
+              <th style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--color-text-muted)', textAlign: 'center', width: 100 }}>Trạng thái</th>
             </tr>
           </thead>
           <tbody>
-            {renderGroup('PHAN KHU VAN (BOARDS)', '', boardMats)}
-            {renderGroup('PHAN KHU NEP (EDGE BANDING)', '', edgeMats)}
-            {renderGroup('PHAN KHU PHU KIEN (HARDWARE)', '', otherMats)}
+            {renderGroup('PHÂN KHU VÁN (BOARDS)', '🪚', boardMats)}
+            {renderGroup('PHÂN KHU NẸP (EDGE BANDING)', '🎗️', edgeMats)}
+            {renderGroup('PHÂN KHU PHỤ KIỆN (HARDWARE)', '🔩', otherMats)}
           </tbody>
         </table>
       </div>
 
       <p style={{ marginTop: 16, fontSize: 12, color: 'var(--color-text-muted)', textAlign: 'center' }}>
-        Tong: {materials.length} vat tu · {dirtyCount} da chinh sua · Moi thay doi tao transaction ADJUSTMENT trong Lich su Giao dich
+        Tổng: {materials.length} vật tư · {dirtyCount} đã chỉnh sửa · Mỗi thay đổi tạo transaction ADJUSTMENT trong Lịch sử Giao dịch
       </p>
     </div>
   );
