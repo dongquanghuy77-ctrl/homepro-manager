@@ -41,13 +41,13 @@ export default function WorkerManagementClient() {
   }, []);
 
   const handleCreate = async () => {
-    if (!form.name || !form.phone || !form.password) { setError('Vui long nhap day du: Ten, SDT, Mat khau'); return; }
-    if (form.password.length < 6) { setError('Mat khau toi thieu 6 ky tu'); return; }
+    if (!form.name || !form.phone || !form.password) { setError('Vui lòng nhập đầy đủ: Tên, SĐT, Mật khẩu'); return; }
+    if (form.password.length < 6) { setError('Mật khẩu tối thiểu 6 ký tự'); return; }
     setSaving(true); setError('');
     const r = await fetch('/api/pwr/workers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
     const d = await r.json();
-    if (!r.ok) { setError(d.error || 'Loi tao tai khoan'); setSaving(false); return; }
-    setSuccess('Da tao tai khoan: ' + form.name);
+    if (!r.ok) { setError(d.error || 'Lỗi tạo tài khoản'); setSaving(false); return; }
+    setSuccess('Đã tạo tài khoản: ' + form.name);
     setForm({ name: '', phone: '', password: '' }); setShowCreate(false); setSaving(false); fetchWorkers();
   };
 
@@ -56,17 +56,17 @@ export default function WorkerManagementClient() {
     setSaving(true); setError('');
     const r = await fetch('/api/pwr/workers/' + editWorker.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editForm) });
     const d = await r.json();
-    if (!r.ok) { setError(d.error || 'Loi cap nhat'); setSaving(false); return; }
-    setSuccess('Da cap nhat: ' + (editForm.name || editWorker.name));
+    if (!r.ok) { setError(d.error || 'Lỗi cập nhật'); setSaving(false); return; }
+    setSuccess('Đã cập nhật: ' + (editForm.name || editWorker.name));
     setEditWorker(null); setSaving(false); fetchWorkers();
   };
 
   const handleDelete = async (w: Worker) => {
-    if (!confirm('Vo hieu hoa tai khoan "' + w.name + '"? Lich su task van duoc giu lai.')) return;
+    if (!confirm('Vô hiệu hóa tài khoản "' + w.name + '"? Lịch sử task vẫn được giữ lại.')) return;
     const r = await fetch('/api/pwr/workers/' + w.id, { method: 'DELETE' });
     const d = await r.json();
     if (!r.ok) { alert(d.error || 'Loi xoa'); return; }
-    setSuccess('Da vo hieu hoa: ' + w.name);
+    setSuccess('Đã vô hiệu hóa: ' + w.name);
     fetchWorkers();
   };
 
@@ -88,13 +88,13 @@ export default function WorkerManagementClient() {
           <button onClick={() => { setShowCreate(false); setEditWorker(null); setError(''); }} style={{ background: 'none', border: 'none', color: c.muted, cursor: 'pointer' }}><X size={20} /></button>
         </div>
         {error && <div style={{ background: 'rgba(239,68,68,0.1)', color: c.danger, padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{error}</div>}
-        <Input label="Ho va ten *" k="name" ph="Nguyen Van A" />
-        <Input label="So dien thoai *" k="phone" type="tel" ph="0901234567" />
-        <Input label={editWorker ? "Mat khau moi (de trong = khong doi)" : "Mat khau *"} k={editWorker ? "newPassword" : "password"} type="password" ph="It nhat 6 ky tu" />
+        <Input label="Họ và tên *" k="name" ph="Nguyen Van A" />
+        <Input label="Số điện thoại *" k="phone" type="tel" ph="0901234567" />
+        <Input label={editWorker ? "Mật khẩu mới (để trống = không đổi)" : "Mật khẩu *"} k={editWorker ? "newPassword" : "password"} type="password" ph="Ít nhất 6 ký tự" />
         <button onClick={onSave} disabled={saving}
           style={{ width: '100%', background: btnColor, color: '#fff', border: 'none', borderRadius: 12, padding: '14px 0', fontWeight: 700, fontSize: 16, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {saving ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={18} />}
-          {saving ? 'Dang xu ly...' : 'Xac nhan'}
+          {saving ? 'Đang xử lý...' : 'Xác nhận'}
         </button>
       </div>
     </div>
@@ -110,12 +110,12 @@ export default function WorkerManagementClient() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px 0', color: c.accent }}>Quan Ly Tho Xuong</h1>
-          <p style={{ color: c.muted, margin: 0 }}>Tao tai khoan, theo doi diem XP va hieu suat tho</p>
+          <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px 0', color: c.accent }}>Quản Lý Thợ Xưởng</h1>
+          <p style={{ color: c.muted, margin: 0 }}>Tạo tài khoản, theo dõi điểm XP và hiệu suất thợ</p>
         </div>
         <button onClick={() => { setShowCreate(true); setError(''); }}
           style={{ background: c.accent, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
-          <Plus size={20} /> Them Tho Moi
+          <Plus size={20} /> Thêm Thợ Mới
         </button>
       </div>
 
@@ -128,9 +128,9 @@ export default function WorkerManagementClient() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 32 }}>
         {[
-          { label: 'Tong so tho', value: workers.length, color: c.blue },
-          { label: 'Tong task hoan thanh', value: totalTasksDone, color: c.success },
-          { label: 'Tong XP toan xuong', value: totalXP.toLocaleString(), color: '#fbbf24' },
+          { label: 'Tổng số thợ', value: workers.length, color: c.blue },
+          { label: 'Tổng task hoàn thành', value: totalTasksDone, color: c.success },
+          { label: 'Tổng XP toàn xưởng', value: totalXP.toLocaleString(), color: '#fbbf24' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ background: c.card, border: '1px solid ' + c.border, borderRadius: 16, padding: 20 }}>
             <div style={{ fontSize: 12, color: c.muted, marginBottom: 4 }}>{label}</div>
@@ -142,13 +142,13 @@ export default function WorkerManagementClient() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: 60, color: c.muted }}>
           <Loader2 size={40} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 16px', display: 'block' }} />
-          Dang tai...
+          Đang tải...
         </div>
       ) : workers.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 60, color: c.muted, background: c.card, borderRadius: 16, border: '1px solid ' + c.border }}>
           <Users size={48} color={c.accent} style={{ margin: '0 auto 16px', display: 'block' }} />
-          <p style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>Chua co tho nao</p>
-          <p>Nhan "Them Tho Moi" de bat dau</p>
+          <p style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>Chưa có thợ nào</p>
+          <p>Nhan "Thêm Thợ Mới" de bat dau</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -163,8 +163,8 @@ export default function WorkerManagementClient() {
                   {w.phone
                     ? <span>📞 {w.phone}</span>
                     : w.username
-                      ? <span title="ID dang nhap tram">🔑 {w.username}</span>
-                      : <span style={{ color: '#ef4444' }}>Chua co SDT</span>
+                      ? <span title="ID đăng nhập trạm">🔑 {w.username}</span>
+                      : <span style={{ color: '#ef4444' }}>Chưa có SĐT</span>
                   }
                 </div>
               </div>
@@ -197,8 +197,8 @@ export default function WorkerManagementClient() {
         </div>
       )}
 
-      {showCreate && <Modal title="Them Tho Moi" onSave={handleCreate} btnColor={c.accent} />}
-      {editWorker && <Modal title={'Sua: ' + editWorker.name} onSave={handleEdit} btnColor={c.blue} />}
+      {showCreate && <Modal title="Thêm Thợ Mới" onSave={handleCreate} btnColor={c.accent} />}
+      {editWorker && <Modal title={'Sửa: ' + editWorker.name} onSave={handleEdit} btnColor={c.blue} />}
     </div>
   );
 }
