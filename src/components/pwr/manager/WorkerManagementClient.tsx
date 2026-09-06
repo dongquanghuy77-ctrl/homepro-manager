@@ -185,7 +185,7 @@ export default function WorkerManagementClient() {
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => { setEditWorker(w); setEditForm({ name: w.name, phone: w.phone || '', newPassword: '' }); setError(''); }}
                   style={{ background: 'rgba(59,130,246,0.1)', color: c.blue, border: '1px solid rgba(59,130,246,0.3)', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-                  <Edit3 size={16} /> Sua
+                  <Edit3 size={16} /> Sửa
                 </button>
                 <button onClick={() => handleDelete(w)}
                   style={{ background: 'rgba(239,68,68,0.1)', color: c.danger, border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
