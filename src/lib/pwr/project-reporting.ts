@@ -1,6 +1,6 @@
-﻿import { db } from "@/db";
+import { db } from "@/db";
 import { pwrProjects, pwrTasks } from "@/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, neq } from "drizzle-orm";
 import { getTodayVN, TERMINAL_STATUSES } from "./constants";
 
 const PHASE_LABELS: Record<number, string> = {
@@ -18,13 +18,18 @@ export interface ProjectSummary {
 
 export async function buildProjectReport(userId: number): Promise<ProjectSummary[]> {
   const today    = getTodayVN();
-  const projects = await db.select().from(pwrProjects).where(eq(pwrProjects.userId, userId));
+  const projects = await db.select().from(pwrProjects).where(
+    and(
+      eq(pwrProjects.userId, userId),
+      neq(pwrProjects.status, 'DELETED')
+    )
+  );
   const allTasks = await db.select().from(pwrTasks)
     .where(and(eq(pwrTasks.userId, userId), isNull(pwrTasks.deletedAt)));
 
   return projects.map(proj => {
     const projTasks = allTasks.filter(t =>
-      t.projectRef?.trim() === proj.name.trim() || (t as any).projectId === proj.id
+      (t.projectRef && t.projectRef.trim().toLowerCase() === proj.name.trim().toLowerCase()) || (t as any).projectId === proj.id
     );
 
     const total   = projTasks.length;
