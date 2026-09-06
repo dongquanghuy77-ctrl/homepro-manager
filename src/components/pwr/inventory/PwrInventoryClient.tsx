@@ -299,42 +299,50 @@ export default function PwrInventoryClient({ materials, transactions, tasks }: {
             </div>
           </div>
 
-          <div className="no-print" style={{ position: 'relative' }} ref={menuRef}>
-            <button 
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#10b981', color: 'white', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(16,185,129,0.2)' }}
+          <div className="no-print" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <a
+              href="/pwr/stocktake"
+              style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f59e0b', color: 'white', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer', textDecoration: 'none' }}
             >
-              <Download size={18} /> Xuất Báo Cáo
-            </button>
+              📋 Kiểm Kê Kho
+            </a>
+            <div style={{ position: 'relative' }} ref={menuRef}>
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#10b981', color: 'white', border: 'none', padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(16,185,129,0.2)' }}
+              >
+                <Download size={18} /> Xuất Báo Cáo
+              </button>
 
-            {showExportMenu && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.2)', width: 260, zIndex: 100, overflow: 'hidden' }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Hệ thống Báo cáo 3 Tầng</span>
+              {showExportMenu && (
+                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 12, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.2)', width: 260, zIndex: 100, overflow: 'hidden' }}>
+                  <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Hệ thống Báo cáo 3 Tầng</span>
+                  </div>
+                  
+                  <button onClick={handlePrintPDF} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', borderBottom: '1px solid var(--color-border)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
+                      <Printer size={16} color="#ef4444" /> Tầng 1: Góc nhìn Quản lý
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>In PDF A4 Ngang - Bức tranh toàn cảnh kho.</div>
+                  </button>
+
+                  <button onClick={handleExportStock} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', borderBottom: '1px solid var(--color-border)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
+                      <FileSpreadsheet size={16} color="#10b981" /> Tầng 2: Vận hành Kho
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>Xuất Excel Tồn kho - Phục vụ lọc và tính toán.</div>
+                  </button>
+
+                  <button onClick={handleExportHistory} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
+                      <FileText size={16} color="#3b82f6" /> Tầng 3: Đối soát Kế toán
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>Xuất CSV Giao dịch - Truy vết ngày nhập/xuất.</div>
+                  </button>
                 </div>
-                
-                <button onClick={handlePrintPDF} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', borderBottom: '1px solid var(--color-border)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
-                    <Printer size={16} color="#ef4444" /> Tầng 1: Góc nhìn Quản lý
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>In PDF A4 Ngang - Bức tranh toàn cảnh kho.</div>
-                </button>
-
-                <button onClick={handleExportStock} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', borderBottom: '1px solid var(--color-border)', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
-                    <FileSpreadsheet size={16} color="#10b981" /> Tầng 2: Vận hành Kho
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>Xuất Excel Tồn kho - Phục vụ lọc và tính toán.</div>
-                </button>
-
-                <button onClick={handleExportHistory} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 16px', border: 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: 'var(--color-text)' }}>
-                    <FileText size={16} color="#3b82f6" /> Tầng 3: Đối soát Kế toán
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', paddingLeft: 24 }}>Xuất CSV Giao dịch - Truy vết ngày nhập/xuất.</div>
-                </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
