@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { pwrProjects, pwrTasks } from "@/db/schema";
-import { eq, and, isNull, neq } from "drizzle-orm";
+import { eq, and, isNull, ne } from "drizzle-orm";
 import { getTodayVN, TERMINAL_STATUSES } from "./constants";
 
 const PHASE_LABELS: Record<number, string> = {
@@ -21,7 +21,7 @@ export async function buildProjectReport(userId: number): Promise<ProjectSummary
   const projects = await db.select().from(pwrProjects).where(
     and(
       eq(pwrProjects.userId, userId),
-      neq(pwrProjects.status, 'DELETED')
+      ne(pwrProjects.status, 'DELETED')
     )
   );
   const allTasks = await db.select().from(pwrTasks)
