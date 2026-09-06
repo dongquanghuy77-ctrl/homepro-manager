@@ -211,16 +211,18 @@ export default function PwrCapacityClient() {
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    const today = new Date();
-    const startDate = format(addDays(today, weekOffset * 7), 'yyyy-MM-dd');
-    const endDate = format(addDays(today, weekOffset * 7 + 6), 'yyyy-MM-dd');
-    fetch(`/api/pwr/capacity?start=${startDate}&end=${endDate}`)
-      .then(res => res.json())
-      .then(d => {
-        setData(d);
-        setIsLoading(false);
-      });
+    const load = () => {
+      setIsLoading(true);
+      const today = new Date();
+      const startDate = format(addDays(today, weekOffset * 7), 'yyyy-MM-dd');
+      const endDate = format(addDays(today, weekOffset * 7 + 6), 'yyyy-MM-dd');
+      fetch(`/api/pwr/capacity?start=${startDate}&end=${endDate}`)
+        .then(res => res.json())
+        .then(d => { setData(d); setIsLoading(false); });
+    };
+    load();
+    const iv = setInterval(load, 60000); // auto-refresh mỗi 60s
+    return () => clearInterval(iv);
   }, [weekOffset]);
 
 
