@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources, pwrProjects, pwrResourceCalendar } from '@/db/schema';
+import { pwrMaterials, pwrMaterialTransactions, pwrTasks, pwrTaskDependencies, pwrTaskResources, pwrResources, pwrProjects, pwrResourceCalendar, pwrIngestionLogs } from '@/db/schema';
 import { eq, sql, inArray, and, gte, lte } from 'drizzle-orm';
 import { requireAuth, ALL_ROLES } from '@/lib/auth';
 
@@ -440,12 +440,28 @@ export async function POST(req: NextRequest) {
 
     });
 
+    // Ghi log thực vào pwr_ingestion_logs
+    const tasksGenerated = isShortageOut ? 4 : 3;
+    try {
+      await db.insert(pwrIngestionLogs).values({
+        userId,
+        fileName: fileName || 'unknown.xlsx',
+        fileSizeMb: body.fileSizeMb || null,
+        rowCount: items.length,
+        status: 'SUCCESS',
+        batchId,
+        projectName: projectName || null,
+        tasksCreated: tasksGenerated,
+        materialsNew: newMaterialsCount,
+      } as any);
+    } catch (_) { /* log failure khong duoc crash pipeline */ }
+
     return NextResponse.json({ 
       success: true, 
       batchId, 
       isShortage: isShortageOut,
       stats: {
-        tasksGenerated: isShortageOut ? 4 : 3,
+        tasksGenerated,
         newMaterialsCount
       }
     });

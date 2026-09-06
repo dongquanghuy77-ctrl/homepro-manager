@@ -28,6 +28,11 @@ export default function PwrIngestionClient() {
   const [countdown, setCountdown] = useState(3);
   const [successBatchId, setSuccessBatchId] = useState('');
 
+  // Real stats from DB
+  const [ingestionStats, setIngestionStats] = useState({ total: 0, success: 0, failed: 0, processing: 0, successRate: '0.0', failRate: '0.0', weekChange: 0 });
+  const [ingestionHistory, setIngestionHistory] = useState<any[]>([]);
+  const [statsLoading, setStatsLoading] = useState(true);
+
   useEffect(() => {
     let timer: any;
     if (uploadStep === 'SUCCESS' && countdown > 0) {
@@ -46,6 +51,20 @@ export default function PwrIngestionClient() {
         if (data.projects) setProjects(data.projects);
       })
       .catch(err => console.error(err));
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const r = await fetch('/api/pwr/ingestion/stats');
+      const d = await r.json();
+      if (d.stats) setIngestionStats(d.stats);
+      if (d.history) setIngestionHistory(d.history);
+    } catch {} finally { setStatsLoading(false); }
+  };
+  useEffect(() => {
+    fetchStats();
+    const iv = setInterval(fetchStats, 30000);
+    return () => clearInterval(iv);
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -317,18 +336,7 @@ export default function PwrIngestionClient() {
                   )}
                 </div>
 
-                
-                  <div style={{ margin: '0 0 24px 0', textAlign: 'left' }}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--color-text-muted)' }}>Tên Lô / Đợt sản xuất (Tùy chọn):</label>
-                    <input 
-                      type="text" 
-                      value={batchName}
-                      onChange={(e) => setBatchName(e.target.value)}
-                      placeholder="VD: Đợt 1 - Tủ Bếp Tầng 1"
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--color-bg)', border: '1px solid var(--color-border)', color: 'var(--color-text)', outline: 'none', fontSize: 14 }}
-                    />
-                  </div>
-<input type="file" id="file-upload" accept=".xlsx, .xls" onChange={handleFileChange} style={{ display: 'none' }} />
+                <input type="file" id="file-upload" accept=".xlsx, .xls" onChange={handleFileChange} style={{ display: 'none' }} />
                 <label htmlFor="file-upload" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#3b82f6', color: '#fff', padding: '10px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
                   <Plus size={18} /> Chọn file từ máy tính
                 </label>
@@ -351,65 +359,75 @@ export default function PwrIngestionClient() {
                 {error && <div style={{ color: '#ef4444', marginTop: 16, fontWeight: 600, fontSize: 14 }}><AlertCircle size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> {error}</div>}
               </div>
 
-              {/* KPI Cards (Mocked based on reference design) */}
+              {/* KPI Cards — Real data from pwr_ingestion_logs */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
                 <div style={{ background: 'var(--color-surface)', padding: 16, borderRadius: 12, border: '1px solid var(--color-border)' }}>
                   <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>Tổng file đã xử lý <div style={{ background: 'rgba(59,130,246,0.1)', padding: 4, borderRadius: 6 }}><FileText size={16} color="#3b82f6"/></div></div>
-                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>1,247</div>
-                  <div style={{ fontSize: 12, color: '#10b981' }}>+12% <span style={{ color: 'var(--color-text-muted)' }}>so với tuần trước</span></div>
+                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{statsLoading ? '—' : ingestionStats.total.toLocaleString()}</div>
+                  <div style={{ fontSize: 12, color: ingestionStats.weekChange >= 0 ? '#10b981' : '#ef4444' }}>
+                    {ingestionStats.weekChange >= 0 ? '+' : ''}{ingestionStats.weekChange}% <span style={{ color: 'var(--color-text-muted)' }}>so với tuần trước</span>
+                  </div>
                 </div>
                 <div style={{ background: 'var(--color-surface)', padding: 16, borderRadius: 12, border: '1px solid var(--color-border)' }}>
                   <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>Thành công <div style={{ background: 'rgba(16,185,129,0.1)', padding: 4, borderRadius: '50%' }}><CheckCircle2 size={16} color="#10b981"/></div></div>
-                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>1,186</div>
-                  <div style={{ fontSize: 12, color: '#10b981' }}>95.1% <span style={{ color: 'var(--color-text-muted)' }}>tỷ lệ thành công</span></div>
+                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{statsLoading ? '—' : ingestionStats.success.toLocaleString()}</div>
+                  <div style={{ fontSize: 12, color: '#10b981' }}>{ingestionStats.successRate}% <span style={{ color: 'var(--color-text-muted)' }}>tỷ lệ thành công</span></div>
                 </div>
                 <div style={{ background: 'var(--color-surface)', padding: 16, borderRadius: 12, border: '1px solid var(--color-border)' }}>
                   <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>Đang xử lý <div style={{ background: 'rgba(245,158,11,0.1)', padding: 4, borderRadius: '50%' }}><Clock size={16} color="#f59e0b"/></div></div>
-                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>3</div>
+                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{statsLoading ? '—' : ingestionStats.processing}</div>
                   <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>File đang trong hàng đợi</div>
                 </div>
                 <div style={{ background: 'var(--color-surface)', padding: 16, borderRadius: 12, border: '1px solid var(--color-border)' }}>
                   <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>Thất bại <div style={{ background: 'rgba(239,68,68,0.1)', padding: 4, borderRadius: '50%' }}><XCircle size={16} color="#ef4444"/></div></div>
-                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>58</div>
-                  <div style={{ fontSize: 12, color: '#ef4444' }}>4.9% <span style={{ color: 'var(--color-text-muted)' }}>cần kiểm tra lại</span></div>
+                  <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>{statsLoading ? '—' : ingestionStats.failed}</div>
+                  <div style={{ fontSize: 12, color: '#ef4444' }}>{ingestionStats.failRate}% <span style={{ color: 'var(--color-text-muted)' }}>cần kiểm tra lại</span></div>
                 </div>
               </div>
 
-              {/* History Table (Mocked) */}
+              {/* History Table — Real data from DB */}
               <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', padding: 20 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 16px 0' }}>Lịch sử xử lý gần đây</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {[
-                    { n: 'Bang_ke_vat_tu_T5_2024.xlsx', size: '2.4 MB', r: '1,234', s: 'Thành công', sc: '#10b981', t: '2 phút trước' },
-                    { n: 'Danh_sach_nhan_su_04.xlsx', size: '1.1 MB', r: '567', s: 'Thành công', sc: '#10b981', t: '15 phút trước' },
-                    { n: 'Bao_cao_ton_kho_T4.xlsx', size: '3.7 MB', r: '2,890', s: 'Đang xử lý', sc: '#f59e0b', t: '18 phút trước' },
-                    { n: 'Du_lieu_san_xuat_T4.xlsx', size: '5.2 MB', r: '4,567', s: 'Thất bại', sc: '#ef4444', t: '32 phút trước', err: 'Lỗi định dạng cột' }
-                  ].map((h, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: i < 3 ? '1px solid var(--color-border)' : 'none' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{ background: h.sc === '#ef4444' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', padding: 8, borderRadius: 8 }}>
-                          <FileText size={20} color={h.sc} />
+                {ingestionHistory.length === 0 && !statsLoading ? (
+                  <div style={{ textAlign: 'center', padding: 32, color: 'var(--color-text-muted)' }}>
+                    <FileText size={32} style={{ margin: '0 auto 8px', display: 'block' }} />
+                    Chưa có lịch sử xử lý. Hãy tải file Excel lên!
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {ingestionHistory.map((h: any, i: number) => {
+                      const sc = h.status === 'SUCCESS' ? '#10b981' : h.status === 'FAILED' ? '#ef4444' : '#f59e0b';
+                      const statusLabel = h.status === 'SUCCESS' ? 'Thành công' : h.status === 'FAILED' ? 'Thất bại' : 'Đang xử lý';
+                      const timeAgo = h.createdAt ? new Date(h.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short', timeStyle: 'short' }) : '';
+                      return (
+                        <div key={h.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16, borderBottom: i < ingestionHistory.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ background: h.status === 'FAILED' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', padding: 8, borderRadius: 8 }}>
+                              <FileText size={20} color={sc} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{h.fileName}</div>
+                              <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+                                {h.fileSizeMb ? `${Number(h.fileSizeMb).toFixed(1)} MB • ` : ''}{(h.rowCount || 0).toLocaleString()} dòng • {h.projectName || 'Không có dự án'}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 24 }}>
+                            <div>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: sc, marginBottom: 2 }}>{statusLabel}</div>
+                              <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{h.errorMessage || timeAgo}</div>
+                            </div>
+                            <div style={{ display: 'flex', gap: 12, color: 'var(--color-text-muted)' }}>
+                              <MoreVertical size={18} style={{ cursor: 'default' }} />
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{h.n}</div>
-                          <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{h.size} • {h.r} dòng dữ liệu</div>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 24 }}>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: h.sc, marginBottom: 2 }}>{h.s}</div>
-                          <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{h.err || h.t}</div>
-                        </div>
-                        <div style={{ display: 'flex', gap: 12, color: 'var(--color-text-muted)' }}>
-                          <Download size={18} cursor="pointer" />
-                          <MoreVertical size={18} cursor="pointer" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
                 <div style={{ textAlign: 'center', marginTop: 16 }}>
-                  <button style={{ background: 'transparent', border: 'none', color: '#3b82f6', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Xem tất cả lịch sử →</button>
+                  <button onClick={fetchStats} style={{ background: 'transparent', border: 'none', color: '#3b82f6', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>↻ Làm mới lịch sử</button>
                 </div>
               </div>
             </>

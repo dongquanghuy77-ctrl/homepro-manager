@@ -1,4 +1,4 @@
-﻿import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, real, timestamp, boolean, primaryKey, unique, jsonb, numeric, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
 
 // ============================================================
@@ -2619,3 +2619,23 @@ export const pwrScrapLogs = pgTable('pwr_scrap_logs', {
 });
 export type PwrScrapLog = typeof pwrScrapLogs.$inferSelect;
 export type NewPwrScrapLog = typeof pwrScrapLogs.$inferInsert;
+
+// ============================================================
+// PWR INGESTION LOGS — Track mỗi lần nuốt file Excel
+// ============================================================
+export const pwrIngestionLogs = pgTable('pwr_ingestion_logs', {
+  id:           serial('id').primaryKey(),
+  userId:       integer('user_id').references(() => users.id),
+  fileName:     text('file_name').notNull(),
+  fileSizeMb:   numeric('file_size_mb'),
+  rowCount:     integer('row_count').default(0),
+  status:       text('status').notNull().default('SUCCESS'), // SUCCESS | FAILED | PROCESSING
+  errorMessage: text('error_message'),
+  batchId:      text('batch_id'),
+  projectName:  text('project_name'),
+  tasksCreated: integer('tasks_created').default(0),
+  materialsNew: integer('materials_new').default(0),
+  createdAt:    timestamp('created_at').defaultNow(),
+});
+export type PwrIngestionLog = typeof pwrIngestionLogs.$inferSelect;
+export type NewPwrIngestionLog = typeof pwrIngestionLogs.$inferInsert;
