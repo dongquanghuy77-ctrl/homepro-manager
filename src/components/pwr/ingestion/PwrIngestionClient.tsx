@@ -189,16 +189,20 @@ export default function PwrIngestionClient() {
           </h1>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <button onClick={() => alert('Tài liệu hướng dẫn chi tiết đang được cập nhật.')} style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+          <a href="#quick-guide" style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
             <Book size={16} /> Tài liệu hướng dẫn
-          </button>
-          <button onClick={() => alert('Tính năng xem toàn bộ Lịch sử xử lý đang được phát triển.')} style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+          </a>
+          <a href="#history-section" style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
             <History size={16} /> Lịch sử xử lý
-          </button>
-          <button onClick={() => alert('Bạn có 3 thông báo mới chưa đọc. Trung tâm thông báo đang được nâng cấp.')} style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', position: 'relative' }}>
+          </a>
+          <div style={{ cursor: 'default', background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', padding: '6px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', position: 'relative' }}>
             <Bell size={18} />
-            <span style={{ position: 'absolute', top: -4, right: -4, background: '#ef4444', color: '#fff', fontSize: 10, width: 16, height: 16, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>3</span>
-          </button>
+            {ingestionStats.failed > 0 && (
+              <span style={{ position: 'absolute', top: -4, right: -4, background: '#ef4444', color: '#fff', fontSize: 10, width: 16, height: 16, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                {ingestionStats.failed > 9 ? '9+' : ingestionStats.failed}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -386,7 +390,7 @@ export default function PwrIngestionClient() {
               </div>
 
               {/* History Table — Real data from DB */}
-              <div style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', padding: 20 }}>
+              <div id="history-section" style={{ background: 'var(--color-surface)', borderRadius: 12, border: '1px solid var(--color-border)', padding: 20 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 16px 0' }}>Lịch sử xử lý gần đây</h3>
                 {ingestionHistory.length === 0 && !statsLoading ? (
                   <div style={{ textAlign: 'center', padding: 32, color: 'var(--color-text-muted)' }}>
@@ -524,7 +528,7 @@ export default function PwrIngestionClient() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           
           {/* Instructions */}
-          <div style={{ background: 'var(--color-surface)', padding: 24, borderRadius: 12, border: '1px solid var(--color-border)' }}>
+          <div id="quick-guide" style={{ background: 'var(--color-surface)', padding: 24, borderRadius: 12, border: '1px solid var(--color-border)' }}>
             <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 20px 0' }}>Hướng dẫn nhanh</h3>
             
             <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
