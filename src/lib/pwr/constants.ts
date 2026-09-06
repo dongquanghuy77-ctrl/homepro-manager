@@ -81,10 +81,10 @@ export const TRANSITION_REQUIRES: Partial<Record<PwrStatus, string[]>> = {
 // Vietnam has no DST — UTC+7 offset is constant
 export const BUSINESS_TZ = 'Asia/Ho_Chi_Minh';
 
-// Helper: get today YYYY-MM-DD in business timezone
+// Helper: get today YYYY-MM-DD in business timezone (GMT+7)
+// Sử dụng Intl API chuẩn — không dùng offset thủ công để tránh lỗi múi giờ DST
 export function getTodayVN(): string {
-  const nowVN = new Date(Date.now() + 7 * 60 * 60 * 1000);
-  return nowVN.toISOString().split('T')[0];
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
 }
 
 export const WAITING_ALERT_DAYS  = 3;
