@@ -5,7 +5,7 @@ import { Play, AlertTriangle, CheckCircle2, Factory, Clock, Plus, X, Loader2, Ch
 type StationId = 'INBOX' | 'CNC' | 'DAN_CANH' | 'KHOAN_CAM' | 'DONG_GOI';
 type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'ISSUE';
 
-interface KanbanTask { id: number; title: string; station: StationId; status: TaskStatus; points: number; }
+interface KanbanTask { id: number; title: string; station: StationId; status: TaskStatus; points: number; dueDate?: string | null; isOverdue?: boolean; overdueDays?: number; }
 
 interface WorkOrder { id: number; operation: string; sequence: number; plannedQuantity: number; workCenterId: number | null; status: string; }
 interface ProductionOrder { id: number; code: string; status: string; priority: string | null; plannedQuantity: number; workOrders: WorkOrder[]; importedCount: number; plannedEnd: string | null; }
@@ -45,13 +45,19 @@ export default function ManagerKanbanBoard() {
       const res = await fetch('/api/pwr/tasks?stationDispatch=true&limit=100');
       if (!res.ok) return;
       const data = await res.json();
+      const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
       // Map pwr_tasks fields to KanbanTask shape
       const mapped: KanbanTask[] = (data.tasks || []).map((t: any) => ({
         id: t.id,
         title: t.title,
         station: (t.stationTeam || 'INBOX') as StationId,
         status: (t.status === 'DONE' ? 'DONE' : t.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'TODO') as TaskStatus,
-        points: 15,
+        points: t.priority === 'HIGH' ? 20 : t.priority === 'LOW' ? 10 : 15,
+        dueDate: t.dueDate || null,
+        isOverdue: t.dueDate ? t.dueDate < todayStr : false,
+        overdueDays: t.dueDate && t.dueDate < todayStr
+          ? Math.ceil((new Date(todayStr).getTime() - new Date(t.dueDate).getTime()) / 86400000)
+          : 0,
       }));
       setTasks(mapped);
       setLoadError('');
@@ -324,7 +330,17 @@ export default function ManagerKanbanBoard() {
                     <div style={{ background: 'rgba(255,255,255,0.05)', color: '#9ca3af', padding: '4px 10px', borderRadius: 8, fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Clock size={14} /> 45p
                     </div>
-                    <div style={{ color: '#fbbf24', fontSize: 13, fontWeight: 700 }}>+{task.points} đ</div>
+                    {task.isOverdue ? (
+                      <div style={{ color: '#ef4444', fontSize: 12, fontWeight: 700, background: 'rgba(239,68,68,0.1)', padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.3)' }}>
+                        ⚠️ Trễ {task.overdueDays}d
+                      </div>
+                    ) : task.dueDate ? (
+                      <div style={{ color: '#10b981', fontSize: 12, fontWeight: 600 }}>
+                        {task.dueDate}
+                      </div>
+                    ) : (
+                      <div style={{ color: '#fbbf24', fontSize: 13, fontWeight: 700 }}>+{task.points} đ</div>
+                    )}
                   </div>
                 </div>
               ))}

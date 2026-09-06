@@ -31,9 +31,10 @@ export async function GET(request: Request) {
     if (assignedTo) conditions.push(eq(pwrTasks.assignedTo, assignedTo));
     if (projectRef) conditions.push(eq(pwrTasks.projectRef, projectRef));
 
-    // stationDispatch=true: lấy tất cả task chưa DONE/CANCELLED để show trên board giao việc
+    // stationDispatch=true: chỉ lấy task ACTIVE (chưa DONE/CANCELLED) để show trên board giao việc
     if (stationDispatch === 'true') {
-      conditions.push(...[]);  // Không filter status — manager thấy tất cả
+      const { notInArray } = await import('drizzle-orm');
+      conditions.push(notInArray(pwrTasks.status, ['DONE', 'CANCELLED']));
     }
 
     let tasks = await db
