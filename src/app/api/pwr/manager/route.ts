@@ -13,15 +13,10 @@ export async function GET(req: NextRequest) {
   if (auth.error) return auth.error;
 
   try {
-    // Timezone VN: UTC+7
-    const nowVN = new Date(Date.now() + 7 * 3600 * 1000);
-    const todayStr = nowVN.toISOString().split('T')[0]; // YYYY-MM-DD
-    const dayStartUTC = new Date(Date.UTC(
-      parseInt(todayStr.split('-')[0]),
-      parseInt(todayStr.split('-')[1]) - 1,
-      parseInt(todayStr.split('-')[2]),
-      -7, 0, 0, 0  // midnight VN = 17:00 prev UTC
-    ));
+    // Timezone VN: dùng Intl API chuẩn — không dùng offset thủ công
+    const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' }); // YYYY-MM-DD GMT+7
+    // Midnight GMT+7 = 17:00 UTC hôm trước → dùng Date.parse chính xác
+    const dayStartUTC = new Date(`${todayStr}T00:00:00+07:00`); // Midnight VN today
 
     // 1. T?ng task theo tr?m (aggregate to�n b?, kh�ng filter userId)
     const stationStats = await db.execute(sql`
@@ -82,8 +77,16 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(pwrUserStats.totalPoints))
       .limit(5);
 
-    const completionRate = totalPending > 0
-      ? Math.round((doneToday / (doneToday + totalPending)) * 100)
+    // Tỷ lệ hoàn thành HÔM NAY = done_today / (done_today + pending_today)
+    // pending_today = task chưa xong mà có due_date = hôm nay HOẶC đang IN_PROGRESS
+    const pendingTodayResult = await db.execute(sql`
+      SELECT COUNT(*) AS count FROM pwr_tasks
+      WHERE status NOT IN ('DONE','CANCELLED') AND deleted_at IS NULL
+        AND (due_date = ${todayStr} OR status = 'IN_PROGRESS')
+    `);
+    const totalTodayActive = parseInt((pendingTodayResult.rows?.[0] as any)?.count ?? '0');
+    const completionRate = (doneToday + totalTodayActive) > 0
+      ? Math.round((doneToday / (doneToday + totalTodayActive)) * 100)
       : doneToday > 0 ? 100 : 0;
 
     const scrapRequests = await db
