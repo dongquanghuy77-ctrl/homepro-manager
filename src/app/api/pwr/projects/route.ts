@@ -120,28 +120,15 @@ const TEMPLATES: Record<string, TaskDef[]> = {
   FULL:     TEMPLATE_FULL,
 };
 
-// ─── GET: Danh sách dự án (mặc định ẩn ARCHIVED) ────────────────────────────
+// ─── GET: Danh sách dự án ────────────────────────────────────────────────────
 export async function GET(req: Request) {
   try {
     const { session, error } = await requireAuth(req as any, ALL_ROLES);
     if (error) return error;
-    const url = new URL(req.url);
-    const includeArchived = url.searchParams.get('includeArchived') === 'true';
-    const statusFilter = url.searchParams.get('status'); // ACTIVE | COMPLETED | ARCHIVED | ALL
-
     const projects = await db.select().from(pwrProjects)
       .where(eq(pwrProjects.userId, session.id))
       .orderBy(desc(pwrProjects.createdAt));
-
-    // Lọc ARCHIVED ra khỏi danh sách mặc định
-    const filtered = projects.filter(p => {
-      if (includeArchived) return true;
-      if (statusFilter === 'ALL') return true;
-      if (statusFilter) return p.status === statusFilter;
-      return p.status !== 'ARCHIVED'; // Mặc định: ẩn ARCHIVED
-    });
-
-    return NextResponse.json({ projects: filtered });
+    return NextResponse.json({ projects });
   } catch (err) {
     console.error('GET /api/pwr/projects:', err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

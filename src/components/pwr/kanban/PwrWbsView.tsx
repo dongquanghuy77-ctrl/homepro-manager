@@ -54,9 +54,6 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
   const [toast, setToast]              = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const [pendingIds,   setPendingIds]   = useState<Set<number>>(new Set());
 
-  const [projectFilter, setProjectFilter] = useState<'ACTIVE'|'COMPLETED'|'ALL'>('ACTIVE');
-  const [sealPrompt, setSealPrompt] = useState<string | null>(null); // projectName that just hit 100%
-
   const [theme, setTheme] = useState<'dark'|'light'>('dark');
   useEffect(() => {
     const t = localStorage.getItem('pwr-theme') || 'dark';
@@ -106,16 +103,6 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         const updated = await res.json();
         setLocalTasks(prev => prev.map(t => t.id === task.id ? updated : t));
         setToast({ message: newStatus === 'DONE' ? `Hoàn thành: ${task.title.substring(0, 40)}` : `Mở lại: ${task.title.substring(0, 40)}`, type: 'success' });
-        // Auto-Seal: check if all tasks in project are now DONE
-        if (newStatus === 'DONE' && task.projectRef) {
-          const projName = task.projectRef.trim();
-          const updatedTasks = localTasks.map(t => t.id === task.id ? { ...t, status: 'DONE' } : t);
-          const projGroup = updatedTasks.filter(t => t.projectRef?.trim() === projName && (t as any).taskType !== 'OPERATIONAL_TASK');
-          const allDone = projGroup.length > 0 && projGroup.every(t => ['DONE','CANCELLED'].includes(t.status));
-          if (allDone) {
-            setTimeout(() => setSealPrompt(projName), 600);
-          }
-        }
       }
     } catch {
       setLocalTasks(prev => prev.map(t => t.id === task.id ? task : t));
@@ -239,7 +226,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
     }
   };
 
-  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' }); // GMT+7 fix
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <div style={{ padding: '8px 24px 60px', color: 'var(--color-text)', fontFamily: 'var(--font-family, -apple-system, sans-serif)' }}>
@@ -308,63 +295,11 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
         />
       )}
 
-      {/* --- Auto-Seal Popup --- */}
-      {sealPrompt && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'var(--color-surface)', border: '2px solid #10b981', borderRadius: 16, padding: '32px 36px', maxWidth: 440, width: '90%', boxShadow: '0 0 60px rgba(16,185,129,0.3)', textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
-            <div style={{ fontWeight: 800, fontSize: 20, color: '#10b981', marginBottom: 8 }}>Dự án hoàn thành 100%!</div>
-            <div style={{ fontSize: 14, color: 'var(--color-text-secondary)', marginBottom: 24 }}>
-              Tất cả task trong <strong style={{ color: 'var(--color-text)' }}>"{sealPrompt}"</strong> đã xong.<br />
-              Bạn có muốn Archive dự án này để giữ màn hình gọn gàng?
-            </div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-              <button onClick={() => setSealPrompt(null)}
-                style={{ padding: '10px 20px', borderRadius: 8, background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
-                Để sau
-              </button>
-              <button onClick={async () => {
-                const proj = localTasks.find(t => t.projectRef?.trim() === sealPrompt);
-                if (proj?.projectId) {
-                  await fetch('/api/pwr/projects/' + proj.projectId, { method: 'DELETE' });
-                  setToast({ message: 'Da archive du an "' + sealPrompt + '"', type: 'success' });
-                  setTimeout(() => setToast(null), 4000);
-                  onRefresh?.();
-                }
-                setSealPrompt(null);
-              }}
-                style={{ padding: '10px 24px', borderRadius: 8, background: '#10b981', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
-                Archive du an
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* --- Theme Toggle & Global Toolbar --- */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {/* Smart Filter Tabs */}
-          <div style={{ display: 'flex', gap: 2, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 8, padding: 3 }}>
-            {[
-              { val: 'ACTIVE', label: 'Dang chay (' + activeCount + ')', color: '#3b82f6' },
-              { val: 'COMPLETED', label: 'Hoan thanh (' + completedCount + ')', color: '#10b981' },
-              { val: 'ALL', label: 'Tat ca (' + Object.keys(projectsMap).length + ')', color: '#64748b' },
-            ].map(({ val, label, color }) => (
-              <button key={val} onClick={() => setProjectFilter(val as any)}
-                style={{ padding: '5px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600,
-                  background: projectFilter === val ? color + '20' : 'transparent',
-                  color: projectFilter === val ? color : 'var(--color-text-muted)',
-                  borderBottom: projectFilter === val ? '2px solid ' + color : '2px solid transparent'
-                }}>
-                {label}
-              </button>
-            ))}
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
-            {filteredProjectKeys.length} du an hien thi · {projTasks.length} task
-            {opTasks.length > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>· {opTasks.length} viec van hanh</span>}
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+          {Object.keys(projectsMap).length} dự án · {projTasks.length} task
+          {opTasks.length > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>· {opTasks.length} việc vận hành</span>}
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <button onClick={toggleTheme} style={{
@@ -423,7 +358,7 @@ export default function PwrWbsView({ tasks, onRefresh }: Props) {
       )}
 
       {/* --- Projects Render --- */}
-      {filteredProjectKeys.map(projName => {
+      {Object.keys(projectsMap).sort().map(projName => {
         const pTasks     = projectsMap[projName];
         const isProjExp  = expandedProjects[projName] ?? true;
         const folderClr  = '#3b82f6';
