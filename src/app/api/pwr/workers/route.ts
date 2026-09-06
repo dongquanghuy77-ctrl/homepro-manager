@@ -63,6 +63,15 @@ export async function POST(req: NextRequest) {
       role: 'WORKER',
     } as any).returning({ id: users.id, name: users.name, phone: users.phone, role: users.role });
 
+    // Auto-create pwr_user_stats row so worker has XP tracking from day 1
+    try {
+      await db.insert(pwrUserStats).values({
+        userId: newWorker.id,
+        totalPoints: 0,
+        currentLevel: 1,
+        tasksCompleted: 0,
+      } as any).onConflictDoNothing();
+    } catch (_) {}
     return NextResponse.json({ success: true, worker: newWorker }, { status: 201 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
