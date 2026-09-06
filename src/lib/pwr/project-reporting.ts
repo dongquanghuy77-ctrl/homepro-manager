@@ -68,5 +68,5 @@ export async function buildProjectReport(userId: number): Promise<ProjectSummary
       activeTasks: active, overdueTasks: overdue, remaining: total - done,
       currentPhase, health, phaseBreakdown,
     };
-  });
+  }).filter(p => p.totalTasks > 0);
 }
