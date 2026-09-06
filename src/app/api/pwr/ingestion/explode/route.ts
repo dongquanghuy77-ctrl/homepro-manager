@@ -441,7 +441,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Ghi log thực vào pwr_ingestion_logs
-    const tasksGenerated = isShortageOut ? 4 : 3;
+    tasksGenerated = isShortageOut ? 4 : 3;
     try {
       await db.insert(pwrIngestionLogs).values({
         userId,
