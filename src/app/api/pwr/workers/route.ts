@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users, pwrUserStats } from '@/db/schema';
 import { requireAuth, ADMIN_OR_MANAGER } from '@/lib/auth';
@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
         id: users.id,
         name: users.name,
         phone: users.phone,
+        username: users.username,
         role: users.role,
         avatarUrl: users.avatarUrl,
         createdAt: users.createdAt,

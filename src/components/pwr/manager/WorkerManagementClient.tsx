@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Plus, Edit3, X, Check, Loader2, Trash2 } from 'lucide-react';
 
 interface Worker {
-  id: number; name: string; phone: string | null; role: string;
+  id: number; name: string; phone: string | null; username: string | null; role: string;
   avatarUrl: string | null; createdAt: string | null;
   totalPoints: number | null; currentLevel: number | null; tasksCompleted: number | null;
 }
@@ -159,7 +159,14 @@ export default function WorkerManagementClient() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 16 }}>{w.name}</div>
-                <div style={{ color: c.muted, fontSize: 13 }}>{w.phone || 'Chua co SDT'}</div>
+                <div style={{ color: c.muted, fontSize: 13 }}>
+                  {w.phone
+                    ? <span>📞 {w.phone}</span>
+                    : w.username
+                      ? <span title="ID dang nhap tram">🔑 {w.username}</span>
+                      : <span style={{ color: '#ef4444' }}>Chua co SDT</span>
+                  }
+                </div>
               </div>
               <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
