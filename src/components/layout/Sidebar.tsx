@@ -188,7 +188,7 @@ export default function Sidebar() {
 
         {/* Workspace Menu Dropdown */}
         {showWorkspaceMenu && (
-          <div style={{ position: 'absolute', top: 60, left: 12, right: 12, background: 'var(--color-surface-1)', border: '1px solid var(--color-border)', borderRadius: '8px', zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 60, left: 12, right: 12, background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '8px', zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
             <div style={{ padding: '8px', fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Các Phân Hệ (Workspaces)</div>
             {visibleWorkspaces.map(ws => {
               const WsIcon = iconMap[ws.icon as keyof typeof iconMap] || LayoutDashboard;
