@@ -7,6 +7,7 @@ import PwrKanbanClient from './PwrKanbanClient';
 import PwrListView from './PwrListView';
 import PwrWbsView from './PwrWbsView';
 import PwrTaskForm from '../tasks/PwrTaskForm';
+import PwrTaskHistoryDrawer from './PwrTaskHistoryDrawer';
 
 const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
 
@@ -17,6 +18,7 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
   const [tasks, setTasks] = useState<PwrTask[]>(initialTasks);
   const [activeTab, setActiveTab] = useState<ViewTab>('KANBAN');
   const [showForm, setShowForm] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [showBell, setShowBell] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
   const todayVN = getTodayVN();
@@ -80,6 +82,9 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
             <a href="/pwr/reports/projects" style={{ display:'flex', alignItems:'center', gap:6, color:'#64748b', fontSize:12, textDecoration:'none', padding:'7px 12px', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, fontFamily:FONT }}>
               📊 Tiến Độ
             </a>
+            <button onClick={() => setShowHistory(true)} style={{ display:'flex', alignItems:'center', gap:6, color:'#94a3b8', background:'transparent', fontSize:12, padding:'7px 12px', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, fontFamily:FONT, cursor:'pointer' }}>
+              <Clock size={14}/> Lịch sử
+            </button>
             <a href="/pwr/calendar" style={{ display:'flex', alignItems:'center', gap:6, color:'#64748b', fontSize:12, textDecoration:'none', padding:'7px 12px', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8, fontFamily:FONT }}>
               <Calendar size={14}/> Lịch
             </a>
@@ -207,6 +212,9 @@ export default function PwrMyWorkCenter({ initialTasks }: Props) {
       {showForm && (
         <PwrTaskForm task={null} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); refresh(); }}/>
       )}
+
+      {/* History Drawer */}
+      <PwrTaskHistoryDrawer isOpen={showHistory} onClose={() => setShowHistory(false)} onRefreshTasks={refresh} />
     </div>
   );
 }

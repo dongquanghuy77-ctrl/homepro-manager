@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Play, AlertTriangle, CheckCircle2, Factory, Clock, Plus, X, Loader2, Check, Download, Package } from 'lucide-react';
+import PwrProductionHistoryModal from './PwrProductionHistoryModal';
 
 type StationId = 'INBOX' | 'CNC' | 'DAN_CANH' | 'KHOAN_CAM' | 'DONG_GOI';
 type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'ISSUE';
@@ -27,6 +28,7 @@ export default function ManagerKanbanBoard() {
   const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', stationTeam: 'INBOX' as StationId, priority: 'MEDIUM' });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
@@ -206,6 +208,10 @@ export default function ManagerKanbanBoard() {
           <p style={{ color: '#9ca3af', fontSize: 16, margin: 0 }}>Kéo thả để giao việc xuống máy trạm. Tự động đồng bộ mỗi 30s.</p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+          <button onClick={() => setShowHistoryModal(true)}
+            style={{ background: 'transparent', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+            <Clock size={18} /> Lịch Sử Điều Phối
+          </button>
           <button onClick={openErpModal}
             style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 12, padding: '12px 18px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
             <Download size={18} /> Import từ Lệnh SX
@@ -428,6 +434,9 @@ export default function ManagerKanbanBoard() {
           </div>
         </div>
       )}
+
+      {/* Production History Modal */}
+      <PwrProductionHistoryModal isOpen={showHistoryModal} onClose={() => setShowHistoryModal(false)} onRefreshTasks={fetchTasks} />
 
       <style>{`@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}`}</style>
     </div>

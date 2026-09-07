@@ -31,11 +31,25 @@ export async function GET(request: Request) {
     if (assignedTo) conditions.push(eq(pwrTasks.assignedTo, assignedTo));
     if (projectRef) conditions.push(eq(pwrTasks.projectRef, projectRef));
 
-    // stationDispatch=true: chỉ lấy task ACTIVE (chưa DONE/CANCELLED) để show trên board giao việc
-    if (stationDispatch === 'true') {
-      const { notInArray } = await import('drizzle-orm');
-      conditions.push(notInArray(pwrTasks.status, ['DONE', 'CANCELLED']));
-    }
+    const todayVN = getTodayVN();
+    const { notInArray, inArray, gte, sql, or } = await import('drizzle-orm');
+
+    // Auto-Archive Logic (Rolling Window):
+    // 1. Giữ lại task nếu trạng thái không phải là DONE/CANCELLED
+    // 2. Hoặc nếu là DONE/CANCELLED nhưng được cập nhật trong ngày hôm nay
+    
+    // stationDispatch=true: Màn hình Điều Phối Sản Xuất
+    // stationDispatch=false: Màn hình My Work Center
+    // Cả 2 đều dùng chung thuật toán Cuốn Chiếu:
+    conditions.push(
+      or(
+        notInArray(pwrTasks.status, ['DONE', 'CANCELLED']),
+        and(
+          inArray(pwrTasks.status, ['DONE', 'CANCELLED']),
+          sql`${pwrTasks.updatedAt} >= ${todayVN}::date`
+        )
+      )
+    );
 
     let tasks = await db
       .select()
@@ -46,8 +60,6 @@ export async function GET(request: Request) {
     if (q) {
       tasks = tasks.filter(t => t.title.toLowerCase().includes(q.toLowerCase()));
     }
-
-    const todayVN = getTodayVN();
 
     if (overdueParam === 'true') {
       tasks = tasks.filter(t =>
