@@ -70,7 +70,7 @@ export default function WorkerManagementClient() {
     fetchWorkers();
   };
 
-  const Input = ({ label, k, type = 'text', ph = '' }: { label: string; k: string; type?: string; ph?: string }) => (
+  const renderInput = (label: string, k: string, type = 'text', ph = '') => (
     <div style={{ marginBottom: 16 }}>
       <label style={{ display: 'block', fontSize: 13, color: c.muted, marginBottom: 6 }}>{label}</label>
       <input type={type} placeholder={ph}
@@ -80,7 +80,7 @@ export default function WorkerManagementClient() {
     </div>
   );
 
-  const Modal = ({ title, onSave, btnColor }: { title: string; onSave: () => void; btnColor: string }) => (
+  const renderModal = (title: string, onSave: () => void, btnColor: string) => (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
       <div style={{ background: '#111118', borderRadius: 20, padding: 32, width: '100%', maxWidth: 480, border: '1px solid ' + c.border }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
@@ -88,9 +88,9 @@ export default function WorkerManagementClient() {
           <button onClick={() => { setShowCreate(false); setEditWorker(null); setError(''); }} style={{ background: 'none', border: 'none', color: c.muted, cursor: 'pointer' }}><X size={20} /></button>
         </div>
         {error && <div style={{ background: 'rgba(239,68,68,0.1)', color: c.danger, padding: 12, borderRadius: 8, marginBottom: 16, fontSize: 14 }}>{error}</div>}
-        <Input label="Họ và tên *" k="name" ph="Nguyen Van A" />
-        <Input label="Số điện thoại *" k="phone" type="tel" ph="0901234567" />
-        <Input label={editWorker ? "Mật khẩu mới (để trống = không đổi)" : "Mật khẩu *"} k={editWorker ? "newPassword" : "password"} type="password" ph="Ít nhất 6 ký tự" />
+        {renderInput("Họ và tên *", "name", "text", "Nguyen Van A")}
+        {renderInput("Số điện thoại *", "phone", "tel", "0901234567")}
+        {renderInput(editWorker ? "Mật khẩu mới (để trống = không đổi)" : "Mật khẩu *", editWorker ? "newPassword" : "password", "password", "Ít nhất 6 ký tự")}
         <button onClick={onSave} disabled={saving}
           style={{ width: '100%', background: btnColor, color: '#fff', border: 'none', borderRadius: 12, padding: '14px 0', fontWeight: 700, fontSize: 16, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {saving ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={18} />}
@@ -197,8 +197,8 @@ export default function WorkerManagementClient() {
         </div>
       )}
 
-      {showCreate && <Modal title="Thêm Thợ Mới" onSave={handleCreate} btnColor={c.accent} />}
-      {editWorker && <Modal title={'Sửa: ' + editWorker.name} onSave={handleEdit} btnColor={c.blue} />}
+      {showCreate && renderModal("Thêm Thợ Mới", handleCreate, c.accent)}
+      {editWorker && renderModal('Sửa: ' + editWorker.name, handleEdit, c.blue)}
     </div>
   );
 }
