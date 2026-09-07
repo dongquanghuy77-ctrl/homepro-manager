@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit3, X, Check, Loader2, Trash2 } from 'lucide-react';
+import { Users, Plus, Edit3, X, Check, Loader2, Trash2, Printer } from 'lucide-react';
 
 interface Worker {
   id: number; name: string; phone: string | null; username: string | null; role: string;
@@ -104,6 +104,82 @@ export default function WorkerManagementClient() {
   const totalTasksDone = workers.reduce((s, w) => s + (w.tasksCompleted || 0), 0);
   const totalXP = workers.reduce((s, w) => s + (w.totalPoints || 0), 0);
 
+  const exportToPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Vui lòng cho phép popup để xuất PDF');
+      return;
+    }
+    const today = new Date().toLocaleDateString('vi-VN');
+    
+    let html = `
+      <html>
+      <head>
+        <title>DanhSachTho_${today.replace(/\//g, '')}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 30px; color: #111; max-width: 1000px; margin: 0 auto; }
+          h1 { text-align: center; font-size: 24px; margin-bottom: 5px; text-transform: uppercase; }
+          .subtitle { text-align: center; color: #555; margin-bottom: 30px; font-size: 14px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+          th, td { border: 1px solid #000; padding: 10px 12px; text-align: left; }
+          th { background-color: #f0f0f0; font-weight: bold; }
+          .right { text-align: right; }
+          .center { text-align: center; }
+          .stats { margin-top: 20px; font-weight: bold; font-size: 14px; }
+          @media print {
+            body { padding: 0; }
+            button { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>DANH SÁCH THỢ XƯỞNG SẢN XUẤT</h1>
+        <div class="subtitle">Ngày xuất: ${today}</div>
+        <table>
+          <thead>
+            <tr>
+              <th class="center" width="50">STT</th>
+              <th>Họ và tên</th>
+              <th>Số điện thoại</th>
+              <th class="center">Level</th>
+              <th class="right">XP</th>
+              <th class="right">Task HT</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    workers.forEach((w, i) => {
+      html += `
+        <tr>
+          <td class="center">${i + 1}</td>
+          <td><strong>${w.name}</strong></td>
+          <td>${w.phone || ''}</td>
+          <td class="center">Lv.${w.currentLevel || 1}</td>
+          <td class="right">${(w.totalPoints || 0).toLocaleString()}</td>
+          <td class="right">${w.tasksCompleted || 0}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+        <div class="stats">
+          Tổng số thợ: ${workers.length} &nbsp;&nbsp;|&nbsp;&nbsp; 
+          Tổng XP: ${totalXP.toLocaleString()} &nbsp;&nbsp;|&nbsp;&nbsp; 
+          Tổng Task: ${totalTasksDone}
+        </div>
+        <script>
+          window.onload = () => { window.print(); window.close(); }
+        </script>
+      </body>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: c.bg, color: '#fff', padding: 32 }}>
       <style>{'@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}'}</style>
@@ -113,10 +189,16 @@ export default function WorkerManagementClient() {
           <h1 style={{ fontSize: 32, fontWeight: 800, margin: '0 0 8px 0', color: c.accent }}>Quản Lý Thợ Xưởng</h1>
           <p style={{ color: c.muted, margin: 0 }}>Tạo tài khoản, theo dõi điểm XP và hiệu suất thợ</p>
         </div>
-        <button onClick={() => { setShowCreate(true); setError(''); }}
-          style={{ background: c.accent, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
-          <Plus size={20} /> Thêm Thợ Mới
-        </button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={exportToPDF}
+            style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '12px 20px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
+            <Printer size={20} /> Xuất PDF
+          </button>
+          <button onClick={() => { setShowCreate(true); setError(''); }}
+            style={{ background: c.accent, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
+            <Plus size={20} /> Thêm Thợ Mới
+          </button>
+        </div>
       </div>
 
       {success && (
