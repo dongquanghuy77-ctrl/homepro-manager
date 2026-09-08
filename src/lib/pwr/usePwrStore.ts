@@ -21,7 +21,7 @@ export const usePwrStore = create<PwrState>((set) => ({
   currentTab: 'STATION',
   activeStation: null,
   userName: 'Anh Huy',
-  userAvatar: 'https://cdn-error-link.com/avatar.jpg', // Cố tình để link lỗi để test thuật toán fallback
+  userAvatar: '',
   userPoints: 120,
   userLevel: 12,
 
