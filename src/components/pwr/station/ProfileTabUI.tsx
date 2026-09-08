@@ -77,9 +77,9 @@ export function ProfileTabUI() {
     <div style={{ padding: '20px 20px 100px 20px', position: 'relative' }}>
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <img 
-          src={userAvatar || ''} 
+          src={avatarSrc} 
           alt="Avatar" 
-          onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3b82f6&color=fff&bold=true`; }}
+          onError={(e) => { e.currentTarget.src = fallbackAvatar; }}
           style={{ width: 80, height: 80, borderRadius: '50%', border: '3px solid #374151', objectFit: 'cover', margin: '0 auto 16px' }} 
         />
         <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px 0' }}>{userName}</h2>
