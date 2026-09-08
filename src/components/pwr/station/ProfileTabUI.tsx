@@ -47,6 +47,9 @@ export function ProfileTabUI() {
     return () => clearInterval(timer);
   }, []);
 
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=3b82f6&color=fff&bold=true`;
+  const avatarSrc = userAvatar && userAvatar.trim() !== '' ? userAvatar : fallbackAvatar;
+
   const handleUpdatePassword = async () => {
     if (!newPassword || newPassword.length < 4) {
       alert('Mật khẩu/Mã PIN phải có ít nhất 4 ký tự');
